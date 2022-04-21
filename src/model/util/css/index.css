@@ -1,0 +1,60 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+header div{
+  margin: auto;
+  width: 90%;
+}
+
+.materias{
+  font-size: 15px;
+  width: 90%;
+}
+
+.materias .materia{
+  width: 30%;
+  float: left;
+  background-color: #888;
+  padding-bottom: 5px;
+  margin: 1px;
+}
+
+.materias .materia .nome{
+  margin: auto;
+  height: 50px;
+  background-color: #888;
+}
+
+.materias .materia .horas{
+  margin: auto;
+  border-top-style: double;
+  background-color: #888;
+  padding-top: 3px;
+}
+
+.materias .materia .horas .hora{
+  float: left;
+  width: 90px;
+
+}
+
+.materias .materia .hora input{
+  float: left;
+  width: 90px;
+}
+
+#res{
+  float: left;
+
+}
