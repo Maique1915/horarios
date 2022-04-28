@@ -1,10 +1,15 @@
 .Horarios-content{
 	display: flex;
-	width: 100%;
-	min-width: 935px;
-	flex-direction: column;
+	width: 500%;
+	background-color: #3f3;
 }
 
+.phorario{
+	position: relative;
+	width: 100%;
+	min-width: 935px;
+
+}
 .Cadastro-content{
 	display: flex;
 	width: 70%;
@@ -140,17 +145,6 @@
 	color: #FFF;
 }	
 
-.l0{background-color: #B22222; opacity: .9;}
-.l1{background-color: #FFA500; opacity: .9;}
-.l2{background-color: #FFD700; opacity: .9;}
-.l3{background-color: #32CD32; opacity: .9;}
-.l4{background-color: #20B2AA; opacity: .9;}
-.l5{background-color: #4169E1; opacity: .9;}
-.l6{background-color: #6959CD; opacity: .9;}
-.l7{background-color: #DC143C; opacity: .9;}
-.l8{background-color: #98FB98; opacity: .9;}
-.l9{background-color: #4F4F4F; opacity: .9;}
-
 b{	
 	opacity: 1;
 }
@@ -169,10 +163,10 @@ option{
 	width: 100%;
 }
 
-
 .salvar{
   display: flex;
   height: 90px;
+  align-items: center;
 }
 
 .footer{

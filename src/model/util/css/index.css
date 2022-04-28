@@ -17,6 +17,54 @@ header div{
   width: 90%;
 }
 
+fieldset{
+  display: flex;
+  flex: 1;
+}
+
+input[type = submit], .abrir{
+  width: 100px;
+  height: 30px;
+  margin: 5px;
+  background: #333;
+  color: white;
+  border: solid #aaa 2px;
+  font: bold15px arial,sans-serif;
+  text-shadow: none;
+  border-radius: 3px;
+}
+
+input[type = submit]:hover, .abrir:hover {
+  background-color: #254;
+} 
+
+input[type = checkbox]{
+  width: 15px;
+  height: 15px;
+  background-color: #ccc;
+  opacity: .8;
+  accent-color: #333;
+}
+
+input[type = checkbox]:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: none;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+input[type = checkbox]:checked ~ .checkmark {
+  background-color: #33f;
+}
+
+input[type = radio]{
+  display: none;
+}
+
 .materias{
   font-size: 15px;
   width: 90%;

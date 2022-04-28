@@ -20,8 +20,6 @@ export default class Grafos{
 			mat.push(this.materias[this.feitas[m]]._re)
 		}
 
-
-
 		for (; i <  colunas.length; i++) {
 			let requisitos = this.materias[i]._pr
 			for (var j = 0; j <  colunas.length; j++) {
