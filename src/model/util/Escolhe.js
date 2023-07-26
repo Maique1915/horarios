@@ -1,5 +1,6 @@
+import Materias from '../Materias'
 
-class Escolhe{
+export default class Escolhe{
 	
 	constructor(genesis){
 		this.genesis = genesis
@@ -7,84 +8,68 @@ class Escolhe{
 
 	exc(){
 		let aux = []
-		for(const a of this.genesis){
+		let i = 2 ** this.genesis.length -1
+		
+		while(true) {
+			if(i <= 0) break
+			let f = i.toString(2).padStart(this.genesis.length, '0')
+			i--
+			if(f.split("1").length >= 9)
+				continue
+			
 			let c = []
-			for(const b of this.genesis){
-				if (c.length === 0) {
-					c.push(a)
-				}
-				if(this.cmp(c, b)){
-					c.push(b)	
+			let m = new Materias(0,0,0,0,0,0,0)
+			let b = true
+
+			for(const j in f){
+				if(f[j] === "1"){
+					let a = this.genesis[j]
+					if(this.colide(m, a) && !this.existe(c, a)){
+						c.push(a)
+						m = this.merge(a, m)
+					}else{
+						b = false
+						break
+					}
 				}
 			}
 
-			const stra = this._string(c)
-			let foi = true
-			
-			for(const b of aux){
-				const strb = this._string(b)
-				if(stra === strb){
-					foi = false
-					break
-				}
-			}
-			
-			if (foi){
+			if(b)
 				aux.push(c)
-			}
 		}
 		aux.sort(this.compare)
 		return aux
 	}
 
-	
-	_printa(e){
-		console.log(this._string(e))
-	}
-
-	_string(e){
-		return this._array(e).join(", ")
-	}
-
-	_array(e){
-		const str= []
-		for(const a in e){
-			str.push(e[a]._di)
-		}
-		return str.sort()
-	}
-
-
-	array(e){
-		const str= []
-		for(const a of e){
-			str.push(this._array(a))
-		}
-		console.log(str)
-		return str
-	}
-
 	compare(a, b){
-		const i = a.length
-		const j = b.length
-		return i < j ? 1 : i > j? -1 : 0
+		return b.length - a.length
 	}
 
-	cmp(c,a){
-		for (const b of c) {
-			for (const i in a._ho) {
-				const e = a._ho[i]
-				const f = b._ho[i]
-				for(const d in e){
-					if(e[d] && f[d]){
-						return false
-					}
+	merge(a, b){
+		for (const i in a._ho)
+			for(const j in a._ho[i])
+				if(a._ho[i][j])
+					b._ho[i][j] = true
+		return b
+	}
+
+	existe(c,a){
+		for(const b of c)
+			if(a._re === b._re)
+				return true
+		return false
+	}
+
+	colide(b,a){
+		for (const i in a._ho) {
+			const e = a._ho[i]
+			const f = b._ho[i]
+			for(const d in e){
+				if(e[d] && f[d]){
+					return false
 				}
 			}
 		}
 		return true
 	}
-
 }
-
-export default Escolhe

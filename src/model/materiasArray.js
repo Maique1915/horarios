@@ -93,7 +93,7 @@ matriz = []
 		this.materias.push(new Materias(7, "Técnicas Digitais", 4 , 2 , ["6D", "6E"] , true , "7A"))
 		this.materias.push(new Materias(7, "Programação Linear", 4 , 0 , ["5E"] , true , "7B"))
 		this.materias.push(new Materias(7, "Processamento Digital de Sinais", 4 , 0 , ["6A"] , true , "7C"))
-		this.materias.push(new Materias(7, "Metodologia Científica", 2 , 0 , ["1G"] , true , "7D"))
+		this.materias.push(new Materias(7, "Metodologia Científica", 2 , 0 , [162] , true , "7D"))
 
 		this.materias.push(new Materias(8, "Sistemas Distribuídos", 2 , 2 , ["3E", "5B", "5C"] , true , "8A"))
 		this.materias.push(new Materias(8, "Microcontroladores e Sistemas Embarcados", 2 , 2 , ["3D", "7A"] , true , "8B"))
@@ -103,7 +103,7 @@ matriz = []
 
 		this.materias.push(new Materias(9, "Computação de Alto Desempenho", 2 , 2 , ["4E", "8A"] , true , "9A"))
 		this.materias.push(new Materias(9, "Trabalho de Conclusão de Curso I", 2 , 0 , ["7D"] , true , "9B"))
-		this.materias.push(new Materias(9, "Estágio Supervisionado", 140 , 0 , [] , true , "9C"))
+		this.materias.push(new Materias(9, "Estágio Supervisionado", 0 , 0 , [140] , true , "9C"))
 
 		this.materias.push(new Materias(10, "Trabalho de Conclusão de Curso II", 2 , 0 , ["9B"] , true , "10A"))
 

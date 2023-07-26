@@ -1,6 +1,8 @@
 *{
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
 body{
   background-color: #D2DBDC;
   margin: 0;
@@ -13,53 +15,63 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
 
 .App-window{
   display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background-image: url("Imagem-tecnologia-002-scaled.jpg");
+  flex: 1;
+  flex-direction: row;
+  width: 100vw;
+  min-width: 1000px;
 }
 
 nav {
-  margin: 0 auto;
   display: flex;
-  max-width: 800px;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 10vw;
+  min-width: 130px;
+  background: #121217;
 }
 
 nav ul {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  list-style: none;
+  margin: 0;
+  padding: 0;
+    gap: 3px;
+
 }
 
-
 nav ul li {
-
+  display: flex;
+  flex: 1;
+  width: 100%;
+  padding: 5px;
+  height: 30px;
+  margin-bottom: 3px;
+  flex-direction: column;
 }
 
 nav ul li label {
-  min-width: 100%;
+  display: flex;
+  flex: 1;
+  width: 25vh;
   color: rgba(255, 255, 255, .9);
   text-decoration: none;
-  padding: 0 50px;
-  border-top: 2px solid transparent;
-  border-bottom: 2px solid transparent;
+  text-transform: uppercase;
   transition: all .3s ease-in-out;
+  border-radius: 5px;
+  padding: 5px;
 }
 
 nav ul li label:hover,
 nav ul li label:focus {
-  background: rgba(0, 0, 0, .15);
+  text-shadow: 1px 1px 5px #000;
+  transition-property: width;
+  transition-duration: 5s;
+  background-color: #07C;
+  cursor: pointer;
 }
 
 nav ul li label:focus {
@@ -102,31 +114,41 @@ header{
 }
 
 .contentarea{
-  width: 100%;
+  width: 100vw;
+  min-width: 890px;
   height: 100vh;
+  padding-top: 10px;
   flex-direction: column;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 30px;
+  /*justify-content: center;*/
+
+  background: rgb(2,0,36);
+  background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
 }
 
 .tela1, .tela2, .tela3{
-  width: 80vw;
+  /*min-width: 30vw;*/
+  width: 60vw;
+  
+  align-items: center;
+  justify-content: center;
   display: none;
 }
 
-#horario:checked ~ .tela1{display: flex; flex-direction: column;}
-#matricula:checked ~ .tela2{display: flex; flex-direction: column;}
-#up_horario:checked ~ .tela3{display: flex; flex-direction: column;}
+#horario:checked ~ .tela1, #grade:checked ~ .tela2, #matricula:checked ~ .tela3, #atualiza:checked ~ .tela3{
+  display: flex;
+  flex-direction: column;
+}
 
 .bar7{
-  width: 70px;
-  height: 30px;
+  width: 35px;
+  height: 25px;
   text-align: center;
   color: white;
   border: 2px solid #AAA;
-  margin: 6px;
+  margin: 5px;
+  align-items: center;
   border-radius: 3px;
   cursor: pointer;
   transition: .4s;
@@ -139,9 +161,35 @@ header{
 .seila, .seila1, .seila3,.seila2{
   display: flex;
   flex: 1;
+  width: 100%;
   flex-direction: column;
-  transition: 1s;
+    transition: 1s;
+
 }
+
+.w3-container{
+  display: flex;  
+  width: 100%;
+  height: 80px;
+  padding: 10%;
+  justify-content: center;
+}
+
+span{
+  display: flex;
+  width: 60%;
+  justify-content: center;
+  align-items: center;
+}
+
+
+span > img{
+  display: flex;
+  flex: 1;
+  width: 50px;
+  }
+
+
 
 .l0{background-color: rgba(178, 34, 32, 0.5);  color: #000;}
 .l1{background-color: rgba(255, 149, 0, 0.5);  color: #000;}
@@ -151,35 +199,9 @@ header{
 .l5{background-color: rgba(105, 89, 205, 0.5);  color: #fff;}
 .l6{background-color: rgba(255, 215, 0, 0.5);  color: #000;}
 .l7{background-color: rgba(220, 20, 60, 0.5);  color: #fff;}
-.l8{background-color: rgba(152, 251, 152, 0.5);  color: #000;}
+.l8{background-color: rgba(233, 251, 84, 0.5);  color: #000;}
 .l9{background-color: rgba(79, 79, 79, 0.5);  color: #fff;}
-
-#radio10:checked ~ .seila1{margin-top: 0;}
-#radio11:checked ~ .seila1{margin-top: -37.81%;}
-#radio12:checked ~ .seila1{margin-top: -75.61%;}
-#radio13:checked ~ .seila1{margin-top: -113.41%;}
-#radio14:checked ~ .seila1{margin-top: -151.22%;}
-#radio15:checked ~ .seila1{margin-top: -189.03%;}
-#radio16:checked ~ .seila1{margin-top: -226.83%;}
-
-#radio20:checked ~ .seila2, #radio30:checked ~ .seila3{margin-top: 0;}
-#radio21:checked ~ .seila2, #radio31:checked ~ .seila3{margin-top: -37.81%;}
-#radio22:checked ~ .seila1, #radio32:checked ~ .seila3{margin-top: -75.61%;}
-#radio23:checked ~ .seila1, #radio33:checked ~ .seila3{margin-top: -113.41%;}
-#radio24:checked ~ .seila1, #radio34:checked ~ .seila3{margin-top: -151.22%;}
-#radio25:checked ~ .seila1, #radio35:checked ~ .seila3{margin-top: -189.03%;}
-#radio26:checked ~ .seila1, #radio36:checked ~ .seila3{margin-top: -226.83%;}
-#radio27:checked ~ .seila1, #radio37:checked ~ .seila3{margin-top: -264.64%;}
-#radio28:checked ~ .seila1, #radio38:checked ~ .seila3{margin-top: -302.44%;}
-#radio29:checked ~ .seila1, #radio39:checked ~ .seila3{margin-top: -340.25%;}
-
-#radio0:checked ~ .seila1{margin-left: 0;}
-#radio1:checked ~ .seila1{margin-left: -100%;}
-#radio2:checked ~ .seila1{margin-left: -200%;}
-#radio3:checked ~ .seila1{margin-left: -300%;}
-#radio4:checked ~ .seila1{margin-left: -400%;}
-#radio5:checked ~ .seila1{margin-left: -500%;}
-#radio6:checked ~ .seila1{margin-left: -600%;}
+.l10{background-color: rgba(34, 178, 255, 0.5);  color: #000;}
 
 #radio0:checked ~ #bar0{border-color: #F3F; border-width: 10px;}
 #radio1:checked ~ #bar1{border-color: #F3F; border-width: 10px;}
@@ -188,6 +210,3 @@ header{
 #radio4:checked ~ #bar4{border-color: #F3F; border-width: 10px;}
 #radio5:checked ~ #bar5{border-color: #F3F; border-width: 10px;}
 #radio6:checked ~ #bar6{border-color: #F3F; border-width: 10px;}
-
-
-

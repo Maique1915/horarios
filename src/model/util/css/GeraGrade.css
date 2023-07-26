@@ -11,14 +11,14 @@
 }
 
 .MateriasFeitas-content{
-	height: calc(100vh - 140px);
+	height: 81vh;
 	min-width: 750px;
 	padding: 5px;
 
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
-	background-color: #EEE;
+	background-color: #FFF;
  	overflow:auto; 
 }
 
@@ -31,23 +31,48 @@
 }
 
 .MateriasFeitas-content::-webkit-scrollbar-thumb {
-  background-color: #333;    /* color of the scroll thumb */
+  background-color: #444;    /* color of the scroll thumb */
   border-radius: 20px;       /* roundness of the scroll thumb */
   border: 3px solid #CCC;  /* creates padding around scroll thumb */
 }
 
-.periodo-content, .buttom-content{
+.periodo-content, .buttom-content,.quer-content{
 	display: flex;
 	flex: 1;
-	font-size: 13px;
 }
 
-.buttom-content{
+.buttom-content, .quer-content, .quer, .possiveis, .excluidos{
 	display: flex;
 	justify-content: center;
-	padding-top: 5px;
-	min-width: 750px;
-	background-color: #777;
+}
+.buttom-content{
+	padding-top: 1vh;
+}
+.quer-content{
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	width: 30vw;
+}
+.possiveis{
+	flex-direction: column;
+		width: 100%;
+
+}
+.quer-content .content{
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+}
+.quer-content div{
+	display: flex;
+	width: 100%;
+}
+
+.c2{
+	display: flex;
+	height: 70vh;
+	overflow: auto;	
 }
 
 .total{
@@ -98,6 +123,7 @@
 	flex: 1;
 	flex-direction: column;
 	margin-bottom: 15px;
+	font-size: 14px;
 }
 
 .as{
@@ -113,6 +139,18 @@
 	color: #FFF;
 	margin: 5px 0;
 }
+.periodo label{
+	font-size: 15px;
+	margin:-1px;
+}
+
+
+.periodo input{
+	font-size: 11px;
+	margin: 3px;
+}
+
+
 
 .periodo:first-child{
 margin-top: 0;	
@@ -123,30 +161,111 @@ margin-top: 0;
 	width: 50%;
 }
 
-
-.slides-content{
-	display: flex;
-	width: 100%;
-	height: 67vh;
-	overflow: hidden;	
-	background-color: #eee;
-}
-
 .slides{
 	display: flex;
-	width: 100%;
-	height: 100vh;
+	width: 70vw;
+	margin-top: 5px;
+	min-width: 920px;
+	flex-direction: column;
+	background-color: #eee;
+	overflow: hidden;
+	border-radius: 10px;
 }
 
 .navigation{
+	margin-top: 5px;
 	display: flex;
+	align-items: center;
 	flex-direction: row;
 	justify-content: center;
+	background-color: #eee;
+	border-radius: 20px;
+	height: 35px;
+	padding: 0 20px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	-ms-border-radius: 20px;
+	-o-border-radius: 20px;
 }
+
+.navigation .page, .navigation .control{
+	color: #333;
+	font-weight: 500;
+	transition: .3s;
+
+	-webkit-transition: .3s;
+	-moz-transition: .3s;
+	-ms-transition: .3s;
+	-o-transition: .3s;
+
+}
+
+.navigation .page{
+	width: 35px;
+	height: 25px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 5px;
+	background-color: #ddd;
+	margin: 0 1px;
+	cursor: pointer;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+}
+
+.navigation .control:hover{
+	color: #07c;
+}
+
+.navigation .page:hover{
+	filter: brightness(.8);
+	-webkit-filter: brightness(.8);
+}
+
+.navigation .page.active{
+	background-color: #07c;
+	color: #eee;
+}
+
+.navigation .control.prev{
+	margin-right: 10px;
+}
+
+.navigation .control.next{
+	margin-left: 10px;
+}
+
 
 .t_mat{
 		display: flex;
 		justify-content: center;
 		margin-top: 2px;
 
+}
+
+.quer{
+	background-color: #fff;
+	flex-direction: column;
+	padding: 5px;
+
+}
+
+.del{
+	display: flex;
+	width: 60px;
+	height: 40px;
+
+	justify-content: center;
+	align-items: center;
+	flex-direction: column-reverse;
+
+}
+
+h3{
+	display: flex;
+	justify-content: center;
 }

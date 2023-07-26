@@ -11,11 +11,11 @@ class Materias{
 		this._re = re
 		this._el = el
 		this._ho = [
-			[false,false,false,false,false,false],
-			[false,false,false,false,false,false],
-			[false,false,false,false,false,false],
-			[false,false,false,false,false,false],
-			[false,false,false,false,false,false]
+			[false,false,false,false,false,false,false,false,false,false,false,false],
+			[false,false,false,false,false,false,false,false,false,false,false,false],
+			[false,false,false,false,false,false,false,false,false,false,false,false],
+			[false,false,false,false,false,false,false,false,false,false,false,false],
+			[false,false,false,false,false,false,false,false,false,false,false,false]
 		]
 	}
 
