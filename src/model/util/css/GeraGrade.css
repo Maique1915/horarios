@@ -161,7 +161,7 @@ margin-top: 0;
 	width: 50%;
 }
 
-.slides{
+.slides, .slides2{
 	display: flex;
 	width: 70vw;
 	margin-top: 5px;

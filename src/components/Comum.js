@@ -1,7 +1,7 @@
 import React from 'react';
 import '../model/util/css/Matricular.css'
 import materias from '../model/db1'
-import Materias from '../model/Materias'
+import * as html2pdf from 'html2pdf.js';
 
 
 const cores = ["l0","l1","l2","l3","l4","l5","l6","l7","l8","l9", "l10"] 
@@ -35,6 +35,7 @@ export default class Comum extends React.Component{
 	}
 	
 	componentDidMount() {
+
     	//this.primeiro(this.state.id+1)
   	}
 
@@ -117,28 +118,42 @@ export default class Comum extends React.Component{
 	}
 
 	salva(){
-		let r = []
-		for (const a of this.materias) {
-			for (const b of a) {
-				const m = new  Materias(b._se, b._di, b._ap, b._at, b._pr, b._el, b._re)
-				for (var i = 0; i < m._ho.length; i++) {
-					for (var j = 0; j < m._ho[0].length; j++) {
-						console.log(b._ho[i])
-						if(b._ho[i])
-							m._ho[i][j] = b._ho[i][j]
-					}
-				}
-				r.push(m)
-			}
+		// Cria uma nova div
+		const slide = document.createElement('div');
+		const tela = document.createElement('div');
+
+		// Adiciona uma classe à nova div
+		slide.classList.add('slides2');
+
+		const root = document.querySelector(".seila2")
+		// Fazer uma cópia do elemento
+		const elementoCopiado = root.cloneNode(true);
+
+		// Anexar a cópia a algum lugar no DOM (por exemplo, ao final do corpo do documento)
+		const elementoTexto = elementoCopiado.querySelector('.intervalo');
+		// Selecionar o elemento que contém o texto "4ª Grade possível"
+	    elementoTexto.textContent = "Grade";
+
+		// Insere a nova div interna dentro da div externa
+		slide.appendChild(elementoCopiado);
+		tela.appendChild(slide);
+		
+		const options = {
+			margin: [10,10,10,10],
+			filename: "Grade.pdf",
+			html2canvas:{scale: 5},
+			jsPDF: { unit: "mm", format: "A4", orientation: "landscape"}
 		}
-		var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(r, null, 1))
-		var downloadAnchorNode = document.createElement('a')
-		downloadAnchorNode.setAttribute("href",     dataStr)
-		downloadAnchorNode.setAttribute("download", "bd.json")
-		document.body.appendChild(downloadAnchorNode); // required for firefox
-		alert("salve este db.json na pasta model")
-		downloadAnchorNode.click()
-		downloadAnchorNode.remove()
+
+		// Centralize o conteúdo
+		tela.style.textAlign = "center"; // Centralize horizontalmente
+		tela.style.display = "flex";
+		tela.style.width = "100%";
+		tela.style.height = "100vh";
+		tela.style.justifyContent = "center"; // Centralize verticalmente
+		slide.style.margin = "0"; /// Centralize verticalmente
+
+		html2pdf().set(options).from(tela).save()
 	}
 
 	atualiza(i, j, op){
@@ -209,12 +224,11 @@ export default class Comum extends React.Component{
 	}
 
 	matricular(){
+		//<input type="submit" value="Escolher esta" onClick={(e) => this.mudaTela(e, 1)} />
 		if(this.t === 2)
 			return (
 			<>
-				<input type="submit" value="Escolher esta" onClick={(e) => this.mudaTela(e, 1)}/>
-				<input type="submit" value="Imprime grade" onClick={(e) => alert("Ainda não funciona")}/>
-
+				<input type="submit" value="Baixar grade" onClick={(e) => this.salva()} />
 			</>)///
 		if(this.t === 3){
 			return this.selects()
@@ -296,7 +310,7 @@ export default class Comum extends React.Component{
 			}
 		}
 		return h
-	}///
+	}
 
 	labels(f){
 		const n = parseInt(f)+1+this.b
@@ -306,7 +320,7 @@ export default class Comum extends React.Component{
 				{n+this.g}
 			</label>
 			)
-	}///
+	}
 	
 	openDescription(e) {
 		let x = null, c = [], ja = [], s
@@ -334,7 +348,6 @@ export default class Comum extends React.Component{
 			}
 		}
 		if(c.length > 0){
-			console.log(c.length)
 			const selectedDescription = document.getElementById("description");
 				//selectedDescription.classList.remove('hidden');
 				this.setState({desc: c})
@@ -360,18 +373,18 @@ export default class Comum extends React.Component{
 		if(b !== null){
 			if(this.h1[this.i] === "09:30" || this.h1[this.i] === "12:30"){
 				h.push(<th className='intervalo2' colSpan="6" scope="row">Intervalo</th>)
-			}else{///
+			}else{
 				h.push(<th className="horario" scope="col">{this.h1[this.i] +" às "+this.h1[this.i+1]}</th>)//
 				for (const i in a){
 					if(this.t !== 3)
 						h.push(<th className={"grade "+a[i]} onClick={(e) =>{this.openDescription(b[i])}} scope="col">{b[i]}</th>)
-					else{///
+					else{
 						h.push(
 							<th className="grade" scope="col">
 								{this.isChecked(c,i)}
 							</th>
 							)
-					}///
+					}
 				}
 			}
 			this.i++
@@ -383,7 +396,7 @@ export default class Comum extends React.Component{
 		}
 
 		return h
-	}///
+	}
 
 	horario(a, b, c){
 		if(this.h1[this.i] === "09:30" || this.h1[this.i] === "12:30")
@@ -393,7 +406,7 @@ export default class Comum extends React.Component{
 					<tr className="tr">{this.linha(a, b, c)}</tr>
 				</>)
 		return (<tr className="tr">{this.linha(a, b, c)}</tr>)
-	}///
+	}
 
 	horarios(a, b, c){
 		let h = []
@@ -402,8 +415,7 @@ export default class Comum extends React.Component{
 			return h
 	}
 
-	caso(){///
-		console.log(this.arr);
+	caso(){
 		let u = this.arr[this.state.id] || []
 		return(
 			<>

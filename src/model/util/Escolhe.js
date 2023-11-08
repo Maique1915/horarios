@@ -33,11 +33,9 @@ export default class Escolhe{
 					}
 				}
 			}
-
 			if(b)
 				aux.push(c)
 		}
-		aux.sort(this.compare)
 		return aux
 	}
 

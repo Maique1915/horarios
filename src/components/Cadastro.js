@@ -11,7 +11,7 @@ class Cadastro extends React.Component{
 	}
 	
 	render(){
-		return <Comum materias = {this.materias} tela={3} separa = {false} g={"º"} f={" Periodo"}/>
+		return <Comum materias = {this.materias} tela={3} separa = {false} g={"º"} f={" Período"}/>
 	}
 }
 
