@@ -1,0 +1,271 @@
+.cont{
+	background-color: #CCC;
+	box-shadow: 0 0 .2rem lightgrey;
+	border-radius: .2rem;
+
+	/*alinhando*/
+	grid-column-start: 1;
+	grid-column-end: 4;
+	grid-row-start: 3;
+	grid-row-end: 3;
+}
+
+.MateriasFeitas-content{
+	height: 81vh;
+	min-width: 750px;
+	padding: 5px;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	background-color: #FFF;
+ 	overflow:auto; 
+}
+
+.MateriasFeitas-content::-webkit-scrollbar {
+  width: 12px;               /* width of the entire scrollbar */
+}
+
+.MateriasFeitas-content::-webkit-scrollbar-track {
+  background: #CCC;        /* color of the tracking area */
+}
+
+.MateriasFeitas-content::-webkit-scrollbar-thumb {
+  background-color: #444;    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: 3px solid #CCC;  /* creates padding around scroll thumb */
+}
+
+.periodo-content, .buttom-content,.quer-content{
+	display: flex;
+	flex: 1;
+}
+
+.buttom-content, .quer-content, .quer, .possiveis, .excluidos{
+	display: flex;
+	justify-content: center;
+}
+.buttom-content{
+	padding-top: 1vh;
+}
+.quer-content{
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	width: 30vw;
+}
+.possiveis{
+	flex-direction: column;
+		width: 100%;
+
+}
+.quer-content .content{
+	display: flex;
+	flex: 1;
+	flex-direction: row;
+}
+.quer-content div{
+	display: flex;
+	width: 100%;
+}
+
+.c2{
+	display: flex;
+	height: 70vh;
+	overflow: auto;	
+}
+
+.total{
+	display: flex;
+	width: 935px;
+	flex-direction: column;
+}
+
+.opc{
+	display: flex;
+	flex-direction: row;
+	height: 30px;
+	color: white;
+	padding: 5px;
+}
+
+.abrir{
+	display: flex;
+	justify-content: center;
+	margin: 0;
+	margin-right: 5px;
+	color: white;
+	text-decoration: none;
+}
+
+.abrir:hover ~.pos {
+	opacity: 1;
+	margin-top: -30px;
+	height: 60px;
+}
+
+
+.pos{
+	display: flex;
+	padding: 5px;
+	left: calc(100% - 890px);
+	color: #FFF;
+	border-radius: 5px;
+	width: 90%;
+	font-size: 13px;
+  transition: height 2s, 1s;
+  opacity: 0;
+	height: 0px;
+}
+
+.lista{
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	margin-bottom: 15px;
+	font-size: 14px;
+}
+
+.as{
+	float: top;
+	width: 100%;
+}
+
+.periodo{
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	background-color: #07C;
+	color: #FFF;
+	margin: 5px 0;
+}
+.periodo label{
+	font-size: 15px;
+	margin:-1px;
+}
+
+
+.periodo input{
+	font-size: 11px;
+	margin: 3px;
+}
+
+
+
+.periodo:first-child{
+margin-top: 0;	
+}
+
+.check{
+	float: left;
+	width: 50%;
+}
+
+.slides, .slides2{
+	display: flex;
+	width: 80vw;
+	margin-top: 15px;
+	min-width: 920px;
+	flex-direction: column;
+	background-color: #eee;
+	overflow: hidden;
+	border-radius: 10px;
+}
+
+.navigation{
+	margin-top: 5px;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	justify-content: center;
+	background-color: #eee;
+	border-radius: 20px;
+	height: 35px;
+	padding: 0 20px;
+	-webkit-border-radius: 20px;
+	-moz-border-radius: 20px;
+	-ms-border-radius: 20px;
+	-o-border-radius: 20px;
+}
+
+.navigation .page, .navigation .control{
+	color: #333;
+	font-weight: 500;
+	transition: .3s;
+
+	-webkit-transition: .3s;
+	-moz-transition: .3s;
+	-ms-transition: .3s;
+	-o-transition: .3s;
+
+}
+
+.navigation .page{
+	width: 35px;
+	height: 25px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 5px;
+	background-color: #ddd;
+	margin: 0 1px;
+	cursor: pointer;
+
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-ms-border-radius: 5px;
+	-o-border-radius: 5px;
+}
+
+.navigation .control:hover{
+	color: #07c;
+}
+
+.navigation .page:hover{
+	filter: brightness(.8);
+	-webkit-filter: brightness(.8);
+}
+
+.navigation .page.active{
+	background-color: #07c;
+	color: #eee;
+}
+
+.navigation .control.prev{
+	margin-right: 10px;
+}
+
+.navigation .control.next{
+	margin-left: 10px;
+}
+
+
+.t_mat{
+		display: flex;
+		justify-content: center;
+		margin-top: 2px;
+
+}
+
+.quer{
+	background-color: #fff;
+	flex-direction: column;
+	padding: 5px;
+
+}
+
+.del{
+	display: flex;
+	width: 60px;
+	height: 40px;
+
+	justify-content: center;
+	align-items: center;
+	flex-direction: column-reverse;
+
+}
+
+h3{
+	display: flex;
+	justify-content: center;
+}
