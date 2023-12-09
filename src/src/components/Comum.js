@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 const cores = ["l0","l1","l2","l3","l4","l5","l6","l7","l8","l9", "l10"] 
 const s = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
-
+const c = {"engcomp":"Engenharia de computação", "fisica":"Física", "turismo":"Turismo", "matematica":"Matemática"}
 class Comum extends React.Component{
 
 	constructor(props){
@@ -29,9 +29,9 @@ class Comum extends React.Component{
 		this.grade()
 		this.passo = [...this.quadros].splice(0, this.quadros.length > 10 ? 10 : this.quadros.length)
 		this.h1 = horarios(this.cur)
-		
-		this.i = 0
 		this.j = 0
+		this.i = 0
+		
 		this.indices(0)
 	}
 
@@ -163,14 +163,18 @@ class Comum extends React.Component{
 	selected(e){
 		let checkbox = document.getElementById('section1')
 		checkbox.checked = false
-		const cur = e.target.innerText
-		this.cur = cur
-		this.arr = ativas(cur)
+		const arr = Object.entries(c).filter(item => {
+			if (item[1] === e.target.innerText)
+				return true
+			return false
+		})[0]
+		this.cur = arr[0]
+		this.arr = ativas(this.cur)
 		this.primeiro(this.state.id > this.quadros.length ? this.quadros.length : this.state.id + 1)
 	}
 
-	option(e){
-		return <Link to={"/"+e} onClick={(f)=> this.selected(f)}>{e}</Link>
+	option(e) {
+		return <Link to={"/" + e} onClick={(f) => this.selected(f)}>{c[e]}</Link>
 	}
 
 	selects(){
@@ -283,7 +287,7 @@ class Comum extends React.Component{
 
 	linha(a, b, c){
 		let h = []
-		let s = this.td == 6? "semana1": "semana2"
+		let s = this.td === 6? "semana1": "semana2"
 		if(b !== null){
 			h.push(<th className="horario" scope="col">{this.h1[this.i][0] +" às "+this.h1[this.i][1]}</th>)//
 			for (const i in a){

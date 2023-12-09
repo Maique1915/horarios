@@ -10,9 +10,10 @@ export default class GeraGrade extends React.Component{
 	constructor(props){
 		super(props)
 		this.cur = props.cur
-		this.state = {names: [], cur: props.cur, keys: [], x:[], cr:[], b: 0}
+		this.state = {names: [], cur: props.cur, keys: [], cr:[], b: 0}
 		this.handleCheck = this.handleCheck.bind(this)
 		this.tela = this.tela.bind(this)
+		this.x = []
 	}
 
 	componentDidUpdate(prevProps, prevState) {
@@ -20,7 +21,8 @@ export default class GeraGrade extends React.Component{
 		if (a !== this.cur && a !== "") {
 			this.cur = a
 			this.arr = ativas(a)
-			this.setState({ names: [], cur: this.cur, keys: [], x: [], cr: [], b: 0 })
+			this.setState({ names: [], cur: this.cur, keys: [], cr: [], b: 0 })
+			this.x = []
 		}
 	}
 
@@ -42,7 +44,7 @@ export default class GeraGrade extends React.Component{
 				if(this.state.b === 0)
 					id = this.state.keys.indexOf(parseInt(mat.value))
 				else if(this.state.b === 1)
-					id = this.state.x.indexOf(mat.id)
+					id = this.x.indexOf(mat.id)
 
 				if(e.target.checked === true && id === -1)
 					this.altera(true, mat)
@@ -73,10 +75,10 @@ export default class GeraGrade extends React.Component{
 			this.state.cr.splice(i,1)
 		}else if(this.state.b === 1){
 			if(a){
-				this.state.x.push(b.id)
+				this.x.push(b.id)
 				return
 			}
-			this.state.x.splice(this.state.x.indexOf(b.id),1)
+			this.x.splice(this.x.indexOf(b.id),1)
 		}
 		document.getElementById("t_"+b.parentNode.parentNode.id).checked = false
 	}
@@ -135,7 +137,7 @@ export default class GeraGrade extends React.Component{
 		if (this.state.b === 0)
 			checked = this.state.keys.includes(k)
 		else if (this.state.b === 1)
-			checked = this.state.x.includes(i._re)
+			checked = this.x.includes(i._re)
 
 
 		return(
@@ -151,7 +153,7 @@ export default class GeraGrade extends React.Component{
 			this.inicia()
 			this.m = this.remove(ativas(this.cur))
 			let as = this.periodo(this.m)
-			this.state.x = []
+			this.x = []
 			this.cr = this.state.cr.reduce((accumulator,value) => accumulator + value, 0)
 
 			return(
@@ -185,12 +187,12 @@ export default class GeraGrade extends React.Component{
 			let str = ""
 
 			if(Object.keys(as).length > 0){
-				if(this.state.x.length === 0)
+				if(this.x.length === 0)
 					str = "Você deseja fazer todas as matérias"
-				else if(this.state.x.length === this.gr.length)
+				else if(this.x.length === this.gr.length)
 					str = "Você não quer estudar este semestre"
 				else
-					str = "Você não deseja fazer "+this.state.x.length+" máteria(s)"
+					str = "Você não deseja fazer "+this.x.length+" máteria(s)"
 			}
 			return (
 				<div className="teste">
@@ -219,7 +221,7 @@ export default class GeraGrade extends React.Component{
 		}else{
 			let m = [...this.gr]
 
-			for(const a of this.state.x){
+			for(const a of this.x){
   				for(const j in m){
   					if(m[j]._re === a){
   						m.splice(j,1)

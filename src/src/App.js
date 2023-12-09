@@ -4,7 +4,6 @@ import './model/util/css/App.css'
 import React from 'react';
 import Quadro from './components/Quadro'
 import GeraGrade from './components/GeraGrade'
-import { Link, Router, Route, Routes } from 'react-router-dom';
 import { cursos } from './model/Filtro';
 
 export default class App extends React.Component {
