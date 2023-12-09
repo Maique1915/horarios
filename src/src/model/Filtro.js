@@ -8,12 +8,14 @@ function periodos(e) {
     const v = new Set(vet.map(item => item._se))
     return Array.from(v).length
 }
+
 function cursos() {
     const v = new Set(db.map(item => {
         if (item.hasOwnProperty("_se"))
-            return item._cu
-    }))
-    return Array.from(v)
+            return item._cu;
+        return undefined; // ou simplesmente omita esse retorno
+    }));
+    return Array.from(v);
 }
 
 function horarios(e) {
