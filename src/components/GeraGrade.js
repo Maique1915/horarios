@@ -220,7 +220,7 @@ export default class GeraGrade extends React.Component{
 			)
 		}else{
 			let m = [...this.gr]
-
+			console.log(this.x)
 			for(const a of this.x){
   				for(const j in m){
   					if(m[j]._re === a){

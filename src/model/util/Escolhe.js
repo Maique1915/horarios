@@ -2,23 +2,32 @@ import Materias from '../Materias'
 
 export default class Escolhe{
 	
-	constructor(genesis){
+	constructor(genesis, cur){
+
 		this.genesis = genesis
+		this.cur = cur
+		this.reduz()
+	}
+
+	reduz() {
+		while (this.genesis.length > 15) {
+			const max = this.genesis.length
+			const a = Math.floor(Math.random() * (max))
+			this.genesis.splice(a, 1)
+		}
 	}
 
 	exc(){
 		let aux = []
-		let i = 2 ** this.genesis.length -1
-		
-		while(true) {
-			if(i <= 0) break
+		let i = 2 ** this.genesis.length - 1
+		while (i > 0) {
 			let f = i.toString(2).padStart(this.genesis.length, '0')
 			i--
 			if(f.split("1").length >= 9)
 				continue
 			
 			let c = []
-			let m = new Materias(0,0,0,0,0,0,0)
+			let m = new Materias(this.cur,0,0,0,0,0,0,0)
 			let b = true
 
 			for(const j in f){
@@ -36,7 +45,7 @@ export default class Escolhe{
 			if(b)
 				aux.push(c)
 		}
-		return aux
+		return aux.sort(this.compare)
 	}
 
 	compare(a, b){
@@ -58,11 +67,12 @@ export default class Escolhe{
 		return false
 	}
 
-	colide(b,a){
+	colide(b, a) {
 		for (const i in a._ho) {
 			const e = a._ho[i]
 			const f = b._ho[i]
-			for(const d in e){
+			
+			for (const d in e) {
 				if(e[d] && f[d]){
 					return false
 				}

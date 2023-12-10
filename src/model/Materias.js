@@ -1,8 +1,10 @@
-const sem = ["seg","ter","qua","qui","sex"]
+import { dimencao } from './Filtro'
+
+const sem = ["seg", "ter", "qua", "qui", "sex"]
 
 class Materias{
 
-	constructor(se, di, ap, at, pr, el, re){
+	constructor(cur, se, di, ap, at, pr, el, re){
 		this._se = se
 		this._di = di
 		this._ap = ap
@@ -10,13 +12,13 @@ class Materias{
 		this._pr = pr
 		this._re = re
 		this._el = el
-		this._ho = [
-			[false,false,false,false,false,false,false,false,false,false,false,false],
-			[false,false,false,false,false,false,false,false,false,false,false,false],
-			[false,false,false,false,false,false,false,false,false,false,false,false],
-			[false,false,false,false,false,false,false,false,false,false,false,false],
-			[false,false,false,false,false,false,false,false,false,false,false,false]
-		]
+		const [r, c] = dimencao(cur)
+		const row = []
+		this._ho = []
+		for (let i = 0; i < r; i++)
+			row.push(false)
+		for (let i = 0; i < c; i++)
+			this._ho.push([...row])
 	}
 
 	get horario(){

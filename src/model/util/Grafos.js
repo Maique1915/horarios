@@ -6,6 +6,8 @@ export default class Grafos{
 		this.feitas = feitas
 		this.cr = cr
 		this.re = names
+		console.log(materias, cr, feitas, names)
+
 	}
 
 	matriz(){

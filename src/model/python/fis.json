@@ -1,0 +1,2970 @@
+[
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Introdu\u00e7\u00e3o a Astronomia",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Introdu\u00e7\u00e3o a F\u00edsica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Introdu\u00e7\u00e3o As Ciencias a e B",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Matrizes e Vetores",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Int. As Ciencias a e B",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Computa\u00e7\u00e3o Alg\u00e9brica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 1,
+        "_di": "Fun\u00e7\u00f5es",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 2,
+        "_di": "Funda\u00e7\u00e3o da Educa\u00e7\u00e3o",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                true,
+                true,
+                true,
+                true,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 2,
+        "_di": "C\u00e1lculo I",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 2,
+        "_di": "Geometria Anal\u00edtica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 2,
+        "_di": "Educa\u00e7\u00e3o e Sociedade",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 2,
+        "_di": "Leitura e Produ\u00e7\u00e3o de Textos",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 2,
+        "_di": "Mec\u00e2nica I",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 3,
+        "_di": "F\u00edsica T\u00e9rmica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 3,
+        "_di": "C\u00e1lculo II ",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 3,
+        "_di": "Probabilidade e Estat\u00edstica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 3,
+        "_di": "Pol\u00edticas P\u00fablicas e Forma\u00e7\u00e3o",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 3,
+        "_di": "Mec\u00e2nica II ",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 4,
+        "_di": "Eletromagnetismo",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                true,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                true,
+                true,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 4,
+        "_di": "C\u00e1lculo II i",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 4,
+        "_di": "Did\u00e1tica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 4,
+        "_di": "Alg\u00e9bra Linear",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 4,
+        "_di": "Oficina de Mec\u00e2nica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 4,
+        "_di": "Circuitos El\u00e9tricos e Eletr\u00f4nicos",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "C\u00e1lculo IV",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "Hist\u00f3ria e Filosofia da Ci\u00eancia",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "Pr\u00e1tica I",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "Oficina de Projetos de Ensino em F\u00edsica T\u00e9rmica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "Relatividade",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "Psicologia",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 5,
+        "_di": "Libras",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "F\u00edsica Ondulat\u00f3ria e \u00d3ptica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "F\u00edsica Qu\u00e2ntica I",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "Pr\u00e1tica II ",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "Pr\u00e1ticas Extensionistas",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "Epistemologia",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "Oficina de Projeto de Ensino em F\u00edsica Ondulat\u00f3ria e Eletromagn\u00e9tica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "Ci\u00eancia e Meio Ambiente",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 6,
+        "_di": "Of. Proj.",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 7,
+        "_di": "Qu\u00edmica Geral",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 7,
+        "_di": "Ci\u00eancia e Cultura",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 7,
+        "_di": "Pr\u00e1tica II i",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 7,
+        "_di": "Metodologia da Pesquisa",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 7,
+        "_di": "Introdu\u00e7\u00e3o \u00e0 F\u00edsica Nuclear",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 8,
+        "_di": "Pr\u00e1tica IV",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 8,
+        "_di": "Discuss\u00e3o dos Conceitos de F\u00edsica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 8,
+        "_di": "F\u00edsica Estat\u00edstica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 8,
+        "_di": "Laborat\u00f3rio  de F\u00edsica Moderna",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 8,
+        "_di": "Oficina de F\u00edsica Moderna",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 8,
+        "_di": "F\u00edsica Estat\u00edstistica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 9,
+        "_di": "Oficina de F\u00edsica Moderna Espec.",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 9,
+        "_di": "Pr\u00e1tica V",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 9,
+        "_di": "T\u00f3picos Avan\u00e7ados em Mec\u00e2nica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 9,
+        "_di": "Novas Tecnologias em Ensino de F\u00edsica ",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                true,
+                true,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 9,
+        "_di": "Introdu\u00e7\u00e3o \u00e0 Pesquida e Ensino de F\u00edsica",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                true,
+                true,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    },
+    {
+        "_cu": "fisica",
+        "_se": 9,
+        "_di": "Sujeito Sociedade e Cultura",
+        "_re": "",
+        "_ap": 0,
+        "_at": 0,
+        "_el": true,
+        "_us": true,
+        "_pr": [],
+        "_ho": [
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                true,
+                true
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ]
+        ]
+    }
+]

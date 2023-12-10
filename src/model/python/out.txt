@@ -1,0 +1,346 @@
+[[nan, nan, nan, '1º Período 2023.1', nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan], ['18:30 - 19:15', 'Introdução a Astronomia\nRaul', 'Introdução a Física\nRogério', 'Introdução as Ciencias A e B\nAlexandre', 'Matrizes e Vetores\nLeandro', 'Introdução as Ciencias A e B\nAlexandre'], ['19:15 - 20:00', 'Introdução a Astronomia\nRaul', 'Introdução a Física\nRogério', 'Int. as Ciencias A e B\nAlexandre', 'Matrizes e Vetores\nLeandro', nan], ['20:15 - 21:00', 'Introdução a Astronomia\nRaul', 'Introdução a Física\nRogério', 'Computação Algébrica\nEduardo', 'Matrizes e Vetores\nLeandro', nan], ['21:00 - 21:45', nan, 'Funções\nGilmar', 'Computação Algébrica\nEduardo', 'Computação Algébrica\nEduardo', 'Funções\nGilmar'], ['21:45 - 22:30', nan, 'Funções\nGilmar', nan, 'Computação Algébrica\nEduardo', 'Funções\nGilmar'], [nan, nan, nan, '2º Período 2023.1', nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, 'Fundação da Educação'], [nan, nan, nan, nan, nan, 'Soraia'], ['18:30 - 19:15', nan, 'Cálculo I', 'Geometria Analítica', 'Cálculo I', 'Fundação da Educação'], [nan, nan, 'Demerson', 'Leandro', 'Demerson', 'Soraia'], ['19:15 - 20:00', 'Geometria Analítica', 'Cálculo I', 'Geometria Analítica', 'Cálculo I', 'Fundação da Educação'], [nan, 'Leandro', 'Demerson', 'Leandro', 'Demerson', 'Soraia'], ['20:15 - 21:00', 'Geometria Analítica', 'Educação e Sociedade', 'Leitura e produção de textos', 'Cálculo I', 'Fundação da Educação'], [nan, 'Leandro', 'Celso', nan, 'Demerson', 'Soraia'], ['21:00 - 21:45', 'Mecânica I', 'Educação e Sociedade', 'Leitura e produção de textos', nan, 'Mecânica I'], [nan, ' Raul', 'Celso', nan, nan, ' Raul'], ['21:45 - 22:30', 'Mecânica I', 'Educação e Sociedade', 'Leitura e produção de textos', nan, 'Mecânica I'], [nan, ' Raul', 'Celso', nan, nan, ' Raul'], [nan, nan, '3º Período 2023.1', nan, nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan], ['18:30 - 19:15', 'Física Térmica', 'Cálculo II', nan, 'Cálculo II', 'Probabilidade e Estatística'], ['19:15 - 20:00', 'Física Térmica', 'Cálculo II', nan, 'Cálculo II', 'Probabilidade e Estatística'], ['20:15 - 21:00', 'Física Térmica', 'Probabilidade e Estatística', 'Políticas Públicas e Formação', 'Cálculo II', 'Mecânica II'], ['21:00 - 21:45', 'Mecânica II', 'Probabilidade e Estatística', 'Políticas Públicas e Formação', 'Física Térmica', 'Mecânica II'], ['21:45 - 22:30', 'Mecânica II', nan, 'Políticas Públicas e Formação', 'Física Térmica', 'Mecânica II'], [nan, nan, nan, '4º Período 2023.1', nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, 'Eletromagnetismo'], ['18:30 - 19:15', 'Eletromagnetismo', 'Cálculo III', 'Didática', 'Cálculo III', 'Eletromagnetismo'], ['19:15 - 20:00', 'Didática', 'Cálculo III', 'Didática', 'Cálculo III', 'Algébra Linear'], ['20:15 - 21:00', 'Didática', 'Oficina de Mecânica', 'Eletromagnetismo', 'Cálculo III', 'Algébra Linear'], ['21:00 - 21:45', 'Circuitos Elétricos e Eletrônicos', 'Oficina de Mecânica', 'Eletromagnetismo', 'Algébra Linear', 'Circuitos Elétricos e Eletrônicos'], ['21:45 - 22:30', 'Circuitos Elétricos e Eletrônicos', 'Oficina de Mecânica', 'Eletromagnetismo', 'Algébra Linear', nan], [nan, nan, nan, '5º Período 2023.1', nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan], ['18:30 - 19:15', 'Cálculo IV', 'História e Filosofia da Ciência', 'Prática I', 'Oficina de Projetos de Ensino em Física Térmica', 'Relatividade'], ['19:15 - 20:00', 'Cálculo IV', 'História e Filosofia da Ciência', 'Prática I', 'Oficina de Projetos de Ensino em Física Térmica', 'Relatividade'], ['20:15 - 21:00', 'Cálculo IV', 'Psicologia', 'Libras', 'Oficina de Projetos de Ensino em Física Térmica', 'Relatividade'], ['21:00 - 21:45', 'História e Filosofia da Ciência', 'Psicologia', 'Libras', 'Cálculo IV', nan], ['21:45 - 22:30', 'História e Filosofia da Ciência', 'Psicologia', 'Libras', 'Cálculo IV', nan], [nan, nan, nan, nan, '6º Período 2023.1', nan, nan], ['Horário', 'Segunda', nan, 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan, 'Física Ondulatória e Óptica'], ['18:30 - 19:15', nan, nan, 'Física Quântica I', 'Prática II', 'Física Ondulatória e Óptica', 'Física Ondulatória e Óptica'], ['19:15 - 20:00', 'Práticas Extensionistas', nan, 'Física Quântica I', 'Prática II', 'Física Ondulatória e Óptica', 'Física Ondulatória e Óptica'], ['20:15 - 21:00', 'Práticas Extensionistas', nan, 'Epistemologia', 'Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética', 'Física Ondulatória e Óptica', nan], ['21:00 - 21:45', 'Ciência e Meio Ambiente', nan, 'Epistemologia', 'Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética', 'Física Quântica I', nan], ['21:45 - 22:30', 'Ciência e Meio Ambiente', 'Of. Proj.', 'Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética', 'Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética', 'Física Quântica I', nan], [nan, nan, nan, '7º Período 2023.1', nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan], ['18:30 - 19:15', 'Química Geral', 'Ciência e cultura', 'Prática III', 'Química Geral', nan], ['19:15 - 20:00', 'Química Geral', 'Ciência e cultura', 'Prática III', 'Química Geral', nan], ['20:15 - 21:00', 'Química Geral', 'Metodologia da Pesquisa', 'Introdução à Física Nuclear', 'Química Geral', nan], ['21:00 - 21:45', nan, 'Metodologia da Pesquisa', 'Introdução à Física Nuclear', 'Ciência e cultura', nan], ['21:45 - 22:30', nan, nan, 'Introdução à Física Nuclear', 'Ciência e cultura', nan], [nan, nan, nan, '8º Período 2023.1', nan, nan], ['Horário', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan], ['18:30 - 19:15', nan, nan, 'Prática IV', nan, nan], ['19:15 - 20:00', 'Discussão dos Conceitos de Física', nan, 'Prática IV', 'Física Estatística', 'Laboratório  de Física Moderna'], ['20:15 - 21:00', 'Discussão dos Conceitos de Física', 'Discussão dos Conceitos de Física', 'Oficina de Física Moderna', 'Física Estatística', 'Laboratório  de Física Moderna'], ['21:00 - 21:45', 'Física Estatístistica', 'Discussão dos Conceitos de Física', 'Oficina de Física Moderna', nan, nan], ['21:45 - 22:30', 'Física Estatístistica', nan, 'Oficina de Física Moderna', nan, nan], [nan, nan, '9º Período 2023.1', nan, nan, nan], ['Horário', 'Seg.', 'Terça', 'Quarta', 'Quinta', 'Sexta'], ['16:45 - 18:10', nan, nan, nan, nan, nan], ['18:30 - 19:15', nan, 'Oficina de Física Moderna Espec.', 'Prática V', nan, nan], ['19:15 - 20:00', nan, 'Oficina de Física Moderna Espec.', 'Prática V', 'Tópicos avançados em Mecânica', 'Novas Tecnologias em Ensino de Física '], ['20:15 - 21:00', nan, nan, 'Introdução à Pesquida e Ensino de Física', 'Tópicos avançados em Mecânica', 'Novas Tecnologias em Ensino de Física '], ['21:00 - 21:45', 'Tópicos avançados em Mecânica', 'Sujeito sociedade e Cultura', 'Introdução à Pesquida e Ensino de Física', 'Introdução à Pesquida e Ensino de Física', nan], ['21:45 - 22:30', 'Tópicos avançados em Mecânica', 'Sujeito sociedade e Cultura', nan, 'Introdução à Pesquida e Ensino de Física', nan]]
+
+Introdução a Astronomia
+Raul 1 , 0
+Introdução a Física
+Rogério 1 , 1
+Introdução as Ciencias A e B
+Alexandre 1 , 2
+Matrizes e Vetores
+Leandro 1 , 3
+Introdução as Ciencias A e B
+Alexandre 1 , 2
+
+Introdução a Astronomia
+Raul 2 , 0
+Introdução a Física
+Rogério 2 , 1
+Int. as Ciencias A e B
+Alexandre 2 , 4
+Matrizes e Vetores
+Leandro 2 , 3
+
+Introdução a Astronomia
+Raul 3 , 0
+Introdução a Física
+Rogério 3 , 1
+Computação Algébrica
+Eduardo 3 , 5
+Matrizes e Vetores
+Leandro 3 , 3
+
+Funções
+Gilmar 4 , 6
+Computação Algébrica
+Eduardo 4 , 5
+Computação Algébrica
+Eduardo 4 , 5
+Funções
+Gilmar 4 , 6
+
+Funções
+Gilmar 5 , 6
+Computação Algébrica
+Eduardo 5 , 5
+Funções
+Gilmar 5 , 6
+
+
+
+Fundação da Educação 0 , 7
+
+
+Cálculo I 1 , 8
+Geometria Analítica 1 , 9
+Cálculo I 1 , 8
+Fundação da Educação 1 , 7
+
+
+Geometria Analítica 2 , 9
+Cálculo I 2 , 8
+Geometria Analítica 2 , 9
+Cálculo I 2 , 8
+Fundação da Educação 2 , 7
+
+
+Geometria Analítica 3 , 9
+Educação e Sociedade 3 , 10
+Leitura e produção de textos 3 , 11
+Cálculo I 3 , 8
+Fundação da Educação 3 , 7
+
+
+Mecânica I 4 , 12
+Educação e Sociedade 4 , 10
+Leitura e produção de textos 4 , 11
+Mecânica I 4 , 12
+
+
+Mecânica I 5 , 12
+Educação e Sociedade 5 , 10
+Leitura e produção de textos 5 , 11
+Mecânica I 5 , 12
+
+
+
+
+
+Física Térmica 1 , 13
+Cálculo II 1 , 14
+Cálculo II 1 , 14
+Probabilidade e Estatística 1 , 15
+
+Física Térmica 2 , 13
+Cálculo II 2 , 14
+Cálculo II 2 , 14
+Probabilidade e Estatística 2 , 15
+
+Física Térmica 3 , 13
+Probabilidade e Estatística 3 , 15
+Políticas Públicas e Formação 3 , 16
+Cálculo II 3 , 14
+Mecânica II 3 , 17
+
+Mecânica II 4 , 17
+Probabilidade e Estatística 4 , 15
+Políticas Públicas e Formação 4 , 16
+Física Térmica 4 , 13
+Mecânica II 4 , 17
+
+Mecânica II 5 , 17
+Políticas Públicas e Formação 5 , 16
+Física Térmica 5 , 13
+Mecânica II 5 , 17
+
+
+
+Eletromagnetismo 0 , 18
+
+Eletromagnetismo 1 , 18
+Cálculo III 1 , 19
+Didática 1 , 20
+Cálculo III 1 , 19
+Eletromagnetismo 1 , 18
+
+Didática 2 , 20
+Cálculo III 2 , 19
+Didática 2 , 20
+Cálculo III 2 , 19
+Algébra Linear 2 , 21
+
+Didática 3 , 20
+Oficina de Mecânica 3 , 22
+Eletromagnetismo 3 , 18
+Cálculo III 3 , 19
+Algébra Linear 3 , 21
+
+Circuitos Elétricos e Eletrônicos 4 , 23
+Oficina de Mecânica 4 , 22
+Eletromagnetismo 4 , 18
+Algébra Linear 4 , 21
+Circuitos Elétricos e Eletrônicos 4 , 23
+
+Circuitos Elétricos e Eletrônicos 5 , 23
+Oficina de Mecânica 5 , 22
+Eletromagnetismo 5 , 18
+Algébra Linear 5 , 21
+
+
+
+
+Cálculo IV 1 , 24
+História e Filosofia da Ciência 1 , 25
+Prática I 1 , 26
+Oficina de Projetos de Ensino em Física Térmica 1 , 27
+Relatividade 1 , 28
+
+Cálculo IV 2 , 24
+História e Filosofia da Ciência 2 , 25
+Prática I 2 , 26
+Oficina de Projetos de Ensino em Física Térmica 2 , 27
+Relatividade 2 , 28
+
+Cálculo IV 3 , 24
+Psicologia 3 , 29
+Libras 3 , 30
+Oficina de Projetos de Ensino em Física Térmica 3 , 27
+Relatividade 3 , 28
+
+História e Filosofia da Ciência 4 , 25
+Psicologia 4 , 29
+Libras 4 , 30
+Cálculo IV 4 , 24
+
+História e Filosofia da Ciência 5 , 25
+Psicologia 5 , 29
+Libras 5 , 30
+Cálculo IV 5 , 24
+
+
+
+Física Ondulatória e Óptica 0 , 31
+
+Física Quântica I 1 , 32
+Prática II 1 , 33
+Física Ondulatória e Óptica 1 , 31
+Física Ondulatória e Óptica 1 , 31
+
+Práticas Extensionistas 2 , 34
+Física Quântica I 2 , 32
+Prática II 2 , 33
+Física Ondulatória e Óptica 2 , 31
+Física Ondulatória e Óptica 2 , 31
+
+Práticas Extensionistas 3 , 34
+Epistemologia 3 , 35
+Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética 3 , 36
+Física Ondulatória e Óptica 3 , 31
+
+Ciência e Meio Ambiente 4 , 37
+Epistemologia 4 , 35
+Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética 4 , 36
+Física Quântica I 4 , 32
+
+Ciência e Meio Ambiente 5 , 37
+Of. Proj. 5 , 38
+Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética 5 , 36
+Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética 5 , 36
+Física Quântica I 5 , 32
+
+
+
+
+Química Geral 1 , 39
+Ciência e cultura 1 , 40
+Prática III 1 , 41
+Química Geral 1 , 39
+
+Química Geral 2 , 39
+Ciência e cultura 2 , 40
+Prática III 2 , 41
+Química Geral 2 , 39
+
+Química Geral 3 , 39
+Metodologia da Pesquisa 3 , 42
+Introdução à Física Nuclear 3 , 43
+Química Geral 3 , 39
+
+Metodologia da Pesquisa 4 , 42
+Introdução à Física Nuclear 4 , 43
+Ciência e cultura 4 , 40
+
+Introdução à Física Nuclear 5 , 43
+Ciência e cultura 5 , 40
+
+
+
+
+Prática IV 1 , 44
+
+Discussão dos Conceitos de Física 2 , 45
+Prática IV 2 , 44
+Física Estatística 2 , 46
+Laboratório  de Física Moderna 2 , 47
+
+Discussão dos Conceitos de Física 3 , 45
+Discussão dos Conceitos de Física 3 , 45
+Oficina de Física Moderna 3 , 48
+Física Estatística 3 , 46
+Laboratório  de Física Moderna 3 , 47
+
+Física Estatístistica 4 , 49
+Discussão dos Conceitos de Física 4 , 45
+Oficina de Física Moderna 4 , 48
+
+Física Estatístistica 5 , 49
+Oficina de Física Moderna 5 , 48
+
+
+
+
+Oficina de Física Moderna Espec. 1 , 50
+Prática V 1 , 51
+
+Oficina de Física Moderna Espec. 2 , 50
+Prática V 2 , 51
+Tópicos avançados em Mecânica 2 , 52
+Novas Tecnologias em Ensino de Física  2 , 53
+
+Introdução à Pesquida e Ensino de Física 3 , 54
+Tópicos avançados em Mecânica 3 , 52
+Novas Tecnologias em Ensino de Física  3 , 53
+
+Tópicos avançados em Mecânica 4 , 52
+Sujeito sociedade e Cultura 4 , 55
+Introdução à Pesquida e Ensino de Física 4 , 54
+Introdução à Pesquida e Ensino de Física 4 , 54
+
+Tópicos avançados em Mecânica 5 , 52
+Sujeito sociedade e Cultura 5 , 55
+Introdução à Pesquida e Ensino de Física 5 , 54
+
+periodos: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+dias: ['SEG', 'TER', 'QUA', 'QUI', 'SEX']
+horarios: [['16:45:00', '18:10:00'], ['18:30:00', '19:15:00'], ['19:15:00', '20:00:00'], ['20:15:00', '21:00:00'], ['21:00:00', '21:45:00'], ['21:45:00', '22:30:00']]
+
+materias: 56
+[1, 'Introdução a Astronomia', '', 0, 0, True, True, 3]
+[1, 'Introdução a Física', '', 0, 0, True, True, 3]
+[1, 'Introdução As Ciencias a e B', '', 0, 0, True, True, 3]
+[1, 'Matrizes e Vetores', '', 0, 0, True, True, 3]
+[1, 'Int. As Ciencias a e B', '', 0, 0, True, True, 3]
+[1, 'Computação Algébrica', '', 0, 0, True, True, 3]
+[1, 'Funções', '', 0, 0, True, True, 3]
+[2, 'Fundação da Educação', '', 0, 0, True, True, 3]
+[2, 'Cálculo I', '', 0, 0, True, True, 3]
+[2, 'Geometria Analítica', '', 0, 0, True, True, 3]
+[2, 'Educação e Sociedade', '', 0, 0, True, True, 3]
+[2, 'Leitura e Produção de Textos', '', 0, 0, True, True, 3]
+[2, 'Mecânica I', '', 0, 0, True, True, 3]
+[3, 'Física Térmica', '', 0, 0, True, True, 3]
+[3, 'Cálculo II ', '', 0, 0, True, True, 3]
+[3, 'Probabilidade e Estatística', '', 0, 0, True, True, 3]
+[3, 'Políticas Públicas e Formação', '', 0, 0, True, True, 3]
+[3, 'Mecânica II ', '', 0, 0, True, True, 3]
+[4, 'Eletromagnetismo', '', 0, 0, True, True, 3]
+[4, 'Cálculo II i', '', 0, 0, True, True, 3]
+[4, 'Didática', '', 0, 0, True, True, 3]
+[4, 'Algébra Linear', '', 0, 0, True, True, 3]
+[4, 'Oficina de Mecânica', '', 0, 0, True, True, 3]
+[4, 'Circuitos Elétricos e Eletrônicos', '', 0, 0, True, True, 3]
+[5, 'Cálculo IV', '', 0, 0, True, True, 3]
+[5, 'História e Filosofia da Ciência', '', 0, 0, True, True, 3]
+[5, 'Prática I', '', 0, 0, True, True, 3]
+[5, 'Oficina de Projetos de Ensino em Física Térmica', '', 0, 0, True, True, 3]
+[5, 'Relatividade', '', 0, 0, True, True, 3]
+[5, 'Psicologia', '', 0, 0, True, True, 3]
+[5, 'Libras', '', 0, 0, True, True, 3]
+[6, 'Física Ondulatória e Óptica', '', 0, 0, True, True, 3]
+[6, 'Física Quântica I', '', 0, 0, True, True, 3]
+[6, 'Prática II ', '', 0, 0, True, True, 3]
+[6, 'Práticas Extensionistas', '', 0, 0, True, True, 3]
+[6, 'Epistemologia', '', 0, 0, True, True, 3]
+[6, 'Oficina de Projeto de Ensino em Física Ondulatória e Eletromagnética', '', 0, 0, True, True, 3]
+[6, 'Ciência e Meio Ambiente', '', 0, 0, True, True, 3]
+[6, 'Of. Proj.', '', 0, 0, True, True, 3]
+[7, 'Química Geral', '', 0, 0, True, True, 3]
+[7, 'Ciência e Cultura', '', 0, 0, True, True, 3]
+[7, 'Prática II i', '', 0, 0, True, True, 3]
+[7, 'Metodologia da Pesquisa', '', 0, 0, True, True, 3]
+[7, 'Introdução à Física Nuclear', '', 0, 0, True, True, 3]
+[8, 'Prática IV', '', 0, 0, True, True, 3]
+[8, 'Discussão dos Conceitos de Física', '', 0, 0, True, True, 3]
+[8, 'Física Estatística', '', 0, 0, True, True, 3]
+[8, 'Laboratório  de Física Moderna', '', 0, 0, True, True, 3]
+[8, 'Oficina de Física Moderna', '', 0, 0, True, True, 3]
+[8, 'Física Estatístistica', '', 0, 0, True, True, 3]
+[9, 'Oficina de Física Moderna Espec.', '', 0, 0, True, True, 3]
+[9, 'Prática V', '', 0, 0, True, True, 3]
+[9, 'Tópicos Avançados em Mecânica', '', 0, 0, True, True, 3]
+[9, 'Novas Tecnologias em Ensino de Física ', '', 0, 0, True, True, 3]
+[9, 'Introdução à Pesquida e Ensino de Física', '', 0, 0, True, True, 3]
+[9, 'Sujeito Sociedade e Cultura', '', 0, 0, True, True, 3]
+
+profs: ['Raul', 'Rogério', 'Alexandre', 'Leandro', 'Eduardo', 'Gilmar']
+
+grade {'1': [['2', '1'], ['3', '1'], ['4', '1']], '2': [['2', '2'], ['3', '2'], ['4', '2']], '3': [['2', '3'], ['2', '5']], '4': [['2', '4'], ['3', '4'], ['4', '4']], '5': [['3', '3']], '6': [['4', '3'], ['5', '3'], ['5', '4'], ['6', '4']], '7': [['5', '2'], ['5', '5'], ['6', '2'], ['6', '5']], '8': [['1', '5'], ['2', '5'], ['3', '5'], ['4', '5']], '9': [['2', '2'], ['2', '4'], ['3', '2'], ['3', '4'], ['4', '4']], '10': [['2', '3'], ['3', '1'], ['3', '3'], ['4', '1']], '11': [['4', '2'], ['5', '2'], ['6', '2']], '12': [['4', '3'], ['5', '3'], ['6', '3']], '13': [['5', '1'], ['5', '5'], ['6', '1'], ['6', '5']], '14': [['2', '1'], ['3', '1'], ['4', '1'], ['5', '4'], ['6', '4']], '15': [['2', '2'], ['2', '4'], ['3', '2'], ['3', '4'], ['4', '4']], '16': [['2', '5'], ['3', '5'], ['4', '2'], ['5', '2']], '17': [['4', '3'], ['5', '3'], ['6', '3']], '18': [['4', '5'], ['5', '1'], ['5', '5'], ['6', '1'], ['6', '5']], '19': [['1', '5'], ['2', '1'], ['2', '5'], ['4', '3'], ['5', '3'], ['6', '3']], '20': [['2', '2'], ['2', '4'], ['3', '2'], ['3', '4'], ['4', '4']], '21': [['2', '3'], ['3', '1'], ['3', '3'], ['4', '1']], '22': [['3', '5'], ['4', '5'], ['5', '4'], ['6', '4']], '23': [['4', '2'], ['5', '2'], ['6', '2']], '24': [['5', '1'], ['5', '5'], ['6', '1']], '25': [['2', '1'], ['3', '1'], ['4', '1'], ['5', '4'], ['6', '4']], '26': [['2', '2'], ['3', '2'], ['5', '1'], ['6', '1']], '27': [['2', '3'], ['3', '3']], '28': [['2', '4'], ['3', '4'], ['4', '4']], '29': [['2', '5'], ['3', '5'], ['4', '5']], '30': [['4', '2'], ['5', '2'], ['6', '2']], '31': [['4', '3'], ['5', '3'], ['6', '3']], '32': [['1', '6'], ['2', '5'], ['2', '6'], ['3', '5'], ['3', '6'], ['4', '5']], '33': [['2', '3'], ['3', '3'], ['5', '5'], ['6', '5']], '34': [['2', '4'], ['3', '4']], '35': [['3', '1'], ['4', '1']], '36': [['4', '3'], ['5', '3']], '37': [['4', '4'], ['5', '4'], ['6', '3'], ['6', '4']], '38': [['5', '1'], ['6', '1']], '39': [['6', '2']], '40': [['2', '1'], ['2', '4'], ['3', '1'], ['3', '4'], ['4', '1'], ['4', '4']], '41': [['2', '2'], ['3', '2'], ['5', '4'], ['6', '4']], '42': [['2', '3'], ['3', '3']], '43': [['4', '2'], ['5', '2']], '44': [['4', '3'], ['5', '3'], ['6', '3']], '45': [['2', '3'], ['3', '3']], '46': [['3', '1'], ['4', '1'], ['4', '2'], ['5', '2']], '47': [['3', '4'], ['4', '4']], '48': [['3', '5'], ['4', '5']], '49': [['4', '3'], ['5', '3'], ['6', '3']], '50': [['5', '1'], ['6', '1']], '51': [['2', '2'], ['3', '2']], '52': [['2', '3'], ['3', '3']], '53': [['3', '4'], ['4', '4'], ['5', '1'], ['6', '1']], '54': [['3', '5'], ['4', '5']], '55': [['4', '3'], ['5', '3'], ['5', '4'], ['6', '4']], '56': [['5', '2'], ['6', '2']]}

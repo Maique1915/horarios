@@ -3,13 +3,31 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import * as ReactDOMClient from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { cursos } from './model/Filtro';
+function rotas() {
+    const res = []
+    let aux = {
+        path: "/",
+        element: <App cur={"engcomp"} />,
+    }
+    res.push(aux)
+  for (const r of cursos()) {
+    let aux = {
+      path: "/" + r,
+      element: <App cur={r} />,
+    }
+    res.push(aux)
+  }
+  return res;
+}
+
+const routes = createBrowserRouter(rotas());
 
 const root = ReactDOMClient.createRoot(document.getElementById("root"));
+//<RouterProvider router={routes}/>
 root.render(
-  <App />
+    <RouterProvider router={routes}/>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

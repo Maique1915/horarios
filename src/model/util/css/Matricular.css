@@ -124,3 +124,72 @@
 .hidden {
   display: none;
 }
+
+
+.accordion {
+    position: relative;
+}
+
+.accordion input[type="checkbox"] {
+    display: none;
+}
+
+.accordion .content-cursos {
+    margin-top: 20px;
+    width: 260px;
+    left: calc(50vw - 65px);
+    border-radius: 20px;
+    overflow: hidden;
+
+}
+
+.accordion .content-cursos .cursos {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.accordion .content-cursos .cursos a {
+    color: #333;
+    text-decoration: none;
+    min-width:130px;
+    width:100%;
+    text-align: center;
+}
+
+.accordion .content-cursos .cursos a:active ~ .accordion input[type="checkbox"] + label + div {
+    display: flex;
+    background-color: #fff;
+}
+
+.accordion .content-cursos .cursos a:hover {
+    background: #ddd;
+}
+
+.accordion > div > p:hover {
+    color: #fff;
+}
+
+.accordion label {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    background-color: #eee;
+    border-radius: 20px;
+    height: 35px;
+    padding: 0 20px;
+    -moz-border-radius: 20px;
+    cursor:pointer;
+}
+
+.accordion input[type="checkbox"] + label + div {
+    display: none;
+    background-color: #fff;
+}
+
+.accordion input[type="checkbox"]:checked + label + div {
+    display: block;
+}
