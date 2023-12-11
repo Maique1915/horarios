@@ -1,0 +1,2732 @@
+[
+	{
+		"_se": 8,
+		"_di": "Projeto Final II",
+		"_re": "8E",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "7F" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+
+	},
+	{
+		"_se": 8,
+		"_di": "Sujeito, sociedade e, cultura",
+		"_re": "8F",
+		"_ap": 2,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 8,
+		"_di": "Prática Docente IV",
+		"_re": "8D",
+		"_ap": 0,
+		"_at": 4,
+		"_pr": [ "7E" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 8,
+		"_di": "Ensino de Matemática em Modalidades Especiais",
+		"_re": "8A",
+		"_ap": 2,
+		"_at": 2,
+		"_pr": [ "4C" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 8,
+		"_di": "Oficina de Projetos de Ensino de Resolução de Problemas",
+		"_re": "8B",
+		"_ap": 3,
+		"_at": 2,
+		"_pr": [ "4B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 7,
+		"_di": "Novas Tecnologias Aplicadas Ao Ensino",
+		"_re": "7D",
+		"_ap": 2,
+		"_at": 2,
+		"_pr": [ "2A" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 7,
+		"_di": "Projeto Final I",
+		"_re": "7F",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "6D" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+
+	},
+	{
+		"_se": 7,
+		"_di": "Prática Docente III",
+		"_re": "7E",
+		"_ap": 0,
+		"_at": 4,
+		"_pr": [ "3D", "4E", "6F" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 7,
+		"_di": "História do Ensino da Matemática Escolar No Brasil",
+		"_re": "7B",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [ "4B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 7,
+		"_di": "Ciência e Meio Ambiente",
+		"_re": "",
+		"_ap": 0,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 6,
+		"_di": "Tendências em Educação Matemática",
+		"_re": "",
+		"_ap": 0,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 6,
+		"_di": "Epistemologia",
+		"_re": "6B",
+		"_ap": 2,
+		"_at": 0,
+		"_pr": [ "3E" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 6,
+		"_di": "Prática Docente II",
+		"_re": "6F",
+		"_ap": 0,
+		"_at": 2,
+		"_pr": [ "5E" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+
+	},
+	{
+		"_se": 6,
+		"_di": "Oficina de Análise Combinatória, Probalidade e Estatística",
+		"_re": "6E",
+		"_ap": 2,
+		"_at": 3,
+		"_pr": [ "4F" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 6,
+		"_di": "Estruturas Algébricas",
+		"_re": "6C",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [ "5C" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 6,
+		"_di": "Metodologia da Pesquisa",
+		"_re": "6D",
+		"_ap": 2,
+		"_at": 0,
+		"_pr": [ "1F" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 6,
+		"_di": "Cálculo Diferencial e Integral IV",
+		"_re": "6A",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [ "5A" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 5,
+		"_di": "História da Matemática",
+		"_re": "5B",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "1F" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 5,
+		"_di": "Prática Docente I",
+		"_re": "5E",
+		"_ap": 0,
+		"_at": 2,
+		"_pr": [ "4B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 5,
+		"_di": "Psicologia Aplicada à Educação",
+		"_re": "5F",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [ "4B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 5,
+		"_di": "Cálculo Diferencial e Integral III",
+		"_re": "5A",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [ "4A" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 5,
+		"_di": "Mecânica Básica II ",
+		"_re": "5D",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [ "3B", "4D" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 4,
+		"_di": "Didática",
+		"_re": "4B",
+		"_ap": 2,
+		"_at": 0,
+		"_pr": [ "2D", "3E" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 4,
+		"_di": "Mecânica Básica I",
+		"_re": "4D",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "1G", "3C" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 4,
+		"_di": "Cálculo Diferencial e Integral II",
+		"_re": "4A",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [ "3B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 4,
+		"_di": "Oficina de Projetos de Ensino de Álgebra",
+		"_re": "4E",
+		"_ap": 2,
+		"_at": 3,
+		"_pr": [ "2C" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 4,
+		"_di": "Probabilidade e Estatística",
+		"_re": "4F",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "3B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 4,
+		"_di": "Língua Brasileira de Sinais",
+		"_re": "4C",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Oficina de Projetos de Ensino de Geometria",
+		"_re": "3D",
+		"_ap": 2,
+		"_at": 3,
+		"_pr": [ "2B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Álgebra Linear",
+		"_re": "3A",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "2E" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Cálculo Diferencial e Integral I",
+		"_re": "3B",
+		"_ap": 0,
+		"_at": 0,
+		"_pr": [ "2C", "2A" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Introdução Às Ciências Experimentais",
+		"_re": "3C",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Políticas Públicas e Formação de Professores",
+		"_re": "3A",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [ "1A" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Práticas Extensionistas",
+		"_re": "3F",
+		"_ap": 0,
+		"_at": 2,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 3,
+		"_di": "Trigonometria e, Números Complexos",
+		"_re": "3G",
+		"_ap": 2,
+		"_at": 1,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 2,
+		"_di": "Matemática Financeira",
+		"_re": "2F",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "1B" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 2,
+		"_di": "Funções",
+		"_re": "2C",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 2,
+		"_di": "Geometria Analítica",
+		"_re": "2E",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [ "1G" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 2,
+		"_di": "Fundamentos Histórico-Filosóficos da Educação",
+		"_re": "2D",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 2,
+		"_di": "Construções Geométricas e Geometria Métrica",
+		"_re": "2B",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [ "1C" ],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 2,
+		"_di": "Computação Algébrica",
+		"_re": "2A",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 1,
+		"_di": "Geometria Euclidiana Plana",
+		"_re": "1C",
+		"_ap": 5,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 1,
+		"_di": "Introdução à Lógica",
+		"_re": "1D",
+		"_ap": 4,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 1,
+		"_di": "Educação Financeira",
+		"_re": "1B",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 1,
+		"_di": "Leitura e Produção de Textos",
+		"_re": "1F",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_se": 1,
+		"_di": "Matrizes e Vetores",
+		"_re": "1G",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	},
+	{
+		"_di": 1,
+		"_se": "Introdução à Matemática",
+		"_re": "1E",
+		"_ap": 3,
+		"_at": 0,
+		"_pr": [],
+		"_el": true,
+		"_ag": true,
+		"_cu": "matematica",
+		"_ho": [
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			],
+			[
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false
+			]
+		]
+	}
+
+]
