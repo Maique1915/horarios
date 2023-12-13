@@ -87,33 +87,47 @@ const Comum = (props) => {
         }
         return aux.filter(e => e.some(elemento => elemento !== undefined && elemento !== null));
     }
-    const salva = () => {
+    function salva(){
+        // Cria uma nova div
         const slide = document.createElement('div');
         const tela = document.createElement('div');
+
+        // Adiciona uma classe à nova div
         slide.classList.add('slides2');
-        const root = document.querySelector('.seila2');
+
+        const root = document.querySelector(".seila2")
+        // Fazer uma cópia do elemento
         const elementoCopiado = root.cloneNode(true);
+
+        // Anexar a cópia a algum lugar no DOM (por exemplo, ao final do corpo do documento)
         const elementoTexto = elementoCopiado.querySelector('.intervalo');
-        elementoTexto.textContent = 'Grade';
+        // Selecionar o elemento que contém o texto "4ª Grade possível"
+        elementoTexto.textContent = "Grade";
+
+        // Insere a nova div interna dentro da div externa
         slide.appendChild(elementoCopiado);
         tela.appendChild(slide);
+
         const options = {
             margin: [10, 10, 10, 10],
-            filename: 'Grade.pdf',
+            filename: "Grade.pdf",
             html2canvas: { scale: 5 },
-            jsPDF: { unit: 'mm', format: 'A4', orientation: 'landscape' },
-        };
-        tela.style.textAlign = 'center';
-        tela.style.display = 'flex';
-        tela.style.flexDirection = 'column';
-        tela.style.width = '100%';
-        tela.style.height = '100vh';
-        tela.style.justifyContent = 'center';
-        tela.style.alignItems = 'center';
-        tela.style.margin = 'auto';
-        slide.style.margin = 'auto';
-        html2pdf().set(options).from(tela).save();
-    };
+            jsPDF: { unit: "mm", format: "A4", orientation: "landscape" }
+        }
+
+        // Centralize o conteúdo
+        tela.style.textAlign = "center"; // Centralize horizontalmente
+        tela.style.display = "flex";
+        tela.style.flexDirection = "column";
+        tela.style.width = "100%";
+        tela.style.height = "100vh";
+        tela.style.justifyContent = "center"; // Centralize verticalmente
+        tela.style.alignItems = "center"; // Centralize verticalmente
+        tela.style.margin = "auto"; /// Centralize verticalmente
+        slide.style.margin = "auto"; /// Centralize verticalmente
+
+        html2pdf().set(options).from(tela).save()
+    }
     function isChecked(i, j) {
         const id = `t_${String(i)}_${String(j)}`;
         return _jsx("input", { type: "checkbox", className: "t_mat2", name: id, id: id, value: id });
