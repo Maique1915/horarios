@@ -1,37 +1,29 @@
-import db from '../model/db'
-
+import db from './db.json';
+import db2 from './db2.json';
 function ativas(e) {
-    return db.filter(item => (item._ag === true || item._se > 0) && item._cu === e)
+    e = e === undefined ? "engcomp" : e;
+    const a = db.filter((item) => (item._ag === true || (item._se && item._se > 0)) && item._cu === e);
+    return a !== undefined ? a : [];
 }
 function periodos(e) {
-    const vet = ativas(e)
-    const v = new Set(vet.map(item => item._se))
-    return Array.from(v).length
+    const vet = ativas(e);
+    const v = new Set(vet.map(item => item._se));
+    return v.size > 0 ? v.size : undefined;
 }
 function cursos() {
-    const v = new Set(db.map(item => {
-        if (item.hasOwnProperty("_se"))
-            return item._cu;
-        return undefined; // ou simplesmente omita esse retorno
-    }));
+    const v = new Set(db2.map((item) => item._cu));
     return Array.from(v);
 }
-
 function horarios(e) {
-    const v = new Set(db.filter(item => {
-        if (!item.hasOwnProperty("_se") && item._cu === e)
-            return true
-        return false
-    }))
-    return Array.from(v)[0]._ho
+    e = e === undefined ? "engcomp" : e;
+    const v = db2.find((item) => item._cu === e);
+    return v === undefined || v === null ? [] : v._hd;
 }
 function dimencao(e) {
-    const v = new Set(db.filter(item => {
-        if (!item.hasOwnProperty("_se") && item._cu === e)
-            return true
-        return false
-    }))
-    return Array.from(v)[0]._di
+    e = e === undefined ? "engcomp" : e;
+    const v = db2.find((item) => item._cu === e);
+    if (v === undefined)
+        return [];
+    return v._da === undefined ? [] : v._da;
 }
-
-export { ativas, periodos, cursos, horarios, dimencao }
+export { ativas, periodos, cursos, horarios, dimencao };
