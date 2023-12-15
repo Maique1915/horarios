@@ -153,11 +153,17 @@ option{
   	align-items: center;
 }
 
-.footer{
-	position: fixed;
+.content-grade{
+	float:left;
+	width: 81vw;
+	height: calc(100vh - 91px);
+
+}
+
+.footer {
+	display: flex;
 	bottom: 5px;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
 }
 

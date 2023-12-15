@@ -193,3 +193,78 @@
 .accordion input[type="checkbox"]:checked + label + div {
     display: block;
 }
+
+/*
+    grade
+    horario
+    semana
+    intervalo2
+    tr
+*/
+.table {
+    margin: 0;
+    float: left;
+    width: 100%;
+    border-collapse: collapse;
+    align-items:center;
+    justify-content:center;
+
+}
+
+.table .th1 {
+    width: 16.66%;
+    float: left;
+    text-align: center;
+    justify-content: center;
+    height: 55px;
+    font-size: 10px;
+    padding: 0 3px 0 3px;
+}
+.table .th2 {
+    width: 14.28%;
+    float: left;
+    text-align: center;
+    justify-content: center;
+    height: 55px;
+    font-size: 10px;
+    padding: 0 3px 0 3px;
+}
+.table th:first-line {
+    margin-top: -10px;
+}
+
+.table tr {
+    float: top;
+}
+
+.table .inte {
+    float:left;
+    height: 10px;
+    width: 100%;
+    background: #333;
+}
+
+.table tr:nth-child(1) {
+    background: #3498db;
+    border-radius: 15px 15px 0 0;
+    padding-top: -10px;
+    color:#fff;
+}
+.table tr:nth-child(1) th {
+    height: 35px;
+    font-size: 12px;
+    color: #fff;
+    margin-top: -15px;
+    margin-bottom: 9px;
+}
+.table tr:nth-child(1) th:nth-child(1) {
+    color: #ffd;
+    font-size: 15px;
+    margin-top: -22px;
+    font-style: inherit;
+    text-transform: uppercase;
+}
+.table th:nth-child(1) {
+    height: 35px;
+    font-size: 10px;
+}

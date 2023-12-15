@@ -1,10 +1,41 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import React from 'react';
 import './model/css/index.css';
 import './model/css/App.css';
-import GeraGrade from './routes/GeraGrade';
-import Quadro from './routes/Quadro';
+import GeraGrade from './routes/GeraGrade'
+import Quadro from './routes/Quadro'
+import Home from './routes/Home'
+
 const App = (props) => {
-    const cur = props.cur;
-    return (_jsxs("div", { className: "App-window", children: [_jsx("nav", { children: _jsxs("ul", { className: "menu", children: [_jsx("li", { children: _jsx("label", { className: "bar", htmlFor: "horario", children: "Grades" }) }), _jsx("li", { children: _jsx("label", { className: "bar", htmlFor: "grade", children: "Gerar a sua" }) })] }) }), _jsxs("div", { className: 'contentarea', children: [_jsx("input", { type: "radio", id: "horario", name: "tela", className: "radio", defaultChecked: true }), _jsx("input", { type: "radio", id: "grade", name: "tela", className: "radio" }), _jsx("input", { type: "radio", id: "atualiza", name: "tela", className: "radio" }), _jsx("input", { type: "radio", id: "fluxograma", name: "tela", className: "radio" }), _jsx("div", { className: "tela1", children: _jsx(Quadro, { cur: cur }) }), _jsx("div", { className: "tela2", children: _jsx(GeraGrade, { cur: cur }) })] })] }));
-};
+    const cur = props.cur === undefined || props.cur === "" ? "engcom" : props.cur
+
+        return (
+            <div className="App-window">
+                <nav>
+                    <ul className="menu">
+                        <li><label className="bar" htmlFor="home">Home</label></li>
+                        <li><label className="bar" htmlFor="horario">Grades</label></li>
+                        <li><label className="bar" htmlFor="grade">Gerar a sua</label></li>
+                    </ul>
+                </nav>
+                <div className='contentarea'>
+                    <input type="radio" id={"home"} name="tela" className="radio" defaultChecked />
+                    <input type="radio" id={"horario"} name="tela" className="radio" />
+                    <input type="radio" id={"grade"} name="tela" className="radio" />
+                    <input type="radio" id={"atualiza"} name="tela" className="radio" />
+                    <input type="radio" id={"fluxograma"} name="tela" className="radio" />
+                    <div className="tela3">
+                        < Home />
+                    </div>
+                    <div className="tela1">
+                        < Quadro cur={cur} />
+                    </div>
+                    <div className="tela2">
+                        <GeraGrade cur={cur} />
+                    </div>
+                </div>
+            </div>
+
+        )
+}
+
 export default App;

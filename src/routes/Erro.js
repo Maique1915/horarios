@@ -1,5 +1,10 @@
-import { jsx as _jsx } from "react/jsx-runtime";
 function Erro() {
-    return (_jsx("div", { children: _jsx("h1", { children: "Curso n\uFFFDo encontrado" }) }));
+
+    return (
+        <div>
+            <h1>Curso não encontrado</h1>
+        </div>
+    )
 }
-export default Erro;
+
+export default Erro
