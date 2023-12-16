@@ -1,0 +1,172 @@
+.Horarios-content{
+	display: flex;
+	width: 500%;
+	background-color: #3f3;
+}
+
+.phorario{
+	position: relative;
+	width: 100%;
+	min-width: 935px;
+
+}
+.Cadastro-content{
+	display: flex;
+	width: 70%;
+	min-width: 935px;
+	flex-direction: column;
+}
+
+.navigation2{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;	
+}
+
+.c_conteiner{
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.tabela{
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	background-color: #DDD;
+}
+
+table{
+	width: 100%;
+	min-height: 45vh;
+}
+
+.conteiner{
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+}	
+
+.semana, .horario, .intervalo2, .grade{
+	justify-content: center;
+	align-items: center;
+	font-size: 10px;
+	text-overflow: inherit;
+	text-align: center;
+}
+
+.grade-content{
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+}
+
+.grade{
+	height: 5.5vh;
+	padding: 0 0.5vh 0 0.5vh;
+	/*cursor: pointer;*/
+	transition: 0.1s;
+	-webkit-transition: 0.1s;
+	-moz-transition: 0.1s;
+	-o-transition: 0.1s;
+}
+
+.materia{
+	width: 100%;
+	display: flex;
+}
+
+.intervalo{
+	display: flex;
+	width: 100%;
+	height: 3vh;
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	color: #FFF;
+	justify-content: center;
+	text-align: center;
+	background-color: #333;
+}
+.horario{
+	width: 15%;
+	min-width: 120px;
+}
+semana {
+	color: #333;
+}
+.semana1 {
+	width: 14%;
+	/*min-width: 180px;*/
+}
+.semana2 {
+	width: 17%;
+	/*min-width: 180px;*/
+}
+
+.semana:nth-child(odd){background-color: #ccc;}
+.semana:nth-child(even){background-color: #ddd;}
+
+tr:nth-child(even) {background-color: #ddd;}
+
+.intervalo2,.semana{
+	height: 3vh;
+}
+
+.intervalo:first-child{
+	background-color: #07C;	
+	color: #FFF;
+}
+
+.intervalo2:first-child{
+	background-color: #333;
+	color: #fff;
+}
+
+b{	
+	opacity: 1;
+}
+
+select{
+	display: flex;
+	width: 45%;
+	min-width: 350px;
+	height: 30px;
+	overflow: auto;
+	text-align: center;
+	border-radius: 15px;
+}
+
+option{
+	display: flex;
+	width: 100%;
+}
+
+.salvar{
+	width: 100%;
+  	display: flex;
+  	justify-content: center;
+	height: 30px;
+	padding: 0.5vh;
+
+  	align-items: center;
+}
+
+.content-grade{
+	float:left;
+	width: 81vw;
+	height: calc(100vh - 91px);
+
+}
+
+.footer {
+	display: flex;
+	bottom: 5px;
+	flex-direction: column;
+	align-items: center;
+}
+
+.hidden{
+	visibility: hidden;
+}

@@ -1,0 +1,45 @@
+.home {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    color: #fff;
+    overflow: hidden;
+}
+
+.lbl {
+    display: flex;
+    flex-direction:column;
+    background: #444;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    box-sizing: none;
+
+}
+    .lbl h5 {
+        overflow: inherit;
+    }
+
+.form {
+    float: left;
+    width: 100%;
+    height: calc(100vh - 10px);
+    /*white-space: nowrap;*/
+    overflow: hidden;
+}
+
+.form label button {
+    width: 24px;
+    height: 24px;
+    border: none;
+    margin-top: 5px;
+    transition: 0.15s;
+}
+
+.form label button:hover {
+    background: #05f;
+    color:#fff;
+}
