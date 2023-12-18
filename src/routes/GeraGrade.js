@@ -9,7 +9,7 @@ import '../model/css/Horarios.css'
 let _cur = ''
 let gr = []
 const GeraGrade = ({ cur }) => {
-	const [state, setState] = useState({names: [], keys: [], estado: 0, x: []});
+	const [state, setState] = useState({keys: [], crs: [], estado: 0, x: []});
 	let arr = ativas(cur);
 	let m = remove([...arr])
 
@@ -17,7 +17,7 @@ const GeraGrade = ({ cur }) => {
 		if (cur !== _cur) {
 			
 			_cur = cur
-			setState(({ names: [], keys: [], estado: 0, x: [] }))
+			setState(({keys: [], crs: [], estado: 0, x: [] }))
 			gr = []
 		}
 	})
@@ -26,13 +26,12 @@ const GeraGrade = ({ cur }) => {
 		if (a !== _cur && (a !== "" && a !== undefined)) {
 			_cur = a
 			cur = a
-			state.names = []
 			state.keys = []
+			state.crs = []
 			state.estado = 0
 			state.x = []
 			gr = []
 		}
-		console.log(a, _cur)
 	}
 
 	function handleCheck(e) {
@@ -49,7 +48,7 @@ const GeraGrade = ({ cur }) => {
 						let id = 0
 
 						if (state.estado === 0)
-							id = state.keys.indexOf(mat.value);
+							id = state.keys.indexOf(mat.id);
 						else if (state.estado === 1)
 							id = state.x.indexOf(mat.id)
 
@@ -67,6 +66,7 @@ const GeraGrade = ({ cur }) => {
 			else if (r.checked === false)
 				altera(false, r);
 		}
+		setState((s) =>({...s}))
 	}
 
 	function periodo(m) {
@@ -77,7 +77,7 @@ const GeraGrade = ({ cur }) => {
 				aux[m[i]._se] = []
 			}
 			if (state.estado === 0) {
-				checked = state.names.includes(m[i]._re)
+				checked = state.keys.includes(m[i]._re)
 			} else if (state.estado === 1) {
 				checked = state.x.includes(m[i]._re)
 			}
@@ -89,21 +89,20 @@ const GeraGrade = ({ cur }) => {
 	function periodios(k, i, c) {
 		return (
 			<div className="check">
-				<input type="checkbox" key={i._re + "_" + state.estado} name={String(i._ap + i._at)} defaultChecked={c} className="mat" id={i._re} value={k} onClick={(e) => { handleCheck(e) }} />
+				<input type="checkbox" key={i._re + "_" + state.estado} name={String(i._ap + i._at)} defaultChecked={c} className="mat" id={i._re} value={i._re} onClick={(e) => { handleCheck(e) }} />
 				<label id={i._di} key={i._re + "_l_" + state.estado} htmlFor={i._re}>{i._di}</label><br />
 			</div>
 		)
 	}
 
 	function altera(a, b) {
-		const value = parseInt(b.name);
 		if (state.estado === 0 && a) {
-			state.keys.push(value)
-			state.names.push(b.id)
+			state.keys.push(b.id)
+			state.crs.push(parseInt(b.name))
 		} else if (state.estado === 0 && !a) {
-			const i = state.keys.indexOf(value)
-			state.keys.splice(i, 1)
-			state.names.splice(i, 1)
+			const id = state.keys.indexOf(b.id)
+			state.keys.splice(id, 1)
+			state.crs.splice(id, 1)
 		} else if (state.estado === 1 && a)
 			state.x.push(b.id)
 		else if (state.estado === 1 && !a)
@@ -151,7 +150,12 @@ const GeraGrade = ({ cur }) => {
 			m = remove([...arr])
 			state.x = []
 			const pe = periodo(m)
-			
+			let str = "Voc\u00ea fez nenhuma mat\u00e9ria"
+			let cr = "Voc\u00ea n\u00e3o possui cr\u00e9ditos"
+			if (state.keys.length > 0) {
+				str = "Voc\u00ea fez " + (state.keys.length) + " mat\u00e9ria(s)"
+				cr = "Voc\u00ea possui " + state.crs.reduce((accumulator, value) => accumulator + value, 0) + " cr\u00e9dito(s)"
+			}
 			return (
 				<div className="teste">
 					<div className="salvar" />
@@ -161,9 +165,9 @@ const GeraGrade = ({ cur }) => {
 							<div className="MateriasFeitas-content">
 								<div className="periodo-content">
 									<div className="lista">
-										{"Voc\u00ea fez " + state.names.length + " mat\u00e9ria(s)" || "Voc\u00ea fez Nenhuma mat\u00e9ria"}
-										<br />
-										{"Voc\u00ea possui " + state.keys.reduce((accumulator, value) => accumulator + value, 0) + " cr\u00e9dito(s)" || "Voc\u00ea n\u00e3o possui cr\u00e9ditos"}
+										{str}
+										<br/>
+										{cr}
 										{Object.keys(pe).map((a) => { return iDivs(a, pe) })}
 									</div>
 								</div>
@@ -177,8 +181,8 @@ const GeraGrade = ({ cur }) => {
 			)
 		} else {
 			if (state.estado === 1) {
-				const cr = state.keys.reduce((accumulator, value) => accumulator + value, 0)
-				gr = new Grafos(m, cr, state.keys, state.names).matriz()
+				const cr = state.crs.reduce((accumulator, value) => accumulator + value, 0)
+				gr = new Grafos(m, cr, state.keys).matriz()
 				const pe = periodo(gr)
 				let str = ""
 

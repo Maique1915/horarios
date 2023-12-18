@@ -1,8 +1,7 @@
 export default class Grafos{
 
-	constructor(materias, cr, feitas, names) {
+	constructor(materias, cr, names) {
 		this.materias = materias
-		this.feitas = feitas
 		this.cr = cr
 		this.re = names
 	}
