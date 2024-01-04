@@ -4,40 +4,37 @@ import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
 import { ativas } from '../model/Filtro';
 import '../model/css/GeraGrade.css'
-import '../model/css/Horarios.css'
 
 let _cur = ''
-let gr = []
+
 const GeraGrade = ({ cur }) => {
-	const [state, setState] = useState({keys: [], crs: [], estado: 0, x: []});
+	
+
+	const [state, setState] = useState({
+		names: [],
+		keys: [],
+		estado: 0,
+		x: [],
+		gr: [],
+	});
+
 	let arr = ativas(cur);
 	let m = remove([...arr])
+	
 
 	useEffect(() => {
 		if (cur !== _cur) {
-			
 			_cur = cur
-			setState(({keys: [], crs: [], estado: 0, x: [] }))
-			gr = []
+			state.estado = 0
+			setState(({ names: [], keys: [], estado: 0, x: [], gr: []}))
 		}
 	})
-	function muda() {
-		const a = window.location.href.split("/")[3]
-		if (a !== _cur && (a !== "" && a !== undefined)) {
-			_cur = a
-			cur = a
-			state.keys = []
-			state.crs = []
-			state.estado = 0
-			state.x = []
-			gr = []
-		}
-	}
 
 	function handleCheck(e) {
 		const r = e.target
 		if (r.className === 't_mat') {
 			const b = r.checked;
+			// Lógica para lidar com a classe 't_mat'
 			const el = document.getElementById(r.value);
 
 			if (el !== null) {
@@ -45,72 +42,92 @@ const GeraGrade = ({ cur }) => {
 				for (const mat of per) {
 					if (mat) {
 						mat.checked = b
-						let id = 0
 
-						if (state.estado === 0)
-							id = state.keys.indexOf(mat.id);
-						else if (state.estado === 1)
-							id = state.x.indexOf(mat.id)
+						let id = 0;
 
-						if (b && id === -1) 
-							altera(true, mat)
-						else if (!b && id >= 0)
-							altera(false, mat)
+						if (state.estado === 0) {
+							id = state.keys.indexOf(parseInt(mat.value));
+						} else if (state.estado === 1) {
+							id = state.x.indexOf(mat.id);
+						}
+
+						if (b && id === -1) {
+							altera(true, mat);
+						} else if (!b && id >= 0) {
+							altera(false, mat);
+						}
 					}
 				}
 				r.checked = b
 			}
 		} else {
-			if (r.checked === true) 
+			if (r.checked === true) {
 				altera(true, r);
-			else if (r.checked === false)
+			} else if (r.checked === false) {
 				altera(false, r);
+			}
 		}
-		setState((s) =>({...s}))
 	}
 
-	function periodo(m) {
+	function altera(a, b) {
+		
+		if (state.estado === 0) {
+			const value = parseInt(b.value);
+
+			if (a) {
+				setState((prevState) => ({
+					...prevState,
+					keys: [...prevState.keys, value],
+					names: [...prevState.names, b.id]
+				}));
+			} else {
+				setState((prevState) => {
+					const i = prevState.keys.findIndex((key) => key === value);
+
+					if (i !== -1) {
+						const keys = [...prevState.keys];
+						keys.splice(i, 1);
+
+						const names = [...prevState.names];
+						names.splice(i, 1);
+
+						return { ...prevState, keys, names };
+					}
+					return prevState;
+				});
+			}
+		} else if (state.estado === 1) {
+			if (a) {
+				setState((prevState) => ({
+					...prevState,
+					x: [...prevState.x, b.id]
+				}));
+			} else {
+				setState((prevState) => ({
+					...prevState,
+					x: prevState.x.filter((id) => id !== b.id)
+				}));
+			}
+		}
+	}
+
+	function periodo (m) {
 		const aux = {};
-		let checked = false
+		
 		for (const i in m) {
-			if (!(m[i]._se in aux)) {
+			if(!(m[i]._se in aux)){
 				aux[m[i]._se] = []
 			}
-			if (state.estado === 0) {
-				checked = state.keys.includes(m[i]._re)
-			} else if (state.estado === 1) {
-				checked = state.x.includes(m[i]._re)
-			}
-			aux[m[i]._se].push(periodios(m[i]._re, m[i], checked))
+			if(state.estado === 0)
+				aux[m[i]._se].push(periodios(i,m[i]))
+			else if (state.estado === 1)
+				aux[m[i]._se].push(periodios(m[i]._re,m[i]))
 		}
 		return aux
 	}
 
-	function periodios(k, i, c) {
-		return (
-			<div className="check">
-				<input type="checkbox" key={i._re + "_" + state.estado} name={String(i._ap + i._at)} defaultChecked={c} className="mat" id={i._re} value={i._re} onClick={(e) => { handleCheck(e) }} />
-				<label id={i._di} key={i._re + "_l_" + state.estado} htmlFor={i._re}>{i._di}</label><br />
-			</div>
-		)
-	}
-
-	function altera(a, b) {
-		if (state.estado === 0 && a) {
-			state.keys.push(b.id)
-			state.crs.push(parseInt(b.name))
-		} else if (state.estado === 0 && !a) {
-			const id = state.keys.indexOf(b.id)
-			state.keys.splice(id, 1)
-			state.crs.splice(id, 1)
-		} else if (state.estado === 1 && a)
-			state.x.push(b.id)
-		else if (state.estado === 1 && !a)
-			state.x.splice(state.x.indexOf(b.id), 1)
-	}
-
 	function remove(m) {
-		const e  = []
+		const e = []
 		for (let i = 0; i < m.length;){
 			if (e.includes(m[i]._re))
 				m.splice(i,1)
@@ -130,44 +147,54 @@ const GeraGrade = ({ cur }) => {
 		return (
 			<>
 				<div className="periodo">
-					<input key={String(i) + "_" + String(state.estado) + "_p"} type="checkbox" className="t_mat" name={"t_"+i} id={"t_"+i} value={i} onClick={(e)=>{handleCheck(e)}}/>
-					<label key={String(i) + "_" + String(state.estado) + "_l"} id={"l_"+i }>{(i) +"\u00BA Per\u00edodo"}</label>
+					<input  type="checkbox" className="t_mat" name={"t_"+i} id={"t_"+i} value={i} onClick={(e)=>{handleCheck(e)}}/>
+					<label >{(i)+"º Periodo"}</label>
 				</div>
-				<div className="as" id={String(i)} key={String(i) + "_" + String(state.estado)}>{a[i].map(e => e)}</div>
+				<div className="as" id={String(i)}>{a[i].map(e => e)}</div>
 			</>
 			)
 	}
 
+	function periodios(k, i) {
+		let checked = false
+		if (state.estado === 0)
+			checked = state.names.includes(i._re)
+		else if (state.estado === 1)
+			checked = state.x.includes(i._re)
+
+		return(
+			<div className="check">
+				<input type="checkbox" name={String(i._ap+i._at)} defaultChecked={checked} className="mat" id={i._re} value={k} onClick={(e)=>{handleCheck(e)}}/>
+				<label htmlFor={i._re}>{i._di}</label><br/>
+			</div>
+			)
+	}
+
 	function mudaTela(i) {
-		if (state.estado !== i)
-			setState((e) => ({ ...e, estado: i }))
+		setState((e) => ({ ...e, estado: i }))
 	}
 
 	function tela() {
-		muda()
+		
 		if (state.estado === 0) {
 			arr = ativas(cur)
 			m = remove([...arr])
-			state.x = []
 			const pe = periodo(m)
-			let str = "Voc\u00ea fez nenhuma mat\u00e9ria"
-			let cr = "Voc\u00ea n\u00e3o possui cr\u00e9ditos"
-			if (state.keys.length > 0) {
-				str = "Voc\u00ea fez " + (state.keys.length) + " mat\u00e9ria(s)"
-				cr = "Voc\u00ea possui " + state.crs.reduce((accumulator, value) => accumulator + value, 0) + " cr\u00e9dito(s)"
-			}
+			state.x = []
 			return (
 				<div className="teste">
 					<div className="salvar" />
-					<div className="slides-content">
+					<div className="seila">
 						<div className="slides">
-							<div className="intervalo">{"Quais mat\u00e9rias vc j\u00e1 fez?"}</div>
+							<div className="intervalo">Quais matérias vc já fez?</div>
 							<div className="MateriasFeitas-content">
 								<div className="periodo-content">
 									<div className="lista">
-										{str}
-										<br/>
-										{cr}
+										Você&nbsp;
+										{"fez " + state.names.length + " matéria(s)" || " fez Nenhuma matéria"}
+										<br />
+										Você&nbsp;
+										{"possui " + state.keys.reduce((accumulator, value) => accumulator + value, 0) + " crédito(s)" || " não possui créditos"}
 										{Object.keys(pe).map((a) => { return iDivs(a, pe) })}
 									</div>
 								</div>
@@ -175,24 +202,27 @@ const GeraGrade = ({ cur }) => {
 						</div>
 					</div>
 					<div className="buttom-content">
-						<input type="submit" value={"Pr\u00f3ximo"} onClick={() => mudaTela(1)} />
+						<input type="submit" value="Próximo" onClick={() => mudaTela(1)} />
 					</div>
 				</div>
 			)
-		} else {
+		}
+		else {
 			if (state.estado === 1) {
-				const cr = state.crs.reduce((accumulator, value) => accumulator + value, 0)
-				gr = new Grafos(m, cr, state.keys).matriz()
-				const pe = periodo(gr)
+				console.log(state.keys)
+				console.log(state.names)
+				const cr = state.keys.reduce((accumulator, value) => accumulator + value, 0)
+				state.gr = new Grafos(m, cr, state.keys, state.names).matriz()
+				const pe = periodo(state.gr)
 				let str = ""
 
 				if (Object.keys(pe).length > 0) {
 					if (state.x.length === 0)
-						str = "Voc\u00ea deseja fazer todas as mat\u00e9rias"
-					else if (state.x.length === gr.length)
-						str = "Voc\u00ea n\u00e3o quer estudar este semestre"
+						str = "Você deseja fazer todas as matérias"
+					else if (state.x.length === state.gr.length)
+						str = "Você não quer estudar este semestre"
 					else
-						str = "Voc\u00ea n\u00e3o deseja fazer " + state.x.length + " m\u00e1teria(s)"
+						str = "Você não deseja fazer " + state.x.length + " matéria(s)"
 				}
 
 				return (
@@ -200,14 +230,14 @@ const GeraGrade = ({ cur }) => {
 						<div className="salvar" />
 						<div className="slides-content">
 							<div className="slides">
-								<div className="intervalo">{"Quais mat\u00e9rias vc n\u00e3o quer fazer?"}</div>
+								<div className="intervalo">Quais matérias vc não quer fazer?</div>
 								<div className="MateriasFeitas-content">
 									<div className="periodo-content">
 										<div className="lista">
 											<br />
 											{str}
 											<br />
-											{Object.keys(pe).length > 0 ? Object.keys(pe).map((a) => { return iDivs(a, pe) }) : <h3>Voc\u00ea fez todas as mat\u00e9rias!</h3>}&nbsp;
+											{Object.keys(pe).length > 0 ? Object.keys(pe).map((a) => { return iDivs(a, pe) }) : <h3>Você fez todas as matérias!</h3>}&nbsp;
 										</div>
 									</div>
 								</div>
@@ -215,26 +245,28 @@ const GeraGrade = ({ cur }) => {
 						</div>
 						<div className="buttom-content">
 							<input type="submit" value="Voltar" onClick={() => mudaTela(0)} />
-							{Object.keys(pe).length > 0 ? <input type="submit" value={"Pr\u00f3ximo"} onClick={() => mudaTela(2)} /> : " "}
+							{Object.keys(pe).length > 0 ? <input type="submit" value="Próximo" onClick={() => mudaTela(2)} /> : " "}
 						</div>
 					</div>
 				)
 			} else {
-				const m = [...gr]
+				const m = [...state.gr]
 				let gp = []
-				for (const a of state.x)
-					for (const j in m)
+				for (const a of state.x) {
+					for (const j in m) {
 						if (m[j]._re === a) {
 							m.splice(parseInt(j), 1)
 							break
 						}
+					}
+				}
 
 				const es = new Escolhe(m, cur)
 				gp = es.exc()
 				gp = gp.splice(0, gp.length > 50 ? 50 : gp.length)
 				const b = <input type="submit" value="Voltar" onClick={() => mudaTela(1)} />
 
-				return <Comum materias={gp} tela={2} fun={b} cur={cur} separa={false} g={"\u00AA"} f={" Grade poss\u00edvel"} />
+				return <Comum materias={gp} tela={2} fun={b} cur={cur} separa={false} g={"ª"} f={" Grade possível"} />
 			}
 		}
 	}

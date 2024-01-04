@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
+import '../model/css/Comum.css'
 import '../model/css/Matricular.css'
 import { cursos, horarios, dimencao, ativas, periodos } from '../model/Filtro'
 import { Link } from 'react-router-dom';
 import Pdf from '../model/util/Pdf'
-import 'bootstrap/scss/bootstrap.scss'
 
 const cores = ["l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10"];
-const s = ["Seg", "Ter", "Qua", "Qui", "Sex", "S\u00e1b"];
-const c = { "engcomp": "Engenharia de computa\u00e7\u00e3o", "fisica": "F\u00edsica", "turismo": "Turismo", "matematica": "Matem\u00e1tica" };
+const s = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const c = { "engcomp": "Engenharia de computação", "fisica": "Física", "turismo": "Turismo", "matematica": "Matemática" };
 
 const Comum = (props) => {
 	const [state, setState] = useState({ b: 0, c: 0, ind: 0, id: 0, materias: props.materias })
 	
 	let _cur = window.location.href.split("/")[3]
-	_cur = _cur === '' || _cur === undefined ? "engcomp" : _cur
+	_cur = _cur === '' ? "engcomp" : _cur
+	console.log(_cur)
 	const _p = props
 	let _passo = [];
 	let _quadros = [];
@@ -26,18 +27,23 @@ const Comum = (props) => {
 	let print = false;
 
 	const dataAtual = new Date();
-	const mesAtual = dataAtual.getMonth() + 1; // Os meses s\u00e3o indexados de 0 a 11
+	const mesAtual = dataAtual.getMonth() + 1; // Os meses são indexados de 0 a 11
 	const anoAtual = dataAtual.getFullYear();
-	
-	const data =  String(anoAtual) + "." + (mesAtual > 5 ? "2" : "1")
+
+	console.log(`Mês atual: ${mesAtual}`);
+	console.log(`Ano atual: ${anoAtual}`);
+	const data =  String(anoAtual) + "." + (mesAtual > 6 ? "2" : "1")
 
 	function inicia() {
 		const h = horarios(_cur)
 		_h1 = h === undefined? []: h
+
 		grade()
 		_passo = [..._quadros].splice(0, _quadros.length > 10 ? 10 : _quadros.length)
+		
 		_j = 0
 		_i = 0
+
 		indices(0)
 	}
 
@@ -64,25 +70,31 @@ const Comum = (props) => {
 			const r = Math.floor(Math.random() * cores.length)
 
 			for (const b in a) {
+				
 				const opt = a[b]._el === false && !a[b]._di.includes(" - OPT") ? " - OPT" : "";
-				for (let c = 0; c < td; c++)
-					for (let d = 0; d < th; d++)
-						if (a[b]._ho[c])
+				for (let c = 0; c < td; c++) {
+					for (let d = 0; d < th; d++) {
+						if (a[b]._ho[c]) {
 							if (a[b]._ho[c][d]) {
 								if (v[d][c] === "" || v[d][c] === undefined) v[d][c] = a[b]._di + opt
 								else v[d][c] += " / " + a[b]._di + opt
 								cl[d][c] = cores[(parseInt(b) + r) % cores.length]
 							}
+						}
+					}
+				}
 			}
 			arr.push(v);
 			cor.push(cl);
 		}
+
 		_quadros = arr
 		_cor = cor
 	}
 
 	function separa(arr) {
-		const aux = [];
+		const aux = []
+		console.log(arr)
 		const aux2 = arr[0]
 		for (const i of aux2) {
 			if (i._se !== aux.length) {
@@ -123,7 +135,7 @@ const Comum = (props) => {
 
 	function salva() {
 		print = true
-		Pdf(tela(),data)
+		Pdf(tela())
 	}
 
 	function option(e) {
@@ -147,15 +159,21 @@ const Comum = (props) => {
 
 	function matricular() {
 		if (_p.tela === 2)
-			return (<input type="submit" value="Baixar grade" onClick={() => salva()} />)
-		return selects()
+			return (
+				<>
+					<input type="submit" value="Baixar grade" onClick={() => salva()} />
+				</>)
+		return (
+			selects()
+		)
 	}
 
 	function tela() {
+		
 		return (
-			<div className={print ? "" : "grade-content"}>
+			<div className={print ? "pdf" : "grade-content"}>
 				<div className={( print? "": "intervalo")}>
-					{print? "Grade" : (state.id + 1) + _p.g + _p.f+" "+data}
+					{print? "" : (state.id + 1) + _p.g + _p.f+" "+data}
 				</div>
 				{caso()}
 			</div>
@@ -165,14 +183,14 @@ const Comum = (props) => {
 	function muda() {
 		_i = 0
 		print = false
-		if (state.b !== 1)
-			return (<>
+		return (
+			<>
 				<div className="content-grade">
 					<div className="salvar">
 						{matricular()}
 					</div>
-					<div className="slides">
-						<div className={"seila" + _p.tela}>
+					<div className="seila">
+						<div className={"slides"}>
 							{tela()}
 						</div>
 					</div>
@@ -185,7 +203,8 @@ const Comum = (props) => {
 						{pages()}
 					</div>
 				</div>
-			</>)
+			</>
+		)
 	}
 
 	function next(p) {
@@ -199,43 +218,47 @@ const Comum = (props) => {
 		const n = f + 1 + state.c
 		const i = _p.tela + "" + (n - 1)
 		return (
-			<label  htmlFor={"radio" + i} className={"page"} onClick={() => { primeiro(n) }} id={"bar" + i}>
+			<>
+			<input type="radio" id={"radio"+_p.tela+"_"+ i} name={"tela"+_p.tela} className={"radio"+_p.tela}/>
+			<label  htmlFor={"radio"+_p.tela+"_"+ i}  className={"page"} onClick={() => { primeiro(n) }} id={"bar" + i}>
 				{n + _p.g}
 			</label>
+			</>
 		)
 	}
 
 	function pages() {
 		const h = []
 
+
 		if (state.c > 0)
 			h.push(<label className="control prev" onClick={() => { next(false) }}>{"<<"}</label>)
-		if (_p.tela !== 3) {
+		if (_p.tela !== 3) 
 			for (const x in _passo) {
 				h.push(labels(parseInt(x)))
 			}
-			if (state.c + 10 < _quadros.length)
-				h.push(<label className="control next" onClick={() => { next(true) }}>{">>"}</label>)
-		}
+		if (state.c + 10 < _quadros.length)
+			h.push(<label className="control next" onClick={() => { next(true) }}>{">>"}</label>)
+		
 		return h
 	}
 
 	function linha(a, b, c) {
+		
+
 		const h = []
 		const s = _td === 6 ? "semana1" : "semana2"
-		let t = ""
-		if (print) t = _td === 6 ? "th2 " : "th1 "
-
+		const r = _td === 6 ? "s2" : "s1"
 		const key = "th_" + String(_i) + "_" + String(_j) + "_";
 
 		if (b !== null) {
-			h.push(<th key={key} className={print ? ""+t : "horario"} scope="col">{_h1[_i][0] + " \u00E0s " + _h1[_i][1]}</th>)//
+			h.push(<th key={key} className={print ? r+" " : "horario"} scope="col">{_h1[_i][0] + " às " + _h1[_i][1]}</th>)//
 			for (const i in a) {
 				if (_p.tela !== 3)
-					h.push(<th key={key + "_" + String(i)} className={(print ? "" + t : "grade ") + a[i]} scope="col" >{b[i]}</th>)
+					h.push(<th key={key + "_" + String(i)} className={( print? r+" ": "grade ") + a[i]} scope="col" >{b[i]}</th>)
 				else {
 					h.push(
-						<th key={key + "_" + String(i)} className={print ? "" + t : "grade"} scope="col" >
+						<th key={key + "_" + String(i)} className={print ? r+" " : "grade"} scope="col" >
 							{isChecked(c, parseInt(i))}
 						</th>
 					)
@@ -243,16 +266,17 @@ const Comum = (props) => {
 			}
 			_i++
 		} else {
-			h.push(<th key={key} className={(print ? "" + t : "semana ") + s} scope="col">{(print ? "Grade " + data : "")}</th>)
+			h.push(<th key={key} className={(print ? r : "semana " + s)} scope="col">{(print ? "Grade " + data : "")}</th>)
 			for (const i in a)
-				h.push(<th key={key + "_" + String(i)} className={(print ? "" + t :"semana ") + s} scope="col">{a[i]}</th>)
+				h.push(<th key={key + "_" + String(i)} className={(print? r : "semana " + s)} scope="col">{a[i]}</th>)
 		}
 		return h
 	}
 
 	function horario(a, b, c) {
 		if (_i > 0 && _h1[_i][0] !== _h1[_i - 1][1]) {
-			return (<>
+			return (
+				<>
 					<tr className={print ? "inte": "" }><th className={(print ? "" : 'intervalo2')} colSpan={7}>{(print ? "" : 'Intervalo')}</th></tr >
 					<tr className={print ? "" : "tr"}>{linha(a, b, c)}</tr>
 				</>)
@@ -262,6 +286,7 @@ const Comum = (props) => {
 
 	function getHorarios(a, b, c) {
 		const h = []
+		
 		if (_i < _h1.length)
 			h.push(horario(b, a, c))
 		return h
@@ -273,18 +298,17 @@ const Comum = (props) => {
 		const u = _quadros[state.id]
 		if(!print)
 			return (
-				<table className={print ? "table" : ''}>
+				<table>
 					<thead>
 						<tr>{linha(_s, null, 0)}</tr>
 					</thead>
 					<tbody>
-						{(print) ? <tr><th className={"inte"} colSpan={7}>{"Grade "}</th></tr > : ""}
 						{u.map((a, b) => { return getHorarios(a, _cor[state.id][b], b) })}
 					</tbody>
 				</table>
 			)
 		return (
-			<table className={print ? "table" : ''}>
+			<table className={"table"}>
 				<tr>{linha(_s, null, 0)}</tr>
 				{u.map((a, b) => { return getHorarios(a, _cor[state.id][b], b) })}
 			</table>
@@ -292,5 +316,7 @@ const Comum = (props) => {
 	}
 
 	return muda()
+	
 }
+
 export default Comum

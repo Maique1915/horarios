@@ -1,8 +1,6 @@
-import '../model/css/Horarios.css'
 import React from 'react'
 import { ativas } from '../model/Filtro'
 import Comum from './Comum'
-import '../model/css/GeraGrade.css'
 
 class Quadro extends React.Component {
 	constructor(props) {
@@ -12,7 +10,7 @@ class Quadro extends React.Component {
 
 	render() {
 		const a = ativas(this.state.cur)
-		return <Comum materias={[a]} tela={1} cur={this.state.cur} separa={true} g={"\u00BA"} f={' Per\u00edodo'} />
+		return <Comum materias={[a]} tela={1} cur={this.state.cur} separa={true} g={"º"} f={' Período'} />
 	}
 }
 
