@@ -36,35 +36,35 @@ html{
 
 
 @media screen and (min-width: 1000px) {
-.App-window{
-    display: flex;
-    display: 1;
-    width: 100%;
-    min-width: 1000px;
-    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
-}
+    .App-window{
+        display: flex;
+        display: 1;
+        width: 100%;
+        min-width: 1000px;
+        background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
+    }
 
-.nav {
-    display: flex;
-    flex-direction: column;
-    width: 9vw;
-    min-width: 110px;
-    background: #121217;
-    overflow: hidden;
-}
-.contentarea{
-    display: flex;
-    flex: 1;
-}
+    .nav {
+        display: flex;
+        flex-direction: column;
+        width: 9vw;
+        min-width: 110px;
+        background: #121217;
+        overflow: hidden;
+    }
+    .contentarea{
+        display: flex;
+        flex: 1;
+    }
 
-.menu {
-    display: flex;
-    flex-direction: column;
-    list-style: none;
-    margin: 10px 0 0  5px;
-    padding: 0;
-    gap: 3px;
-}
+    .menu {
+        display: flex;
+        flex-direction: column;
+        list-style: none;
+        margin: 10px 0 0  5px;
+        padding: 0;
+        gap: 3px;
+    }
 
 }
 
@@ -85,7 +85,7 @@ text-transform: uppercase;
 transition: all .3s ease-in-out;
 border-radius: 5px 0 0 5px;
 padding: 5px;
-font-size: 12px;
+font-size: 13px;
 }
 
 .menu li label:hover,
