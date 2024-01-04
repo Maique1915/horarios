@@ -1,242 +1,75 @@
-.box{
-  width: 300px;
-  padding: 40px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #2f3640;
-  text-align: center;
-  border-radius: 12px;
-}
-
-.box h1 {
-  color: white;
-  text-transform: uppercase;
-  font-weight: 500;
-  font-size: 2.5em;
-}
-
-.box input[type = "text"], .box input[type = "password"], .box input[type = "submit"]{
-  border: 0;
-  background: none;
-  display: block;
-  margin: 20px auto;
-  text-align: center;
-  border: 2px solid #3498db;
-  padding: 14px 10px;
-  width: 200px;
-  outline: none;
-  color: white;
-  border-radius: 24px;
-  transition: 0.25s;
-  font-size: 1em;
-}
-
-.box input[type = "text"]:focus, .box input[type = "password"]:focus{
-  width: 280px;
-  transform: translate(-30px, 0);
-  border-color: #575fcf;
-}
-
-.box input[type = "submit"]{
-  border: 0;
-  background: none;
-  display: block;
-  margin: 20px auto;
-  text-align: center;
-  border: 2px solid #3498db;
-  padding: 14px 40px;
-  outline: none;
-  color: white;
-  border-radius: 24px;
-  transition: 0.25s;
-  cursor: pointer;
-  font-size: 1em;
-}
-.box input[type = "submit"]:hover {
-  background: #575fcf;
-}
-.box input[type = "submit"]::before {
-  content: "";
-  background: #000; 
-  margin-top: -20px;
-}
-
-.item {
-  padding: 10px;
-  background-color: lightgray;
-  cursor: pointer;
-}
-
-.description {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-
-.desc-content{
-  margin: auto;
-  width: 300px;
-  margin-top: 30px;
-  background: white;
-  padding-bottom: 5px;
-  transition: height 2s, 1s;
-
-
-}
-.desc{
-  display: flex;
-  flex-direction: row;
-  width: 90%;
-  height: 150px;
-  margin: 10px;
-  background-color: white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-.topx{
-  display: flex;
-  flex: 1;
-  width: 90%;
-  flex-direction: column;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-.di{
-  display: flex;
-  width: 100%;
-  font-weight: 500;
-}
-
-.fe{
-  float: right;
-  width: 10%;
-  height: 40px;
-  cursor: pointer;
-}
-
-.hidden {
-  display: none;
-}
-
-
-.accordion {
-    position: relative;
-}
-
-.accordion input[type="checkbox"] {
-    display: none;
-}
-
-.accordion .content-cursos {
-    margin-top: 20px;
-    width: 260px;
-    left: calc(50vw - 65px);
-    border-radius: 20px;
-    overflow: hidden;
-
-}
-
-.accordion .content-cursos .cursos {
+.pdf{
     display: flex;
-    width: 100%;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
 
-.accordion .content-cursos .cursos a {
-    color: #333;
-    text-decoration: none;
-    min-width:130px;
-    width:100%;
-    text-align: center;
-}
-
-.accordion .content-cursos .cursos a:active ~ .accordion input[type="checkbox"] + label + div {
+.table {
+    margin: 0;
     display: flex;
-    background-color: #fff;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    border-collapse: collapse;
+    justify-content:center;
 }
 
-.accordion .content-cursos .cursos a:hover {
-    background: #ddd;
+.table tr{
+    display: flex;
 }
 
-.accordion > div > p:hover {
-    color: #fff;
-}
-
-.accordion label {
-    margin-top: 5px;
-    margin-bottom: 10px;
+.table tr th, .s1, .s2 {
     display: flex;
     align-items: center;
-    flex-direction: row;
     justify-content: center;
-    background-color: #eee;
-    border-radius: 20px;
-    height: 35px;
-    padding: 0 20px;
-    -moz-border-radius: 20px;
-    cursor:pointer;
+    text-align: center;
+    height: 55px;
+    font-size: 10px;
 }
 
-.accordion input[type="checkbox"] + label + div {
-    display: none;
-    background-color: #fff;
+.table tr .s1{
+    width: 16.66%;
 }
 
-.accordion input[type="checkbox"]:checked + label + div {
-    display: block;
+.table tr .s2{
+    width: 14.28%;
+}
+
+.table .inte {
+    height: 10px;
+    width: 100%;
+    background: #333;
+}
+
+.table tr:nth-child(1) {
+    background: #349;
+    border-radius: 15px 15px 0 0;
+    border-collapse: collapse;
+    color:#fff;
+}
+
+.table tr:nth-child(1) th {
+    height: 30px;
+    font-size: 13px;
+}
+
+.table tr:nth-child(1) th:nth-child(1) {
+  color: #ffd;
+  font-size: 15px;
+  border-radius: 15px 0 0 0;
+}
+
+.table tr:nth-child(1) th:last-child {
+  border-radius: 0 15px 0 0;
+}
+
+.table tr:nth-child(1)  th:nth-child(2n) {
+    background: rgb(90, 114, 235);
 }
 
 /*
-    grade
-    horario
-    semana
-    intervalo2
-    tr
-*/
-.table {
-    margin: 0;
-    float: left;
-    width: 100%;
-    border-collapse: collapse;
-    align-items:center;
-    justify-content:center;
-
-}
-
-.table .th1 {
-    width: 16.66%;
-    float: left;
-    text-align: center;
-    justify-content: center;
-    height: 55px;
-    font-size: 10px;
-    padding: 0 3px 0 3px;
-}
-.table .th2 {
-    width: 14.28%;
-    float: left;
-    text-align: center;
-    justify-content: center;
-    height: 55px;
-    font-size: 10px;
-    padding: 0 3px 0 3px;
-}
-.table th:first-line {
-    margin-top: -10px;
-}
-
-.table tr {
-    float: top;
-}
-
 .table .inte {
     float:left;
     height: 10px;
@@ -245,26 +78,28 @@
 }
 
 .table tr:nth-child(1) {
-    background: #3498db;
+    float: left;
+    width: 100%;
+    height: 23px;
+    background: #349;
     border-radius: 15px 15px 0 0;
-    padding-top: -10px;
     color:#fff;
 }
+
 .table tr:nth-child(1) th {
     height: 35px;
     font-size: 12px;
     color: #fff;
-    margin-top: -15px;
-    margin-bottom: 9px;
 }
+
 .table tr:nth-child(1) th:nth-child(1) {
     color: #ffd;
     font-size: 15px;
-    margin-top: -22px;
-    font-style: inherit;
-    text-transform: uppercase;
+    font-style:oblique;
 }
+
 .table th:nth-child(1) {
     height: 35px;
     font-size: 10px;
 }
+*/
