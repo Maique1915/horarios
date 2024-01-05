@@ -88,7 +88,7 @@ const GeraGrade = ({ cur }) => {
 	function periodios(k, i, c) {
 		return (
 			<div className="check">
-				<input type="checkbox" key={i._re + "_" + state.estado} name={String(i._ap + i._at)} defaultChecked={c} className="mat" id={i._re} value={i._re} onClick={(e) => { handleCheck(e) }} />
+				<input type="checkbox" key={i._re + "_" + state.estado} name={String((parseInt(i._ap) + parseInt(i._at)))} defaultChecked={c} className="mat" id={i._re} value={i._re} onClick={(e) => { handleCheck(e) }} />
 				<label id={i._di} key={i._re + "_l_" + state.estado} htmlFor={i._re}>{i._di}</label><br />
 			</div>
 		)
