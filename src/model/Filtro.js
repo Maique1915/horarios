@@ -3,7 +3,7 @@ import db2 from './db2.json';
 
 function ativas(e) {
     e = e === undefined || e === '' ? "engcomp" : e
-    const a = db.filter((item) => (item._ag === true || (item._se && item._se > 0)) && item._cu === e)
+    const a = db.filter((item) => (item._ag === true) && item._cu === e)
     return a !== undefined ? a : [];
 }
 
