@@ -164,7 +164,7 @@ const GeraGrade = ({ cur }) => {
 
 		return(
 			<div className="check">
-				<input type="checkbox" name={String((parseInt(i._ap)+parseInt(i._at)))} defaultChecked={checked} className="mat" id={i._re} value={k} onClick={(e)=>{handleCheck(e)}}/>
+				<input type="checkbox" name={k} defaultChecked={checked} className="mat" id={i._re} value={String((parseInt(i._ap)+parseInt(i._at)))} onClick={(e)=>{handleCheck(e)}}/>
 				<label htmlFor={i._re}>{i._di}</label><br/>
 			</div>
 			)
