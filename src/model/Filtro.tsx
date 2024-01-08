@@ -4,7 +4,7 @@ import { Materia} from './Materia';
 
 function ativas(e: string): Materia[] {
     e = e === undefined ? "engcomp" : e
-    const a: Materia[] = db.filter((item) => (item._ag === true || (item._se && item._se > 0)) && item._cu === e)
+    const a: Materia[] = db.filter((item) => (item._ag === true) && item._cu === e)
     return a !== undefined ? a : [];
 }
 
