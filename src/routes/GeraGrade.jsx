@@ -46,7 +46,7 @@ const GeraGrade = ({ cur }) => {
 						let id = 0;
 
 						if (state.estado === 0) {
-							id = state.keys.indexOf(parseInt(mat.value));
+							id = state.names.indexOf(parseInt(mat.id));
 						} else if (state.estado === 1) {
 							id = state.x.indexOf(mat.id);
 						}
@@ -164,7 +164,7 @@ const GeraGrade = ({ cur }) => {
 
 		return(
 			<div className="check">
-				<input type="checkbox" name={k} defaultChecked={checked} className="mat" id={i._re} value={String((parseInt(i._ap)+parseInt(i._at)))} onClick={(e)=>{handleCheck(e)}}/>
+				<input type="checkbox" name={String((parseInt(i._ap)+parseInt(i._at)))} defaultChecked={checked} className="mat" id={i._re} value={k} onClick={(e)=>{handleCheck(e)}}/>
 				<label htmlFor={i._re}>{i._di}</label><br/>
 			</div>
 			)
