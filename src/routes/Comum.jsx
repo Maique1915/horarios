@@ -8,6 +8,7 @@ import Pdf from '../model/util/Pdf'
 const cores = ["l0", "l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10"];
 const s = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const c = { "engcomp": "Engenharia de computação", "fisica": "Física", "turismo": "Turismo", "matematica": "Matemática" };
+const rand = Math.floor(Math.random() * cores.length)
 
 const Comum = (props) => {
 	const [state, setState] = useState({ b: 0, c: 0, ind: 0, id: 0, materias: props.materias })
@@ -37,7 +38,7 @@ const Comum = (props) => {
 	function inicia() {
 		const h = horarios(_cur)
 		_h1 = h === undefined? []: h
-
+		console.log("reste")
 		grade()
 		_passo = [..._quadros].splice(0, _quadros.length > 10 ? 10 : _quadros.length)
 		
@@ -67,7 +68,7 @@ const Comum = (props) => {
 		for (const a of aux) {
 			const cl = Array.from(m2, () => Array.from(m))
 			const v = Array.from(m2, () => Array.from(m))
-			const r = Math.floor(Math.random() * cores.length)
+			
 
 			for (const b in a) {
 				
@@ -78,7 +79,7 @@ const Comum = (props) => {
 							if (a[b]._ho[c][d]) {
 								if (v[d][c] === "" || v[d][c] === undefined) v[d][c] = a[b]._di + opt
 								else v[d][c] += " / " + a[b]._di + opt
-								cl[d][c] = cores[(parseInt(b) + r) % cores.length]
+								cl[d][c] = cores[(parseInt(b) + rand) % cores.length]
 							}
 						}
 					}
@@ -217,10 +218,14 @@ const Comum = (props) => {
 	function labels(f) {
 		const n = f + 1 + state.c
 		const i = _p.tela + "" + (n - 1)
+		let h = <input type="radio" id={"radio"+_p.tela+"_"+ i} key={"radio"+_p.tela+"_"+ i+"_r"} name={"tela"+_p.tela} className={"radio"+_p.tela}/>
+		if(state.id === n-1)
+			h = <input type="radio" id={"radio"+_p.tela+"_"+ i} key={"radio"+_p.tela+"_"+ i+"_r"} name={"tela"+_p.tela} className={"radio"+_p.tela} defaultChecked/>
+
 		return (
 			<>
-			<input type="radio" id={"radio"+_p.tela+"_"+ i} name={"tela"+_p.tela} className={"radio"+_p.tela}/>
-			<label  htmlFor={"radio"+_p.tela+"_"+ i}  className={"page"} onClick={() => { primeiro(n) }} id={"bar" + i}>
+			{h}
+			<label  htmlFor={"radio"+_p.tela+"_"+ i} key={"radio"+_p.tela+"_"+ i+"_l"} className={"page"} onClick={() => { primeiro(n) }} id={"bar" + i}>
 				{n + _p.g}
 			</label>
 			</>
@@ -296,6 +301,7 @@ const Comum = (props) => {
 		inicia()
 		
 		const u = _quadros[state.id]
+		console.log(u)
 		if(!print)
 			return (
 				<table>

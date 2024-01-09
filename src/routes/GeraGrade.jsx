@@ -16,6 +16,7 @@ const GeraGrade = ({ cur }) => {
 		estado: 0,
 		x: [],
 		gr: [],
+		crs: []
 	});
 
 	let arr = ativas(cur);
@@ -26,7 +27,7 @@ const GeraGrade = ({ cur }) => {
 		if (cur !== _cur) {
 			_cur = cur
 			state.estado = 0
-			setState(({ names: [], keys: [], estado: 0, x: [], gr: []}))
+			setState(({ names: [], keys: [], crs: [], estado: 0, x: [], gr: []}))
 		}
 	})
 
@@ -46,7 +47,7 @@ const GeraGrade = ({ cur }) => {
 						let id = 0;
 
 						if (state.estado === 0) {
-							id = state.names.indexOf(parseInt(mat.id));
+							id = state.keys.indexOf(parseInt(mat.value));
 						} else if (state.estado === 1) {
 							id = state.x.indexOf(mat.id);
 						}
@@ -64,6 +65,8 @@ const GeraGrade = ({ cur }) => {
 			if (r.checked === true) {
 				altera(true, r);
 			} else if (r.checked === false) {
+				const ch = document.getElementById("t_"+r.parentElement.parentElement.id)
+				ch.checked =  false
 				altera(false, r);
 			}
 		}
@@ -78,6 +81,7 @@ const GeraGrade = ({ cur }) => {
 				setState((prevState) => ({
 					...prevState,
 					keys: [...prevState.keys, value],
+					crs: [...prevState.crs, parseInt(b.name)],
 					names: [...prevState.names, b.id]
 				}));
 			} else {
@@ -91,7 +95,10 @@ const GeraGrade = ({ cur }) => {
 						const names = [...prevState.names];
 						names.splice(i, 1);
 
-						return { ...prevState, keys, names };
+						const crs = [...prevState.crs];
+						crs.splice(i, 1);
+
+						return { ...prevState, keys, names, crs };
 					}
 					return prevState;
 				});
@@ -164,7 +171,7 @@ const GeraGrade = ({ cur }) => {
 
 		return(
 			<div className="check">
-				<input type="checkbox" name={String((parseInt(i._ap)+parseInt(i._at)))} defaultChecked={checked} className="mat" id={i._re} value={k} onClick={(e)=>{handleCheck(e)}}/>
+				<input type="checkbox" name={String(i._ap+i._at)} defaultChecked={checked} className="mat" id={i._re} value={k} onClick={(e)=>{handleCheck(e)}}/>
 				<label htmlFor={i._re}>{i._di}</label><br/>
 			</div>
 			)
@@ -194,7 +201,7 @@ const GeraGrade = ({ cur }) => {
 										{"fez " + state.names.length + " matéria(s)" || " fez Nenhuma matéria"}
 										<br />
 										Você&nbsp;
-										{"possui " + state.keys.reduce((accumulator, value) => accumulator + value, 0) + " crédito(s)" || " não possui créditos"}
+										{"possui " + state.crs.reduce((accumulator, value) => accumulator + value, 0) + " crédito(s)" || " não possui créditos"}
 										{Object.keys(pe).map((a) => { return iDivs(a, pe) })}
 									</div>
 								</div>
@@ -211,7 +218,8 @@ const GeraGrade = ({ cur }) => {
 			if (state.estado === 1) {
 				console.log(state.keys)
 				console.log(state.names)
-				const cr = state.keys.reduce((accumulator, value) => accumulator + value, 0)
+				console.log(state.x)
+				const cr = state.crs.reduce((accumulator, value) => accumulator + value, 0)
 				state.gr = new Grafos(m, cr, state.keys, state.names).matriz()
 				const pe = periodo(state.gr)
 				let str = ""
