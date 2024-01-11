@@ -10,12 +10,16 @@ const s = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const c = { "engcomp": "Engenharia de computação", "fisica": "Física", "turismo": "Turismo", "matematica": "Matemática" };
 const rand = Math.floor(Math.random() * cores.length)
 
+const dataAtual = new Date();
+const mesAtual = dataAtual.getMonth() + 1; // Os meses são indexados de 0 a 11
+const anoAtual = dataAtual.getFullYear();
+const data =  String(anoAtual) + "." + (mesAtual > 6 ? "2" : "1")
+
 const Comum = (props) => {
 	const [state, setState] = useState({ b: 0, c: 0, ind: 0, id: 0, materias: props.materias })
 	
 	let _cur = window.location.href.split("/")[3]
 	_cur = _cur === '' ? "engcomp" : _cur
-	console.log(_cur)
 	const _p = props
 	let _passo = [];
 	let _quadros = [];
@@ -27,18 +31,14 @@ const Comum = (props) => {
 	let _cor = [];
 	let print = false;
 
-	const dataAtual = new Date();
-	const mesAtual = dataAtual.getMonth() + 1; // Os meses são indexados de 0 a 11
-	const anoAtual = dataAtual.getFullYear();
+	
 
-	console.log(`Mês atual: ${mesAtual}`);
-	console.log(`Ano atual: ${anoAtual}`);
-	const data =  String(anoAtual) + "." + (mesAtual > 6 ? "2" : "1")
+	
 
 	function inicia() {
 		const h = horarios(_cur)
 		_h1 = h === undefined? []: h
-		console.log("reste")
+		//console.log("reste")
 		grade()
 		_passo = [..._quadros].splice(0, _quadros.length > 10 ? 10 : _quadros.length)
 		
@@ -71,7 +71,6 @@ const Comum = (props) => {
 			
 
 			for (const b in a) {
-				
 				const opt = a[b]._el === false && !a[b]._di.includes(" - OPT") ? " - OPT" : "";
 				for (let c = 0; c < td; c++) {
 					for (let d = 0; d < th; d++) {
@@ -85,6 +84,7 @@ const Comum = (props) => {
 					}
 				}
 			}
+			//console.log(v)
 			arr.push(v);
 			cor.push(cl);
 		}
@@ -95,7 +95,7 @@ const Comum = (props) => {
 
 	function separa(arr) {
 		const aux = []
-		console.log(arr)
+		//console.log(arr)
 		const aux2 = arr[0]
 		for (const i of aux2) {
 			if (i._se !== aux.length) {
@@ -160,17 +160,11 @@ const Comum = (props) => {
 
 	function matricular() {
 		if (_p.tela === 2)
-			return (
-				<>
-					<input type="submit" value="Baixar grade" onClick={() => salva()} />
-				</>)
-		return (
-			selects()
-		)
+			return (<input type="submit" value="Baixar grade" onClick={() => salva()} />)
+		return selects()
 	}
 
 	function tela() {
-		
 		return (
 			<div className={print ? "" : "grade-content"}>
 				<div className={( print? "": "intervalo")}>
@@ -299,9 +293,8 @@ const Comum = (props) => {
 
 	function caso() {
 		inicia()
-		
 		const u = _quadros[state.id]
-		console.log(u)
+		//console.log(u)
 		if(!print)
 			return (
 				<table>
