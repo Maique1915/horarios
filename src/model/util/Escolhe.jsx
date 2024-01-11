@@ -48,6 +48,7 @@ export default class Escolhe {
 			if(b)
 				aux.push(c)
 		}
+		
 		return aux.sort(this.compare)
 	}
 
