@@ -1,0 +1,153 @@
+*{
+    /*border: 1px solid #000;*/
+    font-family: "Segoe UI", Helvetica Neue, Lucida Grande, Arial;
+}
+
+html{
+    background: rgba(9,9,194,1);
+}
+
+@media screen and (min-width: 1000px) {
+    .tela1, .tela2{
+        display: flex;
+        height: 100vh;
+        padding-bottom: 15px;
+        align-items: center;
+        justify-content: start;
+        display: none;
+    }
+    
+}
+
+@media screen and (max-width: 1000px) {
+    .tela1, .tela2{        
+        display: none;
+    }
+    
+}
+
+#horario:checked ~ .tela1, #grade:checked ~ .tela2 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 920px;
+    align-items: center;
+}
+
+
+@media screen and (min-width: 1000px) {
+.App-window{
+    display: flex;
+    display: 1;
+    width: 100%;
+    min-width: 1000px;
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    width: 9vw;
+    min-width: 110px;
+    background: #121217;
+    overflow: hidden;
+}
+.contentarea{
+    display: flex;
+    flex: 1;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 10px 0 0  5px;
+    padding: 0;
+    gap: 3px;
+}
+
+}
+
+.menu li {
+display: flex;
+gap: 5px;
+height: 30px;
+margin-top: 5px;
+flex-direction: column;
+}
+
+.menu li label {
+display: flex;
+flex: 1;
+color: rgba(255, 255, 255, .9);
+text-decoration: none;
+text-transform: uppercase;
+transition: all .3s ease-in-out;
+border-radius: 5px 0 0 5px;
+padding: 5px;
+font-size: 12px;
+}
+
+.menu li label:hover,
+.menu li label:focus {
+text-shadow: 1px 1px 5px #000;
+transition-property: width;
+transition-duration: 5s;
+background-color: #07C;
+cursor: pointer;
+}
+
+.menu li label:focus {
+color: white;
+}
+
+.aside{
+display: flex;
+display: 1;
+flex-direction: column;
+width: 100%;
+}
+
+input[type = radio]{
+display: none;
+}
+
+@media screen and (max-width: 1000px) {
+    .App-window{
+        display: flex;
+        display: 1;
+        flex-direction: column;
+        width: 100%;
+        min-width: 930px;
+        background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
+    }
+
+    .nav {
+        display: flex;
+        display: 1;
+        align-items: center;
+        justify-content: center;
+        background-color: #333;
+    }
+
+    .menu {
+        display: flex;
+        margin: 0;
+        padding: 0;
+        gap: 3px;
+        list-style: none;
+    }
+
+    .menu li label {
+        border-radius: 5px 5px 0 0;
+
+    }
+
+    .aside{
+        display: flex;
+        display: 1;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+}
