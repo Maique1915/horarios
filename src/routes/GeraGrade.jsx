@@ -6,6 +6,7 @@ import { ativas } from '../model/Filtro';
 import '../model/css/GeraGrade.css'
 
 let _cur = ''
+let gr = []
 
 const GeraGrade = ({ cur }) => {
 	
@@ -15,19 +16,16 @@ const GeraGrade = ({ cur }) => {
 		keys: [],
 		estado: 0,
 		x: [],
-		gr: [],
 		crs: []
 	});
 
 	let arr = ativas(cur);
-	let m = remove([...arr])
-	
 
 	useEffect(() => {
 		if (cur !== _cur) {
 			_cur = cur
 			state.estado = 0
-			setState(({ names: [], keys: [], crs: [], estado: 0, x: [], gr: []}))
+			setState(({ names: [], keys: [], crs: [], estado: 0, x: []}))
 		}
 	})
 
@@ -134,20 +132,18 @@ const GeraGrade = ({ cur }) => {
 	}
 
 	function remove(m) {
+		const aux = []
 		const e = []
-		for (let i = 0; i < m.length;){
-			if (e.includes(m[i]._re))
-				m.splice(i,1)
-			else{
-				if (m[i]._di.includes(" - A") || m[i]._di.includes(" - B"))
-					m[i]._di = m[i]._di.substring(0, m[i]._di.length-4)
-				else if(!m[i]._el && !m[i]._di.includes(" - OPT"))
-					m[i]._di += " - OPT"
-				e.push(m[i]._re)
-				i++
+		for(const i of m)
+			if (!e.includes(i._re)){
+				e.push(i._re)
+				if (i._di.includes(" - A") || i._di.includes(" - B"))
+					i._di = i._di.substring(0, i._di.length-4)
+				else if(!i._el && !i._di.includes(" - OPT"))
+					i._di += " - OPT"
+				aux.push(i)
 			}
-		}
-		return m
+		return aux
 	}
 
 	function iDivs (i, a) {
@@ -185,8 +181,8 @@ const GeraGrade = ({ cur }) => {
 		
 		if (state.estado === 0) {
 			arr = ativas(cur)
-			m = remove([...arr])
-			const pe = periodo(m)
+			gr = []
+			const pe = periodo(remove(arr))
 			state.x = []
 			return (
 				<div className="teste">
@@ -213,21 +209,17 @@ const GeraGrade = ({ cur }) => {
 					</div>
 				</div>
 			)
-		}
-		else {
+		} else {
 			if (state.estado === 1) {
-				console.log(state.keys)
-				console.log(state.names)
-				console.log(state.x)
 				const cr = state.crs.reduce((accumulator, value) => accumulator + value, 0)
-				state.gr = new Grafos(m, cr, state.keys, state.names).matriz()
-				const pe = periodo(state.gr)
+				gr = new Grafos(arr, cr, state.names).matriz()
+				const pe = periodo(remove(gr))
 				let str = ""
 
 				if (Object.keys(pe).length > 0) {
 					if (state.x.length === 0)
 						str = "Você deseja fazer todas as matérias"
-					else if (state.x.length === state.gr.length)
+					else if (state.x.length === gr.length)
 						str = "Você não quer estudar este semestre"
 					else
 						str = "Você não deseja fazer " + state.x.length + " matéria(s)"
@@ -258,8 +250,7 @@ const GeraGrade = ({ cur }) => {
 					</div>
 				)
 			} else {
-				const m = [...state.gr]
-				let gp = []
+				const m = [...gr]
 				for (const a of state.x) {
 					for (const j in m) {
 						if (m[j]._re === a) {
@@ -269,8 +260,7 @@ const GeraGrade = ({ cur }) => {
 					}
 				}
 
-				const es = new Escolhe(m, cur)
-				gp = es.exc()
+				let gp = new Escolhe(m, cur).exc()
 				gp = gp.splice(0, gp.length > 50 ? 50 : gp.length)
 				const b = <input type="submit" value="Voltar" onClick={() => mudaTela(1)} />
 
