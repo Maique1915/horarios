@@ -8,8 +8,25 @@
 	display: flex;
 	flex: 1;
 	flex-direction: column;
+	overflow: auto;
 }
-
+.grade-content::-webkit-scrollbar {
+	visibility: hidden;
+	width: 0;
+	/*width: 12px;                width of the entire scrollbar */
+  }
+  
+.grade-content::-webkit-scrollbar-track {
+	visibility: hidden;
+	/*background: orange;         color of the tracking area */
+  }
+  
+.grade-content::-webkit-scrollbar-thumb {
+	visibility: hidden;
+	/*background-color: blue;     color of the scroll thumb */
+	/*border-radius: 20px;        roundness of the scroll thumb */
+	/*border: 3px solid orange;   creates padding around scroll thumb */
+  }
 .intervalo{
 	display: flex;
 	width: 100%;
