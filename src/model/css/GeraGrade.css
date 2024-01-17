@@ -62,7 +62,8 @@
 	justify-content: center;
 	background-color: #07C;
 	color: #FFF;
-	margin: 5px 0;
+	margin: 5px;
+	gap: 5px;
 }
 
 .as{
