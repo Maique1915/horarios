@@ -166,12 +166,15 @@ const Comum = (props) => {
 
 	function tela() {
 		return (
-			<div className={print ? "" : "grade-content"}>
-				<div className={( print? "": "intervalo")}>
+			<>
+			<div className={( print? "": "intervalo")}>
 					{print? "" : (state.id + 1) + _p.g + _p.f+" "+data}
 				</div>
+			<div className={print ? "" : "grade-content"}>
+				
 				{caso()}
 			</div>
+			</>
 		)
 	}
 
