@@ -41,6 +41,7 @@
 .intervalo:first-child{
 	background-color: #07C;	
 	color: #FFF;
+	padding: 10px;
 }
 
 .periodo-content, .buttom-content, .quer-content{
@@ -113,9 +114,6 @@ margin-top: 0;
 	width: 100%;
 }
 
-
-
-
 .check{
 	float: left;
 	width: 50%;
@@ -126,7 +124,7 @@ margin-top: 0;
 }
 
 .seila, .seila1, .seila3,.seila2{
-    display: flex;
-    flex-direction: column; 
-    height: 80vh;
-  }
+	display: flex;
+	flex-direction: column; 
+	height: calc(80vh + 5px);
+}
