@@ -71,6 +71,7 @@
 	flex-wrap: wrap;
 	align-items: center;
 	width: 100%;
+	margin: 0 5px 0 5px;
 }
 
 .periodo_label{
