@@ -4,7 +4,6 @@ import Comum from './Comum'
 
 const Quadro = ({ cur }) => {	
 	const a = ativas(cur)
-	console.log(cur)
 	return <Comum materias={[a]} tela={1} cur={cur} separa={true} g={"º"} f={' Período'} />
 }
 
