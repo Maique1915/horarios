@@ -14,10 +14,9 @@ const dataAtual = new Date();
 const mesAtual = dataAtual.getMonth() + 1; // Os meses são indexados de 0 a 11
 const anoAtual = dataAtual.getFullYear();
 const data =  String(anoAtual) + "." + (mesAtual > 6 ? "2" : "1")
-let id = 0
 
 const Comum = (props) => {
-	const [state, setState] = useState(0)
+	const [state, setState] = useState({ b: 0, c: 0, ind: 0, id: 0, materias: props.materias })
 	
 	let _cur = window.location.href.split("/")[3]
 	_cur = _cur === '' ? "engcomp" : _cur
@@ -31,20 +30,21 @@ const Comum = (props) => {
 	let _s = [];
 	let _cor = [];
 	let print = false;
-	let  materias = props.materias
+
+	
+
+	
 
 	function inicia() {
 		const h = horarios(_cur)
 		_h1 = h === undefined? []: h
+		//console.log("reste")
 		grade()
-		console.log(_quadros.length, _cur)
 		_passo = [..._quadros].splice(0, _quadros.length > 10 ? 10 : _quadros.length)
 		
 		_j = 0
 		_i = 0
-		
-		const p = periodos(_cur)
-		primeiro(id > p ? p : id + 1)
+
 		indices(0)
 	}
 
@@ -57,7 +57,7 @@ const Comum = (props) => {
 	function grade() {
 		const arr = []
 		const cor = []
-		const bd = [...materias]
+		const bd = [...state.materias]
 		const [th, td] = dimencao(_cur)
 		
 		const aux = _p.separa ? separa(bd) : bd
@@ -113,8 +113,7 @@ const Comum = (props) => {
 	}
 
 	function primeiro(n) {
-		id = n - 1
-		console.log(id)
+		setState((e) => ({ ...e, id: n - 1 }))
 	}
 
 	function selected(e) {
@@ -128,7 +127,10 @@ const Comum = (props) => {
 				return false
 			})[0]
 			_cur = arr[0]
-			materias = [ativas(_cur)]
+			state.materias = [ativas(_cur)]
+			const p = periodos(_cur)
+			if (p !== undefined)
+				primeiro(state.id > p ? p : state.id + 1)
 		}
 	}
 
@@ -166,7 +168,7 @@ const Comum = (props) => {
 		return (
 			<>
 			<div className={( print? "": "intervalo")}>
-					{print? "" : (id + 1) + _p.g + _p.f+" "+data}
+					{print? "" : (state.id + 1) + _p.g + _p.f+" "+data}
 				</div>
 			<div className={print ? "" : "grade-content"}>
 				
@@ -204,17 +206,17 @@ const Comum = (props) => {
 	}
 
 	function next(p) {
-		let b = state + (p ? 10 : state >= 10 ? -10 : 0)
+		let b = state.c + (p ? 10 : state.c >= 10 ? -10 : 0)
 		b = (_quadros.length < 10 + b) ? _quadros.length - 10 : b - b % 10
 		indices(b)
-		setState(b)
+		setState((e) => ({ ...e, c: b }))
 	}
 
 	function labels(f) {
-		const n = f + 1 + state
+		const n = f + 1 + state.c
 		const i = _p.tela + "" + (n - 1)
 		let h = <input type="radio" id={"radio"+_p.tela+"_"+ i} key={"radio"+_p.tela+"_"+ i+"_r"} name={"tela"+_p.tela} className={"radio"+_p.tela}/>
-		if(id === n-1)
+		if(state.id === n-1)
 			h = <input type="radio" id={"radio"+_p.tela+"_"+ i} key={"radio"+_p.tela+"_"+ i+"_r"} name={"tela"+_p.tela} className={"radio"+_p.tela} defaultChecked/>
 
 		return (
@@ -231,13 +233,13 @@ const Comum = (props) => {
 		const h = []
 
 
-		if (state > 0)
+		if (state.c > 0)
 			h.push(<label className="control prev" onClick={() => { next(false) }}>{"<<"}</label>)
 		if (_p.tela !== 3) 
 			for (const x in _passo) {
 				h.push(labels(parseInt(x)))
 			}
-		if (state + 10 < _quadros.length)
+		if (state.c + 10 < _quadros.length)
 			h.push(<label className="control next" onClick={() => { next(true) }}>{">>"}</label>)
 		
 		return h
@@ -294,8 +296,8 @@ const Comum = (props) => {
 
 	function caso() {
 		inicia()
-		const u = _quadros[id]
-
+		const u = _quadros[state.id]
+		//console.log(u)
 		if(!print)
 			return (
 				<table>
@@ -303,19 +305,20 @@ const Comum = (props) => {
 						<tr>{linha(_s, null, 0)}</tr>
 					</thead>
 					<tbody>
-						{u.map((a, b) => { return getHorarios(a, _cor[id][b], b) })}
+						{u.map((a, b) => { return getHorarios(a, _cor[state.id][b], b) })}
 					</tbody>
 				</table>
 			)
 		return (
 			<table className={"table"}>
 				<tr>{linha(_s, null, 0)}</tr>
-				{u.map((a, b) => { return getHorarios(a, _cor[id][b], b) })}
+				{u.map((a, b) => { return getHorarios(a, _cor[state.id][b], b) })}
 			</table>
 		)
 	}
 
 	return muda()
+	
 }
 
 export default Comum
