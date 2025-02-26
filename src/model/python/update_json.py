@@ -3,11 +3,11 @@ import json
 import pandas as pd
 from datetime import datetime
 
-arquivo_excel = "engcom.xlsx"
+arquivo_excel = "eng.xlsx"
 caminho_json = "db.json"
 separador_h = " às "
 dias = ['SEG', 'TER', 'QUA', 'QUI', 'SEX']
-materias = []  # Lista de matérias
+materias = []
 horarios = {
     "07:00"+separador_h+"07:50": 0,
     "07:50"+separador_h+"08:40": 1,
@@ -170,8 +170,13 @@ def processar_materia(grade_atual, indice, celula, prox):
         partes = celula.split("Início")  # Divide a string onde aparece 'Horário'
         return [partes[0].strip()]  # Retorna
 
-    if isinstance(prox, str) and "Horário" in prox:
-        partes = prox.split("Horário")  # Divide a string onde aparece 'Horário'
+    # Divide a string onde aparece 'Horário'
+    if isinstance(prox, str) and "Horário" in prox or isinstance(celula, str) and "Horário" in celula:
+        if isinstance(prox, str) and "Horário" in prox:
+            partes = prox.split("Horário")
+        if isinstance(celula, str) and "Horário" in celula:
+            partes = celula.split("Horário")
+            celula = partes[0].strip()
 
         if len(partes) < 2:
             return [celula]  # Retorna como está se não houver "Horário" corretamente formatado
@@ -221,20 +226,18 @@ def adicionar_materias(periodo, indice, horario, materias_lista):
     if len(materias_lista) == 0:
       return
 
-    m = materias_lista.split(" - Opt")[0]
+    nome = materias_lista.split(" - Opt")[0]
 
     # Verifica se alguma das matérias já está na lista
-    indice_materia = materia_ja_adicionada(materias, m)
+    indice_materia = materia_ja_adicionada(materias, nome)
 
 
     if indice_materia < 0:
-        novo_identificador = gerar_identificador_unico(materias)
-
         nova_materia = {
             "_cu": "engcomp",
             "_se": int(periodo),
-            "_di": m,  # Assume o primeiro nome como principal
-            "_re": novo_identificador,  # Identificador único
+            "_di": nome,  # Assume o primeiro nome como principal
+            "_re": "",  # Identificador único
             "_ap": 0,  # Créditos práticos (inicialmente 0)
             "_at": 0,  # Créditos teóricos (inicialmente 0)
             "_el": " - Opt" not in materias_lista,  # Definir como optativa se qualquer nome for optativo
@@ -344,10 +347,11 @@ def atualizar_materias_no_json(grade):
     materias = []
     for periodo, horarios in grade.items():
         for horario, materias_periodo in horarios.items():
-            #print(materias_periodo)
+            print(materias_periodo)
             for indice, materia in enumerate(materias_periodo):
                 for x in materia:
                     adicionar_materias(periodo, indice, horario, x)
+        print()
 
 def atualizar_json(dados_json, materias):
 
