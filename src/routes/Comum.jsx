@@ -55,43 +55,50 @@ const Comum = (props) => {
 	}
 
 	function grade() {
-		const arr = []
-		const cor = []
-		const bd = [...state.materias]
-		const [th, td] = dimencao(_cur)
-		
-		const aux = _p.separa ? separa(bd) : bd
-		_td = td
-		_s = s.slice(0, td)
-		const m = Array(td).fill("")
-		const m2 = Array(th).fill("")
-		for (const a of aux) {
-			const cl = Array.from(m2, () => Array.from(m))
-			const v = Array.from(m2, () => Array.from(m))
-			
+  const arr = [];
+  const cor = [];
+  const bd = [...state.materias];
+  const [th, td] = dimencao(_cur);
 
-			for (const b in a) {
-				const opt = a[b]._el === false && !a[b]._di.includes(" - OPT") ? " - OPT" : "";
-				for (let c = 0; c < td; c++) {
-					for (let d = 0; d < th; d++) {
-						if (a[b]._ho[c]) {
-							if (a[b]._ho[c][d]) {
-								if (v[d][c] === "" || v[d][c] === undefined) v[d][c] = a[b]._di + opt
-								else v[d][c] += " / " + a[b]._di + opt
-								cl[d][c] = cores[(parseInt(b) + rand) % cores.length]
-							}
-						}
-					}
-				}
-			}
-			//console.log(v)
-			arr.push(v);
-			cor.push(cl);
-		}
+  const aux = _p.separa ? separa(bd) : bd;
+  _td = td;
+  _s = s.slice(0, td);
+  const m = Array(td).fill("");
+  const m2 = Array(th).fill("");
+  
+  for (const a of aux) {
+    const cl = Array.from(m2, () => Array.from(m));
+    const v = Array.from(m2, () => Array.from(m));
 
-		_quadros = arr
-		_cor = cor
-	}
+    for (const b in a) {
+      const opt = a[b]._el === false && !a[b]._di.includes(" - OPT") ? " - OPT" : "";
+      const materiaComData = a[b]._da ? `${a[b]._di}\n${a[b]._da}` : a[b]._di;
+
+      for (let c = 0; c < td; c++) {
+        let primeiraVezNoDia = true; // Flag para verificar se é a primeira vez que a matéria aparece no dia
+
+        for (let d = 0; d < th; d++) {
+          if (a[b]._ho[c]) {
+            if (a[b]._ho[c][d]) {
+              if (v[d][c] === "" || v[d][c] === undefined) {
+                v[d][c] = primeiraVezNoDia ? materiaComData + opt : a[b]._di + opt;
+                primeiraVezNoDia = false; // Marca que a matéria já apareceu no dia
+              } else {
+                v[d][c] += " / " + a[b]._di + opt;
+              }
+              cl[d][c] = cores[(parseInt(b) + rand) % cores.length];
+            }
+          }
+        }
+      }
+    }
+    arr.push(v);
+    cor.push(cl);
+  }
+
+  _quadros = arr;
+  _cor = cor;
+}
 
 	function separa(arr) {
 		const aux = []
