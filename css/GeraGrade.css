@@ -1,0 +1,147 @@
+/* GeraGrade.css */
+
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 0 24px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.card-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 8px;
+}
+
+.status-info {
+    display: flex;
+    justify-content: space-around;
+    background-color: #f7f9fc;
+    border-radius: 6px;
+    margin-bottom: 24px;
+}
+
+.status-info p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.status-info .highlight {
+    font-weight: 600;
+    color: #007bff; /* Cor de destaque */
+}
+
+.period-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.period-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    transition: box-shadow 0.3s;
+}
+
+.period-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.period-header {
+    background-color: #f7f9fc;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.period-label {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #333;
+    margin-left: 10px;
+}
+
+.subject-group {
+    padding: 16px;
+    display: grid;
+    /* 1. Padrão: Uma coluna para telas pequenas (Mobile First) */
+    grid-template-columns: 1fr;
+    gap: 16px; /* Aumentei um pouco o gap para melhor espaçamento em uma coluna */
+}
+
+/* 2. Media Query: Aplica duas colunas em telas com 600px ou mais de largura */
+@media (min-width: 600px) {
+    .subject-group {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px; /* Pode manter o gap original para duas colunas */
+    }
+}
+
+.subject-item {
+    display: flex;
+    align-items: center;
+}
+
+.subject-checkbox {
+    margin-right: 8px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.primary-button, .secondary-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.primary-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.primary-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.secondary-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.secondary-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
