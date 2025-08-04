@@ -1,36 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
+import GeraGrade from './components/GeraGrade';
+import Quadro from './components/Quadro';
 import './model/css/App.css';
-import './model/css/Matricular.css';
-import GeraGrade from './routes/GeraGrade'
-import Quadro from './routes/Quadro'
-import 'bootstrap/scss/bootstrap.scss'
 
 const App = (props) => {
-    const cur = props.cur
+    const [activeTab, setActiveTab] = useState('gerar');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { cur } = props;
 
-        return (
-            <div className="App-window">
-                <nav className='nav'>
-                    <ul className="menu">
-                        <li><label className="bar" htmlFor="horario">Grades</label></li>
-                        <li><label className="bar" htmlFor="grade">Gerar a sua</label></li>
-                    </ul>
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
+    return (
+        <div className="app-container">
+            <header className="app-header">
+                <h1>Planejador de Grade</h1>
+                <button className="menu-toggle" onClick={toggleMenu}>
+                    &#9776; {/* Hamburger Icon */}
+                </button>
+                <nav className={`app-nav ${isMenuOpen ? 'open' : ''}`}>
+                    <button 
+                        onClick={() => { setActiveTab('grades'); setIsMenuOpen(false); }} 
+                        className={activeTab === 'grades' ? 'active' : ''}
+                    >
+                        Grades
+                    </button>
+                    <button 
+                        onClick={() => { setActiveTab('gerar'); setIsMenuOpen(false); }}
+                        className={activeTab === 'gerar' ? 'active' : ''}
+                    >
+                        Gerar a Sua
+                    </button>
                 </nav>
-                <div className='contentarea'>
-                    <input type="radio" id={"horario"} name="tela" className="radio" defaultChecked />
-                    <input type="radio" id={"grade"} name="tela" className="radio" />
-                    <input type="radio" id={"atualiza"} name="tela" className="radio" />
-                    <input type="radio" id={"fluxograma"} name="tela" className="radio" />
-                    <div className="tela1">
-                        < Quadro cur={cur} />
-                    </div>
-                    <div className="tela2">
-                        <GeraGrade cur={cur} />
-                    </div>
-                </div>
-            </div>
-
-        )
+            </header>
+            
+            <main className="content-area">
+                {activeTab === 'grades' && <Quadro cur={cur} />}
+                {activeTab === 'gerar' && <GeraGrade cur={cur} />}
+            </main>
+        </div>
+    );
 }
 
 export default App;

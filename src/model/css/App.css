@@ -1,153 +1,125 @@
-*{
-    /*border: 1px solid #000;*/
-    font-family: "Segoe UI", Helvetica Neue, Lucida Grande, Arial;
+/* AppModerno.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #007bff;
+    --background-color: #f4f7f6;
+    --text-color: #333;
+    --card-background: #ffffff;
+    --border-color: #e0e0e0;
 }
 
-html{
-    background: rgba(9,9,194,1);
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
-@media screen and (min-width: 1000px) {
-    .tela1, .tela2{
-        display: flex;
-        height: 100vh;
-        padding-bottom: 15px;
-        align-items: center;
-        justify-content: start;
-        display: none;
-    }
-    
-}
-
-@media screen and (max-width: 1000px) {
-    .tela1, .tela2{        
-        display: none;
-    }
-    
-}
-
-#horario:checked ~ .tela1, #grade:checked ~ .tela2 {
+.app-container {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    min-width: 920px;
-    align-items: center;
-}
-
-
-@media screen and (min-width: 1000px) {
-.App-window{
-    display: flex;
-    display: 1;
-    width: 100%;
-    min-width: 1000px;
+    min-height: 100vh;
     background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
+
 }
 
-.nav {
+.app-header {
+    background-color: var(--card-background);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     display: flex;
-    flex-direction: column;
-    width: 9vw;
-    min-width: 110px;
-    background: #121217;
-    overflow: hidden;
+    justify-content: space-between;
+    align-items: center;
+    position: relative; /* Para o menu responsivo */
 }
-.contentarea{
+
+.app-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.menu-toggle {
+    display: none; /* Oculto por padrão */
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.app-nav button {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.app-nav button::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.app-nav button:hover,
+.app-nav button.active {
+    color: var(--primary-color);
+}
+
+.app-nav button.active::after {
+    transform: scaleX(1);
+}
+
+.content-area {
+    flex-grow: 1;
+    padding: 12px;
     display: flex;
-    flex: 1;
+    justify-content: center;
+    width: 100vw;
+    box-sizing: border-box;
+  
 }
 
-.menu {
-    display: flex;
-    flex-direction: column;
-    list-style: none;
-    margin: 10px 0 0  5px;
-    padding: 0;
-    gap: 3px;
-}
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block; /* Exibido em telas menores */
+    }
 
-}
-
-.menu li {
-display: flex;
-gap: 5px;
-height: 30px;
-margin-top: 5px;
-flex-direction: column;
-}
-
-.menu li label {
-display: flex;
-flex: 1;
-color: rgba(255, 255, 255, .9);
-text-decoration: none;
-text-transform: uppercase;
-transition: all .3s ease-in-out;
-border-radius: 5px 0 0 5px;
-padding: 5px;
-font-size: 12px;
-}
-
-.menu li label:hover,
-.menu li label:focus {
-text-shadow: 1px 1px 5px #000;
-transition-property: width;
-transition-duration: 5s;
-background-color: #07C;
-cursor: pointer;
-}
-
-.menu li label:focus {
-color: white;
-}
-
-.aside{
-display: flex;
-display: 1;
-flex-direction: column;
-width: 100%;
-}
-
-input[type = radio]{
-display: none;
-}
-
-@media screen and (max-width: 1000px) {
-    .App-window{
-        display: flex;
-        display: 1;
+    .app-nav {
+        display: none; /* Oculto por padrão em telas menores */
         flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
         width: 100%;
-        min-width: 930px;
-        background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);
+        background-color: var(--card-background);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .nav {
-        display: flex;
-        display: 1;
-        align-items: center;
-        justify-content: center;
-        background-color: #333;
+    .app-nav.open {
+        display: flex; /* Exibido quando o menu está aberto */
     }
 
-    .menu {
-        display: flex;
+    .app-nav button {
         margin: 0;
-        padding: 0;
-        gap: 3px;
-        list-style: none;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
     }
 
-    .menu li label {
-        border-radius: 5px 5px 0 0;
-
-    }
-
-    .aside{
-        display: flex;
-        display: 1;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
+    .app-nav button:last-child {
+        border-bottom: none;
     }
 }

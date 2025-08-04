@@ -1,377 +1,334 @@
-.Horarios-content{
-	display: flex;
-	width: 500%;
-	background-color: #3f3;
+/* ComumModerno.css */
+.comum-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    /* Esta é a forma correta de fazer o cálculo */
+    width: calc(100% - 40px);
+    animation: fadeIn 0.5s ease-in-out;
+    max-height: calc(100vh - 95px);
+    /* Limita a altura à altura da tela menos o padding */
+    overflow-y: auto;
+    /* Adiciona uma barra de rolagem vertical quando necessário */
 }
 
-.grade-content{
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	overflow: auto;
-}
-.grade-content::-webkit-scrollbar {
-	visibility: hidden;
-	width: 0;
-	/*width: 12px;                width of the entire scrollbar */
-  }
-  
-.grade-content::-webkit-scrollbar-track {
-	visibility: hidden;
-	/*background: orange;         color of the tracking area */
-  }
-  
-.grade-content::-webkit-scrollbar-thumb {
-	visibility: hidden;
-	/*background-color: blue;     color of the scroll thumb */
-	/*border-radius: 20px;        roundness of the scroll thumb */
-	/*border: 3px solid orange;   creates padding around scroll thumb */
-  }
-.intervalo{
-	display: flex;
-	width: 100%;
-	height: 3vh;
-	font-size: 14px;
-	font-weight: 500;
-	display: flex;
-	align-items: center;
-	color: #FFF;
-	justify-content: center;
-	text-align: center;
-	background-color: #333;
-}
-.intervalo:first-child{
-	background-color: #07C;	
-	color: #FFF;
+/* Estilizando a barra de rolagem para ser mais discreta */
+.comum-container::-webkit-scrollbar {
+    width: 8px;
+    /* Largura da barra de rolagem */
 }
 
-.tabela{
-	width: 100%;
-	display: flex;
-	flex-direction: row;
-	background-color: #DDD;
-	box-shadow: #000 0px 7px 29px 0px;
+.comum-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Cor do fundo da trilha */
+    border-radius: 8px;
 }
 
-.grade {
-	justify-content: center;
-	align-items: center;
-	font-size: 10px;
-	text-overflow: inherit;
-	text-align: center;
-	height: 5.5vh;
-	padding: 0 .5vh;
-	/* transition: .1s; */
-	/* -webkit-transition: .1s; */
-	-moz-transition: .1s;
-	-o-transition: .1s;
-}
-.semana, .horario, .intervalo2{
-	justify-content: center;
-	align-items: center;
-	font-size: 10px;
-	text-overflow: inherit;
-	text-align: center;
-}
-.horario{
-	width: 15%;
-	min-width: 120px;
-}
-.semana {
-	color: #333;
-}
-.semana1 {
-	width: 14%;
-	/*min-width: 180px;*/
-}
-.semana2 {
-	width: 17%;
-	/*min-width: 180px;*/
+.comum-container::-webkit-scrollbar-thumb {
+    background: #888;
+    /* Cor do polegar da barra de rolagem */
+    border-radius: 8px;
 }
 
-.semana:nth-child(odd){background-color: #ccc;}
-.semana:nth-child(even){background-color: #ddd;}
-
-tr:nth-child(even) {background-color: #ddd;}
-
-.intervalo2,.semana{
-	height: 3vh;
+.comum-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* Cor do polegar ao passar o mouse */
 }
 
-.intervalo:first-child{
-	background-color: #07C;	
-	color: #FFF;
-}
-
-.intervalo2:first-child{
-	background-color: #333;
-	color: #fff;
-}
-
-
-
-.footer {
+.grade-header {
     display: flex;
-    padding-top: 1vh;
-	flex-direction: column;
-	align-items: center;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
 }
 
-.buttom-content{
-	display: flex;
-	flex: 1;
-	justify-content: center;
-	padding: 1vh 0 1vh 0;
-    transition: .3s;
-
-	-moz-transition: .3s;
-	-o-transition: .3s;
+.grade-header h3 {
+    font-weight: 600;
+    color: #333;
+    margin: 0;
 }
 
-.t_mat{
-	display: flex;
-	justify-content: center;
-	margin-top: 2px;
-}
-
-.salvar{
-	width: 100%;
-  	display: flex;
-  	justify-content: center;
-	height: 30px;
-	padding: 0.5vh;
-    margin-top: 15px;
-  	align-items: center;
-}
-
-.slides{
-	display: flex;
-	width: 80vw;
-	margin-top: 15px;
-	min-width: 920px;
-	flex-direction: column;
-	background-color: #eee;
-	overflow: hidden;
-	border-radius: 10px;
-    transition: 1s;
-}
-
-.seila, .seila1, .seila3,.seila2{
+.grade-header .actions {
     display: flex;
-    flex-direction: column; 
-    height: calc(100%);
-  }
-
-  
-  input[type = "submit"]{
-	border: 0;
-	background: none;
-	display: block;
-	margin-right: 5px;
-	margin-left: 5px;
-	width: 150px;
-	text-align: center;
-	border: 2px solid #3498db;
-	outline: none;
-	color: white;
-	border-radius: 24px;
-	transition: 0.25s;
-	cursor: pointer;
-	font-size: 0.8em;
-  }
-  
-  input[type = "submit"]:hover {
-	background: #575fcf;
-  }
-  input[type = "submit"]::before {
-	content: "";
-	background: #000; 
-	margin-top: -20px;
-  }
-
-  .grade {
-    justify-content: center;
-	align-items: center;
-	font-size: 10px;
-	text-overflow: inherit;
-	text-align: center;
-    height: 5.5vh;
-    padding: 0 .5vh;
-     transition: .3s;
-     -webkit-transition: .3s;
-    -moz-transition: .3s;
-    -o-transition: .3s;
+    gap: 10px;
 }
 
-.tr{
+.grade-container {
+    overflow-x: auto;
+    /* Para rolagem em telas pequenas */
+}
+
+.grade-table {
     width: 100%;
-    height: 5.5vh;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* Colunas com largura igual */
 }
 
-.navigation{
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-    background-color: #FFF;
-    padding: 3px 10px 3px 10px;
-    border-radius: 15px;
+.grade-table th,
+.grade-table td {
+    border: 1px solid #dee2e6;
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.9rem;
+    min-width: 120px;
+    white-space: pre-wrap;
+    /* Para quebras de linha com 
+ */
+    word-wrap: break-word;
 }
 
-.page, .control{
-	color: #333;
-	font-weight: 500;
+.interval-row,
+.grade-table thead th {
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    padding: 8px !important;
 }
 
-.page, .prev, .next{
-	width: 35px;
-	height: 25px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 5px;
-	background-color: #ddd;
-	margin: 0 1px;
-	cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-	-moz-border-radius: 5px;
+.grade-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.time-slot,
+.time-slot-header {
+    background-color: #f8f9fa;
+    font-weight: 500;
+    /* ### MUDANÇA AQUI ### */
+    /* Define uma largura fixa e menor para a coluna de horário. */
+    /* '90px' é um bom valor, mas você pode ajustar se precisar. */
+    width: 110px;
+    /* Garante que a coluna não ficará maior que o necessário */
+    min-width: 90px;
+}
+
+.grade-cell {
+    transition: background-color 0.3s;
+}
+
+.interval-row td {
+    background-color: #6c757d;
+    color: white;
+    font-weight: 500;
+    text-align: center;
+    padding: 8px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    gap: 8px;
+}
+
+.page-button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.page-button:hover {
+    background-color: #e0e0e0;
+}
+
+.page-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Adicione estas classes ao final do seu ComumModerno.css */
+/* Estilo para o modo acordeão para remover padding extra do container principal */
+.comum-container.accordion-mode {
+    padding: 8px;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+.period-item {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    /* Garante que os cantos arredondados funcionem */
+}
+
+.period-header {
+    padding: 16px 20px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    background-color: #f7f9fc;
+    border-bottom: 1px solid transparent;
+    /* Borda para quando estiver aberto */
+    transition: background-color 0.3s, border-color 0.3s;
+    position: relative;
+    /* Para posicionar o ícone de seta */
+}
+
+.period-header:hover {
+    background-color: #f1f3f5;
+}
+
+.period-header.open {
+    border-bottom-color: #e0e0e0;
+}
+
+.grade-content-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+    padding: 0;
+}
+
+.grade-content-wrapper.open {
+    /* Um valor alto para garantir que qualquer tabela caiba. */
+    max-height: 2000px;
+}
+
+/* Adiciona um padding interno ao conteúdo da grade quando ele está no modo acordeão */
+.grade-content-wrapper .grade-container {
+    padding: 20px;
+}
+
+/* Estilo para a seta de expansão */
+.expand-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    transition: transform 0.3s ease-in-out;
+    font-size: 1.5rem;
+    color: #6c757d;
+}
+
+.expand-icon.open {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.nav-button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-button:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.no-grades-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+.app-container {
+    background-color: #f4f7f6;
+    min-height: 100vh;
+}
+
+.printing-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,194,1) 87%);    
+    z-index: 9998;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.5s;
+
+}
+
+.printing-mode .comum-container {
+    
+    width: calc(100% - 40px);
+    animation: fadeIn 0.5s;
+    max-height: calc(100vh - 95px);
+    background-color: #f4f7f6;
+    z-index: 9999;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 
-.control:hover{
-	color: #07c;
+.app-container.printing>*:not(.comum-containers) {
+    display: none;
 }
 
-.page:hover{
-	filter: brightness(.8);
+
+.printing-mode>*:not(.comum-container) {
+    display: none;
 }
 
-.page.active{
-	background-color: #07c;
-	color: #eee;
+.print-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
+
 }
 
-.prev, .next{
-	background-color: #fff;
+.print-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+
 }
 
-input[type="radio"]:checked + label {
-	background-color: #07C; /* Cor de fundo quando o radio está marcado */
-	color: white; /* Cor do texto quando o radio está marcado */
+
+@media (max-width: 1040px) {
+    .print-button {
+        display: none;
+    }
 }
 
-.hidden {
-	display: none;
-  }
-  
-  
-.accordion {
-	display: flex;
-	flex-direction: column;
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .comum-container, .comum-container * {
+        visibility: visible;
+    }
+    .comum-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
 }
-
-.accordion input[type="checkbox"] {
-	display: none;
-}
-
-.accordion .content-cursos {
-	display: flex;
-	width: 260px;
-	margin-top: 95px;
-	border-radius: 20px;
-	overflow: hidden;
-}
-
-.accordion .content-cursos .cursos {
-	display: flex;
-	width: 100%;
-	flex-direction: column;
-}
-
-.accordion .content-cursos .cursos a {
-	color: #333;
-	text-decoration: none;
-	min-width:130px;
-	width:100%;
-	text-align: center;
-	padding: 5px 0 5px 0;
-}
-
-.accordion .content-cursos .cursos a:active ~ .accordion input[type="checkbox"] + label + div {
-	display: flex;
-	background-color: #fff;
-}
-
-.accordion .content-cursos .cursos a:hover {
-	background: #ddd;
-}
-
-.accordion > div > p:hover {
-	color: #fff;
-}
-
-.accordion label {
-	margin-top: 5px;
-	margin-bottom: 10px;
-	display: flex;
-	align-items: center;
-	flex-direction: row;
-	justify-content: center;
-	background-color: #eee;
-	border-radius: 20px;
-	height: 35px;
-	padding: 0 20px;
-	-moz-border-radius: 20px;
-	cursor:pointer;
-}
-
-.accordion input[type="checkbox"] + label + div {
-	display: none;
-	background-color: #fff;
-	z-index:1;
-}
-
-.accordion input[type="checkbox"]:checked + label + div {
-	opacity: 1;
-
-	display: block;
-}
-
-.accordion input[type="checkbox"]:checked + label {
-	display: none;
-}
-  /*
-  
-  
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
- 
- 
-*/
-#radio0:checked ~ #bar0{border-color: #F3F; border-width: 10px;}
-#radio1:checked ~ #bar1{border-color: #F3F; border-width: 10px;}
-#radio2:checked ~ #bar2{border-color: #F3F; border-width: 10px;}
-#radio3:checked ~ #bar3{border-color: #F3F; border-width: 10px;}
-#radio4:checked ~ #bar4{border-color: #F3F; border-width: 10px;}
-#radio5:checked ~ #bar5{border-color: #F3F; border-width: 10px;}
-#radio6:checked ~ #bar6{border-color: #F3F; border-width: 10px;}
-
-.l0{background-color: rgba(178, 34, 32, 0.5);  color: #000;}
-.l1{background-color: rgba(255, 149, 0, 0.5);  color: #000;}
-.l2{background-color: rgba(50, 205, 50, 0.5);  color: #000;}
-.l3{background-color: rgba(32, 178, 170, 0.5);  color: #000;}
-.l4{background-color: rgba(65, 105, 225, 0.5);  color: #fff;}
-.l5{background-color: rgba(105, 89, 205, 0.5);  color: #fff;}
-.l6{background-color: rgba(255, 215, 0, 0.5);  color: #000;}
-.l7{background-color: rgba(220, 20, 60, 0.5);  color: #fff;}
-.l8{background-color: rgba(233, 251, 84, 0.5);  color: #000;}
-.l9{background-color: rgba(79, 79, 79, 0.5);  color: #fff;}
-.l10{background-color: rgba(34, 178, 255, 0.5);  color: #000;}
