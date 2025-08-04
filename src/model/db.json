@@ -13,7 +13,7 @@
       [0, 4],
       [0, 5]
     ],
-    "_au": "T. 1102",
+    "_au": "ROBERTA",
     "_ha": []
   },
   {
@@ -31,7 +31,7 @@
       [1, 1],
       [1, 2]
     ],
-    "_au": "T. 1103",
+    "_au": "ANA ELISA",
     "_ha": []
   },
   {
@@ -49,7 +49,7 @@
       [2, 1],
       [2, 2]
     ],
-    "_au": "T. 1105",
+    "_au": "LUIS RETONDARO",
     "_ha": []
   },
   {
@@ -66,7 +66,7 @@
       [3, 2],
       [3, 3]
     ],
-    "_au": "T. 1101",
+    "_au": "RAFAEL SARAIVA",
     "_ha": []
   },
   {
@@ -83,7 +83,7 @@
       [0, 1],
       [0, 2]
     ],
-    "_au": "T. 1107",
+    "_au": "LUIS RETONDARO",
     "_ha": []
   },
   {
@@ -101,7 +101,7 @@
       [2, 4],
       [2, 5]
     ],
-    "_au": "T. 1104-A",
+    "_au": "COLATTO",
     "_ha": []
   },
   {
@@ -119,7 +119,7 @@
       [1, 4],
       [1, 5]
     ],
-    "_au": "T. 1106",
+    "_au": "ANA ELISA",
     "_ha": []
   },
   {
@@ -150,7 +150,7 @@
       [4, 4],
       [4, 5]
     ],
-    "_au": "T. 1108",
+    "_au": "AMANDA",
     "_ha": []
   },
   {
@@ -168,10 +168,9 @@
       [0, 4],
       [0, 5]
     ],
-    "_au": "T. 1104-B",
+    "_au": "CARLOS EDUARDO",
     "_ha": []
   },
-
   {
     "_cu": "engcomp",
     "_se": 2,
@@ -181,17 +180,14 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1E",
-      "1F"
-    ],
+    "_pr": [ "1E", "1F" ],
     "_ho": [
       [1, 1],
       [1, 2],
       [2, 0],
       [2, 1]
     ],
-    "_au": "T. 1206",
+    "_au": "JOÃO THOMPSON",
     "_ha": []
   },
   {
@@ -203,10 +199,7 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1C",
-      "1D"
-    ],
+    "_pr": [ "1C", "1D" ],
     "_ho": [
       [3, 0],
       [3, 1],
@@ -214,7 +207,7 @@
       [4, 1],
       [4, 2]
     ],
-    "_au": "T. 1202",
+    "_au": "RAFAEL SARAIVA",
     "_ha": []
   },
   {
@@ -226,18 +219,14 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1A",
-      "1C",
-      "1D"
-    ],
+    "_pr": [ "1A", "1C", "1D" ],
     "_ho": [
       [0, 4],
       [0, 5],
       [1, 3],
       [1, 4]
     ],
-    "_au": "T. 1203",
+    "_au": "COLATTO",
     "_ha": []
   },
   {
@@ -249,17 +238,14 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1D",
-      "1E"
-    ],
+    "_pr": [ "1D", "1E" ],
     "_ho": [
       [2, 2],
       [2, 3],
       [2, 4],
       [2, 5]
     ],
-    "_au": "T. 1205",
+    "_au": "ANDRÉ MONTEIRO",
     "_ha": []
   },
   {
@@ -271,14 +257,12 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1A"
-    ],
+    "_pr": [ "1A" ],
     "_ho": [
       [0, 2],
       [0, 3]
     ],
-    "_au": "T. 1207",
+    "_au": "ROBERTA",
     "_ha": []
   },
   {
@@ -290,9 +274,7 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1D"
-    ],
+    "_pr": [ "1D" ],
     "_ho": [
       [3, 4],
       [3, 5],
@@ -300,7 +282,7 @@
       [4, 4],
       [4, 5]
     ],
-    "_au": "T. 1204",
+    "_au": "FELIPE MONDAINI",
     "_ha": []
   },
   {
@@ -317,7 +299,7 @@
       [3, 2],
       [3, 3]
     ],
-    "_au": "T. 1201",
+    "_au": "CAROLINA",
     "_ha": []
   },
   {
@@ -329,16 +311,12 @@
     "_at": 2,
     "_el": true,
     "_ag": false,
-    "_da": "",
-    "_pr": [
-      "1E",
-      "1F"
-    ],
+    "_da": [""],
+    "_pr": [ "1E", "1F" ],
     "_ho": [],
     "_au": "",
     "_ha": []
   },
-
   {
     "_cu": "engcomp",
     "_se": 3,
@@ -348,104 +326,54 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2E",
-      "2F"
-    ],
+    "_pr": [ "2E", "2F" ],
     "_ho": [
-      [
-        0,
-        2
-      ],
-      [
-        0,
-        3
-      ],
-      [
-        0,
-        4
-      ],
-      [
-        0,
-        5
-      ],
-      [
-        2,
-        4
-      ],
-      [
-        2,
-        5
-      ]
+      [0, 2],
+      [0, 3],
+      [0, 4],
+      [0, 5],
+      [2, 4],
+      [2, 5]
     ],
-    "_au": "",
+    "_au": "PEDRO LUGÃO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 3,
-    "_di": "Termodin\u00e2mica",
+    "_di": "Termodinâmica",
     "_re": "3C",
     "_ap": 2,
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2B",
-      "2D"
-    ],
+    "_pr": [ "2B", "2D" ],
     "_ho": [
-      [
-        3,
-        0
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        4,
-        1
-      ],
-      [
-        4,
-        2
-      ]
+      [3, 1],
+      [3, 2],
+      [4, 1],
+      [4, 2]
     ],
-    "_au": "",
+    "_au": "FELIPE MONDAINI",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 3,
-    "_di": "Software B\u00e1sico",
+    "_di": "Software Básico",
     "_re": "3D",
     "_ap": 4,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2F"
-    ],
+    "_pr": [ "2F" ],
     "_ho": [
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ],
-      [
-        2,
-        0
-      ],
-      [
-        2,
-        1
-      ]
+      [1, 2],
+      [1, 3],
+      [2, 0],
+      [2, 1]
     ],
-    "_au": "",
+    "_au": "PEDRO LARA",
     "_ha": []
   },
   {
@@ -457,107 +385,66 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1E"
-    ],
+    "_pr": [ "1E" ],
     "_ho": [
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ]
+      [1, 4],
+      [1, 5]
     ],
-    "_au": "",
+    "_au": "PEDRO LUGÃO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 3,
-    "_di": "C\u00e1lculo a V\u00e1rias Vari\u00e1veis",
+    "_di": "Cálculo a Várias Variáveis",
     "_re": "3B",
     "_ap": 5,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2B"
-    ],
+    "_pr": [ "2B" ],
     "_ho": [
-      [
-        3,
-        2
-      ],
-      [
-        3,
-        3
-      ],
-      [
-        4,
-        3
-      ],
-      [
-        4,
-        4
-      ],
-      [
-        4,
-        5
-      ]
+      [3, 3],
+      [3, 4],
+      [4, 3],
+      [4, 4],
+      [4, 5]
     ],
-    "_au": "",
+    "_au": "RAFAEL SARAIVA",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 3,
-    "_di": "Introdu\u00e7\u00e3o a Eng. Ambiental",
+    "_di": "Introdução a Eng. Ambiental",
     "_re": "3A",
     "_ap": 2,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1A"
-    ],
+    "_pr": [ "1A" ],
     "_ho": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        1
-      ]
+      [0, 0],
+      [0, 1]
     ],
-    "_au": "",
+    "_au": "ROBERTA",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 3,
-    "_di": "Humanidades e Ci\u00eancias Sociais",
+    "_di": "Humanidades e Ciências Sociais",
     "_re": "3G",
     "_ap": 2,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2A"
-    ],
+    "_pr": [ "2A" ],
     "_ho": [
-      [
-        2,
-        2
-      ],
-      [
-        2,
-        3
-      ]
+      [2, 2],
+      [2, 3]
     ],
-    "_au": "",
+    "_au": "CELSO",
     "_ha": []
   },
   {
@@ -569,98 +456,54 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2F",
-      "3F"
-    ],
+    "_pr": [ "2F", "3F" ],
     "_ho": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        1
-      ],
-      [
-        1,
-        0
-      ],
-      [
-        1,
-        1
-      ]
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1]
     ],
-    "_au": "",
+    "_au": "JURAIR",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 4,
-    "_di": "Equa\u00e7\u00f5es Diferenciais Ordin\u00e1rias I",
+    "_di": "Equações Diferenciais Ordinárias I",
     "_re": "4A",
     "_ap": 4,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3B",
-      "2C"
-    ],
+    "_pr": [ "3B", "2C" ],
     "_ho": [
-      [
-        2,
-        2
-      ],
-      [
-        2,
-        3
-      ],
-      [
-        2,
-        4
-      ],
-      [
-        2,
-        5
-      ]
+      [2, 2],
+      [2, 3],
+      [2, 4],
+      [2, 5]
     ],
-    "_au": "",
+    "_au": "CARLOS EDUARDO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 4,
-    "_di": "Equa\u00e7\u00f5es Diferenciais Ordin\u00e1rias I - B",
+    "_di": "Equações Diferenciais Ordinárias I - B",
     "_re": "4A",
     "_ap": 4,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3B",
-      "2C"
-    ],
+    "_pr": [ "3B", "2C" ],
     "_ho": [
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ],
-      [
-        4,
-        4
-      ],
-      [
-        4,
-        5
-      ]
+      [2, 10],
+      [2, 11],
+      [3, 10],
+      [3, 11]
     ],
-    "_au": "",
-    "_ha": []
+    "_au": "LEANDRO",
+    "_ha": [],
+    "_da": ["18:30", "19:20", "18:30", "19:20"]
   },
   {
     "_cu": "engcomp",
@@ -671,52 +514,16 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3E"
-    ],
+    "_pr": [ "3E" ],
     "_ho": [
-      [
-        0,
-        2
-      ],
-      [
-        0,
-        3
-      ],
-      [
-        0,
-        4
-      ],
-      [
-        0,
-        5
-      ],
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ],
-      [
-        3,
-        3
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        3,
-        5
-      ],
-      [
-        3,
-        6
-      ]
+      [0, 2],
+      [0, 3],
+      [0, 4],
+      [0, 5],
+      [1, 4],
+      [1, 5]
     ],
-    "_au": "",
+    "_au": "LAURA",
     "_ha": []
   },
   {
@@ -728,36 +535,16 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3D"
-    ],
+    "_pr": [ "3D" ],
     "_ho": [
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ],
-      [
-        4,
-        2
-      ],
-      [
-        4,
-        3
-      ],
-      [
-        4,
-        4
-      ],
-      [
-        4,
-        5
-      ]
+      [1, 2],
+      [1, 3],
+      [4, 2],
+      [4, 3],
+      [4, 4],
+      [4, 5]
     ],
-    "_au": "",
+    "_au": "LUÍS TARRATACA",
     "_ha": []
   },
   {
@@ -769,46 +556,16 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_da": "13:00",
-    "_pr": [
-      "2D",
-      "3B"
-    ],
+    "_da": ["13:00", "13:50", "14:40", "15:30", "16:20"],
+    "_pr": [ "2D", "3B" ],
     "_ho": [
-      [
-        0,
-        6
-      ],
-      [
-        3,
-        0
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        3,
-        2
-      ],
-      [
-        3,
-        3
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        4,
-        6
-      ],
-      [
-        4,
-        7
-      ]
+      [0, 6],
+      [0, 7],
+      [0, 8],
+      [0, 9],
+      [0, 10]
     ],
-    "_au": "",
+    "_au": "ANA BARROS",
     "_ha": []
   },
   {
@@ -820,64 +577,33 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "1D",
-      "2F"
-    ],
+    "_pr": [ "1D", "2F" ],
     "_ho": [
-      [
-        2,
-        0
-      ],
-      [
-        2,
-        1
-      ],
-      [
-        3,
-        0
-      ],
-      [
-        3,
-        1
-      ]
+      [2, 0],
+      [2, 1],
+      [3, 0],
+      [3, 1]
     ],
-    "_au": "",
+    "_au": "ANA ELISA",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 5,
-    "_di": "C\u00e1lculo Num\u00e9rico",
+    "_di": "Cálculo Numérico",
     "_re": "5E",
     "_ap": 3,
     "_at": 1,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2C",
-      "2F",
-      "3B"
-    ],
+    "_pr": [ "2C", "2F", "3B" ],
     "_ho": [
-      [
-        0,
-        4
-      ],
-      [
-        0,
-        5
-      ],
-      [
-        1,
-        0
-      ],
-      [
-        1,
-        1
-      ]
+      [0, 3],
+      [0, 4],
+      [1, 0],
+      [1, 1]
     ],
-    "_au": "",
+    "_au": "PEDRO LARA",
     "_ha": []
   },
   {
@@ -889,29 +615,13 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "4A",
-      "4B"
-    ],
+    "_pr": [ "4A", "4B" ],
     "_ho": [
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ],
-      [
-        2,
-        4
-      ],
-      [
-        2,
-        5
-      ]
+      [0, 5],
+      [1, 4],
+      [1, 5]
     ],
-    "_au": "",
+    "_au": "ANDRÉ ALBAGLI",
     "_ha": []
   },
   {
@@ -923,106 +633,55 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "4C"
-    ],
+    "_pr": [ "4C" ],
     "_ho": [
-      [
-        3,
-        0
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        3,
-        2
-      ],
-      [
-        3,
-        3
-      ],
-      [
-        4,
-        0
-      ],
-      [
-        4,
-        1
-      ]
+      [3, 0],
+      [3, 1],
+      [3, 2],
+      [3, 3],
+      [4, 0],
+      [4, 1]
     ],
-    "_au": "",
+    "_au": "DALBERT",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 5,
-    "_di": "Programa\u00e7\u00e3o Orientada a Objetos",
+    "_di": "Programação Orientada a Objetos",
     "_re": "5G",
     "_ap": 3,
     "_at": 3,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3E"
-    ],
+    "_pr": [ "3E" ],
     "_ho": [
-      [
-        2,
-        2
-      ],
-      [
-        2,
-        3
-      ],
-      [
-        4,
-        2
-      ],
-      [
-        4,
-        3
-      ],
-      [
-        4,
-        4
-      ],
-      [
-        4,
-        5
-      ]
+      [2, 2],
+      [2, 3],
+      [4, 2],
+      [4, 3],
+      [4, 4],
+      [4, 5]
     ],
-    "_au": "",
+    "_au": "JOÃO THOMPSON",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 5,
-    "_di": "Probabilidade e Estat\u00edstica",
+    "_di": "Probabilidade e Estatística",
     "_re": "5A",
     "_ap": 3,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2B"
-    ],
+    "_pr": [ "2B" ],
     "_ho": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        1
-      ],
-      [
-        0,
-        2
-      ]
+      [0, 0],
+      [0, 1],
+      [0, 2]
     ],
-    "_au": "",
+    "_au": "CARLOS EDUARDO",
     "_ha": []
   },
   {
@@ -1034,28 +693,14 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "4D"
-    ],
+    "_pr": [ "4D" ],
     "_ho": [
-      [
-        2,
-        0
-      ],
-      [
-        2,
-        1
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        3,
-        5
-      ]
+      [2, 0],
+      [2, 1],
+      [3, 4],
+      [3, 5]
     ],
-    "_au": "",
+    "_au": "ANDRÉ MONTEIRO",
     "_ha": []
   },
   {
@@ -1067,20 +712,12 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2F"
-    ],
+    "_pr": [ "2F" ],
     "_ho": [
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ]
+      [1, 2],
+      [1, 3]
     ],
-    "_au": "",
+    "_au": "LUIS RETONDARO",
     "_ha": []
   },
   {
@@ -1092,262 +729,124 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2C",
-      "4A"
-    ],
+    "_pr": [ "2C", "4A" ],
     "_ho": [
-      [
-        0,
-        2
-      ],
-      [
-        0,
-        3
-      ],
-      [
-        3,
-        2
-      ],
-      [
-        3,
-        3
-      ]
+      [1, 2],
+      [1, 3],
+      [3, 2],
+      [3, 3]
     ],
-    "_au": "",
+    "_au": "MARCO AURÉLIO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 6,
-    "_di": "Eletr\u00f4nica Anal\u00f3gica",
+    "_di": "Eletrônica Analógica",
     "_re": "6E",
     "_ap": 4,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "5D"
-    ],
+    "_pr": [ "5D" ],
     "_ho": [
-      [
-        1,
-        0
-      ],
-      [
-        1,
-        1
-      ],
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ]
+      [0, 2],
+      [0, 3],
+      [1, 0],
+      [1, 1]
     ],
-    "_au": "",
+    "_au": "ANDRÉ ALBAGLI",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 6,
-    "_di": "Lab. de Circuitos El\u00e9tricos e Eletr\u00f4nicos",
+    "_di": "Lab. de Circuitos Elétricos e Eletrônicos",
     "_re": "6D",
     "_ap": 0,
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "5D"
-    ],
+    "_pr": [ "5D" ],
     "_ho": [
-      [
-        3,
-        0
-      ],
-      [
-        3,
-        1
-      ]
+      [2, 6],
+      [2, 7]
     ],
-    "_au": "",
+    "_au": "CRISTIANO CARVALHO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 6,
-    "_di": "Linguagens Formais e Aut\u00f4matos",
+    "_di": "Linguagens Formais e Autômatos",
     "_re": "6F",
     "_ap": 3,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "4E"
-    ],
+    "_pr": [ "4E" ],
     "_ho": [
-      [
-        2,
-        1
-      ],
-      [
-        2,
-        2
-      ],
-      [
-        2,
-        3
-      ]
+      [2, 1],
+      [2, 2],
+      [2, 3]
     ],
-    "_au": "",
+    "_au": "PEDRO LUGÃO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 6,
-    "_di": "Lab. de Circuitos El\u00e9tricos e Eletr\u00f4nicos - B",
+    "_di": "Lab. de Circuitos Elétricos e Eletrônicos - B",
     "_re": "6D",
     "_ap": 0,
     "_at": 2,
     "_el": true,
     "_ag": false,
-    "_da": "",
-    "_pr": [
-      "5D"
-    ],
-    "_ho": [
-      [
-        3,
-        2
-      ],
-      [
-        3,
-        3
-      ]
-    ],
+    "_da": [""],
+    "_pr": [ "5D" ],
+    "_ho": [],
     "_au": "",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 6,
-    "_di": "Ondulat\u00f3ria e F\u00edsica Moderna",
+    "_di": "Ondulatória e Física Moderna",
     "_re": "6B",
     "_ap": 2,
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2D",
-      "3B"
-    ],
+    "_pr": [ "2D", "3B" ],
     "_ho": [
-      [
-        0,
-        4
-      ],
-      [
-        0,
-        5
-      ],
-      [
-        2,
-        4
-      ],
-      [
-        2,
-        5
-      ]
+      [0, 4],
+      [0, 5],
+      [2, 4],
+      [2, 5]
     ],
-    "_au": "",
+    "_au": "ROGÉRIO WANIS",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 6,
-    "_di": "An\u00e1lise de Algoritmos",
+    "_di": "Análise de Algoritmos",
     "_re": "6G",
     "_ap": 4,
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "4E"
-    ],
+    "_pr": [ "4E" ],
     "_ho": [
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ],
-      [
-        4,
-        0
-      ],
-      [
-        4,
-        1
-      ]
+      [1, 4],
+      [1, 5],
+      [4, 0],
+      [4, 1]
     ],
-    "_au": "",
+    "_au": "LUÍS TARRATACA",
     "_ha": []
   },
   {
-    "_cu": "engcomp",
-    "_se": 6,
-    "_di": "Hist\u00f3ria e Filosofia da Ci\u00eancia",
-    "_re": "32O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": true,
-    "_pr": [],
-    "_ho": [
-      [
-        0,
-        6
-      ],
-      [
-        0,
-        7
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 6,
-    "_di": "Nanoci\u00eancia e Nanotecnologia",
-    "_re": "12O",
-    "_ap": 0,
-    "_at": 3,
-    "_el": false,
-    "_ag": true,
-    "_da": "16:00",
-    "_pr": [],
-    "_ho": [
-      [
-        4,
-        8
-      ],
-      [
-        4,
-        9
-      ],
-      [
-        4,
-        10
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },  {
     "_cu": "engcomp",
     "_se": 6,
     "_di": "Servidores de Redes",
@@ -1356,171 +855,17 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_da": "",
+    "_da": [""],
     "_pr": ["5C"],
     "_ho": [
-      [
-        3,
-        5
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        4,
-        2
-      ],
-      [
-        4,
-        3
-      ],
-      [
-        4,
-        4
-      ],
-      [
-        4,
-        5
-      ]
+      [3, 4],
+      [3, 5],
+      [4, 2],
+      [4, 3],
+      [4, 4],
+      [4, 5]
     ],
-    "_au": "",
-    "_ha": []
-  },
-
-
-  
-  {
-    "_cu": "engcomp",
-    "_se": 7,
-    "_di": "Programa\u00e7\u00e3o Linear",
-    "_re": "7B",
-    "_ap": 4,
-    "_at": 0,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      "5E"
-    ],
-    "_ho": [
-      [
-        0,
-        0
-      ],
-      [
-        0,
-        1
-      ],
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 7,
-    "_di": "Processamento Digital de Sinais",
-    "_re": "7C",
-    "_ap": 4,
-    "_at": 0,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      "6A"
-    ],
-    "_ho": [
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        3,
-        5
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 7,
-    "_di": "Metodologia Cient\u00edfica",
-    "_re": "7D",
-    "_ap": 0,
-    "_at": 2,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      162
-    ],
-    "_ho": [
-      [
-        2,
-        4
-      ],
-      [
-        2,
-        5
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 7,
-    "_di": "T\u00e9cnicas Digitais",
-    "_re": "7A",
-    "_ap": 4,
-    "_at": 2,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      "6D",
-      "6E"
-    ],
-    "_ho": [
-      [
-        0,
-        2
-      ],
-      [
-        0,
-        3
-      ],
-      [
-        0,
-        4
-      ],
-      [
-        4,
-        2
-      ],
-      [
-        4,
-        3
-      ],
-      [
-        4,
-        4
-      ]
-    ],
-    "_au": "",
+    "_au": "DALBERT",
     "_ha": []
   },
   {
@@ -1534,45 +879,160 @@
     "_ag": true,
     "_pr": [],
     "_ho": [
-      [
-        1,
-        6
-      ],
-      [
-        1,
-        7
-      ]
+      [0, 6],
+      [0, 7]
     ],
-    "_au": "",
+    "_au": "SORAIA",
     "_ha": []
   },
   {
     "_cu": "engcomp",
-    "_se": 8,
-    "_di": "5G - Comunica\u00e7\u00e3o de Dados M\u00f3veis",
-    "_re": "13O",
-    "_ap": 3,
-    "_at": 0,
+    "_se": 6,
+    "_di": "Nanociência e Nanotecnologia",
+    "_re": "12O",
+    "_ap": 0,
+    "_at": 3,
     "_el": false,
     "_ag": true,
-    "_pr": [
-      "6B"
-    ],
+    "_da": [],
+    "_pr": [],
     "_ho": [
-      [
-        1,
-        6
-      ],
-      [
-        1,
-        7
-      ],
-      [
-        1,
-        8
-      ]
+      [0, 8],
+      [0, 9],
+      [0, 10]
     ],
-    "_au": "",
+    "_au": "RENATA MARIANO",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 6,
+    "_di": "Segurança de Redes de Computadores I",
+    "_re": "2O",
+    "_ap": 1,
+    "_at": 1,
+    "_el": false,
+    "_ag": true,
+    "_pr": [ "5C" ],
+    "_ho": [
+      [3, 6],
+      [3, 7],
+      [3, 8]
+    ],
+    "_au": "DALBERT",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 7,
+    "_di": "Programação Linear",
+    "_re": "7B",
+    "_ap": 4,
+    "_at": 0,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ "5E" ],
+    "_ho": [
+      [0, 0],
+      [0, 1],
+      [1, 2],
+      [1, 3]
+    ],
+    "_au": "LAURA",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 7,
+    "_di": "Processamento Digital de Sinais",
+    "_re": "7C",
+    "_ap": 4,
+    "_at": 0,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ "6A" ],
+    "_ho": [
+      [0, 5],
+      [1, 4],
+      [1, 5]
+    ],
+    "_au": "DIEGO HADDAD",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 7,
+    "_di": "Metodologia Científica",
+    "_re": "7D",
+    "_ap": 0,
+    "_at": 2,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ 162 ],
+    "_ho": [
+      [2, 4],
+      [2, 5]
+    ],
+    "_au": "JOÃO THOMPSON",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 7,
+    "_di": "Técnicas Digitais",
+    "_re": "7A",
+    "_ap": 4,
+    "_at": 2,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ "6D", "6E" ],
+    "_ho": [
+      [0, 2],
+      [0, 3],
+      [0, 4],
+      [2, 1],
+      [2, 2],
+      [2, 3]
+    ],
+    "_au": "CRISTIANO CARVALHO",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 7,
+    "_di": "Tópicos Especiais em IA",
+    "_re": "41O",
+    "_ap": 2,
+    "_at": 2,
+    "_el": false,
+    "_ag": true,
+    "_pr": [],
+    "_ho": [
+      [0, 6],
+      [0, 7],
+      [0, 8],
+      [0, 9]
+    ],
+    "_au": "PEDRO LUGÃO",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 7,
+    "_di": "Tópicos Especiais em Computação Móvel",
+    "_re": "23O",
+    "_ap": 2,
+    "_at": 1,
+    "_el": false,
+    "_ag": true,
+    "_pr": [ "5C", "5G" ],
+    "_ho": [
+      [2, 6],
+      [2, 7],
+      [2, 8],
+      [2, 9]
+    ],
+    "_au": "ANDRÉ MONTEIRO",
     "_ha": []
   },
   {
@@ -1584,120 +1044,50 @@
     "_at": 3,
     "_el": false,
     "_ag": true,
-    "_pr": [
-      "5C",
-      "6B"
-    ],
+    "_pr": [ "5C", "6B" ],
     "_ho": [
-      [
-        2,
-        6
-      ],
-      [
-        2,
-        7
-      ],
-      [
-        2,
-        8
-      ]
+      [2, 3],
+      [2, 4],
+      [2, 5]
     ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 6,
-    "_di": "Seguran\u00e7a de Redes II",
-    "_re": "5O",
-    "_ap": 4,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "2O"
-    ],
-    "_ho": [
-      [
-        4,
-        6
-      ],
-      [
-        4,
-        7
-      ],
-      [
-        4,
-        8
-      ]
-    ],
-    "_au": "",
+    "_au": "ANA ELISA",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 8,
-    "_di": "Sistemas Distribu\u00eddos",
+    "_di": "Sistemas Distribuídos",
     "_re": "8A",
     "_ap": 2,
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3E",
-      "5B",
-      "5C"
-    ],
+    "_pr": [ "3E", "5B", "5C" ],
     "_ho": [
-      [
-        3,
-        0
-      ],
-      [
-        3,
-        1
-      ],
-      [
-        3,
-        2
-      ],
-      [
-        3,
-        3
-      ]
+      [3, 0],
+      [3, 1],
+      [3, 2],
+      [3, 3]
     ],
-    "_au": "",
+    "_au": "ANDRÉ MONTEIRO",
     "_ha": []
   },
   {
     "_cu": "engcomp",
     "_se": 8,
-    "_di": "Computa\u00e7\u00e3o Gr\u00e1fica",
+    "_di": "Computação Gráfica",
     "_re": "8D",
     "_ap": 0,
     "_at": 3,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "2C",
-      "5G"
-    ],
+    "_pr": [ "2C", "5G" ],
     "_ho": [
-      [
-        0,
-        3
-      ],
-      [
-        0,
-        4
-      ],
-      [
-        0,
-        5
-      ]
+      [0, 3],
+      [0, 4],
+      [0, 5]
     ],
-    "_au": "",
+    "_au": "LUIS RETONDARO",
     "_ha": []
   },
   {
@@ -1709,26 +1099,13 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3E",
-      "5A",
-      "6F"
-    ],
+    "_pr": [ "3E", "5A", "6F" ],
     "_ho": [
-      [
-        2,
-        3
-      ],
-      [
-        2,
-        4
-      ],
-      [
-        2,
-        5
-      ]
+      [2, 3],
+      [2, 4],
+      [2, 5]
     ],
-    "_au": "",
+    "_au": "RAFAEL SARAIVA",
     "_ha": []
   },
   {
@@ -1740,28 +1117,14 @@
     "_at": 0,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "6E"
-    ],
+    "_pr": [ "6E" ],
     "_ho": [
-      [
-        2,
-        0
-      ],
-      [
-        2,
-        1
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        3,
-        5
-      ]
+      [0, 1],
+      [0, 2],
+      [1, 2],
+      [1, 3]
     ],
-    "_au": "",
+    "_au": "DIEGO HADDAD",
     "_ha": []
   },
   {
@@ -1773,922 +1136,14 @@
     "_at": 2,
     "_el": true,
     "_ag": true,
-    "_pr": [
-      "3D",
-      "7A"
-    ],
+    "_pr": [ "3D", "7A" ],
     "_ho": [
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ],
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ]
+      [1, 4],
+      [1, 5],
+      [3, 4],
+      [3, 5]
     ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 8,
-    "_di": "Aprendizado N\u00e3o Supervisionado",
-    "_re": "31O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "8C"
-    ],
-    "_ho": [
-      [
-        3,
-        4
-      ],
-      [
-        3,
-        5
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 9,
-    "_di": "TCC I",
-    "_re": "9B",
-    "_ap": 0,
-    "_at": 0,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      "7D"
-    ],
-    "_ho": [
-      [
-        1,
-        0
-      ],
-      [
-        1,
-        1
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 9,
-    "_di": "Computa\u00e7\u00e3o de Alto Desempenho",
-    "_re": "9A",
-    "_ap": 2,
-    "_at": 2,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      "4E",
-      "8A"
-    ],
-    "_ho": [
-      [
-        1,
-        4
-      ],
-      [
-        1,
-        5
-      ],
-      [
-        2,
-        2
-      ],
-      [
-        2,
-        3
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 9,
-    "_di": "Est\u00e1gio Supervisionado",
-    "_re": "9C",
-    "_ap": 0,
-    "_at": 0,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      140
-    ],
-    "_ho": [
-      [
-        1,
-        2
-      ],
-      [
-        1,
-        3
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 10,
-    "_di": "TCC II",
-    "_re": "10A",
-    "_ap": 0,
-    "_at": 0,
-    "_el": true,
-    "_ag": true,
-    "_pr": [
-      "9B"
-    ],
-    "_ho": [
-      [
-        1,
-        0
-      ],
-      [
-        1,
-        1
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Anima\u00e7\u00e3o Digital",
-    "_re": "1O",
-    "_ap": 3,
-    "_at": 1,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "1C",
-      "1E",
-      "1G"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Ci\u00eancia e Tecnologia dos Materiais",
-    "_re": "2O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "2D",
-      "16O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Competi\u00e7\u00f5es de Programa\u00e7\u00e3o",
-    "_re": "3O",
-    "_ap": 4,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "3E"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Desenho T\u00e9cnico",
-    "_re": "5O",
-    "_ap": 2,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "1A",
-      "1C"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Fen\u00f4menos de Transporte",
-    "_re": "6O",
-    "_ap": 0,
-    "_at": 3,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "3B",
-      "3C",
-      "4A"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Introdu\u00e7\u00e3o \u00e0 Mec\u00e2nica dos S\u00f3lidos",
-    "_re": "8O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "2D",
-      "3B",
-      "4A"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Introdu\u00e7\u00e3o \u00e0 Prog. para Dispositivos M\u00f3veis",
-    "_re": "9O",
-    "_ap": 2,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "1E",
-      "1G"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Minera\u00e7\u00e3o de Dados",
-    "_re": "11O",
-    "_ap": 1,
-    "_at": 3,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "4F"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Organiza\u00e7\u00e3o do Trabalho e Normas",
-    "_re": "13O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Programa\u00e7\u00e3o em Python",
-    "_re": "14O",
-    "_ap": 2,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "1E"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Programa\u00e7\u00e3o Orientada a Objetos usando C++",
-    "_re": "15O",
-    "_ap": 2,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "5G"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Qu\u00edmica Geral",
-    "_re": "16O",
-    "_ap": 2,
-    "_at": 4,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Redes de Transmiss\u00e3o",
-    "_re": "17O",
-    "_ap": 1,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "4C"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Redes sem Fio",
-    "_re": "18O",
-    "_ap": 1,
-    "_at": 1,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "6C"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 5,
-    "_di": "Seguran\u00e7a de Redes de Computadores I",
-    "_re": "2O",
-    "_ap": 1,
-    "_at": 1,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "5C"
-    ],
-    "_ho": [
-      [
-        2,
-        6
-      ],
-      [
-        2,
-        7
-      ],
-      [
-        2,
-        8
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 6,
-    "_di": "Seguran\u00e7a de Redes de Computadores II",
-    "_re": "20O",
-    "_ap": 2,
-    "_at": 1,
-    "_el": false,
-    "_ag": true,
-    "_pr": [
-      "2O"
-    ],
-    "_ho": [
-      [
-        2,
-        6
-      ],
-      [
-        2,
-        7
-      ],
-      [
-        2,
-        8
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "T\u00f3picos Complementares em Pr\u00e9-C\u00e1lculo",
-    "_re": "21O",
-    "_ap": 2,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "T\u00f3picos em Algoritmos",
-    "_re": "22O",
-    "_ap": 4,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "2E",
-      "2F"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 5,
-    "_di": "T\u00f3picos Especiais em Computa\u00e7\u00e3o M\u00f3vel",
-    "_re": "23O",
-    "_ap": 2,
-    "_at": 1,
-    "_el": false,
-    "_ag": true,
-    "_pr": [
-      "5C",
-      "5G"
-    ],
-    "_ho": [
-      [
-        2,
-        6
-      ],
-      [
-        2,
-        7
-      ],
-      [
-        2,
-        8
-      ],
-      [
-        2,
-        9
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "T\u00f3picos Especiais em Intelig\u00eancia Artificial",
-    "_re": "24O",
-    "_ap": 0,
-    "_at": 4,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "2F",
-      "3B"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "T\u00f3picos Especiais em Otimiza\u00e7\u00e3o",
-    "_re": "25O",
-    "_ap": 0,
-    "_at": 4,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "7B"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "T\u00f3picos Especiais em Programa\u00e7\u00e3o",
-    "_re": "26O",
-    "_ap": 2,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "4F",
-      "5G"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "T\u00f3picos Especiais em Sistemas Digitais",
-    "_re": "27O",
-    "_ap": 0,
-    "_at": 3,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "1F"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Virtualiza\u00e7\u00e3o de Servidores",
-    "_re": "28O",
-    "_ap": 2,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "5B",
-      "5C"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Visualiza\u00e7\u00e3o de Dados",
-    "_re": "29O",
-    "_ap": 3,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "2C",
-      "2F",
-      "3F"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "5G \u2013 Comunica\u00e7\u00e3o de Dados M\u00f3veis",
-    "_re": "30O",
-    "_ap": 0,
-    "_at": 3,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "6B"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Monitoria I",
-    "_re": "33O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Monitoria II",
-    "_re": "34O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "33O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Monitoria III",
-    "_re": "35O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "34O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Monitoria IV",
-    "_re": "36O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "35O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Inicia\u00e7\u00e3o Cient\u00edfica I",
-    "_re": "37O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Inicia\u00e7\u00e3o Cient\u00edfica II",
-    "_re": "38O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "37O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Inicia\u00e7\u00e3o Cient\u00edfica III",
-    "_re": "39O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "38O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 0,
-    "_di": "Inicia\u00e7\u00e3o Cient\u00edfica IV",
-    "_re": "40O",
-    "_ap": 0,
-    "_at": 2,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "39O"
-    ],
-    "_ho": [],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 4,
-    "_di": "Algoritmos e Estruturas de Dados II - B",
-    "_re": "4E",
-    "_ap": 4,
-    "_at": 2,
-    "_el": true,
-    "_ag": false,
-    "_da": "",
-    "_pr": [
-      "3E"
-    ],
-    "_ho": [
-      [
-        2,
-        6
-      ],
-      [
-        2,
-        7
-      ],
-      [
-        2,
-        8
-      ],
-      [
-        2,
-        9
-      ],
-      [
-        2,
-        10
-      ],
-      [
-        2,
-        11
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 4,
-    "_di": "Devops",
-    "_re": "90O",
-    "_ap": 3,
-    "_at": 0,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [
-      [
-        3,
-        6
-      ],
-      [
-        3,
-        7
-      ],
-      [
-        3,
-        8
-      ],
-      [
-        3,
-        9
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 7,
-    "_di": "T\u00f3picos Especiais em IA",
-    "_re": "41O",
-    "_ap": 2,
-    "_at": 2,
-    "_el": false,
-    "_ag": true,
-    "_pr": [],
-    "_ho": [
-      [
-        0,
-        6
-      ],
-      [
-        0,
-        7
-      ],
-      [
-        0,
-        8
-      ],
-      [
-        0,
-        9
-      ]
-    ],
-    "_au": "",
-    "_ha": []
-  },
-  {
-    "_cu": "engcomp",
-    "_se": 7,
-    "_di": "Internet VIa Sat\u00e9lite",
-    "_re": "",
-    "_ap": 2,
-    "_at": 1,
-    "_el": false,
-    "_ag": false,
-    "_da": "",
-    "_pr": [],
-    "_ho": [
-      [
-        1,
-        7
-      ],
-      [
-        1,
-        8
-      ],
-      [
-        1,
-        9
-      ]
-    ],
-    "_au": "",
+    "_au": "CRISTIANO CARVALHO",
     "_ha": []
   },
   {
@@ -2702,16 +1157,99 @@
     "_ag": true,
     "_pr": [],
     "_ho": [
-      [
-        0,
-        3
-      ],
-      [
-        0,
-        4
-      ]
+      [0, 1],
+      [0, 2]
     ],
-    "_au": "",
+    "_au": "PEDRO LARA",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 9,
+    "_di": "TCC I",
+    "_re": "9B",
+    "_ap": 0,
+    "_at": 0,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ "7D" ],
+    "_ho": [
+      [1, 0],
+      [1, 1]
+    ],
+    "_au": "LUIS RETONDARO",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 9,
+    "_di": "Computação de Alto Desempenho",
+    "_re": "9A",
+    "_ap": 2,
+    "_at": 2,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ "4E", "8A" ],
+    "_ho": [
+      [1, 4],
+      [1, 5],
+      [2, 2],
+      [2, 3]
+    ],
+    "_au": "PEDRO LARA",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 9,
+    "_di": "Estágio Supervisionado",
+    "_re": "9C",
+    "_ap": 0,
+    "_at": 0,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ 140 ],
+    "_ho": [
+      [1, 2],
+      [1, 3]
+    ],
+    "_au": "JURAIR",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 9,
+    "_di": "Animação Digital",
+    "_re": "1O",
+    "_ap": 3,
+    "_at": 1,
+    "_el": false,
+    "_ag": true,
+    "_pr": [ "1C", "1E", "1G" ],
+    "_ho": [
+      [1, 6],
+      [1, 7],
+      [1, 8],
+      [1, 9]
+    ],
+    "_au": "LUIS RETONDARO",
+    "_ha": []
+  },
+  {
+    "_cu": "engcomp",
+    "_se": 10,
+    "_di": "TCC II",
+    "_re": "10A",
+    "_ap": 0,
+    "_at": 0,
+    "_el": true,
+    "_ag": true,
+    "_pr": [ "9B" ],
+    "_ho": [
+      [1, 0],
+      [1, 1]
+    ],
+    "_au": "LAURA",
     "_ha": []
   }
 ]
