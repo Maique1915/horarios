@@ -52,15 +52,17 @@ const Comum = (props) => {
 
             semestre.forEach((disciplina, index) => {
                 const opt = !disciplina._el && !disciplina._di.includes(" - OPT") ? " - OPT" : "";
-                const nomeMateria = disciplina._da ? `${disciplina._di}\n${disciplina._da}` : disciplina._di;
 
                 if (Array.isArray(disciplina._ho)) {
-                    disciplina._ho.forEach(([dia, horario]) => {
+                    disciplina._ho.forEach(([dia, horario], i) => {
                         if (dia < td && horario < th) {
+                            const nomeMateria = (disciplina._da && disciplina._da[i])
+                                ? `${disciplina._di}\n${disciplina._da[i]}`
+                                : disciplina._di;
                             if (gradeVazia[horario][dia] === "") {
                                 gradeVazia[horario][dia] = nomeMateria + opt;
                             } else {
-                                gradeVazia[horario][dia] += ` / ${disciplina._di}${opt}`;
+                                gradeVazia[horario][dia] += ` / ${nomeMateria}${opt}`;
                             }
                             coresVazias[horario][dia] = cores[(index + rand) % cores.length];
                         }
