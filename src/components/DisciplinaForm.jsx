@@ -39,10 +39,6 @@ const DisciplinaForm = ({
     defaultValues: disciplina,
   });
 
-  useEffect(() => {
-    reset(disciplina);
-  }, [disciplina, reset]);
-
   return (
     <div className="lg:col-span-2">
       <div className="sticky top-8 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm p-6">

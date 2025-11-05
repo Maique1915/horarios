@@ -98,7 +98,6 @@ const EditDb = () => {
 
 
   const handleEditDisciplina = (disciplinaToEdit) => {
-    reset({ ...disciplinaToEdit, _id: disciplinaToEdit._re }); // Preencher o formulário
     setEditingDisciplineId(disciplinaToEdit._re); // Usar _re como ID temporário
     setEditingDisciplina(disciplinaToEdit); // Definir a disciplina completa para edição
   };
@@ -393,6 +392,7 @@ const EditDb = () => {
           </div>
 
           <DisciplinaForm
+            key={editingDisciplina ? editingDisciplina._re : 'new'}
             disciplina={editingDisciplina || newDisciplina}
             onInputChange={editingDisciplina ? handleEditingInputChange : handleNewInputChange}
             onHoChange={editingDisciplina ? handleEditingHoChange : handleNewHoChange}
