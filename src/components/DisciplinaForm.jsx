@@ -224,10 +224,7 @@ const DisciplinaForm = ({
                               <button
                                 className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
                                 type="button"
-                                onClick={() => {
-                                  reset();
-                                  onCancel();
-                                }}
+                                onClick={onCancel}
                               >
                                 <span className="truncate">Cancelar</span>
                               </button>
