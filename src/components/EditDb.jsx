@@ -64,6 +64,9 @@ const EditDb = () => {
   const [newDisciplina, setNewDisciplina] = useState(() => ({ // Estado para a nova disciplina
     _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
   }));
+  const [filtroPeriodo, setFiltroPeriodo] = useState(null);
+  const [filtroCurso, setFiltroCurso] = useState(null);
+  const [filtroStatus, setFiltroStatus] = useState(null);
 
   // Função para gerar as opções de pré-requisitos
   const getPrerequisiteOptions = useCallback(() => {
@@ -261,7 +264,20 @@ const EditDb = () => {
     } else {
       handleNewHoChange(newHo);
     }
-  }, [editingDisciplina, newDisciplina, handleEditingHoChange, handleNewHoChange]);
+  }); 
+  const opcoesPeriodo = [...new Set(disciplinas.map(d => d._se))].sort((a, b) => a - b).map(se => ({ value: se, label: `${se}º Período` }));
+  const opcoesCurso = [...new Set(db.map(d => d._cu))].map(cu => ({ value: cu, label: cu }));
+  const opcoesStatus = [
+    { value: true, label: 'Ativa' },
+    { value: false, label: 'Inativa' },
+  ];
+
+  const disciplinasFiltradas = disciplinas.filter(d => {
+    if (filtroPeriodo && d._se !== filtroPeriodo.value) return false;
+    if (filtroCurso && d._cu !== filtroCurso.value) return false;
+    if (filtroStatus && d._ag !== filtroStatus.value) return false;
+    return true;
+  });
 
   return (
     <main className="flex-1 overflow-y-auto">
@@ -315,19 +331,25 @@ const EditDb = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3 p-4 overflow-x-auto border-b border-border-light dark:border-border-dark">
-                <button className="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-background-dark px-3 hover:bg-primary/10 transition-colors">
-                  <p className="text-sm font-medium leading-normal">Academic Period</p>
-                  <span className="material-symbols-outlined text-base">expand_more</span>
-                </button>
-                <button className="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-background-dark px-3 hover:bg-primary/10 transition-colors">
-                  <p className="text-sm font-medium leading-normal">Department</p>
-                  <span className="material-symbols-outlined text-base">expand_more</span>
-                </button>
-                <button className="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-background-dark px-3 hover:bg-primary/10 transition-colors">
-                  <p className="text-sm font-medium leading-normal">Status</p>
-                  <span className="material-symbols-outlined text-base">expand_more</span>
-                </button>
+              <div className="flex gap-3 p-4 border-b border-border-light dark:border-border-dark">
+                <Select
+                  placeholder="Academic Period"
+                  options={opcoesPeriodo}
+                  onChange={setFiltroPeriodo}
+                  isClearable
+                />
+                <Select
+                  placeholder="Department"
+                  options={opcoesCurso}
+                  onChange={setFiltroCurso}
+                  isClearable
+                />
+                <Select
+                  placeholder="Status"
+                  options={opcoesStatus}
+                  onChange={setFiltroStatus}
+                  isClearable
+                />
               </div>
 
               <div className="overflow-x-auto">
@@ -343,7 +365,7 @@ const EditDb = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {disciplinas.map((disciplina, index) => (
+                    {disciplinasFiltradas.map((disciplina, index) => (
                       <tr key={`${disciplina._re}-${disciplina._se}-${index}`} className="border-b border-border-light dark:border-border-dark">
                         <td className="px-6 py-4 font-medium">{disciplina._re}</td>
                         <td className="px-6 py-4">{disciplina._di}</td>
