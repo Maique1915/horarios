@@ -64,9 +64,9 @@ const EditDb = () => {
   const [newDisciplina, setNewDisciplina] = useState(() => ({ // Estado para a nova disciplina
     _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
   }));
-  const [filtroPeriodo, setFiltroPeriodo] = useState(null);
-  const [filtroStatus, setFiltroStatus] = useState(null);
-  const [filtroEl, setFiltroEl] = useState(null);
+  const [filtroPeriodo, setFiltroPeriodo] = useState({ value: 1, label: '1º Período' });
+  const [filtroStatus, setFiltroStatus] = useState({ value: true, label: 'Ativa' });
+  const [filtroEl, setFiltroEl] = useState({ value: true, label: 'Eletiva' });
 
   // Função para gerar as opções de pré-requisitos
   const getPrerequisiteOptions = useCallback(() => {
