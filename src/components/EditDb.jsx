@@ -266,6 +266,15 @@ const EditDb = () => {
       handleNewHoChange(newHo);
     }
   }); 
+  const handleToggleStatus = (disciplinaToToggle) => {
+    const updatedDisciplinas = disciplinas.map(d =>
+      (d._re === disciplinaToToggle._re && d._se === disciplinaToToggle._se)
+        ? { ...d, _ag: !d._ag }
+        : d
+    );
+    setDisciplinas(updatedDisciplinas);
+  };
+
   const opcoesPeriodo = [...new Set(disciplinas.map(d => d._se))].sort((a, b) => a - b).map(se => ({ value: se, label: `${se}º Período` }));
   const opcoesCurso = [...new Set(db.map(d => d._cu))].map(cu => ({ value: cu, label: cu }));
   const opcoesStatus = [
@@ -364,11 +373,10 @@ const EditDb = () => {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs uppercase text-text-light-secondary dark:text-text-dark-secondary">
                     <tr>
-                      <th className="px-6 py-3" scope="col">Código da Disciplina</th>
+                      <th className="px-6 py-3" scope="col">Código</th>
                       <th className="px-6 py-3" scope="col">Nome da Disciplina</th>
                       <th className="px-6 py-3" scope="col">Período</th>
                       <th className="px-6 py-3" scope="col">Créditos</th>
-                      <th className="px-6 py-3" scope="col">Status</th>
                       <th className="px-6 py-3 text-right" scope="col">Ações</th>
                     </tr>
                   </thead>
@@ -379,12 +387,13 @@ const EditDb = () => {
                         <td className="px-6 py-4">{disciplina._di}</td>
                         <td className="px-6 py-4">{disciplina._se}º Período</td>
                         <td className="px-6 py-4">{disciplina._at + disciplina._ap}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${disciplina._ag ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {disciplina._ag ? 'Ativa' : 'Inativa'}
-                          </span>
-                        </td>
                         <td className="px-6 py-4 flex justify-end gap-2">
+                          <button
+                            className={`p-2 rounded-md hover:bg-gray-500/10 ${disciplina._ag ? 'text-green-500' : 'text-red-500'} transition-colors`}
+                            onClick={() => handleToggleStatus(disciplina)}
+                          >
+                            <span className="material-symbols-outlined text-xl">{disciplina._ag ? 'visibility' : 'visibility_off'}</span>
+                          </button>
                           <button
                             className="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"
                             onClick={() => handleEditDisciplina(disciplina)}
