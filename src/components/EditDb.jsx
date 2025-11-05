@@ -65,8 +65,8 @@ const EditDb = () => {
     _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
   }));
   const [filtroPeriodo, setFiltroPeriodo] = useState(null);
-  const [filtroCurso, setFiltroCurso] = useState(null);
   const [filtroStatus, setFiltroStatus] = useState(null);
+  const [filtroEl, setFiltroEl] = useState(null);
 
   // Função para gerar as opções de pré-requisitos
   const getPrerequisiteOptions = useCallback(() => {
@@ -271,11 +271,15 @@ const EditDb = () => {
     { value: true, label: 'Ativa' },
     { value: false, label: 'Inativa' },
   ];
+  const opcoesEl = [
+    { value: true, label: 'Eletiva' },
+    { value: false, label: 'Optativa' },
+  ];
 
   const disciplinasFiltradas = disciplinas.filter(d => {
     if (filtroPeriodo && d._se !== filtroPeriodo.value) return false;
-    if (filtroCurso && d._cu !== filtroCurso.value) return false;
     if (filtroStatus && d._ag !== filtroStatus.value) return false;
+    if (filtroEl && d._el !== filtroEl.value) return false;
     return true;
   });
 
@@ -339,9 +343,9 @@ const EditDb = () => {
                   isClearable
                 />
                 <Select
-                  placeholder="Department"
-                  options={opcoesCurso}
-                  onChange={setFiltroCurso}
+                  placeholder="Eletiva/Optativa"
+                  options={opcoesEl}
+                  onChange={setFiltroEl}
                   isClearable
                 />
                 <Select
