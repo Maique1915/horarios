@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import * as z from "zod";
@@ -38,6 +38,10 @@ const DisciplinaForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: disciplina,
   });
+
+  useEffect(() => {
+    reset(disciplina);
+  }, [disciplina, reset]);
 
   return (
     <div className="lg:col-span-2">
