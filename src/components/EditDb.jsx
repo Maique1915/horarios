@@ -67,6 +67,7 @@ const EditDb = () => {
   const [filtroPeriodo, setFiltroPeriodo] = useState({ value: 1, label: '1º Período' });
   const [filtroStatus, setFiltroStatus] = useState({ value: true, label: 'Ativa' });
   const [filtroEl, setFiltroEl] = useState({ value: true, label: 'Eletiva' });
+  const [filtroTexto, setFiltroTexto] = useState('');
 
   // Função para gerar as opções de pré-requisitos
   const getPrerequisiteOptions = useCallback(() => {
@@ -280,6 +281,7 @@ const EditDb = () => {
     if (filtroPeriodo && d._se !== filtroPeriodo.value) return false;
     if (filtroStatus && d._ag !== filtroStatus.value) return false;
     if (filtroEl && d._el !== filtroEl.value) return false;
+    if (filtroTexto && !d._di.toLowerCase().includes(filtroTexto.toLowerCase()) && !d._re.toLowerCase().includes(filtroTexto.toLowerCase())) return false;
     return true;
   });
 
@@ -312,7 +314,7 @@ const EditDb = () => {
           <div className="lg:col-span-2 flex flex-col gap-4">
             <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm">
               <div className="p-4 flex flex-col md:flex-row gap-4 border-b border-border-light dark:border-border-dark">
-                <div className="flex-1">
+                <div className="w-full md:w-1/2 lg:w-1/3">
                   <label className="flex flex-col min-w-40 h-10 w-full">
                     <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
                       <div className="text-text-light-secondary dark:text-text-dark-secondary flex border-r-0 items-center justify-center pl-3 pr-2 bg-background-light dark:bg-background-dark rounded-l-lg">
@@ -321,6 +323,8 @@ const EditDb = () => {
                       <input
                         className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary h-full placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary px-2 rounded-l-none border-l-0 text-sm font-normal leading-normal"
                         placeholder="Search by subject name or code..."
+                        value={filtroTexto}
+                        onChange={(e) => setFiltroTexto(e.target.value)}
                       />
                     </div>
                   </label>
