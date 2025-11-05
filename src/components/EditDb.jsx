@@ -6,27 +6,11 @@ import db from '../model/db.json'; // Importar db.json diretamente
 import db2 from '../model/db2.json'; // Importar definições de grade
 
 import * as z from "zod";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from 'react-router-dom';
 import { da } from 'zod/locales';
+import DisciplinaForm from './DisciplinaForm';
 
 const animatedComponents = makeAnimated();
-
-const formSchema = z.object({
-  _id: z.string().optional(), // Adicionado para compatibilidade, embora não usado diretamente no db.json
-  _di: z.string().min(3, "Nome muito curto"),
-  _re: z.string().min(2, "Código muito curto"),
-  _se: z.coerce.number(),
-  _at: z.coerce.number().min(0),
-  _ap: z.coerce.number().min(0),
-  _pr: z.array(z.string()),
-  _el: z.boolean(),
-  _ag: z.boolean(),
-  _cu: z.string(),
-  _ho: z.array(z.tuple([z.number(), z.number()])),
-  _da: z.array(z.union([z.tuple([z.string(), z.string()]), z.null()])).nullable(),
-});
 
 // Componente auxiliar para renderizar cada período
 const PeriodEditDivs = ({ periodKey, subjectsData, onEditDisciplina }) => {
@@ -86,13 +70,6 @@ const EditDb = () => {
   const courseData = db2.find(c => c._cu === cur);
   const days = ['','Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].filter((_, index) => index < (courseData?._da[1] + 1 || 6));
   const timeIntervals = courseData?._hd || []; // Usar _hd de db2.json
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: defaultFormValues,
-  });
-
-  const { handleSubmit, register, control, setValue, watch, reset, formState: { errors } } = form;
 
   useEffect(() => {
     console.log('Carregando disciplinas para o curso:', cur);
@@ -415,216 +392,24 @@ const EditDb = () => {
             </div>
           </div>
 
-          {/* Add New Subject Form */}
-          <div className="lg:col-span-2">
-            <div className="sticky top-8 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm p-6">
-              <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-                <h3 className="text-xl font-bold">Formulário de disciplina</h3>
-
-                <div className="flex flex-col gap-4">
-                  <div class="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    <div className="lg:col-span-1 flex flex-col">
-                      <label className="block mb-2 text-sm font-medium" htmlFor="numeric-period">
-                        Semestre
-                      </label>
-                      <input
-                        className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                        id="numericPeriod"
-                        type="number"
-                        placeholder="e.g., 1"
-                        value={editingDisciplina ? editingDisciplina._se : newDisciplina._se}
-                        onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_se')}
-                        maxLength="2"
-                        required
-                      />
-                    </div>
-                    <div className="lg:col-span-3 flex flex-col">
-                      <label className="block mb-2 text-sm font-medium" htmlFor="subject-name">
-                        Disiciplina
-                      </label>
-                      <input
-                        className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                        id="_di"
-                        type="text"
-                        placeholder="e.g., Introduction to Programming"
-                        value={editingDisciplina ? editingDisciplina._di : newDisciplina._di}
-                        onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_di')}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block mb-2 text-sm font-medium" htmlFor="academic-period">
-                        Referência
-                      </label>
-                      <input
-                        className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                        id="_re"
-                        type="text"
-                        placeholder="e.g., 101A"
-                        value={editingDisciplina ? editingDisciplina._re : newDisciplina._re}
-                        onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_re')}
-                        required
-                      />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-
-                      <label htmlFor="_el_edit" className="flex items-center cursor-pointer">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            id="_el_edit"
-                            className="sr-only" // sr-only makes it visually hidden but accessible
-                            checked={editingDisciplina ? editingDisciplina._el : newDisciplina._el}
-                            onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_el')}
-                          />
-                          <div className="block bg-gray-600 w-14 h-8 rounded-full"></div> {/* Track */}
-                          <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${editingDisciplina && editingDisciplina._el ? 'translate-x-full bg-primary' : ''}`}></div> {/* Thumb */}
-                        </div>
-                        <span className="ml-3 text-sm font-medium text-gray-900">Eletiva</span>
-                      </label>
-
-                      <label htmlFor="_ag_edit" className="flex items-center cursor-pointer">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            id="_ag_edit"
-                            className="sr-only" // sr-only makes it visually hidden but accessible
-                            checked={editingDisciplina ? editingDisciplina._ag : newDisciplina._ag}
-                            onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_ag')}
-                          />
-                          <div className="block bg-gray-600 w-14 h-8 rounded-full"></div> {/* Track */}
-                          <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${editingDisciplina && editingDisciplina._ag ? 'translate-x-full bg-primary' : ''}`}></div> {/* Thumb */}
-                        </div>
-                        <span className="ml-3 text-sm font-medium text-gray-900">Ativa</span>
-                      </label>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block mb-2 text-sm font-medium" htmlFor="credit-hours">
-                          Créditos práticos
-                        </label>
-                        <input
-                          className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                          id="_ap"
-                          type="number"
-                          placeholder="3"
-                          value={editingDisciplina ? editingDisciplina._ap : newDisciplina._ap}
-                          onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_ap')}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block mb-2 text-sm font-medium" htmlFor="credit-hours">
-                          Creditos teóricos
-                        </label>
-                        <input
-                          className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                          id="_at"
-                          type="number"
-                          placeholder="3"
-                          value={editingDisciplina ? editingDisciplina._at : newDisciplina._at}
-                          onChange={(e) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)(e, '_at')}
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block mb-2 text-sm font-medium" htmlFor="department">
-                      Pré-requisitos
-                    </label>
-                    <Select
-                      closeMenuOnSelect={false}
-                      components={animatedComponents}
-                      isMulti
-                      options={getPrerequisiteOptions()}
-                      value={getPrerequisiteOptions().filter(option => editingDisciplina ? editingDisciplina._pr.includes(option.value) : newDisciplina._pr.includes(option.value))}
-                      onChange={(selectedOptions) => (editingDisciplina ? handleEditingInputChange : handleNewInputChange)({ target: { value: selectedOptions, type: 'select-multi' } }, '_pr')}
-                      className="w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                      id="_pr"
-                      classNamePrefix="select"
-                    />
-                  </div>
-
-
-
-                  <div className="space-y-4">
-                    <label className="block text-sm font-medium">Horários</label>
-
-                    <div className={`grid grid-cols-${days.length} gap-2 text-center text-xs`}>
-                      {/* Cabeçalho */}
-                      {days.map((day, index) => (
-                        <div key={`header-${index}`} className="font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                          {day}
-                        </div>
-                      ))}
-                      <div className={`col-span-${days.length} border-t border-border-light dark:border-border-dark my-1`}></div>
-
-                      {/* Corpo do quadro */}
-                      {timeIntervals.map((interval, timeIndex) => (
-                        <React.Fragment key={timeIndex}>
-                          <div className="flex items-center justify-center font-medium text-text-light-secondary dark:text-text-dark-secondary">
-                            {interval[0]} - {interval[1]}
-                          </div>
-                          {days.slice(1).map((day, dayIndex) => {
-                            const currentHo = editingDisciplina ? editingDisciplina._ho : newDisciplina._ho;
-                            const isChecked = currentHo.some(
-                              (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
-                            );
-                            return (
-                              <label
-                                key={dayIndex}
-                                className={`flex items-center justify-center p-2 rounded-lg cursor-pointer ring-1 ring-transparent hover:bg-primary/10 transition-colors ${isChecked ? 'bg-primary/20 ring-primary' : 'bg-background-light dark:bg-background-dark'
-                                  }`}
-                              >
-                                <input
-                                  className="form-checkbox hidden"
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => handleTimeSlotToggle(dayIndex + 1, timeIndex)}
-                                />
-                                <span className="text-xs font-medium">&ensp;</span> {/* Espaço para a label */}
-                              </label>
-                            );
-                          })}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 mt-2">
-                  <button
-                    className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
-                    type="submit"
-                  >
-                    <span className="truncate">Salvar Alterações</span>
-                  </button>
-                  <button
-                    className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
-                    type="button"
-                    onClick={() => {
-                      if (editingDisciplina) {
-                        resetDisciplina();
-                      } else {
-                        setNewDisciplina({
-                          _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
-                        });
-                      }
-                    }}
-                  >
-                    <span className="truncate">Cancelar</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+          <DisciplinaForm
+            disciplina={editingDisciplina || newDisciplina}
+            onInputChange={editingDisciplina ? handleEditingInputChange : handleNewInputChange}
+            onHoChange={editingDisciplina ? handleEditingHoChange : handleNewHoChange}
+            onSubmit={editingDisciplina ? () => {} : addDisciplina} // A ser implementado
+            onCancel={() => {
+              if (editingDisciplina) {
+                resetDisciplina();
+              } else {
+                cancelAddDisciplina();
+              }
+            }}
+            getPrerequisiteOptions={getPrerequisiteOptions}
+            days={days}
+            timeIntervals={timeIntervals}
+            handleTimeSlotToggle={handleTimeSlotToggle}
+            cur={cur}
+          />
         </div>
       </div>
     </main>
