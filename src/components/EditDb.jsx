@@ -204,7 +204,7 @@ const EditDb = () => {
   };
 
   const removeDisciplina = (disciplinaToRemove) => {
-    if (window.confirm(`Tem certeza que deseja remover a disciplina "${disciplinaToRemove._di}" (${disciplinaToRemove._re})? Esta ação é permanente.\n\nVocê pode apenas desativa-la, isto oculará ela do sistema.`)) {
+    if (window.confirm(`Excluir removerá a matéria do sistema. Se a matéria só não vai ser dada no semestre seguinte, basta desativá-la. Tem certeza que deseja remover a disciplina "${disciplinaToRemove._di}" (${disciplinaToRemove._re})?`)) {
       const updatedDisciplinas = disciplinas.filter(d =>
         !(d._re === disciplinaToRemove._re && d._se === disciplinaToRemove._se)
       );
