@@ -290,9 +290,9 @@ const EditDb = () => {
       <div className="mx-auto max-w-1x1 p-6 lg:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex flex-col gap-1">
-            <p className="text-3xl font-bold leading-tight tracking-tight">Course Subject Management</p>
+            <p className="text-3xl font-bold leading-tight tracking-tight">Gerenciamento de Disciplinas do Curso</p>
             <p className="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">
-              Add, edit, or remove course subjects from the university catalog.
+              Adicione, edite ou remova disciplinas do catálogo da universidade.
             </p>
           </div>
           <button
@@ -322,7 +322,7 @@ const EditDb = () => {
                       </div>
                       <input
                         className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary h-full placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary px-2 rounded-l-none border-l-0 text-sm font-normal leading-normal"
-                        placeholder="Search by subject name or code..."
+                        placeholder="Pesquisar por nome ou código da disciplina..."
                         value={filtroTexto}
                         onChange={(e) => setFiltroTexto(e.target.value)}
                       />
@@ -341,7 +341,7 @@ const EditDb = () => {
 
               <div className="flex gap-3 p-4 border-b border-border-light dark:border-border-dark">
                 <Select
-                  placeholder="Academic Period"
+                  placeholder="Período"
                   options={opcoesPeriodo}
                   onChange={setFiltroPeriodo}
                   isClearable
@@ -364,12 +364,12 @@ const EditDb = () => {
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs uppercase text-text-light-secondary dark:text-text-dark-secondary">
                     <tr>
-                      <th className="px-6 py-3" scope="col">Subject Code</th>
-                      <th className="px-6 py-3" scope="col">Subject Name</th>
-                      <th className="px-6 py-3" scope="col">Academic Period</th>
-                      <th className="px-6 py-3" scope="col">Credits</th>
+                      <th className="px-6 py-3" scope="col">Código da Disciplina</th>
+                      <th className="px-6 py-3" scope="col">Nome da Disciplina</th>
+                      <th className="px-6 py-3" scope="col">Período</th>
+                      <th className="px-6 py-3" scope="col">Créditos</th>
                       <th className="px-6 py-3" scope="col">Status</th>
-                      <th className="px-6 py-3 text-right" scope="col">Actions</th>
+                      <th className="px-6 py-3 text-right" scope="col">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -595,7 +595,7 @@ const EditDb = () => {
                     className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
                     type="submit"
                   >
-                    <span className="truncate">Save Changes</span>
+                    <span className="truncate">Salvar Alterações</span>
                   </button>
                   <button
                     className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
@@ -610,7 +610,7 @@ const EditDb = () => {
                       }
                     }}
                   >
-                    <span className="truncate">Cancel</span>
+                    <span className="truncate">Cancelar</span>
                   </button>
                 </div>
               </form>
