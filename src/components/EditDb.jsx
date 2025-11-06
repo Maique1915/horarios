@@ -53,23 +53,9 @@ const EditDb = () => {
   const [filtroEl, setFiltroEl] = useState({ value: true, label: 'Eletiva' });
   const [filtroTexto, setFiltroTexto] = useState('');
 
-  // Função para gerar as opções de pré-requisitos
-  const getPrerequisiteOptions = useCallback(() => {
-    const activeDisciplinas = disciplinas.filter(d => d._ag);
-    const uniquePrerequisites = Array.from(new Set(activeDisciplinas.map(d => d._re)));
-    return uniquePrerequisites.map(re => ({ value: re, label: `${re} - ${activeDisciplinas.find(d => d._re === re)?._di || ''}` }));
-  }, [disciplinas]);
-
-
-
   const defaultFormValues = React.useMemo(() => ({
     _id: "", _di: "", _re: "", _se: 1, _at: 4, _ap: 0, _pr: [], _el: false, _ag: true, _cu: cur, _ho: [], _da: [],
   }), [cur]);
-
-
-  const courseData = db2.find(c => c._cu === cur);
-  const days = ['','Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].filter((_, index) => index < (courseData?._da[1] + 1 || 6));
-  const timeIntervals = courseData?._hd || []; // Usar _hd de db2.json
 
   useEffect(() => {
     console.log('Carregando disciplinas para o curso:', cur);
@@ -99,108 +85,39 @@ const EditDb = () => {
 
   const handleEditDisciplina = (disciplinaToEdit) => {
     setEditingDisciplineId(disciplinaToEdit._re); // Usar _re como ID temporário
-    setEditingDisciplina(disciplinaToEdit); // Definir a disciplina completa para edição
+    setEditingDisciplina({ ...disciplinaToEdit }); // Definir a disciplina completa para edição, passando uma cópia
   };
 
-  const handleEditingInputChange = (e, field) => {
-    if (!editingDisciplina) return;
-
-    let parsedValue;
-    if (e.target.type === 'checkbox') {
-      parsedValue = e.target.checked;
-    } else if (e.target.type === 'select-multi' && field === '_pr') {
-      parsedValue = e.target.value ? e.target.value.map(option => option.value) : [];
-    } else if (['_se', '_at', '_ap'].includes(field)) {
-      parsedValue = parseInt(e.target.value) || '';
-    } else {
-      parsedValue = e.target.value;
-    }
-
-    // Update the main list
-    const updatedDisciplinas = disciplinas.map(d =>
-      (d._re === editingDisciplina._re && d._se === editingDisciplina._se)
-        ? { ...d, [field]: parsedValue }
-        : d
-    );
-    setDisciplinas(updatedDisciplinas);
-
-    // Update the local form state
-    setEditingDisciplina(prev => ({ ...prev, [field]: parsedValue }));
-  };
-
-  // Nova função para lidar com a mudança de horários do HorarioEditor para edição
-  const handleEditingHoChange = useCallback((newHo) => {
-    if (!editingDisciplina) return;
-
-    const updatedDisciplinas = disciplinas.map(d =>
-      (d._re === editingDisciplina._re && d._se === editingDisciplina._se)
-        ? { ...d, _ho: newHo }
-        : d
-    );
-    setDisciplinas(updatedDisciplinas);
-
-    setEditingDisciplina(prev => ({ ...prev, _ho: newHo }));
-  }, [editingDisciplina, disciplinas]);
-
-  const resetDisciplina = () => {
-    if (!editingDisciplina) return;
-
-    // Find the original discipline from the reference
-    const originalDisciplina = referenceDisciplinas.find(d =>
-      d._re === editingDisciplina._re && d._se === editingDisciplina._se
-    );
-
-    if (originalDisciplina) {
-      // Update the 'disciplinas' (editing) state with the original data
-      setDisciplinas(prevDisciplinas => {
-        return prevDisciplinas.map(d => {
-          if (d._re === editingDisciplina._re && d._se === editingDisciplina._se) {
-            return originalDisciplina;
-          }
-          return d;
-        });
-      });
-
-      // Update the local editing form as well
-      setEditingDisciplina(JSON.parse(JSON.stringify(originalDisciplina)));
-    }
-  };
-
-  const closeEditForm = () => {
-    setEditingDisciplina(null); // Fechar o formulário de edição
-  };
-
-  const handleNewInputChange = (e, field) => {
-    let value = e.target.value;
-    if (e.target.type === 'select-multi' && field === '_pr') {
-      value = e.target.value ? e.target.value.map(option => option.value) : [];
-    } else if (field === '_el' || field === '_ag') {
-      value = e.target.checked; // Para checkboxes
-    } else if (field === '_se' || field === '_at' || field === '_ap') {
-      value = parseInt(value);
-    }
-    setNewDisciplina(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Nova função para lidar com a mudança de horários do HorarioEditor para adição
-  const handleNewHoChange = useCallback((newHo) => {
-    setNewDisciplina(prev => ({ ...prev, _ho: newHo }));
-  }, []);
-
-  const addDisciplina = () => {
-    const updatedDisciplinas = [...disciplinas, { ...newDisciplina, _se: parseInt(newDisciplina._se), _at: parseInt(newDisciplina._at), _ap: parseInt(newDisciplina._ap) }];
-    setDisciplinas(updatedDisciplinas);
-    setNewDisciplina({
-      _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: 'matematica', _ho: []
+  const handleSaveDisciplina = (updatedDisciplina) => {
+    setDisciplinas(prevDisciplinas => {
+      const newDisciplinas = prevDisciplinas.map(d =>
+        (d._re === updatedDisciplina._re && d._se === updatedDisciplina._se)
+          ? updatedDisciplina
+          : d
+      );
+      return newDisciplinas;
     });
-    setShowAddFormOverlay(false); // Esconder o formulário de adição após adicionar
+    setEditingDisciplina(null); // Fechar o formulário após salvar
   };
 
-  const cancelAddDisciplina = () => {
-    setShowAddFormOverlay(false);
+  const handleCancelForm = () => {
+    setEditingDisciplina(null);
     setNewDisciplina({
-      _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: 'matematica', _ho: []
+      _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
     });
+  };
+
+  const addDisciplina = (newDisciplineData) => {
+    const newDisciplineWithParsedNumbers = {
+      ...newDisciplineData,
+      _se: parseInt(newDisciplineData._se),
+      _at: parseInt(newDisciplineData._at),
+      _ap: parseInt(newDisciplineData._ap),
+      _cu: cur,
+    };
+
+    setDisciplinas(prevDisciplinas => [...prevDisciplinas, newDisciplineWithParsedNumbers]);
+    handleCancelForm(); // Call handleCancelForm to reset newDisciplina and close the form
   };
 
   const removeDisciplina = (disciplinaToRemove) => {
@@ -213,8 +130,8 @@ const EditDb = () => {
     }
   };
 
-  const saveAllDisciplinas = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(disciplinas, null, 2));
+  const saveAllDisciplinas = (currentDisciplinas) => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentDisciplinas, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "db.json");
@@ -241,7 +158,7 @@ const EditDb = () => {
     } else {
       handleNewHoChange(newHo);
     }
-  }); 
+  });
   const handleToggleStatus = (disciplinaToToggle) => {
     const updatedDisciplinas = disciplinas.map(d =>
       (d._re === disciplinaToToggle._re && d._se === disciplinaToToggle._se)
@@ -270,30 +187,57 @@ const EditDb = () => {
     return true;
   });
 
+  // Função para resetar o formulário
+  const resetForm = (defaultValues) => {
+    setDisciplina(defaultValues || {
+      _id: '',
+      _di: '',
+      _re: '',
+      _se: 1,
+      _at: 0,
+      _ap: 0,
+      _pr: [],
+      _el: false,
+      _ag: true,
+      _cu: '',
+      _ho: [],
+      _da: null
+    });
+  };
+
+
   return (
     <main className="flex-1 overflow-y-auto">
       <div className="mx-auto max-w-1x1 p-6 lg:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex flex-col gap-1">
-            <p className="text-3xl font-bold leading-tight tracking-tight">Gerenciamento de Disciplinas do Curso</p>
-            <p className="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">
-              Adicione, edite ou remova disciplinas do catálogo da universidade.
-            </p>
-          </div>
-          <button
-            className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
-            onClick={() => {
-              setEditingDisciplina(null);
-              setNewDisciplina({
-                _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
-              });
-            }}
-          >
-            <span className="material-symbols-outlined text-xl">add</span>
-            <span className="truncate">Nova disciplina</span>
-          </button>
-        </div>
-
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div className="flex flex-col gap-1">
+                      <p className="text-3xl font-bold leading-tight tracking-tight">Gerenciamento de Disciplinas do Curso</p>
+                      <p className="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">
+                        Adicione, edite ou remova disciplinas do catálogo da universidade.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+                        onClick={() => saveAllDisciplinas(disciplinas)}
+                      >
+                        <span className="material-symbols-outlined text-xl">download</span>
+                        <span className="truncate">Salvar JSON</span>
+                      </button>
+                      <button
+                        className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+                        onClick={() => {
+                          setEditingDisciplina(null);
+                          setNewDisciplina({
+                            _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
+                          });
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-xl">add</span>
+                        <span className="truncate">Nova disciplina</span>
+                      </button>
+                    </div>
+                  </div>
         <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {/* Subjects Table */}
           <div className="lg:col-span-2 flex flex-col gap-4">
@@ -392,23 +336,11 @@ const EditDb = () => {
           </div>
 
           <DisciplinaForm
-            key={editingDisciplina ? editingDisciplina._re : 'new'}
             disciplina={editingDisciplina || newDisciplina}
-            onInputChange={editingDisciplina ? handleEditingInputChange : handleNewInputChange}
-            onHoChange={editingDisciplina ? handleEditingHoChange : handleNewHoChange}
-            onSubmit={editingDisciplina ? () => {} : addDisciplina} // A ser implementado
-            onCancel={() => {
-              if (editingDisciplina) {
-                resetDisciplina();
-              } else {
-                cancelAddDisciplina();
-              }
-            }}
-            getPrerequisiteOptions={getPrerequisiteOptions}
-            days={days}
-            timeIntervals={timeIntervals}
-            handleTimeSlotToggle={handleTimeSlotToggle}
+            onSubmit={editingDisciplina ? handleSaveDisciplina : addDisciplina}
+            onCancel={handleCancelForm}
             cur={cur}
+            disciplinas={disciplinas}
           />
         </div>
       </div>
