@@ -124,13 +124,13 @@ const DisciplinaForm = ({
     const currentHo = watch('_ho');
     const newHo = [...currentHo];
     const index = newHo.findIndex(
-      (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
+      (ho) => ho[0] === dayIndex && ho[1] === timeIndex
     );
 
     if (index > -1) {
       newHo.splice(index, 1); // Remove se já existe
     } else {
-      newHo.push([dayIndex + 1, timeIndex]); // Adiciona se não existe
+      newHo.push([dayIndex, timeIndex]); // Adiciona se não existe
     }
     setValue('_ho', newHo);
   }, [watch, setValue]);
@@ -253,7 +253,7 @@ const DisciplinaForm = ({
                     {days.map((day, dayIndex) => {
                       const currentHo = watch('_ho');
                       const isChecked = currentHo && currentHo.some(
-                        (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
+                        (ho) => ho[0] === dayIndex && ho[1] === timeIndex
                       );
                       return (
                         <label
