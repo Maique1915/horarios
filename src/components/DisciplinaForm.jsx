@@ -83,7 +83,9 @@ const DisciplinaForm = ({
   });
 
   const courseData = db2.find(c => c._cu === cur);
-  const days = ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].filter((_, index) => index < (courseData?._da[1] + 1 || 6));
+  const allDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  const numDays = courseData?._da[1] || 5; // Default to 5 days if not specified
+  const days = allDays.slice(0, numDays);
   const timeIntervals = courseData?._hd || [];
 
 
@@ -235,19 +237,20 @@ const DisciplinaForm = ({
 
             <div className="space-y-4">
               <label className="block text-sm font-medium">Horários</label>
-              <div className={`grid grid-cols-${days.length} gap-2 text-center text-xs`}>
+              <div className={`grid grid-cols-${days.length + 1} gap-2 text-center text-xs`}>
+                <div className="font-medium text-text-light-secondary dark:text-text-dark-secondary"></div> {/* Empty cell for time labels */}
                 {days.map((day, index) => (
                   <div key={`header-${index}`} className="font-medium text-text-light-secondary dark:text-text-dark-secondary">
                     {day}
                   </div>
                 ))}
-                <div className={`col-span-${days.length} border-t border-border-light dark:border-border-dark my-1`}></div>
+                <div className={`col-span-${days.length + 1} border-t border-border-light dark:border-border-dark my-1`}></div>
                 {timeIntervals.map((interval, timeIndex) => (
                   <React.Fragment key={timeIndex}>
                     <div className="flex items-center justify-center font-medium text-text-light-secondary dark:text-text-dark-secondary">
                       {interval[0]} - {interval[1]}
                     </div>
-                    {days.slice(1).map((day, dayIndex) => {
+                    {days.map((day, dayIndex) => {
                       const currentHo = watch('_ho');
                       const isChecked = currentHo && currentHo.some(
                         (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
