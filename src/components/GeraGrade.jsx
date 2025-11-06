@@ -169,8 +169,7 @@ const GeraGrade = () => {
                         <span className="material-symbols-outlined">expand_more</span>
                     </div>
                 </summary>
-                <div className="border-t border-slate-200 dark:border-slate-800 -mx-4">
-                    <div className="px-4 divide-y divide-slate-200 dark:divide-slate-800">
+                <div className="px-4 divide-y divide-slate-200 dark:divide-slate-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4">
                         {subjectsData.map(item => {
                             const originalIndex = arr.findIndex(i => i._re === item._re);
                             const key = (state.estado === 0) ? originalIndex : item._re;
@@ -270,7 +269,7 @@ const GeraGrade = () => {
             </header>
             {/* Main Content Area */}
             <div className="layout-container flex h-full grow flex-col">
-                <div className="flex flex-1 flex-col lg:flex-row">
+                <div className="flex flex-1 flex-col-4 lg:flex-row">
                     {/* Left Column: Course Selection */}
                     <main className="w-full lg:w-2/3 p-4 sm:p-6 lg:p-8">
                         <div className="layout-content-container flex flex-col w-full">
@@ -332,5 +331,6 @@ const GeraGrade = () => {
             </div>
         </div>
     );
+};
 
 export default GeraGrade;
