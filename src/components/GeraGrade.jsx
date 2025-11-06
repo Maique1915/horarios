@@ -9,7 +9,7 @@ let _cur = '';
 let gr = [];
 
 const GeraGrade = () => {
-    const { cur = 'engcomp' } = useParams(); // Use useParams para obter 'cur'
+    const { cur = 'engcomp' } = useParams();
     const [state, setState] = useState({
         names: [],
         keys: [],
@@ -27,129 +27,114 @@ const GeraGrade = () => {
 
     const arr = ativas(cur);
 
+    // ### CORREÇÃO PRINCIPAL: Função handleCheck simplificada ###
     function handleCheck(e) {
-        const r = e.target;
+        const target = e.target;
+        const isChecked = target.checked;
 
-        if (r.classList.contains('period-toggle')) {
-            const isChecked = r.checked;
-            const subjectGroup = document.getElementById(r.value);
-
-            if (subjectGroup) {
-                const subjectCheckboxes = subjectGroup.getElementsByClassName("subject-checkbox");
-                
-                for (const mat of subjectCheckboxes) {
-                    // A lógica aqui já estava correta: ela atualiza o estado de verdade.
-                    // O problema era apenas visual no 'period-toggle'.
-                    const idNoEstado = (state.estado === 0) 
-                        ? state.keys.indexOf(parseInt(mat.value)) 
-                        : state.x.indexOf(mat.id);
-
-                    if (isChecked && idNoEstado === -1) {
-                        altera(true, mat);
-                    } else if (!isChecked && idNoEstado > -1) {
-                        altera(false, mat);
-                    }
-                }
-            }
-        } 
-        else if (r.classList.contains('subject-checkbox')) {
-            altera(r.checked, r);
-        }
-    }
-
-    function altera(add, target) {
-        if (state.estado === 0) {
-            const value = parseInt(target.value);
+        if (target.classList.contains('period-toggle')) {
+            const periodKey = target.value;
+            const subjectsInPeriod = arr.filter(item => item._se == periodKey); // Changed === to == for potential type coercion issues
+            
             setState(prevState => {
-                const keys = [...prevState.keys];
-                const names = [...prevState.names];
-                const crs = [...prevState.crs];
-
-                if (add) {
-                    if (!keys.includes(value)) {
-                        keys.push(value);
-                        names.push(target.id);
-                        crs.push(parseInt(target.name));
+                if (prevState.estado === 0) {
+                    if (isChecked) {
+                        // Adiciona todas as matérias do período
+                        const newKeys = [...prevState.keys];
+                        const newNames = [...prevState.names];
+                        const newCrs = [...prevState.crs];
+                        
+                        subjectsInPeriod.forEach(subject => {
+                            if (!newKeys.includes(subject._re)) {
+                                newKeys.push(subject._re);
+                                newNames.push(subject._re);
+                                newCrs.push(parseInt(subject._ap + subject._at));
+                            }
+                        });
+                        
+                        return { ...prevState, keys: newKeys, names: newNames, crs: newCrs };
+                    } else {
+                        // Remove todas as matérias do período
+                        const subjectIds = subjectsInPeriod.map(s => s._re);
+                        const newKeys = prevState.keys.filter(key => !subjectIds.includes(key));
+                        const newNames = prevState.names.filter(name => !subjectIds.includes(name));
+                        const newCrs = prevState.crs.filter((cr, index) => !subjectIds.includes(prevState.keys[index]));
+                        
+                        return { ...prevState, keys: newKeys, names: newNames, crs: newCrs };
                     }
-                } else {
-                    const i = keys.indexOf(value);
-                    if (i > -1) {
-                        keys.splice(i, 1);
-                        names.splice(i, 1);
-                        crs.splice(i, 1);
+                } else if (prevState.estado === 1) {
+                    if (isChecked) {
+                        // Adiciona todas as matérias do período à lista de exclusão
+                        const subjectIds = subjectsInPeriod.map(s => s._re);
+                        const newX = [...new Set([...prevState.x, ...subjectIds])];
+                        return { ...prevState, x: newX };
+                    } else {
+                        // Remove todas as matérias do período da lista de exclusão
+                        const subjectIds = subjectsInPeriod.map(s => s._re);
+                        const newX = prevState.x.filter(id => !subjectIds.includes(id));
+                        return { ...prevState, x: newX };
                     }
                 }
-                return { ...prevState, keys, names, crs };
+                return prevState;
             });
-        } else if (state.estado === 1) {
-            setState(prevState => ({
-                ...prevState,
-                x: add ? [...prevState.x, target.id] : prevState.x.filter(id => id !== target.id)
-            }));
-        }
-    }
-    
-    function remove(m) {
-        const aux = [];
-        const e = new Set();
-        for (const i of m) {
-            if (!e.has(i._re)) {
-                e.add(i._re);
-                if (i._di.includes(" - A") || i._di.includes(" - B")) {
-                    i._di = i._di.substring(0, i._di.length - 4);
-                } else if (!i._el && !i._di.includes(" - OPT")) {
-                    i._di += " - OPT";
-                }
-                aux.push(i);
+        } 
+        else if (target.classList.contains('subject-checkbox')) {
+            // Lógica para checkboxes individuais (mantida similar)
+            if (state.estado === 0) {
+                setState(prevState => {
+                    const keys = [...prevState.keys];
+                    const names = [...prevState.names];
+                    const crs = [...prevState.crs];
+
+                    if (isChecked) {
+                        if (!keys.includes(target.value)) {
+                            keys.push(target.value);
+                            names.push(target.id);
+                            crs.push(parseInt(target.name));
+                        }
+                    } else {
+                        const i = keys.indexOf(target.value);
+                        if (i > -1) {
+                            keys.splice(i, 1);
+                            names.splice(i, 1);
+                            crs.splice(i, 1);
+                        }
+                    }
+                    return { ...prevState, keys, names, crs };
+                });
+            } else if (state.estado === 1) {
+                setState(prevState => ({
+                    ...prevState,
+                    x: isChecked 
+                        ? [...prevState.x, target.id] 
+                        : prevState.x.filter(id => id !== target.id)
+                }));
             }
         }
-        return aux;
     }
 
-    // ### MUDANÇA 1: Simplificamos a função 'periodo' ###
-    // Ela agora agrupa os OBJETOS de matéria, não os componentes JSX.
-    // Isso nos permite analisar os dados antes de renderizar.
-    function periodo(m) {
-        const aux = {};
-        for (const item of m) {
-            if (!aux[item._se]) {
-                aux[item._se] = [];
-            }
-            aux[item._se].push(item);
-        }
-        return aux;
-    }
-
-    function renderPeriodoItem(key, itemData) {
-        const isChecked = (state.estado === 0)
-            ? state.names.includes(itemData._re)
-            : state.x.includes(itemData._re);
-
-        return (
-            <label className="flex items-center gap-x-4 py-4 cursor-pointer" key={itemData._re}>
-                <input
-                    type="checkbox"
-                    name={String(itemData._ap + itemData._at)}
-                    checked={isChecked}
-                    className="h-5 w-5 rounded border-slate-300 dark:border-slate-600 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:var(--checkbox-tick-svg)] focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900/50 focus:ring-primary/50 focus:outline-none"
-                    id={itemData._re}
-                    value={key}
-                    onChange={handleCheck}
-                />
-                <p className="text-slate-800 dark:text-slate-200 text-base font-normal leading-normal flex-1">{itemData._re} - {itemData._di} ({itemData._ap + itemData._at} CP)</p>
-            </label>
-        );
-    }
-    
-    // ### MUDANÇA 2: O componente 'IPeriodDivs' agora é mais inteligente ###
-    // Ele recebe os dados das matérias e calcula se o 'period-toggle' deve estar marcado.
+    // ### CORREÇÃO: Função IPeriodDivs atualizada ###
     function IPeriodDivs({ periodKey, subjectsData }) {
-
         const allSubjectIdsInPeriod = subjectsData.map(s => s._re);
-        const selectedSubjects = (state.estado === 0) ? state.names : state.x;
-        const areAllSelected = allSubjectIdsInPeriod.length > 0 &&
-                               allSubjectIdsInPeriod.every(id => selectedSubjects.includes(id));
         
+        const areAllSelected = allSubjectIdsInPeriod.length > 0 &&
+            allSubjectIdsInPeriod.every(id => {
+                if (state.estado === 0) {
+                    return state.keys.includes(id); // Changed from .names to .keys
+                } else {
+                    return state.x.includes(id);
+                }
+            });
+
+        const areSomeSelected = allSubjectIdsInPeriod.length > 0 &&
+            allSubjectIdsInPeriod.some(id => {
+                if (state.estado === 0) {
+                    return state.keys.includes(id); // Changed from .names to .keys
+                } else {
+                    return state.x.includes(id);
+                }
+            });
+
         return (
             <details className="flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 px-4 group" open>
                 <summary className="flex cursor-pointer items-center justify-between gap-6 py-3">
@@ -161,6 +146,11 @@ const GeraGrade = () => {
                             value={periodKey}
                             onChange={handleCheck}
                             checked={areAllSelected}
+                            ref={input => {
+                                if (input) {
+                                    input.indeterminate = areSomeSelected && !areAllSelected;
+                                }
+                            }}
                             onClick={(e) => e.stopPropagation()}
                         />
                         <span className="text-slate-900 dark:text-white text-base font-semibold leading-normal">{`${periodKey}º Período`}</span>
@@ -169,11 +159,29 @@ const GeraGrade = () => {
                         <span className="material-symbols-outlined">expand_more</span>
                     </div>
                 </summary>
-                <div className="px-4 divide-y divide-slate-200 dark:divide-slate-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4">
+                <div className="border-t border-slate-200 dark:border-slate-800 -mx-4">
+                    <div id={`subject-group-${periodKey}`} className="px-4 divide-y divide-slate-200 dark:divide-slate-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 p-4">
                         {subjectsData.map(item => {
-                            const originalIndex = arr.findIndex(i => i._re === item._re);
-                            const key = (state.estado === 0) ? originalIndex : item._re;
-                            return renderPeriodoItem(key, item);
+                            const isChecked = (state.estado === 0)
+                                ? state.keys.includes(item._re) // Changed from .names to .keys
+                                : state.x.includes(item._re);
+
+                            return (
+                                <label className="flex items-center gap-x-4 py-4 cursor-pointer" key={item._re}>
+                                    <input
+                                        type="checkbox"
+                                        name={String(item._ap + item._at)}
+                                        checked={isChecked}
+                                        className="subject-checkbox h-5 w-5 rounded border-slate-300 dark:border-slate-600 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:var(--checkbox-tick-svg)] focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900/50 focus:ring-primary/50 focus:outline-none"
+                                        id={item._re}
+                                        value={item._re}
+                                        onChange={handleCheck}
+                                    />
+                                    <p className="text-slate-800 dark:text-slate-200 text-base font-normal leading-normal flex-1">
+                                        {item._re} - {item._di} ({item._ap + item._at} CP)
+                                    </p>
+                                </label>
+                            );
                         })}
                     </div>
                 </div>
@@ -188,7 +196,6 @@ const GeraGrade = () => {
 
     function tela() {
         if (state.estado === 0) {
-            // A função 'periodo' agora retorna um objeto com arrays de DADOS.
             const pe = periodo(remove(arr));
 
             return (
@@ -197,7 +204,7 @@ const GeraGrade = () => {
                         <p className="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Quais matérias você já fez?</p>
                     </div>
                     <div className="mb-4 text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">
-                        <p>Você selecionou <span className="font-semibold text-primary">{state.names.length} matéria(s)</span></p>
+                        <p>Você selecionou <span className="font-semibold text-primary">{state.keys.length} matéria(s)</span></p>
                         <p>Totalizando <span className="font-semibold text-primary">{state.crs.reduce((a, b) => a + b, 0)} crédito(s)</span></p>
                     </div>
                     <div className="flex flex-col py-4 gap-4">
@@ -331,6 +338,6 @@ const GeraGrade = () => {
             </div>
         </div>
     );
-};
+}; 
 
 export default GeraGrade;
