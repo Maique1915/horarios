@@ -151,7 +151,7 @@ const GeraGrade = () => {
                                allSubjectIdsInPeriod.every(id => selectedSubjects.includes(id));
         
         return (
-            <details className="flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 px-4 group" open="">
+            <details className="flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 px-4 group" open>
                 <summary className="flex cursor-pointer items-center justify-between gap-6 py-3">
                     <div className="flex items-center space-x-2">
                         <input
