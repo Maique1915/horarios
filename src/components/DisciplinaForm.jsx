@@ -23,6 +23,53 @@ const formSchema = z.object({
   _da: z.array(z.union([z.tuple([z.string(), z.string()]), z.null()])).nullable(),
 });
 
+const blankForm = {
+  _id: '',
+  _di: '',
+  _re: '',
+  _se: 0,
+  _at: 0,
+  _ap: 0,
+  _pr: [],
+  _el: false,
+  _ag: false,
+  _cu: '',
+  _ho: [],
+  _da: null
+};
+
+const FormField = ({ label, id, type = "text", placeholder, maxLength, required, register, valueAsNumber = false, className = "lg:col-span-1 flex flex-col" }) => (
+  <div className={className}>
+    <label className="block mb-2 text-sm font-medium" htmlFor={id}>
+      {label}
+    </label>
+    <input
+      className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
+      id={id}
+      type={type}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      required={required}
+      {...register(id, { valueAsNumber: valueAsNumber })}
+    />
+  </div>
+);
+
+const Toggle = ({ label, id, register, checked }) => (
+  <label htmlFor={id} className="flex items-center cursor-pointer">
+    <div className="relative w-14 h-8 rounded-full bg-gray-600">
+      <input
+        type="checkbox"
+        id={id}
+        className="sr-only"
+        {...register(id)}
+      />
+      <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${checked ? 'translate-x-6 bg-primary' : ''}`}></div>
+    </div>
+    <span className="ml-3 text-sm font-medium text-gray-900">{label}</span>
+  </label>
+);
+
 const DisciplinaForm = ({
   disciplina,
   onSubmit,
@@ -32,20 +79,7 @@ const DisciplinaForm = ({
 }) => {
   const { handleSubmit, register, control, setValue, watch, reset, formState: { errors } } = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      _id: '',
-      _di: '',
-      _re: '',
-      _se: 0,
-      _at: 0,
-      _ap: 0,
-      _pr: [],
-      _el: false,
-      _ag: false,
-      _cu: '',
-      _ho: [],
-      _da: null
-    },
+    defaultValues: blankForm,
   });
 
   const courseData = db2.find(c => c._cu === cur);
@@ -65,20 +99,7 @@ const DisciplinaForm = ({
   const handleCancel = () => {
     console.log('DisciplinaForm handleCancel - resetting to empty state'); // DEBUG
     // Reseta o formulário para um estado completamente "vazio"
-    reset({
-      _id: '',
-      _di: '',
-      _re: '',
-      _se: 0,
-      _at: 0,
-      _ap: 0,
-      _pr: [],
-      _el: false,
-      _ag: false,
-      _cu: '',
-      _ho: [],
-      _da: null
-    });
+    reset(blankForm);
 
     // Chama a função onCancel original se existir
     if (onCancel) {
@@ -93,22 +114,24 @@ const DisciplinaForm = ({
       reset(disciplina);
     } else {
       // Se nenhuma disciplina for fornecida (novo formulário), reseta para o estado inicial completamente vazio
-      reset({
-        _id: '',
-        _di: '',
-        _re: '',
-        _se: 0,
-        _at: 0,
-        _ap: 0,
-        _pr: [],
-        _el: false,
-        _ag: false,
-        _cu: '',
-        _ho: [],
-        _da: null
-      });
+      reset(blankForm);
     }
   }, [disciplina, reset, cur]); // Adicionar 'cur' como dependência
+
+  const handleTimeSlotChange = useCallback((dayIndex, timeIndex) => {
+    const currentHo = watch('_ho');
+    const newHo = [...currentHo];
+    const index = newHo.findIndex(
+      (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
+    );
+
+    if (index > -1) {
+      newHo.splice(index, 1); // Remove se já existe
+    } else {
+      newHo.push([dayIndex + 1, timeIndex]); // Adiciona se não existe
+    }
+    setValue('_ho', newHo);
+  }, [watch, setValue]);
 
   return (
     <div className="lg:col-span-2">
@@ -118,49 +141,37 @@ const DisciplinaForm = ({
 
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              <div className="lg:col-span-1 flex flex-col">
-                <label className="block mb-2 text-sm font-medium" htmlFor="numeric-period">
-                  Semestre
-                </label>
-                <input
-                  className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                  id="numericPeriod"
-                  type="number"
-                  placeholder="e.g., 1"
-                  maxLength="2"
-                  required
-                  {...register('_se', { valueAsNumber: true })}
-                />
-              </div>
-              <div className="lg:col-span-3 flex flex-col">
-                <label className="block mb-2 text-sm font-medium" htmlFor="subject-name">
-                  Disciplina
-                </label>
-                <input
-                  className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                  id="_di"
-                  type="text"
-                  placeholder="ex: Introdução à Programação"
-                  required
-                  {...register('_di')}
-                />
-              </div>
+              <FormField
+                label="Semestre"
+                id="_se"
+                type="number"
+                placeholder="e.g., 1"
+                maxLength="2"
+                required
+                register={register}
+                valueAsNumber
+                className="lg:col-span-1 flex flex-col"
+              />
+              <FormField
+                label="Disciplina"
+                id="_di"
+                type="text"
+                placeholder="ex: Introdução à Programação"
+                required
+                register={register}
+                className="lg:col-span-3 flex flex-col"
+              />
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block mb-2 text-sm font-medium" htmlFor="academic-period">
-                  Referência
-                </label>
-                <input
-                  className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                  id="_re"
-                  type="text"
-                  placeholder="ex: 101A"
-                  required
-                  {...register('_re')}
-                />
-              </div>
+              <FormField
+                label="Referência"
+                id="_re"
+                type="text"
+                placeholder="ex: 101A"
+                required
+                register={register}
+              />
 
               <div className="grid grid-cols-2 gap-2">
                 <label className="block mb-2 text-sm font-medium" htmlFor="academic-period">
@@ -169,61 +180,30 @@ const DisciplinaForm = ({
                 <label className="block mb-2 text-sm font-medium" htmlFor="academic-period">
                   &nbsp;
                 </label>
-                <label htmlFor="_el_edit" className="flex items-center cursor-pointer">
-                  <div className="relative w-14 h-8 rounded-full bg-gray-600">
-                    <input
-                      type="checkbox"
-                      id="_el_edit"
-                      className="sr-only"
-                      {...register('_el')}
-                    />
-                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${watch('_el') ? 'translate-x-6 bg-primary' : ''}`}></div>
-                  </div>
-                  <span className="ml-3 text-sm font-medium text-gray-900">Eletiva</span>
-                </label>
+                <Toggle label="Eletiva" id="_el" register={register} checked={watch('_el')} />
 
-                <label htmlFor="_ag_edit" className="flex items-center cursor-pointer">
-                  <div className="relative w-14 h-8 rounded-full bg-gray-600">
-                    <input
-                      type="checkbox"
-                      id="_ag_edit"
-                      className="sr-only"
-                      {...register('_ag')}
-                    />
-                    <div className="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                    <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${watch('_ag') ? 'translate-x-6 bg-primary' : ''}`}></div>
-                  </div>
-                  <span className="ml-3 text-sm font-medium text-gray-900">Ativa</span>
-                </label>
+                <Toggle label="Ativa" id="_ag" register={register} checked={watch('_ag')} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-2 text-sm font-medium" htmlFor="credit-hours">
-                    Créditos práticos
-                  </label>
-                  <input
-                    className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                    id="_ap"
-                    type="number"
-                    placeholder="3"
-                    required
-                    {...register('_ap', { valueAsNumber: true })}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-medium" htmlFor="credit-hours">
-                    Créditos teóricos
-                  </label>
-                  <input
-                    className="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                    id="_at"
-                    type="number"
-                    placeholder="3"
-                    required
-                    {...register('_at', { valueAsNumber: true })}
-                  />
-                </div>
+                <FormField
+                  label="Créditos práticos"
+                  id="_ap"
+                  type="number"
+                  placeholder="3"
+                  required
+                  register={register}
+                  valueAsNumber
+                />
+                <FormField
+                  label="Créditos teóricos"
+                  id="_at"
+                  type="number"
+                  placeholder="3"
+                  required
+                  register={register}
+                  valueAsNumber
+                />
               </div>
             </div>
 
@@ -281,19 +261,7 @@ const DisciplinaForm = ({
                             className="form-checkbox hidden"
                             type="checkbox"
                             checked={isChecked || false}
-                            onChange={() => {
-                              const newHo = [...currentHo];
-                              const index = newHo.findIndex(
-                                (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
-                              );
-
-                              if (index > -1) {
-                                newHo.splice(index, 1); // Remove se já existe
-                              } else {
-                                newHo.push([dayIndex + 1, timeIndex]); // Adiciona se não existe
-                              }
-                              setValue('_ho', newHo);
-                            }}
+                            onChange={() => handleTimeSlotChange(dayIndex + 1, timeIndex)}
                           />
                           <span className="text-xs font-medium">&ensp;</span>
                         </label>
