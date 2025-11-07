@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, BrowserRouter } from 'react-router-dom';
 
 import './index.css';
 import AppLayout from './components/AppLayout';
@@ -34,8 +34,11 @@ const router = createBrowserRouter([
     }
 ]);
 
+
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <BrowserRouter basename={'/Matricula/'+router} />
-    </React.StrictMode>,
+  <React.StrictMode>
+    <BrowserRouter basename="/Matricula">
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
 );
