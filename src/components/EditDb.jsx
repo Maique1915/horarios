@@ -258,14 +258,6 @@ const EditDb = () => {
                     </div>
                   </label>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button className="p-2.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-primary/10 transition-colors">
-                    <span className="material-symbols-outlined text-xl">filter_list</span>
-                  </button>
-                  <button className="p-2.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-primary/10 transition-colors">
-                    <span className="material-symbols-outlined text-xl">swap_vert</span>
-                  </button>
-                </div>
               </div>
 
               <div className="flex gap-3 p-4 border-b border-border-light dark:border-border-dark">

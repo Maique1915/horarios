@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Course Subject Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#135bec",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101622",
+              "surface-light": "#ffffff",
+              "surface-dark": "#1a2332",
+              "text-light-primary": "#0d121b",
+              "text-dark-primary": "#f1f3f7",
+              "text-light-secondary": "#4c669a",
+              "text-dark-secondary": "#a0b3d7",
+              "border-light": "#e7ebf3",
+              "border-dark": "#344159",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
+<div class="flex h-screen w-full">
+<!-- Side Navigation Bar -->
+<aside class="flex w-64 flex-col border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
+<div class="flex h-full flex-col justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 p-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Admin user avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAt9stUvlQAHfz8UhOuD_LorBzgVy4YIBWrh9_CKUSkAGAVJWk-VjYY70hWDTr4KpG9ajqe4gCWzLBNocE1rXyYTlPvm9tkZjo06_1DXjjA0H7fi3zNgaxXq70-7DXGLy4cwovnu1DK_yeHD5kWy-hJzpYnlooVxko-VvNCfJRw4fH54Z3SI90UDTHLI-zA1NXsXmBu9qll1Ln9jkawNeaQ1TuvB95Xm_G6ADYr-LLE9yIbGqlJllsdMNT0bxi4CZF5tmdtDOSZ9OwY");'></div>
+<div class="flex flex-col">
+<h1 class="text-base font-medium leading-normal">Admin Name</h1>
+<p class="text-sm font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">Administrator</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary" href="#">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<p class="text-sm font-medium leading-normal">Manage Subjects</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">corporate_fare</span>
+<p class="text-sm font-medium leading-normal">Departments</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">person</span>
+<p class="text-sm font-medium leading-normal">Professors</p>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">help</span>
+<p class="text-sm font-medium leading-normal">Help</p>
+</a>
+</div>
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="mx-auto max-w-7xl p-6 lg:p-8">
+<!-- Page Heading -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<p class="text-3xl font-bold leading-tight tracking-tight">Course Subject Management</p>
+<p class="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">Add, edit, or remove course subjects from the university catalog.</p>
+</div>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+<span class="truncate">Add New Subject</span>
+</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Subjects List -->
+<div class="lg:col-span-2 flex flex-col gap-4">
+<div class="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm">
+<!-- Toolbar and Search -->
+<div class="p-4 flex flex-col md:flex-row gap-4 border-b border-border-light dark:border-border-dark">
+<div class="flex-1">
+<label class="flex flex-col min-w-40 h-10 w-full">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-text-light-secondary dark:text-text-dark-secondary flex border-r-0 items-center justify-center pl-3 pr-2 bg-background-light dark:bg-background-dark rounded-l-lg">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary h-full placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary px-2 rounded-l-none border-l-0 text-sm font-normal leading-normal" placeholder="Search by subject name or code..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-xl">filter_list</span>
+</button>
+<button class="p-2.5 rounded-lg bg-background-light dark:bg-background-dark hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-xl">swap_vert</span>
+</button>
+</div>
+</div>
+<!-- Chips / Quick Filters -->
+<div class="flex gap-3 p-4 overflow-x-auto border-b border-border-light dark:border-border-dark">
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-background-dark px-3 hover:bg-primary/10 transition-colors">
+<p class="text-sm font-medium leading-normal">Academic Period</p>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-background-dark px-3 hover:bg-primary/10 transition-colors">
+<p class="text-sm font-medium leading-normal">Department</p>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+<button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-background-dark px-3 hover:bg-primary/10 transition-colors">
+<p class="text-sm font-medium leading-normal">Status</p>
+<span class="material-symbols-outlined text-base">expand_more</span>
+</button>
+</div>
+<!-- Subjects Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-sm text-left">
+<thead class="text-xs uppercase text-text-light-secondary dark:text-text-dark-secondary">
+<tr>
+<th class="px-6 py-3" scope="col">Subject Code</th>
+<th class="px-6 py-3" scope="col">Subject Name</th>
+<th class="px-6 py-3" scope="col">Academic Period</th>
+<th class="px-6 py-3" scope="col">Credits</th>
+<th class="px-6 py-3 text-right" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-border-light dark:border-border-dark">
+<td class="px-6 py-4 font-medium">CS-101</td>
+<td class="px-6 py-4">Introduction to Programming</td>
+<td class="px-6 py-4">Fall 2024</td>
+<td class="px-6 py-4">3</td>
+<td class="px-6 py-4 flex justify-end gap-2">
+<button class="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 rounded-md hover:bg-red-500/10 text-red-500 transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</td>
+</tr>
+<tr class="border-b border-border-light dark:border-border-dark">
+<td class="px-6 py-4 font-medium">MATH-203</td>
+<td class="px-6 py-4">Calculus II</td>
+<td class="px-6 py-4">Fall 2024</td>
+<td class="px-6 py-4">4</td>
+<td class="px-6 py-4 flex justify-end gap-2">
+<button class="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 rounded-md hover:bg-red-500/10 text-red-500 transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</td>
+</tr>
+<tr class="border-b border-border-light dark:border-border-dark">
+<td class="px-6 py-4 font-medium">ENG-112</td>
+<td class="px-6 py-4">Advanced Composition</td>
+<td class="px-6 py-4">Spring 2025</td>
+<td class="px-6 py-4">3</td>
+<td class="px-6 py-4 flex justify-end gap-2">
+<button class="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 rounded-md hover:bg-red-500/10 text-red-500 transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</td>
+</tr>
+<tr class="border-b border-border-light dark:border-border-dark">
+<td class="px-6 py-4 font-medium">PHY-210</td>
+<td class="px-6 py-4">University Physics I</td>
+<td class="px-6 py-4">Fall 2024</td>
+<td class="px-6 py-4">4</td>
+<td class="px-6 py-4 flex justify-end gap-2">
+<button class="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-2 rounded-md hover:bg-red-500/10 text-red-500 transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Right Column: Add/Edit Form Panel -->
+<div class="lg:col-span-1">
+<div class="sticky top-8 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm p-6">
+<form class="flex flex-col gap-6">
+<h3 class="text-xl font-bold">Add New Subject</h3>
+<div class="flex flex-col gap-4">
+<div>
+<label class="block mb-2 text-sm font-medium" for="subject-name">Subject Name</label>
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" id="subject-name" placeholder="e.g., Introduction to Programming" type="text"/>
+</div>
+<div>
+<label class="block mb-2 text-sm font-medium" for="subject-code">Subject Code</label>
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" id="subject-code" placeholder="e.g., CS-101" type="text"/>
+<p class="mt-1 text-xs text-text-light-secondary dark:text-text-dark-secondary">Code must follow the 'DEPT-101' format.</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block mb-2 text-sm font-medium" for="academic-period">Academic Period</label>
+<select class="form-select w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" id="academic-period">
+<option>Fall 2024</option>
+<option>Spring 2025</option>
+<option>Summer 2025</option>
+</select>
+</div>
+<div>
+<label class="block mb-2 text-sm font-medium" for="credit-hours">Credit Hours</label>
+<input class="form-input w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" id="credit-hours" placeholder="3" type="number"/>
+</div>
+</div>
+<div>
+<label class="block mb-2 text-sm font-medium" for="department">Department</label>
+<select class="form-select w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" id="department">
+<option>Computer Science</option>
+<option>Mathematics</option>
+<option>English</option>
+<option>Physics</option>
+</select>
+</div>
+<div>
+<label class="block mb-2 text-sm font-medium" for="description">Description (optional)</label>
+<textarea class="form-textarea w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" id="description" placeholder="Enter a brief description of the course..." rows="4"></textarea>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-2">
+<button class="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors" type="submit">
+<span class="truncate">Save Changes</span>
+</button>
+<button class="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors" type="button">
+<span class="truncate">Cancel</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,76 @@
+/*.horario-editor-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+*/
+.horario-editor-container th,
+.horario-editor-container td {
+  /*border: 1px solid #ddd;*/
+  text-align: center;
+}
+
+.horario-editor-container th {
+  background-color: #f2f2f2;
+}
+
+.horario-toggle-button {
+  width: 50px;
+  height: 40px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.horario-toggle-button.selected {
+  background-color: #007bff; /* Cor para botão selecionado */
+  border-color: #007bff;
+}
+
+.horario-toggle-button:hover {
+  background-color: #e0e0e0;
+}
+
+.horario-toggle-button.selected:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos para a seção de horários customizados */
+.custom-time-editor {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.custom-time-editor h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.custom-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.custom-time-row span {
+  font-weight: 500;
+  color: #555;
+  flex-basis: 50%; /* Ocupa metade do espaço */
+}
+
+.time-input {
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100px; /* Largura fixa para os inputs */
+  margin-left: 10px;
+  text-align: center;
+}

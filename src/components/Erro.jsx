@@ -2,7 +2,7 @@ function Erro() {
 
     return (
         <div>
-            <h1>Curso n„o encontrado</h1>
+            <h1>Curso n√£o encontrado</h1>
         </div>
     )
 }
