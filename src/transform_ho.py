@@ -1,6 +1,6 @@
 import json
 
-with open('src/model/db.json', 'r', encoding='utf-8') as f:
+with open('src/model/db_mat.json', 'r', encoding='utf-8') as f:
     db = json.load(f)
 
 for item in db:
