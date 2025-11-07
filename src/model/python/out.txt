@@ -1,2 +1,0 @@
-56 53
-['Introdução à Astronomia', 'Introdução à Física', 'Computação Algébrica', 'Geometria Analítica', 'Educação e Sociedade', 'Leitura e Produção de Textos', 'Física Térmica', 'Probabilidade e Estatística', 'Didática', 'Circuitos Elétricos e Eletrônicos', 'História e Filosofia da Ciência', 'Relatividade', 'Física Ondulatória e Óptica', 'Práticas Extensionistas', 'Epistemologia', 'Ciência e Meio Ambiente', 'Metodologia da Pesquisa', 'Introdução à Física Nuclear']
