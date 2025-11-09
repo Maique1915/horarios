@@ -23,11 +23,11 @@ const router = createBrowserRouter(
                 { path: ':cur/edit', element: <EditDb /> },
                 { path: ':cur/mapa', element: <MapaMental /> }
             ]
-        },
+        }
+    ],
     {
         basename: '/Matricula' // 👈 Importante para GitHub Pages
     }
-    ]
 );
 
 ReactDOM.createRoot(document.getElementById('root')).render(
