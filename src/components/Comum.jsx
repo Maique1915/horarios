@@ -17,7 +17,8 @@ const Comum = (props) => {
         materias: props.materias
     });
     const [isPrinting, setIsPrinting] = useState(false);
-
+    const [transitioningTo, setTransitioningTo] = useState(null);
+    const [previousGrade, setPreviousGrade] = useState(null);
 
     // Desestruturando a prop 'separa' para fácil acesso
     let { cur: _cur, fun: _fun, separa: _separa, g, f } = props;
@@ -76,6 +77,18 @@ const Comum = (props) => {
 
     const { grades, coresGrade } = criarGrade();
 
+    const handlePageChange = (newId) => {
+        if (newId !== state.id && transitioningTo === null) {
+            setTransitioningTo(newId);
+            setPreviousGrade({ grade: grades[state.id], cores: coresGrade[state.id] });
+            setTimeout(() => {
+                setState(s => ({ ...s, id: newId }));
+                setTransitioningTo(null);
+                setPreviousGrade(null);
+            }, 500); // Duração da animação
+        }
+    };
+
     const handleNextBlock = () => {
         setState(s => ({ ...s, pageBlockStart: s.pageBlockStart + 10 }));
     };
@@ -91,19 +104,43 @@ const Comum = (props) => {
         }, 7000);
     };
 
+    function renderCelula(numLinha, numCelula, key) {
+        const isTransitioning = transitioningTo !== null;
+        const newGradeId = transitioningTo !== null ? transitioningTo : state.id;
 
-    function renderCelula(conteudo, cor, key) {
-        return <td key={key} className="border p-1 text-center text-xs" style={{ backgroundColor: cor }}>{conteudo.split('\n').map((line, i) => <div key={i}>{line}</div>)}</td>;
+        // Dados da grade "nova" (a que está na tela ou para a qual estamos transicionando)
+        const conteudoNovo = grades[newGradeId]?.[numLinha]?.[numCelula] || "";
+        const corNova = coresGrade[newGradeId]?.[numLinha]?.[numCelula] || "transparent";
+
+        // Dados da grade anterior (só existem durante a transição)
+        const conteudoAnterior = previousGrade?.grade?.[numLinha]?.[numCelula] || "";
+        const corAnterior = previousGrade?.cores?.[numLinha]?.[numCelula] || "transparent";
+
+        return (
+            <td key={key} className="relative border p-0 text-center text-xs" style={{ minHeight: '50px' }}>
+                {/* Conteúdo Antigo (saindo) */}
+                {isTransitioning && (
+                    <div className="absolute inset-0 p-1 animate-fade-out" style={{ backgroundColor: corAnterior }}>
+                        {conteudoAnterior.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+                    </div>
+                )}
+
+                {/* Conteúdo Novo (entrando) */}
+                <div className={`absolute inset-0 p-1 ${isTransitioning ? 'animate-fade-in' : ''}`} style={{ backgroundColor: corNova }}>
+                    {conteudoNovo.split('\n').map((line, i) => <div key={i}>{line}</div>)}
+                </div>
+            </td>
+        );
     }
 
     function renderLinha(numLinha) {
         if (!grades[state.id] || !h[numLinha]) return null;
-        const celulas = grades[state.id][numLinha].map((conteudo, index) =>
-            renderCelula(conteudo, coresGrade[state.id][numLinha][index], `cell-${numLinha}-${index}`)
+        const celulas = Array.from({ length: td }).map((_, numCelula) =>
+            renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
             <tr key={`row-${numLinha}`}>
-                <td className="border p-1 text-xs whitespace-nowrap">{`${h[numLinha][0]} - ${h[numLinha][1]}`}</td>
+                <td className="border p-1 py-4 text-xs whitespace-nowrap">{`${h[numLinha][0]} - ${h[numLinha][1]}`}</td>
                 {celulas}
             </tr>
         );
@@ -169,7 +206,7 @@ const Comum = (props) => {
                     return (
                         <button
                             key={actualPageIndex}
-                            onClick={() => setState(s => ({ ...s, id: actualPageIndex }))}
+                            onClick={() => handlePageChange(actualPageIndex)}
                             className={`py-2 px-4 w-12 h-10 ${state.id === actualPageIndex ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-700 text-white'}`}
                         >
                             {actualPageIndex + 1}
@@ -193,7 +230,7 @@ const Comum = (props) => {
     return (
         <div className={'flex flex-col items-center p-4'}>
             {renderPaginacao()}
-            <div className="bg-white shadow-md rounded-lg p-4 flex flex-col flex-1 w-full max-w-5xl mx-auto">
+            <div className="bg-white shadow-md rounded-lg p-4 flex flex-col flex-1 w-full max-w-7xl mx-auto">
 
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">{isPrinting ? `${"Grade"} - ${periodoAtual}` : `${state.id + 1}${g} ${f} - ${periodoAtual}`}</h3>
