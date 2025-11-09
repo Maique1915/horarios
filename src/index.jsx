@@ -20,6 +20,10 @@ const router = createBrowserRouter(
                 { path: ':cur/grades', element: <Quadro /> },
                 { path: ':cur/edit', element: <EditDb /> }
             ]
+        },
+        {
+            index: true, // Isso corresponde à rota pai '/'
+            element: <GeraGrade /> // Renderiza GeraGrade com a prop padrão
         }
     ]
 );
