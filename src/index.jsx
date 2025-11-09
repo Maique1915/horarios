@@ -21,12 +21,12 @@ const router = createBrowserRouter(
                 { path: ':cur', element: <GeraGrade /> },
                 { path: ':cur/grades', element: <Quadro /> },
                 { path: ':cur/edit', element: <EditDb /> },
-                { path: ':cur/mapa', element: <MapaMental /> }
+                { path: ':cur/cronograma', element: <MapaMental /> }
             ]
         }
     ],
     {
-        basename: '/Matricula' // 👈 Importante para GitHub Pages
+        basename: '/' // 👈 Importante para GitHub Pages
     }
 );
 

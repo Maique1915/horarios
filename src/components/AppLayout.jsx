@@ -19,7 +19,7 @@ const AppLayout = () => {
                     <div className="flex items-center gap-4">
                         <img src="/icon.png" alt="Admin Icon" className="size-10 rounded-full" />
                         <nav className="flex gap-2">
-                            <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}`}>
+                            <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}`} end>
                                 <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>add_task</span>
                                 <p className="text-sm font-medium leading-normal">Gera Grade ({cur})</p>
                             </NavLink>
@@ -27,7 +27,7 @@ const AppLayout = () => {
                                 <span className="material-symbols-outlined text-xl">grid_on</span>
                                 <p className="text-sm font-medium leading-normal">Grade ({cur})</p>
                             </NavLink>
-                            <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}/mapa`}>
+                            <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}/cronograma`}>
                                 <span className="material-symbols-outlined text-xl">timeline</span>
                                 <p className="text-sm font-medium leading-normal">Cronograma</p>
                             </NavLink>

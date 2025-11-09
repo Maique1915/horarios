@@ -4,9 +4,11 @@ import Comum from './Comum';
 import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
 import { ativas } from '../model/Filtro.jsx';
+import MapaMental from './MapaMental'; // Importar o MapaMental
 
 const GeraGrade = () => {
     const { cur = 'engcomp' } = useParams();
+    // const navigate = useNavigate(); // Não é mais necessário para o mapa
     const [state, setState] = useState({
         names: [],
         keys: [],
@@ -202,12 +204,17 @@ const GeraGrade = () => {
         if (i === 1) {
             const cr = state.crs.reduce((a, b) => a + b, 0);
             const calculatedGr = new Grafos(arr, cr, state.names).matriz();
-            setState(e => ({ ...e, estado: i, gradesResult: calculatedGr }));
+            setGradesResult(calculatedGr);
+            setState(e => ({ ...e, estado: i }));
         } else {
             setState(e => ({ ...e, estado: i }));
         }
         window.scrollTo(0, 0);
     }
+
+    const handleOpenMapaMental = () => {
+        setState(e => ({ ...e, estado: 4 })); // Mudar para o estado do mapa
+    };
 
     function getStepTitle() {
         if (state.estado === 0)
@@ -268,7 +275,7 @@ const GeraGrade = () => {
                 </div>
             );
         } else if (state.estado === 1) {
-            const pe = periodo(remove(state.gradesResult));
+            const pe = periodo(remove(gradesResult));
 
             if (Object.keys(pe).length === 0) {
                 return (
@@ -306,7 +313,7 @@ const GeraGrade = () => {
                 </div>
             );
         } else { // This block is for state.estado === 2
-            const m = state.gradesResult.filter(item => !state.x.includes(item._re));
+            const m = gradesResult.filter(item => !state.x.includes(item._re));
             let gp = new Escolhe(m, cur).exc();
             console.log(gp);
 
@@ -316,6 +323,17 @@ const GeraGrade = () => {
         }
     }
 
+    if (state.estado === 4) {
+        return (
+            <MapaMental
+                subjectStatus={{
+                    feitas: state.names,
+                    podeFazer: gradesResult.map(d => d._re),
+                }}
+                onVoltar={() => setState(e => ({ ...e, estado: 1 }))}
+            />
+        );
+    }
 
     if (state.estado === 2)
         return renderStepContent()
@@ -358,12 +376,20 @@ const GeraGrade = () => {
                                         </button>
                                     )}
                                     {state.estado === 1 && (
-                                        <button
-                                            onClick={() => mudaTela(2)}
-                                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-primary text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                        >
-                                            Gerar Grades
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={() => mudaTela(2)}
+                                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-primary text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                            >
+                                                Gerar Grades
+                                            </button>
+                                            <button
+                                                onClick={handleOpenMapaMental}
+                                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-blue-500 text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                            >
+                                                Ver no Conograma
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>

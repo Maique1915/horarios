@@ -21,9 +21,26 @@ const periodColors = [
 const periodBackgroundColors = periodColors.map(c => c.replace(', 1)', ', 0.15)'));
 
 const SubjectNode = ({ node, onNodeClick }) => {
-  const colorIndex = (node.depth - 1) % periodColors.length;
-  const borderColor = periodColors[colorIndex];
-  const backgroundColor = periodBackgroundColors[colorIndex];
+  const statusColors = {
+    feita: {
+      border: 'rgba(0, 128, 0, 1)', // Verde
+      background: 'rgba(0, 128, 0, 0.15)',
+    },
+    podeFazer: {
+      border: 'rgba(0, 0, 255, 1)', // Azul
+      background: 'rgba(0, 0, 255, 0.15)',
+    },
+    naoPodeFazer: {
+      border: 'rgba(128, 128, 128, 1)', // Cinza
+      background: 'rgba(128, 128, 128, 0.15)',
+    },
+    normal: { // Fallback para quando nenhum status é passado
+      border: periodColors[(node.depth - 1) % periodColors.length],
+      background: periodBackgroundColors[(node.depth - 1) % periodBackgroundColors.length],
+    }
+  };
+
+  const { border, background } = statusColors[node.status] || statusColors.normal;
 
   return (
     <g 
@@ -35,8 +52,8 @@ const SubjectNode = ({ node, onNodeClick }) => {
         <div 
           className="w-full h-full p-3 rounded-lg shadow-lg flex items-center justify-center text-center font-medium transition-all duration-200"
           style={{ 
-            border: `2px solid ${borderColor}`,
-            backgroundColor: backgroundColor,
+            border: `2px solid ${border}`,
+            backgroundColor: background,
             color: 'hsl(var(--foreground))'
           }}
         >
