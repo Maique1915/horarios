@@ -21,10 +21,7 @@ const router = createBrowserRouter(
                 { path: ':cur/edit', element: <EditDb /> }
             ]
         }
-    ],
-    {
-        basename: '/Matricula' // 👈 Importante para GitHub Pages
-    }
+    ]
 );
 
 ReactDOM.createRoot(document.getElementById('root')).render(
