@@ -7,21 +7,36 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
   const svgRef = useRef(null);
 
   useEffect(() => {
-    if (svgRef.current && nodes && nodes.length > 0) {
-      const { width, height } = svgRef.current.getBoundingClientRect();
-      
-      // Centralizar a visualização na média dos nós
-      const avgX = nodes.reduce((sum, n) => sum + n.x, 0) / nodes.length;
-      const avgY = nodes.reduce((sum, n) => sum + n.y, 0) / nodes.length;
-
+    if (svgRef.current && graphBounds) {
+      const svgWidth = svgRef.current.clientWidth;
+      const svgHeight = svgRef.current.clientHeight;
+  
+      if (svgWidth === 0 || svgHeight === 0) return; // Evitar divisão por zero
+  
+      const graphWidth = graphBounds.maxX - graphBounds.minX;
+      const graphHeight = graphBounds.maxY - graphBounds.minY;
+  
+      // Calcular a escala para caber o grafo inteiro
+      const scaleX = svgWidth / graphWidth;
+      const scaleY = svgHeight / graphHeight;
+      const scale = Math.min(scaleX, scaleY) * 0.95; // 0.95 para uma pequena margem
+  
+      // O width/height do viewBox é o tamanho da tela dividido pela escala
+      const viewboxWidth = svgWidth / scale;
+      const viewboxHeight = svgHeight / scale;
+  
+      // Centralizar o viewBox no centro do grafo
+      const viewboxX = graphBounds.minX + (graphWidth - viewboxWidth) / 2;
+      const viewboxY = graphBounds.minY + (graphHeight - viewboxHeight) / 2;
+  
       setViewBox({
-          x: avgX - width / 2,
-          y: avgY - height / 2,
-          width,
-          height
+        x: viewboxX,
+        y: viewboxY,
+        width: viewboxWidth,
+        height: viewboxHeight,
       });
     }
-  }, [nodes]); 
+  }, [graphBounds]); 
   
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });

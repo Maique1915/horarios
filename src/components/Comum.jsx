@@ -93,7 +93,7 @@ const Comum = (props) => {
 
 
     function renderCelula(conteudo, cor, key) {
-        return <td key={key} className="border p-2 text-center text-sm" style={{ backgroundColor: cor }}>{conteudo}</td>;
+        return <td key={key} className="border p-1 text-center text-xs" style={{ backgroundColor: cor }}>{conteudo.split('\n').map((line, i) => <div key={i}>{line}</div>)}</td>;
     }
 
     function renderLinha(numLinha) {
@@ -102,15 +102,15 @@ const Comum = (props) => {
             renderCelula(conteudo, coresGrade[state.id][numLinha][index], `cell-${numLinha}-${index}`)
         );
         return (
-            <tr key={`row-${numLinha}`} className="h-16">
-                <td className="border p-2 whitespace-nowrap">{`${h[numLinha][0]} - ${h[numLinha][1]}`}</td>
+            <tr key={`row-${numLinha}`}>
+                <td className="border p-1 text-xs whitespace-nowrap">{`${h[numLinha][0]} - ${h[numLinha][1]}`}</td>
                 {celulas}
             </tr>
         );
     }
 
     function renderIntervalo(key) {
-        return <tr key={key}><td colSpan={td + 1} className="bg-gray-800 text-white text-center p-1">Intervalo</td></tr>;
+        return <tr key={key}><td colSpan={td + 1} className="bg-gray-800 text-white text-center p-1 text-xs">Intervalo</td></tr>;
     }
 
     function renderTabela() {
@@ -124,11 +124,11 @@ const Comum = (props) => {
         }
         return (
             <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-237px)]">
-                <table className="w-full border-collapse">
+                <table className="w-full border-collapse table-fixed">
                     <thead>
                         <tr className="bg-gray-200">
-                            <th className="border p-2">Horário</th>
-                            {dias.map(dia => <th key={dia} className="border p-2 w-1/5">{dia}</th>)}
+                            <th className="border p-1 text-xs w-24">Horário</th>
+                            {dias.map(dia => <th key={dia} className="border p-1 text-xs">{dia}</th>)}
                         </tr>
                     </thead>
                     <tbody>
@@ -191,9 +191,9 @@ const Comum = (props) => {
     }
 
     return (
-        <div className={'flex flex-col items-center'}>
+        <div className={'flex flex-col items-center p-4'}>
             {renderPaginacao()}
-            <div className="bg-white shadow-md rounded-lg p-4 flex flex-col flex-1 w-[calc(100vw-30px)]">
+            <div className="bg-white shadow-md rounded-lg p-4 flex flex-col flex-1 w-full max-w-5xl mx-auto">
 
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">{isPrinting ? `${"Grade"} - ${periodoAtual}` : `${state.id + 1}${g} ${f} - ${periodoAtual}`}</h3>

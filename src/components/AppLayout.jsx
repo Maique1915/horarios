@@ -17,7 +17,7 @@ const AppLayout = () => {
 
                 <header className="flex w-full flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <img src="/icon.png" alt="Admin Icon" className="size-10 rounded-full" />
+                        <img src={`${import.meta.env.BASE_URL}/icon.png`} alt="Admin Icon" className="size-10 rounded-full" />
                         <nav className="flex gap-2">
                             <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}`} end>
                                 <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>add_task</span>
