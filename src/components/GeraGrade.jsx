@@ -326,12 +326,9 @@ const GeraGrade = () => {
                     <main className="w-full lg:w-2/3 p-4 sm:p-6 lg:p-8">
                         <div className="layout-content-container flex flex-col w-full">
                             <div className="flex flex-wrap justify-between gap-3 pb-4">
-                                <p className="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">
+                                <h1 className="text-2xl font-bold p-4">
                                     {getStepTitle()}
-                                </p>
-                            </div>
-
-                            <div className="status-info pb-6">
+                                </h1>
                             </div>
 
                             {renderStepContent()}
@@ -368,7 +365,8 @@ const GeraGrade = () => {
                                             Gerar Grades
                                         </button>
                                     )}
-                                </div>                            </div>
+                                </div>
+                            </div>
                         </div>
                     </aside>
                 </div>

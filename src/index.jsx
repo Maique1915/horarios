@@ -9,6 +9,8 @@ import Quadro from './components/Quadro';
 import EditDb from './components/EditDb';
 import Redirect from './components/Redirect';
 
+import MapaMental from './components/MapaMental';
+
 const router = createBrowserRouter(
     [
         {
@@ -18,13 +20,14 @@ const router = createBrowserRouter(
                 { index: true, element: <Redirect to="/engcomp" /> },
                 { path: ':cur', element: <GeraGrade /> },
                 { path: ':cur/grades', element: <Quadro /> },
-                { path: ':cur/edit', element: <EditDb /> }
+                { path: ':cur/edit', element: <EditDb /> },
+                { path: ':cur/mapa', element: <MapaMental /> }
             ]
-        }
-    ],
+        },
     {
         basename: '/Matricula' // 👈 Importante para GitHub Pages
     }
+    ]
 );
 
 ReactDOM.createRoot(document.getElementById('root')).render(

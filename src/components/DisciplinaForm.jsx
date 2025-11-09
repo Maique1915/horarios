@@ -142,7 +142,7 @@ const DisciplinaForm = ({
           <h3 className="text-xl font-bold">Formulário de disciplina</h3>
 
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-8 md:grid-cols-4 lg:grid-cols-2 gap-6">
               <FormField
                 label="Semestre"
                 id="_se"
@@ -161,11 +161,8 @@ const DisciplinaForm = ({
                 placeholder="ex: Introdução à Programação"
                 required
                 register={register}
-                className="lg:col-span-3 flex flex-col"
+                className="lg:col-span-2 flex flex-col"
               />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
               <FormField
                 label="Referência"
                 id="_re"
@@ -173,8 +170,31 @@ const DisciplinaForm = ({
                 placeholder="ex: 101A"
                 required
                 register={register}
+                className="lg:col-span-1 flex flex-col"
               />
+              <FormField
+                label="Créditos práticos"
+                id="_ap"
+                type="number"
+                placeholder="3"
+                required
+                register={register}
+                valueAsNumber
+                className="lg:col-span-1 flex flex-col"
+              />
+              <FormField
+                label="Créditos teóricos"
+                id="_at"
+                type="number"
+                placeholder="3"
+                required
+                register={register}
+                valueAsNumber
+                className="lg:col-span-1 flex flex-col"
+              />
+            </div>
 
+            <div className="flex flex-cols-8 md:grid-cols-4 lg:grid-cols-2 gap-4">
               <div className="grid grid-cols-2 gap-2">
                 <label className="block mb-2 text-sm font-medium" htmlFor="academic-period">
                   &nbsp;
@@ -186,53 +206,31 @@ const DisciplinaForm = ({
 
                 <Toggle label="Ativa" id="_ag" register={register} checked={watch('_ag')} />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  label="Créditos práticos"
-                  id="_ap"
-                  type="number"
-                  placeholder="3"
-                  required
-                  register={register}
-                  valueAsNumber
-                />
-                <FormField
-                  label="Créditos teóricos"
-                  id="_at"
-                  type="number"
-                  placeholder="3"
-                  required
-                  register={register}
-                  valueAsNumber
+              <div className='w-1/2'>
+                <label className="block mb-2 text-sm font-medium" htmlFor="department">
+                  Pré-requisitos
+                </label>
+                <Controller
+                  name="_pr"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      closeMenuOnSelect={false}
+                      components={animatedComponents}
+                      isMulti
+                      options={getPrerequisiteOptions()}
+                      value={getPrerequisiteOptions().filter(option =>
+                        field.value && field.value.includes(option.value)
+                      )}
+                      onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
+                      className="w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
+                      id="_pr"
+                      classNamePrefix="select"
+                    />
+                  )}
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block mb-2 text-sm font-medium" htmlFor="department">
-                Pré-requisitos
-              </label>
-              <Controller
-                name="_pr"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    closeMenuOnSelect={false}
-                    components={animatedComponents}
-                    isMulti
-                    options={getPrerequisiteOptions()}
-                    value={getPrerequisiteOptions().filter(option =>
-                      field.value && field.value.includes(option.value)
-                    )}
-                    onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
-                    className="w-full rounded-lg border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary"
-                    id="_pr"
-                    classNamePrefix="select"
-                  />
-                )}
-              />
             </div>
 
             <div className="space-y-4">
