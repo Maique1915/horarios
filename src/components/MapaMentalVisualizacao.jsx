@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import MapaMentalNode from './MapaMentalNode';
 import MapaMentalLink from './MapaMentalLink';
 
-const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, graphBounds }) => {
+const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, graphBounds, svgRef }) => {
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 800, height: 600 });
-  const svgRef = useRef(null);
+
 
   useEffect(() => {
     if (svgRef.current && graphBounds) {
