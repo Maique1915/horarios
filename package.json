@@ -1,6 +1,6 @@
 {
   "name": "horarios4",
-  "homepage" : "https://maique1915.github.io/Matricula/",
+  "homepage": "https://maique1915.github.io/Matricula/",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -33,6 +33,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "cp -a build/index.html build/404.html",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist"
   },
