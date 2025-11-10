@@ -1,11 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import db from '../model/db.json';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
+// Remover import html2canvas from 'html2canvas';
 
 // Constantes para o layout
-const COLUMN_WIDTH = 280;
-const ROW_HEIGHT = 100;
+const COLUMN_WIDTH = 280; // Reverter para o valor original
+const ROW_HEIGHT = 100; // Reverter para o valor original
+const NODE_WIDTH = 240; // Reverter para o valor original
+const NODE_HEIGHT = 72; // Reverter para o valor original
+const TITLE_WIDTH = 240;
+const TITLE_HEIGHT = 50;
+const VERTICAL_PADDING = 30; // Manter se for usado em ROW_HEIGHT
 
 const MapaMental = ({ subjectStatus, onVoltar }) => {
   const { cur } = useParams();
@@ -13,12 +19,17 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   const [mindMapData, setMindMapData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const svgRef = useRef(null);
+  // Remover const containerRef = useRef(null);
 
-  const handleNodeClick = (nodeId) => {
+  const handleNodeClick = useCallback((nodeId) => {
     setSelectedNodeId(prevId => (prevId === nodeId ? null : nodeId));
-  };
+  }, []);
 
-  const processarDadosParaMapa = (disciplinasDoCurso) => {
+  // Remover handleDownloadImage e o useEffect de captura
+
+  const processarDadosParaMapa = useCallback((disciplinasDoCurso, currentSubjectStatus) => { // Remover downloadMode
+    // Remover currentLayout e usar as constantes diretamente
     const disciplinasMap = new Map();
     disciplinasDoCurso.forEach(d => {
       if (d._ag && !disciplinasMap.has(d._re)) {
@@ -43,7 +54,7 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
 
     sortedPeriods.forEach(periodo => {
       const disciplinasNoPeriodo = periodosMap.get(periodo);
-      const columnX = (periodo - 1) * COLUMN_WIDTH;
+      const columnX = (periodo - 1) * COLUMN_WIDTH; // Usar COLUMN_WIDTH diretamente
 
       nodes.push({
         id: `period-title-${periodo}`,
@@ -51,8 +62,8 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
         type: 'title',
         x: columnX,
         y: -100,
-        width: 240,
-        height: 50,
+        width: TITLE_WIDTH, // Usar TITLE_WIDTH diretamente
+        height: TITLE_HEIGHT, // Usar TITLE_HEIGHT diretamente
         depth: periodo,
       });
 
@@ -60,26 +71,26 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
         const disciplina = disciplinasMap.get(re);
         if (disciplina) {
           let status = 'naoPodeFazer';
-          if (subjectStatus?.feitas?.includes(re)) {
+          if (currentSubjectStatus?.feitas?.includes(re)) {
             status = 'feita';
-          } else if (subjectStatus?.podeFazer?.includes(re)) {
+          } else if (currentSubjectStatus?.podeFazer?.includes(re)) {
             status = 'podeFazer';
           }
 
           nodes.push({
             ...disciplina,
             type: 'subject',
-            status: subjectStatus ? status : 'normal',
+            status: currentSubjectStatus ? status : 'normal',
             x: columnX,
-            y: index * ROW_HEIGHT,
-            width: 240,
-            height: 72,
+            y: index * ROW_HEIGHT, // Usar ROW_HEIGHT diretamente
+            width: NODE_WIDTH, // Usar NODE_WIDTH diretamente
+            height: NODE_HEIGHT, // Usar NODE_HEIGHT diretamente
             depth: periodo,
           });
         }
       });
     });
-    
+
     const links = [];
     const subjectNodes = nodes.filter(n => n.type === 'subject');
     subjectNodes.forEach(targetNode => {
@@ -104,7 +115,7 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
       maxY = Math.max(maxY, node.y + node.height);
     });
 
-    const padding = 200;
+    const padding = 200; // Reverter para o padding original
     const graphBounds = {
       minX: minX - padding,
       minY: minY - padding,
@@ -113,19 +124,19 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
     };
 
     return { nodes, links, graphBounds };
-  };
+  }, []); // Dependências vazias para useCallback
 
   useEffect(() => {
     setLoading(true);
     const filteredDb = db.filter(d => d._cu === cur);
-    
+
     if (filteredDb.length > 0) {
-      const data = processarDadosParaMapa(filteredDb);
+      const data = processarDadosParaMapa(filteredDb, subjectStatus); // Remover isDownloadMode
       setMindMapData(data);
     }
-    
+
     setLoading(false);
-  }, [cur, subjectStatus]);
+  }, [cur, subjectStatus, processarDadosParaMapa]); // Remover isDownloadMode das dependências
 
   if (loading) {
     return <div>Carregando mapa mental...</div>;
@@ -137,20 +148,24 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
-      <div className="p-4 flex justify-between items-center">
+      <div className="fixed z-10 w-full flex flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between">
         <h1 className="text-2xl font-bold">Mapa de Pré-requisitos - {cur}</h1>
-        {onVoltar && (
-          <button
-            onClick={onVoltar}
-            className="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
-          >
-            <span className="material-symbols-outlined text-xl">arrow_back</span>
-            Voltar
-          </button>
-        )}
+        <div className="flex flex-row space-x-2">
+          {onVoltar && (
+            <button
+              onClick={onVoltar}
+              className="flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">arrow_back</span>
+              Voltar
+            </button>
+          )}
+          {/* Remover botão de baixar imagem */}
+        </div>
       </div>
-      <MapaMentalVisualizacao 
-        nodes={mindMapData.nodes} 
+      <MapaMentalVisualizacao
+        svgRef={svgRef}
+        nodes={mindMapData.nodes}
         links={mindMapData.links}
         selectedNodeId={selectedNodeId}
         onNodeClick={handleNodeClick}
