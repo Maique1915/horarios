@@ -384,14 +384,7 @@ const GeraGrade = () => {
                     )}
                 </div>
             </aside>
-
-
-
             <div className="font-display bg-background-light dark:bg-background-dark h-full flex-grow mt-28 md:mt-0">
-
-
-
-
                 <div className="layout-container flex h-full grow flex-col">
                     <div className="flex flex-1 flex-row">
                         <main className="w-full lg:w-full p-4 xl:pt-20">
