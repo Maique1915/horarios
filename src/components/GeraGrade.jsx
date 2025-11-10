@@ -353,10 +353,16 @@ const GeraGrade = () => {
                         </div>
                     </main>
 
-                    <aside className="w-full lg:w-1/3 lg:min-w-[380px] lg:max-w-[420px] p-4 sm:p-6 lg:p-8 lg:border-l lg:border-slate-200 dark:lg:border-slate-800">
-                        <div className="sticky top-24">
-                            <div className="flex flex-col gap-6 rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6">
+                    <aside className="w-full lg:w-1/3 lg:min-w-[380px] lg:max-w-[420px] p-4 sm:p-6 lg:p-8 lg:border-l lg:border-slate-200 dark:lg:border-slate-800 fixed bottom-0 left-0 right-0 z-50 lg:sticky lg:top-24 bg-background-light dark:bg-background-dark lg:bg-transparent lg:dark:bg-transparent border-t border-slate-200 dark:border-slate-800 lg:border-t-0">
+                        <details className="lg:block flex flex-col rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6">
+                            <summary className="flex items-center justify-between gap-6 cursor-pointer lg:hidden">
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">Sumário</h3>
+                                <div className="text-slate-900 dark:text-white group-open:rotate-180 transition-transform">
+                                    <span className="material-symbols-outlined">expand_more</span>
+                                </div>
+                            </summary>
+                            <div className="lg:pt-0 pt-4">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white lg:block hidden">Sumário</h3>
                                 {getStepDescription()}
                                 <div className="flex flex-col gap-3">
                                     {state.estado === 1 && (
@@ -393,7 +399,7 @@ const GeraGrade = () => {
                                     )}
                                 </div>
                             </div>
-                        </div>
+                        </details>
                     </aside>
                 </div>
             </div>
