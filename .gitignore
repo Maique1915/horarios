@@ -23,5 +23,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-\ndownload.zip\ndownload/\n*.png\npackage copy.json
+download.zip
+download/
+*.png
+package copy.json
 vite.config.ts
+src/index.html
+src/index.jsx
