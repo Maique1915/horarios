@@ -8,30 +8,29 @@ import GeraGrade from './components/GeraGrade';
 import Quadro from './components/Quadro';
 import EditDb from './components/EditDb';
 import Redirect from './components/Redirect';
-
 import MapaMental from './components/MapaMental';
 
 const router = createBrowserRouter(
-    [
-        {
-            path: '/',
-            element: <AppLayout />,
-            children: [
-                { index: true, element: <Redirect to="/engcomp" /> },
-                { path: ':cur', element: <GeraGrade /> },
-                { path: ':cur/grades', element: <Quadro /> },
-                { path: ':cur/edit', element: <EditDb /> },
-                { path: ':cur/cronograma', element: <MapaMental /> }
-            ]
-        }
-    ],
+  [
     {
-        basename: '/Matricula/' // 👈 Importante para GitHub Pages
+      path: '/',
+      element: <AppLayout />,
+      children: [
+        { index: true, element: <Redirect to="/engcomp" /> },
+        { path: ':cur', element: <GeraGrade /> },
+        { path: ':cur/grades', element: <Quadro /> },
+        { path: ':cur/edit', element: <EditDb /> },
+        { path: ':cur/cronograma', element: <MapaMental /> }
+      ]
     }
+  ],
+  {
+    basename: '/Matricula/' // ✅ Agora está correto
+  }
 );
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <RouterProvider router={router} />
-    </React.StrictMode>
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
 );
