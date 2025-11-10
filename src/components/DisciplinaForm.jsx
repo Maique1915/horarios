@@ -15,12 +15,13 @@ const formSchema = z.object({
   _se: z.coerce.number(),
   _at: z.coerce.number().min(0),
   _ap: z.coerce.number().min(0),
-  _pr: z.array(z.string()),
+  _pr: z.array(z.union([z.string(), z.coerce.number()])),
   _el: z.boolean(),
   _ag: z.boolean(),
   _cu: z.string(),
   _ho: z.array(z.tuple([z.number(), z.number()])),
   _da: z.array(z.union([z.tuple([z.string(), z.string()]), z.null()])).nullable(),
+  _pr_creditos_input: z.coerce.number().optional().default(0),
 });
 
 const blankForm = {
@@ -35,7 +36,8 @@ const blankForm = {
   _ag: false,
   _cu: '',
   _ho: [],
-  _da: null
+  _da: null,
+  _pr_creditos_input: 0
 };
 
 const FormField = ({ label, id, type = "text", placeholder, maxLength, required, register, valueAsNumber = false, className = "lg:col-span-1 flex flex-col" }) => (
@@ -112,13 +114,19 @@ const DisciplinaForm = ({
   // Atualiza o formulário quando a disciplina prop muda (para edição)
   useEffect(() => {
     console.log('DisciplinaForm useEffect - disciplina prop:', disciplina); // DEBUG
-    if (disciplina) { // Apenas preenche se uma disciplina for fornecida
-      reset(disciplina);
+    if (disciplina) {
+      const numericPrerequisites = disciplina._pr.filter(pr => typeof pr === 'number');
+      const stringPrerequisites = disciplina._pr.filter(pr => typeof pr === 'string');
+
+      reset({
+        ...disciplina,
+        _pr: stringPrerequisites,
+        _pr_creditos_input: numericPrerequisites.length > 0 ? numericPrerequisites[0] : 0,
+      });
     } else {
-      // Se nenhuma disciplina for fornecida (novo formulário), reseta para o estado inicial completamente vazio
       reset(blankForm);
     }
-  }, [disciplina, reset, cur]); // Adicionar 'cur' como dependência
+  }, [disciplina, reset, cur]);
 
   const handleTimeSlotChange = useCallback((dayOfWeek, timeIndex) => {
     const currentHo = watch('_ho');
@@ -135,10 +143,19 @@ const DisciplinaForm = ({
     setValue('_ho', newHo);
   }, [watch, setValue]);
 
+  const onSubmitHandler = (data) => {
+    const finalPrerequisites = [...data._pr];
+    if (data._pr_creditos_input > 0) {
+      finalPrerequisites.push(data._pr_creditos_input);
+    }
+    const finalData = { ...data, _pr: finalPrerequisites };
+    onSubmit(finalData);
+  };
+
   return (
     <div className="lg:col-span-2">
       <div className="sticky top-8 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm p-6">
-        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmitHandler)}>
           <h3 className="text-xl font-bold">Formulário de disciplina</h3>
 
           <div className="flex flex-col gap-4">
@@ -206,6 +223,20 @@ const DisciplinaForm = ({
 
                 <Toggle label="Ativa" id="_ag" register={register} checked={watch('_ag')} />
               </div>
+
+              <div className="grid grid-cols-1 gap-2">
+              <FormField
+                label="Créditos mínimos"
+                id="_pr_creditos_input"
+                type="number"
+                placeholder="0"
+                register={register}
+                valueAsNumber
+                className="lg:col-span-1 flex flex-col"
+              />
+              </div>
+
+
               <div className='w-1/2'>
                 <label className="block mb-2 text-sm font-medium" htmlFor="department">
                   Pré-requisitos
@@ -276,13 +307,13 @@ const DisciplinaForm = ({
 
           <div className="flex items-center gap-4 mt-2">
             <button
-              className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
               type="submit"
             >
               <span className="truncate">Salvar Alterações</span>
             </button>
             <button
-              className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
               type="button"
               onClick={handleCancel}
             >
