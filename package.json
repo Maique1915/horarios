@@ -30,12 +30,12 @@
     "web-vitals": "^2.1.4",
     "zod": "^4.1.12"
   },
+  
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "postbuild": "cp -a build/index.html build/404.html",
+    "build": "vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "eslintConfig": {
     "extends": [
