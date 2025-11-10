@@ -340,7 +340,55 @@ const GeraGrade = () => {
     return (
         <div className="font-display bg-background-light dark:bg-background-dark h-full flex-grow">
 
-            
+            <aside className="fixed z-10 w-full flex flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between">
+                {/* Esquerda: Título "Sumário" */}
+                <div className="flex-none">
+                    <h3 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Sumário</h3>
+                </div>
+
+                {/* Centro: Selecionados e Créditos */}
+                <div className="flex-grow flex justify-center">
+                    <div className="flex flex-col items-center">
+                        {getStepDescription()}
+                    </div>
+                </div>
+
+                {/* Direita: Botões */}
+                <div className="flex-none flex flex-row gap-3">
+                    {state.estado === 1 && (
+                        <button
+                            onClick={() => mudaTela(0)}
+                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary-300 hover:bg-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        >
+                            Voltar
+                        </button>
+                    )}
+                    {state.estado === 0 && (
+                        <button
+                            onClick={() => mudaTela(1)}
+                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        >
+                            Avançar
+                        </button>
+                    )}
+                    {state.estado === 1 && (
+                        <>
+                            <button
+                                onClick={() => mudaTela(2)}
+                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                Gerar Grades
+                            </button>
+                            <button
+                                onClick={handleOpenMapaMental}
+                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                            >
+                                Ver no Conograma
+                            </button>
+                        </>
+                    )}
+                </div>
+            </aside>
             <div className="layout-container flex h-full grow flex-col">
                 <div className="flex flex-1 flex-row">
                     <main className="w-full lg:w-2/3 p-4 pt-20">
