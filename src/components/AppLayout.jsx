@@ -15,10 +15,19 @@ const AppLayout = () => {
         <div className="font-display bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary">
             <div className="flex h-screen w-full flex-col">
 
-                <header className="flex w-full flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between">
+                <header className="flex w-full flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between relative">
                     <div className="flex items-center gap-4">
                         <img src={`${import.meta.env.BASE_URL}icon.png`} alt="Admin Icon" className="size-10 rounded-full" />
-                        <nav className="flex gap-2">
+                        {/* Botão de menu sanduíche para mobile */}
+                        <button onClick={toggleMenu} className="lg:hidden p-2 rounded-lg hover:bg-primary/10">
+                            <span className="material-symbols-outlined text-xl">
+                                {isMenuOpen ? 'close' : 'menu'}
+                            </span>
+                        </button>
+                    </div>
+                    {/* Container para os links de navegação */}
+                    <div className={`absolute top-full left-0 w-full bg-surface-light dark:bg-surface-dark z-51 lg:static lg:w-auto lg:flex lg:flex-row lg:gap-2 ${isMenuOpen ? 'flex flex-col' : 'hidden'}`}>
+                        <nav className="flex flex-col lg:flex-row gap-2 p-2 lg:p-0"> {/* Links principais */}
                             <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}`} end>
                                 <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>add_task</span>
                                 <p className="text-sm font-medium leading-normal">Gera Grade ({cur})</p>
@@ -32,13 +41,12 @@ const AppLayout = () => {
                                 <p className="text-sm font-medium leading-normal">Cronograma</p>
                             </NavLink>
                         </nav>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}/edit`}>
-                            <span className="material-symbols-outlined text-xl">settings</span>
-                            <p className="text-sm font-medium leading-normal">Edite</p>
-                        </NavLink>
-
+                        <div className="flex flex-col lg:flex-row items-center gap-2 p-2 lg:p-0"> {/* Link Edite */}
+                            <NavLink className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors ${getLinkClass({ isActive })}`} to={`/${cur}/edit`}>
+                                <span className="material-symbols-outlined text-xl">settings</span>
+                                <p className="text-sm font-medium leading-normal">Edite</p>
+                            </NavLink>
+                        </div>
                     </div>
                 </header>
                 <main className="flex-1 overflow-y-auto">
