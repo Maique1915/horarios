@@ -232,24 +232,24 @@ const GeraGrade = () => {
                 </p>
             )
         return (
-            <>
-                <div className="flex justify-between items-center">
+            <div className="flex flex-row flex-rows-2 gap-4">
+                <div className="flex justify-left w-70 gap-4">
                     <p className="text-lg font-bold text-slate-900 dark:text-white">
                         Matérias Selecionadas:
                     </p>
                     <p className="text-lg font-bold text-primary">
-                        {`${state.names.length} CP`}
+                        {state.names.length}
                     </p>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-left w-70 gap-4">
                     <p className="text-lg font-bold text-slate-900 dark:text-white">
                         Total de Crédios:
                     </p>
                     <p className="text-lg font-bold text-primary">
-                        {`${state.crs.reduce((a, b) => a + b, 0)} CP`}
+                        {state.crs.reduce((a, b) => a + b, 0)}
                     </p>
                 </div>
-            </>
+            </div>
         )
     }
 
@@ -339,9 +339,59 @@ const GeraGrade = () => {
         return renderStepContent()
     return (
         <div className="font-display bg-background-light dark:bg-background-dark h-full flex-grow">
+
+            <aside className="fixed z-10 w-full flex flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between">
+                {/* Esquerda: Título "Sumário" */}
+                <div className="flex-none">
+                    <h3 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Sumário</h3>
+                </div>
+
+                {/* Centro: Selecionados e Créditos */}
+                <div className="flex-grow flex justify-center">
+                    <div className="flex flex-col items-center">
+                        {getStepDescription()}
+                    </div>
+                </div>
+
+                {/* Direita: Botões */}
+                <div className="flex-none flex flex-col gap-3">
+                    {state.estado === 1 && (
+                        <button
+                            onClick={() => mudaTela(0)}
+                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary-300 hover:bg-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        >
+                            Voltar
+                        </button>
+                    )}
+                    {state.estado === 0 && (
+                        <button
+                            onClick={() => mudaTela(1)}
+                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                        >
+                            Avançar
+                        </button>
+                    )}
+                    {state.estado === 1 && (
+                        <>
+                            <button
+                                onClick={() => mudaTela(2)}
+                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            >
+                                Gerar Grades
+                            </button>
+                            <button
+                                onClick={handleOpenMapaMental}
+                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                            >
+                                Ver no Conograma
+                            </button>
+                        </>
+                    )}
+                </div>
+            </aside>
             <div className="layout-container flex h-full grow flex-col">
                 <div className="flex flex-1 flex-row">
-                    <main className="w-full lg:w-2/3 p-4">
+                    <main className="w-full lg:w-2/3 p-4 pt-20">
                         <div className="layout-content-container flex flex-col w-full">
                             <div className="flex flex-wrap justify-between gap-3 pb-4">
                                 <h1 className="text-2xl font-bold">
@@ -353,54 +403,6 @@ const GeraGrade = () => {
                         </div>
                     </main>
 
-                    <aside className="w-full lg:w-1/3 lg:min-w-[380px] lg:max-w-[420px] p-4 sm:p-6 lg:p-8 lg:border-l lg:border-slate-200 dark:lg:border-slate-800 fixed bottom-0 left-0 right-0 z-50 lg:sticky lg:top-24 bg-background-light dark:bg-background-dark lg:bg-transparent lg:dark:bg-transparent border-t border-slate-200 dark:border-slate-800 lg:border-t-0">
-                        <details className="lg:block flex flex-col rounded-xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-6">
-                            <summary className="flex items-center justify-between gap-6 cursor-pointer lg:hidden">
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Sumário</h3>
-                                <div className="text-slate-900 dark:text-white group-open:rotate-180 transition-transform">
-                                    <span className="material-symbols-outlined">expand_more</span>
-                                </div>
-                            </summary>
-                            <div className="lg:pt-0 pt-4">
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white lg:block hidden">Sumário</h3>
-                                {getStepDescription()}
-                                <div className="flex flex-col gap-3">
-                                    {state.estado === 1 && (
-                                        <button
-                                            onClick={() => mudaTela(0)}
-                                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary-300 gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                        >
-                                            Voltar
-                                        </button>
-                                    )}
-                                    {state.estado === 0 && (
-                                        <button
-                                            onClick={() => mudaTela(1)}
-                                            className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-primary text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                        >
-                                            Avançar
-                                        </button>
-                                    )}
-                                    {state.estado === 1 && (
-                                        <>
-                                            <button
-                                                onClick={() => mudaTela(2)}
-                                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-primary text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                                            >
-                                                Gerar Grades
-                                            </button>
-                                            <button
-                                                onClick={handleOpenMapaMental}
-                                                className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-blue-500 text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                            >
-                                                Ver no Conograma
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </details>
-                    </aside>
                 </div>
             </div>
         </div>
