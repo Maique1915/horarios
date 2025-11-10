@@ -209,15 +209,6 @@ const DisciplinaForm = ({
                 valueAsNumber
                 className="lg:col-span-1 flex flex-col"
               />
-              <FormField
-                label="Pré-requisito de Créditos (Número)"
-                id="_pr_creditos_input"
-                type="number"
-                placeholder="0"
-                register={register}
-                valueAsNumber
-                className="lg:col-span-1 flex flex-col"
-              />
             </div>
 
             <div className="flex flex-cols-8 md:grid-cols-4 lg:grid-cols-2 gap-4">
@@ -232,6 +223,20 @@ const DisciplinaForm = ({
 
                 <Toggle label="Ativa" id="_ag" register={register} checked={watch('_ag')} />
               </div>
+
+              <div className="grid grid-cols-1 gap-2">
+              <FormField
+                label="Créditos mínimos"
+                id="_pr_creditos_input"
+                type="number"
+                placeholder="0"
+                register={register}
+                valueAsNumber
+                className="lg:col-span-1 flex flex-col"
+              />
+              </div>
+
+
               <div className='w-1/2'>
                 <label className="block mb-2 text-sm font-medium" htmlFor="department">
                   Pré-requisitos
@@ -302,13 +307,13 @@ const DisciplinaForm = ({
 
           <div className="flex items-center gap-4 mt-2">
             <button
-              className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
               type="submit"
             >
               <span className="truncate">Salvar Alterações</span>
             </button>
             <button
-              className="flex-1 flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
               type="button"
               onClick={handleCancel}
             >
