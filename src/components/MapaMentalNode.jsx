@@ -5,22 +5,22 @@ const NODE_HEIGHT = 72;
 
 // Cores locais para garantir que funcionem sem depender de CSS externo
 const periodColors = [
-  'rgba(255, 99, 132, 1)',   // Red
-  'rgba(54, 162, 235, 1)',   // Blue
-  'rgba(255, 206, 86, 1)',   // Yellow
-  'rgba(75, 192, 192, 1)',    // Green
-  'rgba(153, 102, 255, 1)',  // Purple
-  'rgba(255, 159, 64, 1)',   // Orange
-  'rgba(255, 99, 132, 1)',   // Red
-  'rgba(54, 162, 235, 1)',   // Blue
-  'rgba(255, 206, 86, 1)',   // Yellow
-  'rgba(75, 192, 192, 1)',    // Green
+  'rgba(255, 99, 132, 1)',   // Vermelho
+  'rgba(54, 162, 235, 1)',   // Azul
+  'rgba(255, 206, 86, 1)',   // Amarelo
+  'rgba(75, 192, 192, 1)',   // Verde água
+  'rgba(153, 102, 255, 1)',  // Roxo
+  'rgba(255, 159, 64, 1)',   // Laranja
+  'rgba(201, 203, 207, 1)',  // Cinza
+  'rgba(255, 99, 255, 1)',   // Rosa
+  'rgba(100, 255, 100, 1)',  // Verde claro
+  'rgba(0, 191, 255, 1)',    // Azul celeste
 ];
-
+ 
 // Gera cores de fundo com opacidade
 const periodBackgroundColors = periodColors.map(c => c.replace(', 1)', ', 0.15)'));
 
-const SubjectNode = ({ node, onNodeClick }) => {
+const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
   const statusColors = {
     feita: {
       border: 'rgba(0, 128, 0, 1)', // Verde
@@ -41,6 +41,7 @@ const SubjectNode = ({ node, onNodeClick }) => {
   };
 
   const { border, background } = statusColors[node.status] || statusColors.normal;
+  const isSelected = node.id === selectedNodeId;
 
   return (
     <g 
@@ -54,7 +55,7 @@ const SubjectNode = ({ node, onNodeClick }) => {
           style={{ 
             border: `2px solid ${border}`,
             backgroundColor: background,
-            color: 'hsl(var(--foreground))'
+            color: 'hsl(var(--foreground))',
           }}
         >
           <p className="line-clamp-3">{node.name} ({node.id})</p>
@@ -79,11 +80,11 @@ const TitleNode = ({ node }) => {
 };
 
 
-const MapaMentalNode = ({ node, onNodeClick }) => {
+const MapaMentalNode = ({ node, onNodeClick, selectedNodeId }) => {
   if (node.type === 'title') {
     return <TitleNode node={node} />;
   }
-  return <SubjectNode node={node} onNodeClick={onNodeClick} />;
+  return <SubjectNode node={node} onNodeClick={onNodeClick} selectedNodeId={selectedNodeId} />;
 };
 
 export default MapaMentalNode;
