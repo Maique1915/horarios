@@ -354,7 +354,7 @@ const GeraGrade = () => {
                 </div>
 
                 {/* Direita: Botões */}
-                <div className="flex-none flex flex-row gap-3">
+                <div className="flex-none flex flex-col gap-3">
                     {state.estado === 1 && (
                         <button
                             onClick={() => mudaTela(0)}
