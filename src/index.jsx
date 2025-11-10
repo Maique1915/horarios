@@ -26,7 +26,7 @@ const router = createBrowserRouter(
         }
     ],
     {
-        basename: '/' // 👈 Importante para GitHub Pages
+        basename: '/Matricula' // 👈 Importante para GitHub Pages
     }
 );
 
