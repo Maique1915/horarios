@@ -340,8 +340,7 @@ const GeraGrade = () => {
     return (
 
         <>
-            <aside className="fixed  flex  justify-between w-full left-0 md:left-auto z-10 bg-background-light dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 p-2 flex items-center ">
-
+            <aside className="fixed flex justify-between w-full left-0 xl:flex-row z-10 bg-background-light dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 p-2">
 
                 {/* Direita: Botões e H1 */}
                 <h1 className="text-2xl font-bold container flex flex-wrap items-center text-slate-800">
