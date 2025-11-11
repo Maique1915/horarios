@@ -395,7 +395,7 @@ const GeraGrade = () => {
             <div className="font-display bg-background-light dark:bg-background-dark h-full flex-grow mt-28 md:mt-0">
                 <div className="layout-container flex h-full grow flex-col">
                     <div className="flex flex-1 flex-row">
-                        <main className="w-full lg:w-2/3 p-4 xl:pt-20">
+                        <main className="w-full p-4 xl:pt-20">
                             <div className="layout-content-container flex flex-col w-full">
                                 {renderStepContent()}
                             </div>
