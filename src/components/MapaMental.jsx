@@ -148,7 +148,7 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
-      <div className="fixed z-10 w-full flex flex-row border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2 items-center justify-between">
+      <div className="fixed z-10 w-full flex flex-row border-b border-border-light dark:border-border-dark dark:bg-surface-dark p-2 items-center justify-between">
         <h1 className="text-2xl font-bold">Mapa de Pré-requisitos - {cur}</h1>
         <div className="flex flex-row space-x-2">
           {onVoltar && (
