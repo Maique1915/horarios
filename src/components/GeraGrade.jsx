@@ -340,18 +340,23 @@ const GeraGrade = () => {
     return (
 
         <>
-            <aside className="fixed left-0 z-50 w-full flex flex-col md:flex-row items-center justify-between border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark p-2">
+            <aside className="fixed  flex  justify-between w-full md:w-auto left-0 md:left-auto z-10 bg-background-light dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 p-2 flex items-center ">
+
+
+                {/* Direita: Botões e H1 */}
+                <h1 className="text-2xl font-bold container flex flex-wrap items-center text-slate-800">
+                    {getStepTitle()}
+                </h1>
                 {/* Centro: Selecionados e Créditos */}
                 <div className="flex flex-col items-center md:absolute md:left-1/2 md:-translate-x-1/2">
                     {getStepDescription()}
                 </div>
+                <div className="flex gap-2">
 
-                {/* Direita: Botões */}
-                <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0 md:ml-auto">
                     {state.estado === 1 && (
                         <button
                             onClick={() => mudaTela(0)}
-                            className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary-300 hover:bg-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                            className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary-300 hover:bg-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none whitespace-nowrap"
                         >
                             Voltar
                         </button>
@@ -370,31 +375,29 @@ const GeraGrade = () => {
                         <>
                             <button
                                 onClick={() => mudaTela(2)}
-                                className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                                className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none whitespace-nowrap"
                             >
                                 Gerar Grades
                             </button>
                             <button
                                 onClick={handleOpenMapaMental}
-                                className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none whitespace-nowrap"
                             >
-                                Ver no Cronograma
+                                Cronograma
                             </button>
                         </>
                     )}
                 </div>
+
             </aside>
+
+
+
             <div className="font-display bg-background-light dark:bg-background-dark h-full flex-grow mt-28 md:mt-0">
                 <div className="layout-container flex h-full grow flex-col">
                     <div className="flex flex-1 flex-row">
-                        <main className="w-full lg:w-full p-4 xl:pt-20">
+                        <main className="w-full lg:w-2/3 p-4 xl:pt-20">
                             <div className="layout-content-container flex flex-col w-full">
-                                <div className="flex flex-wrap justify-between gap-3 pb-4">
-                                    <h1 className="text-2xl font-bold">
-                                        {getStepTitle()}
-                                    </h1>
-                                </div>
-
                                 {renderStepContent()}
                             </div>
                         </main>
