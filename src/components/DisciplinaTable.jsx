@@ -22,7 +22,10 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
       {
         accessorKey: '_pr',
         header: 'Pré-requisitos',
-        cell: info => info.getValue().length > 0 ? info.getValue().join(', ') : 'Nenhum',
+        cell: info => {
+          const value = info.getValue();
+          return (Array.isArray(value) && value.length > 0) ? value.join(', ') : 'Nenhum';
+        },
       },
       {
         accessorKey: '_di',

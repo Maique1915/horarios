@@ -3,9 +3,9 @@ import { dimencao } from './Filtro'
 const sem = ["seg", "ter", "qua", "qui", "sex"]
 
 class Materias{
-	constructor(cur) {
+	constructor(cur, dimensao = [0, 0]) {
 		this.m = { _cu: '', _di: '', _ap: 0, _at: 0, _pr: [], _ag: false, _se: 0, _re: '', _el: false, _ho: [] }
-		const [r, c] = dimencao(cur)
+		const [r, c] = dimensao
 		const row = []
 		for (let i = 0; i < r; i++)
 			row.push(false)

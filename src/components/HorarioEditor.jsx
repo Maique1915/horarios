@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import db2 from '../model/db2.json'; // Importar db2.json
+import { useCourseConfig } from '../model/CourseConfigContext';
 import './HorarioEditor.css'; // CSS para o editor de horários
 
 const HorarioEditor = ({ initialHo, initialDa, onHoChange, onDaChange, cur }) => {
   const [ho, setHo] = useState(initialHo || []);
   const [da, setDa] = useState(initialDa || []);
+  
+  // Usa o Context em vez de carregar dados
+  const { courseConfig, loading, error } = useCourseConfig();
 
-  // Encontrar os dados de horários para o curso atual
-  const cursoData = db2.find(c => c._cu === cur);
-  const numHorarios = cursoData ? cursoData._da[0] : 0; // Número de horários
-  const numDias = cursoData ? cursoData._da[1] : 0;     // Número de dias
-  const horariosDefinidos = cursoData ? cursoData._hd : []; // Definições dos horários
+  const numHorarios = courseConfig?._da[0] || 0; // Número de horários
+  const numDias = courseConfig?._da[1] || 0;     // Número de dias
+  const horariosDefinidos = courseConfig?._hd || []; // Definições dos horários
 
   const diasSemana = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
@@ -63,8 +64,25 @@ const HorarioEditor = ({ initialHo, initialDa, onHoChange, onDaChange, cur }) =>
     onDaChange(newDa);
   };
 
-  if (!cursoData) {
-    return <div>{`Erro: Dados de horários para o curso "${cur}" não encontrados em db2.json.`}</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+            Carregando horários...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 p-4">Erro ao carregar horários: {error}</div>;
+  }
+
+  if (!courseConfig) {
+    return <div>{`Erro: Dados de horários para o curso "${cur}" não encontrados no registro.`}</div>;
   }
 
   return (

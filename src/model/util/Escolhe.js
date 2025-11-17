@@ -1,11 +1,18 @@
 import Materias from '../Materias'
+import { dimencao } from '../Filtro'
 
 export default class Escolhe {
 
     constructor(genesis, cur) {
         this.genesis = genesis
         this.cur = cur
+        this.dimensao = null
         this.reduz()
+    }
+
+    async init() {
+        this.dimensao = await dimencao(this.cur)
+        return this
     }
 
     reduz() {
@@ -30,7 +37,7 @@ export default class Escolhe {
             if (this.count(f) >= 9) continue
 
             const c = []
-            let m = new Materias(this.cur).m
+            let m = new Materias(this.cur, this.dimensao || [0, 0]).m
             let b = true
 
             for(const j in f){

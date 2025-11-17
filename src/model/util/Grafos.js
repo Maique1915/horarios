@@ -6,20 +6,59 @@ export default class Grafos {
     }
 
     matriz() {
-        return this.materias.filter(
+        console.log('Grafos.matriz(): Iniciando filtragem...');
+        console.log('Grafos.matriz(): Total de matérias:', this.materias.length);
+        console.log('Grafos.matriz(): Créditos:', this.cr);
+        console.log('Grafos.matriz(): Matérias feitas (re):', this.re);
+        
+        const resultado = this.materias.filter(
             materia => {
-                if (!this.re.includes(materia._re) && this.temRequisitos(materia._pr))
-                    return true
-                return false
+                const jaFeita = this.re.includes(materia._re);
+                const temReq = this.temRequisitos(materia._pr);
+                
+                if (jaFeita) {
+                    return false;
+                }
+                
+                if (!temReq) {
+                    console.log(`  ❌ ${materia._re} (${materia._di}) - NÃO pode fazer. Pré-req: ${JSON.stringify(materia._pr)}`);
+                    return false;
+                }
+                
+                console.log(`  ✅ ${materia._re} (${materia._di}) - PODE fazer. Pré-req: ${JSON.stringify(materia._pr)}`);
+                return true;
             }
-        )
+        );
+        
+        console.log('Grafos.matriz(): Resultado:', resultado.length, 'matérias podem ser feitas');
+        return resultado;
     }
 
     temRequisitos(requisitos) {
-        return requisitos.every(requisito =>
-            (Number.isInteger(requisito) && this.cr >= parseInt(String(requisito))) ||
-            (!Number.isInteger(requisito) && this.re.includes(String(requisito)))
-        )
+        if (!requisitos || requisitos.length === 0) {
+            console.log(`    ✓ Sem pré-requisitos`);
+            return true; // Sem requisitos = pode fazer
+        }
+        
+        console.log(`    Verificando ${requisitos.length} pré-requisito(s): ${JSON.stringify(requisitos)}`);
+        
+        const resultado = requisitos.every(requisito => {
+            const isCredito = Number.isInteger(requisito);
+            const temCredito = isCredito && this.cr >= parseInt(String(requisito));
+            const temMateria = !isCredito && this.re.includes(String(requisito));
+            const atende = temCredito || temMateria;
+            
+            if (isCredito) {
+                console.log(`      ${atende ? '✓' : '✗'} Crédito: ${requisito} (você tem: ${this.cr})`);
+            } else {
+                console.log(`      ${atende ? '✓' : '✗'} Matéria: ${requisito} (${temMateria ? 'FEITA' : 'NÃO FEITA'})`);
+            }
+            
+            return atende;
+        });
+        
+        console.log(`    Resultado final: ${resultado ? '✓ TODOS OK' : '✗ FALTAM REQUISITOS'}`);
+        return resultado;
     }
 
     getHorarios(materia) {

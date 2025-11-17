@@ -2,16 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import './EditDb.css'; // Usaremos o CSS existente e talvez adicionemos mais
-import db from '../model/db.json'; // Importar db.json diretamente
-import db2 from '../model/db2.json'; // Importar definições de grade
+import { loadDbData, clearCache } from '../model/loadData'; // Importar loader e clearCache
+import { horarios, dimencao } from '../model/Filtro.jsx'; // Importar horarios e dimencao
 
 import * as z from "zod";
 import { useParams } from 'react-router-dom';
 import { da } from 'zod/locales';
 import DisciplinaForm from './DisciplinaForm';
 import DisciplinaTable from './DisciplinaTable';
+import LoadingSpinner, { SavingSpinner } from './LoadingSpinner';
 
 const animatedComponents = makeAnimated();
+
+// URL do Apps Script
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8E80OOXc9pjXZos9XHuxwT1DkwXZqVshjRPX7DVfEdCDGEYaB89w8P2oyRRQGJSYI4A/exec';
 
 // Componente auxiliar para renderizar cada período
 const PeriodEditDivs = ({ periodKey, subjectsData, onEditDisciplina }) => {
@@ -53,20 +57,86 @@ const EditDb = () => {
   const [filtroStatus, setFiltroStatus] = useState(null);
   const [filtroEl, setFiltroEl] = useState(null);
   const [filtroTexto, setFiltroTexto] = useState('');
+  const [syncing, setSyncing] = useState(false); // Estado para indicar sincronização
+  const [courseSchedule, setCourseSchedule] = useState([]);
+  const [courseDimension, setCourseDimension] = useState([0, 0]);
 
   const defaultFormValues = React.useMemo(() => ({
     _id: "", _di: "", _re: "", _se: 1, _at: 4, _ap: 0, _pr: [], _el: false, _ag: true, _cu: cur, _ho: [], _da: [],
   }), [cur]);
 
   useEffect(() => {
-    console.log('Carregando disciplinas para o curso:', cur);
-    const filteredDb = db.filter(d => d._cu === cur).map(d => ({ ...d, _da: d._da || [] }));
-    setReferenceDisciplinas(filteredDb);
-    setDisciplinas(JSON.parse(JSON.stringify(filteredDb))); // Deep copy for editing
-    setLoading(false);
-    // Resetar a visualização quando o curso mudar
-    setActiveSemestreIndex(0);
+    const fetchData = async () => {
+      console.log('EditDb: Carregando dados para o curso:', cur);
+      setLoading(true);
+      try {
+        const [db, schedule, dimension] = await Promise.all([
+          loadDbData(),
+          horarios(cur),
+          dimencao(cur)
+        ]);
+        
+        const filteredDb = db.filter(d => d._cu === cur).map(d => ({ ...d, _da: d._da || [] }));
+        setReferenceDisciplinas(filteredDb);
+        setDisciplinas(JSON.parse(JSON.stringify(filteredDb))); // Deep copy for editing
+        setCourseSchedule(schedule);
+        setCourseDimension(dimension);
+        setError(null);
+        
+        console.log('EditDb: Dados carregados -', filteredDb.length, 'disciplinas');
+      } catch (err) {
+        console.error('EditDb: Erro ao carregar dados:', err);
+        setError('Erro ao carregar disciplinas. Tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+      // Resetar a visualização quando o curso mudar
+      setActiveSemestreIndex(0);
+    };
+    
+    fetchData();
   }, [cur]); // Adicionar cur como dependência
+
+  // Função para salvar no Google Sheets via Apps Script
+  const saveToGoogleSheets = async (action, data) => {
+    setSyncing(true);
+    try {
+      console.log(`Salvando no Google Sheets - Action: ${action}`, data);
+      
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Importante para Apps Script
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: action,
+          course: cur,
+          ...data
+        })
+      });
+
+      // Com no-cors, não podemos ler a resposta, então assumimos sucesso
+      console.log(`Operação ${action} enviada com sucesso`);
+      
+      // Limpa o cache para forçar recarregamento
+      clearCache();
+      
+      // Recarrega os dados
+      const db = await loadDbData();
+      const filteredDb = db.filter(d => d._cu === cur).map(d => ({ ...d, _da: d._da || [] }));
+      setReferenceDisciplinas(filteredDb);
+      setDisciplinas(JSON.parse(JSON.stringify(filteredDb)));
+      
+      return { success: true };
+      
+    } catch (error) {
+      console.error(`Erro ao salvar no Google Sheets (${action}):`, error);
+      throw error;
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const separarPorSemestre = (allDisciplinas) => {
     const semestresMap = new Map();
@@ -90,20 +160,37 @@ const EditDb = () => {
     setShowForm(true); // Mostrar o formulário
   };
 
-  const handleSaveDisciplina = (updatedDataFromForm) => {
-    setDisciplinas(prevDisciplinas => {
-      const newDisciplinas = prevDisciplinas.map(d => {
-        // Usa a disciplina original que está sendo editada (do estado) para encontrar o alvo
-        if (editingDisciplina && d._re === editingDisciplina._re && d._se === editingDisciplina._se) {
-          // Retorna um novo objeto mesclando os dados originais com os novos dados do formulário
-          return { ...editingDisciplina, ...updatedDataFromForm };
-        }
-        return d;
+  const handleSaveDisciplina = async (updatedDataFromForm) => {
+    try {
+      // Salva no Google Sheets
+      await saveToGoogleSheets('updateDiscipline', {
+        reference: editingDisciplina._re,
+        data: updatedDataFromForm
       });
-      return newDisciplinas;
-    });
-    setEditingDisciplina(null); // Fechar o formulário após salvar
-    setShowForm(false); // Voltar para a lista
+      
+      setEditingDisciplina(null);
+      setEditingDisciplineId(null);
+      setShowForm(false);
+      
+      alert('✅ Disciplina atualizada com sucesso no Google Sheets!');
+      
+    } catch (error) {
+      console.error('Erro ao salvar disciplina:', error);
+      alert('❌ Erro ao salvar disciplina. Verifique o console.');
+      
+      // Mantém a edição local mesmo se falhar no servidor
+      setDisciplinas(prevDisciplinas => {
+        const newDisciplinas = prevDisciplinas.map(d => {
+          if (editingDisciplina && d._re === editingDisciplina._re && d._se === editingDisciplina._se) {
+            return { ...editingDisciplina, ...updatedDataFromForm };
+          }
+          return d;
+        });
+        return newDisciplinas;
+      });
+      setEditingDisciplina(null);
+      setShowForm(false);
+    }
   };
 
   const handleCancelForm = () => {
@@ -114,7 +201,7 @@ const EditDb = () => {
     setShowForm(false); // Voltar para a lista
   };
 
-  const addDisciplina = (newDisciplineData) => {
+  const addDisciplina = async (newDisciplineData) => {
     const newDisciplineWithParsedNumbers = {
       ...newDisciplineData,
       _se: parseInt(newDisciplineData._se),
@@ -123,29 +210,121 @@ const EditDb = () => {
       _cu: cur,
     };
 
-    setDisciplinas(prevDisciplinas => [...prevDisciplinas, newDisciplineWithParsedNumbers]);
-    handleCancelForm(); // Call handleCancelForm to reset newDisciplina and close the form
-    setShowForm(false); // Voltar para a lista
+    try {
+      // Salva no Google Sheets
+      await saveToGoogleSheets('addDiscipline', {
+        data: newDisciplineWithParsedNumbers
+      });
+      
+      handleCancelForm();
+      setShowForm(false);
+      
+      alert('✅ Disciplina adicionada com sucesso no Google Sheets!');
+      
+    } catch (error) {
+      console.error('Erro ao adicionar disciplina:', error);
+      alert('❌ Erro ao adicionar disciplina. Verifique o console.');
+      
+      // Adiciona localmente mesmo se falhar no servidor
+      setDisciplinas(prevDisciplinas => [...prevDisciplinas, newDisciplineWithParsedNumbers]);
+      handleCancelForm();
+      setShowForm(false);
+    }
   };
 
-  const removeDisciplina = (disciplinaToRemove) => {
-    if (window.confirm(`Excluir removerá a matéria do sistema. Se a matéria só não vai ser dada no semestre seguinte, basta desativá-la. Tem certeza que deseja remover a disciplina "${disciplinaToRemove._di}" (${disciplinaToRemove._re})?`)) {
+  const removeDisciplina = async (disciplinaToRemove) => {
+    if (!window.confirm(`Excluir removerá a matéria do sistema. Se a matéria só não vai ser dada no semestre seguinte, basta desativá-la. Tem certeza que deseja remover a disciplina "${disciplinaToRemove._di}" (${disciplinaToRemove._re})?`)) {
+      return;
+    }
+    
+    try {
+      // Remove do Google Sheets
+      await saveToGoogleSheets('deleteDiscipline', {
+        reference: disciplinaToRemove._re
+      });
+      
+      setEditingDisciplina(null);
+      alert('✅ Disciplina removida com sucesso do Google Sheets!');
+      
+    } catch (error) {
+      console.error('Erro ao remover disciplina:', error);
+      alert('❌ Erro ao remover disciplina. Verifique o console.');
+      
+      // Remove localmente mesmo se falhar no servidor
       const updatedDisciplinas = disciplinas.filter(d =>
         !(d._re === disciplinaToRemove._re && d._se === disciplinaToRemove._se)
       );
       setDisciplinas(updatedDisciplinas);
-      setEditingDisciplina(null); // Fechar o formulário de edição
+      setEditingDisciplina(null);
     }
   };
 
-  const saveAllDisciplinas = (currentDisciplinas) => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentDisciplinas, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "db.json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
+  const saveAllDisciplinas = async (currentDisciplinas) => {
+    // Converter para CSV com separador TAB (igual ao CourseSelector)
+    const headers = "_cu\t_se\t_di\t_re\t_ap\t_at\t_el\t_ag\t_pr\t_ho\t_au\t_ha\t_da";
+    
+    const csvRows = currentDisciplinas.map(disc => {
+      // Formatar arrays e valores
+      const _pr = Array.isArray(disc._pr) && disc._pr.length > 0 
+        ? `"${disc._pr.join(', ')}"` 
+        : '';
+      
+      const _ho = Array.isArray(disc._ho) && disc._ho.length > 0
+        ? `"${JSON.stringify(disc._ho).replace(/"/g, '')}"`
+        : '';
+      
+      const _ha = Array.isArray(disc._ha) && disc._ha.length > 0
+        ? `"${JSON.stringify(disc._ha).replace(/"/g, '')}"`
+        : '[]';
+      
+      const _au = disc._au || '';
+      const _da = disc._da || '';
+      
+      // Criar linha CSV com separador TAB
+      return `${disc._cu}\t${disc._se}\t${disc._di}\t${disc._re}\t${disc._ap}\t${disc._at}\t${disc._el}\t${disc._ag}\t${_pr}\t${_ho}\t${_au}\t${_ha}\t${_da}`;
+    });
+    
+    const csvContent = headers + '\n' + csvRows.join('\n');
+    
+    // Copiar para clipboard
+    try {
+      await navigator.clipboard.writeText(csvContent);
+      
+      alert(
+        `✅ Dados CSV copiados para a área de transferência!\n\n` +
+        `📋 INSTRUÇÕES:\n\n` +
+        `1. Abra o Google Sheets com seus dados\n` +
+        `2. Vá para a aba "${cur}"\n` +
+        `3. Selecione TODA a planilha (Ctrl+A)\n` +
+        `4. Cole os dados copiados (Ctrl+V)\n` +
+        `5. Os dados serão atualizados automaticamente\n\n` +
+        `⚠️ IMPORTANTE: Esta operação irá SUBSTITUIR todos os dados da aba "${cur}"\n` +
+        `Certifique-se de estar na aba correta antes de colar!\n\n` +
+        `Total de disciplinas: ${currentDisciplinas.length}`
+      );
+    } catch (err) {
+      console.error('Erro ao copiar:', err);
+      
+      // Fallback: fazer download do CSV
+      const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvContent);
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", `${cur}_disciplinas.csv`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+      
+      alert(
+        `⚠️ Não foi possível copiar automaticamente.\n\n` +
+        `O arquivo CSV foi baixado.\n\n` +
+        `📋 INSTRUÇÕES:\n` +
+        `1. Abra o arquivo CSV baixado\n` +
+        `2. Copie todo o conteúdo (Ctrl+A, Ctrl+C)\n` +
+        `3. Vá para o Google Sheets, aba "${cur}"\n` +
+        `4. Selecione a célula A1\n` +
+        `5. Cole os dados (Ctrl+V)`
+      );
+    }
   };
 
   const handleTimeSlotToggle = useCallback((day, timeIndex) => {
@@ -167,17 +346,56 @@ const EditDb = () => {
       handleNewHoChange(newHo);
     }
   });
-  const handleToggleStatus = (disciplinaToToggle) => {
-    const updatedDisciplinas = disciplinas.map(d =>
-      (d._re === disciplinaToToggle._re && d._se === disciplinaToToggle._se)
-        ? { ...d, _ag: !d._ag }
-        : d
-    );
-    setDisciplinas(updatedDisciplinas);
+  const handleToggleStatus = async (disciplinaToToggle) => {
+    console.log('Toggle chamado para:', disciplinaToToggle);
+    
+    try {
+      const newStatus = !disciplinaToToggle._ag;
+      
+      // Atualiza no Google Sheets
+      await saveToGoogleSheets(newStatus ? 'activate' : 'deactivate', {
+        reference: disciplinaToToggle._re
+      });
+      
+      alert(`✅ Disciplina ${newStatus ? 'ativada' : 'desativada'} com sucesso!`);
+      
+    } catch (error) {
+      console.error('Erro ao alterar status:', error);
+      alert('❌ Erro ao alterar status. Verifique o console.');
+      
+      // Atualiza localmente mesmo se falhar no servidor
+      const updatedDisciplinas = disciplinas.map(d => {
+        const isSameDisciplina = 
+          d._re === disciplinaToToggle._re && 
+          d._se === disciplinaToToggle._se &&
+          d._di === disciplinaToToggle._di &&
+          d._cu === disciplinaToToggle._cu;
+        
+        if (isSameDisciplina) {
+          console.log('Toggling:', d._di, 'de', d._ag, 'para', !d._ag);
+        }
+        
+        return isSameDisciplina ? { ...d, _ag: !d._ag } : d;
+      });
+      
+      console.log('Total modificadas:', updatedDisciplinas.filter((d, i) => d._ag !== disciplinas[i]._ag).length);
+      setDisciplinas(updatedDisciplinas);
+    }
   };
 
   const opcoesPeriodo = [...new Set(disciplinas.map(d => d._se))].sort((a, b) => a - b).map(se => ({ value: se, label: `${se}º Período` }));
-  const opcoesCurso = [...new Set(db.map(d => d._cu))].map(cu => ({ value: cu, label: cu }));
+  
+  const [opcoesCurso, setOpcoesCurso] = useState([]);
+  
+  useEffect(() => {
+    const fetchCursos = async () => {
+      const db = await loadDbData();
+      const cursos = [...new Set(db.map(d => d._cu))].map(cu => ({ value: cu, label: cu }));
+      setOpcoesCurso(cursos);
+    };
+    fetchCursos();
+  }, []);
+  
   const opcoesStatus = [
     { value: true, label: 'Ativa' },
     { value: false, label: 'Inativa' },
@@ -214,26 +432,61 @@ const EditDb = () => {
   };
 
 
+  if (loading) {
+    return <LoadingSpinner message="Carregando disciplinas..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <span className="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
+          <p className="text-xl font-bold text-red-500 mb-2">Erro ao carregar dados</p>
+          <p className="text-text-light-secondary dark:text-text-dark-secondary">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="flex-1 overflow-y-auto">
+      {/* Overlay de salvamento */}
+      {syncing && <SavingSpinner message="Salvando no Google Sheets..." />}
+      
       <div className="mx-auto max-w-1x1 p-6 lg:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex flex-col gap-1">
             <p className="text-3xl font-bold leading-tight tracking-tight">Gerenciamento de Disciplinas do Curso</p>
             <p className="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">
-              Adicione, edite ou remova disciplinas do catálogo da universidade.
+              Adicione, edite ou remova disciplinas diretamente no Google Sheets.
             </p>
           </div>
           <div className="flex gap-2">
             <button
-              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
-              onClick={() => saveAllDisciplinas(disciplinas)}
+              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-green-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={async () => {
+                clearCache();
+                const db = await loadDbData();
+                const filteredDb = db.filter(d => d._cu === cur).map(d => ({ ...d, _da: d._da || [] }));
+                setReferenceDisciplinas(filteredDb);
+                setDisciplinas(JSON.parse(JSON.stringify(filteredDb)));
+                alert('✅ Dados recarregados do Google Sheets!');
+              }}
+              disabled={syncing}
             >
-              <span className="material-symbols-outlined text-xl">download</span>
-              <span className="truncate">Salvar JSON</span>
+              <span className="material-symbols-outlined text-xl">refresh</span>
+              <span className="truncate">Recarregar</span>
             </button>
             <button
-              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => saveAllDisciplinas(disciplinas)}
+              disabled={syncing}
+            >
+              <span className="material-symbols-outlined text-xl">download</span>
+              <span className="truncate">Baixar CSV</span>
+            </button>
+            <button
+              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => {
                 setEditingDisciplina(null);
                 setNewDisciplina({
@@ -241,6 +494,7 @@ const EditDb = () => {
                 });
                 setShowForm(true); // Mostrar o formulário
               }}
+              disabled={syncing}
             >
               <span className="material-symbols-outlined text-xl">add</span>
               <span className="truncate">Nova disciplina</span>
@@ -254,6 +508,8 @@ const EditDb = () => {
             onCancel={handleCancelForm}
             cur={cur}
             disciplinas={disciplinas}
+            courseSchedule={courseSchedule}
+            courseDimension={courseDimension}
           />
         ) : (
           <div className="grid grid-cols gap-6">

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Google Sheets</title>
+</head>
+<body>
+    <h1>Teste de Carregamento</h1>
+    <button onclick="testar()">Testar Carregamento</button>
+    <div id="resultado"></div>
+
+    <script>
+        const GOOGLE_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQDxOYV5tQlDvKYrvNAQUBjLjJgL00WVtKmPYsuc9cBVr5Y6FAPZSha3iOCUSSDdGxmyJSicnFeyiI8/pub?output=csv';
+
+        async function testar() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = 'Carregando...';
+            
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL);
+                const text = await response.text();
+                
+                console.log('CSV recebido:', text.substring(0, 500));
+                
+                const lines = text.trim().split('\n');
+                resultado.innerHTML = `
+                    <h2>Sucesso!</h2>
+                    <p>Total de linhas: ${lines.length}</p>
+                    <p>Primeira linha (cabeçalho): ${lines[0]}</p>
+                    <p>Segunda linha (exemplo): ${lines[1]}</p>
+                    <pre>${text.substring(0, 1000)}</pre>
+                `;
+            } catch (error) {
+                resultado.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>

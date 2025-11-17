@@ -1,10 +1,11 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import * as z from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import db2 from '../model/db2.json';
+import { loadCoursesRegistry } from '../model/loadData';
+import { InlineLoadingSpinner } from './LoadingSpinner';
 
 const animatedComponents = makeAnimated();
 
@@ -77,14 +78,45 @@ const DisciplinaForm = ({
   onSubmit,
   onCancel,
   cur,
-  disciplinas
+  disciplinas,
+  courseSchedule,      // Nova prop opcional
+  courseDimension      // Nova prop opcional
 }) => {
   const { handleSubmit, register, control, setValue, watch, reset, formState: { errors } } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: blankForm,
   });
 
-  const courseData = db2.find(c => c._cu === cur);
+  const [courseData, setCourseData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      // Se recebeu dados via props, usa eles
+      if (courseSchedule && courseDimension) {
+        console.log('DisciplinaForm: Usando dados das props');
+        setCourseData({
+          _da: courseDimension,
+          _hd: courseSchedule
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // Senão, busca do servidor
+      console.log('DisciplinaForm: Buscando dados do servidor');
+      const startTime = performance.now();
+      const coursesRegistry = await loadCoursesRegistry();
+      const data = coursesRegistry.find(c => c._cu === cur);
+      const endTime = performance.now();
+      
+      console.log(`DisciplinaForm: Dados carregados em ${(endTime - startTime).toFixed(2)}ms`);
+      setCourseData(data);
+      setLoading(false);
+    };
+    fetchCourseData();
+  }, [cur, courseSchedule, courseDimension]);
+
   const allDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
   const numDays = courseData?._da[1] || 5; // Default to 5 days if not specified
   const days = allDays.slice(0, numDays);
@@ -128,6 +160,7 @@ const DisciplinaForm = ({
     }
   }, [disciplina, reset, cur]);
 
+  // IMPORTANTE: Todos os hooks devem vir ANTES de qualquer return condicional
   const handleTimeSlotChange = useCallback((dayOfWeek, timeIndex) => {
     const currentHo = watch('_ho');
     const newHo = [...currentHo];
@@ -151,6 +184,11 @@ const DisciplinaForm = ({
     const finalData = { ...data, _pr: finalPrerequisites };
     onSubmit(finalData);
   };
+
+  // Mostra loading enquanto carrega dados do curso (APÓS todos os hooks)
+  if (loading || !courseData) {
+    return <InlineLoadingSpinner message="Carregando formulário..." size="md" />;
+  }
 
   return (
     <div className="lg:col-span-2">
@@ -282,7 +320,7 @@ const DisciplinaForm = ({
                     {days.map((day, dayIndex) => {
                       const currentHo = watch('_ho');
                       const isChecked = currentHo && currentHo.some(
-                        (ho) => ho[0] === dayIndex + 1 && ho[1] === timeIndex
+                        (ho) => ho[0] === dayIndex && ho[1] === timeIndex
                       );
                       return (
                         <label
@@ -293,7 +331,7 @@ const DisciplinaForm = ({
                             className="form-checkbox hidden"
                             type="checkbox"
                             checked={isChecked || false}
-                            onChange={() => handleTimeSlotChange(dayIndex + 1, timeIndex)}
+                            onChange={() => handleTimeSlotChange(dayIndex, timeIndex)}
                           />
                           <span className="text-xs font-medium">&ensp;</span>
                         </label>

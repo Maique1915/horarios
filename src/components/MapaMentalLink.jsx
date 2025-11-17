@@ -1,11 +1,12 @@
 import React from 'react';
 
 const NODE_WIDTH = 240; // Valor fixo
+const NODE_HEIGHT = 72; // Valor fixo
 
 const MapaMentalLink = ({ source, target, selectedNodeId }) => {
-  const startX = source.x + NODE_WIDTH / 2;
+  const startX = source.x + NODE_WIDTH*0.75;
   const startY = source.y;
-  const endX = target.x - NODE_WIDTH / 2;
+  const endX = target.x - NODE_WIDTH*0.75;
   const endY = target.y;
 
   const isVisible = selectedNodeId && (source.id === selectedNodeId || target.id === selectedNodeId);
