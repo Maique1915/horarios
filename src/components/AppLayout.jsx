@@ -40,6 +40,10 @@ const AppLayout = () => {
                             alt="Logo"
                             className="w-10 h-10 rounded-full flex-shrink-0"
                         />
+                        {/* Label que só aparece quando o menu está expandido */}
+                        <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
+                            CEFET-PET
+                        </span>
                     </button>
                 </div>
 
