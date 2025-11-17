@@ -1,7 +1,7 @@
 import React from 'react';
 
-const NODE_WIDTH = 240; // Restaurar
-const NODE_HEIGHT = 72; // Restaurar
+const NODE_WIDTH = 360; // Metade do tamanho original (240 / 2)
+const NODE_HEIGHT = 72; // Metade do tamanho original (72 / 2)
 
 // Cores locais para garantir que funcionem sem depender de CSS externo
 const periodColors = [
@@ -51,12 +51,12 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
     >
       <foreignObject x={-NODE_WIDTH / 2} y={-NODE_HEIGHT / 2} width={NODE_WIDTH} height={NODE_HEIGHT} className="group">
         <div 
-          className="w-full h-full p-4 shadow-lg flex items-center justify-center text-center font-medium transition-all duration-200"
+          className="w-full h-full p-6 shadow-lg flex items-center justify-center text-center font-medium transition-all duration-200"
           style={{ 
             border: `2px solid ${border}`,
             backgroundColor: background,
             color: 'hsl(var(--foreground))',
-            borderRadius: '12px',
+            borderRadius: '20px',
           }}
         >
           <p className="line-clamp-2" style={{ textAlign: 'center', fontFamily: 'sans-serif' }}>{node.name} ({node.id})</p>

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import db from '../model/db.json';
+import { loadDbData } from '../model/loadData';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
 // Remover import html2canvas from 'html2canvas';
 
 // Constantes para o layout
-const COLUMN_WIDTH = 280; // Reverter para o valor original
-const ROW_HEIGHT = 100; // Reverter para o valor original
-const NODE_WIDTH = 240; // Reverter para o valor original
+const COLUMN_WIDTH = 400; // Reverter para o valor original
+const ROW_HEIGHT = 100; // Aumentado para evitar sobreposição
+const NODE_WIDTH = 100; // Reverter para o valor original
 const NODE_HEIGHT = 72; // Reverter para o valor original
 const TITLE_WIDTH = 240;
 const TITLE_HEIGHT = 50;
@@ -127,15 +127,20 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   }, []); // Dependências vazias para useCallback
 
   useEffect(() => {
-    setLoading(true);
-    const filteredDb = db.filter(d => d._cu === cur);
+    const fetchData = async () => {
+      setLoading(true);
+      const db = await loadDbData();
+      const filteredDb = db.filter(d => d._cu === cur);
 
-    if (filteredDb.length > 0) {
-      const data = processarDadosParaMapa(filteredDb, subjectStatus); // Remover isDownloadMode
-      setMindMapData(data);
-    }
+      if (filteredDb.length > 0) {
+        const data = processarDadosParaMapa(filteredDb, subjectStatus); // Remover isDownloadMode
+        setMindMapData(data);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    };
+
+    fetchData();
   }, [cur, subjectStatus, processarDadosParaMapa]); // Remover isDownloadMode das dependências
 
   if (loading) {
@@ -147,10 +152,10 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   }
 
   return (
-    <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
-      <div className="fixed z-10 w-full flex flex-row border-b border-border-light dark:border-border-dark dark:bg-surface-dark p-2 items-center justify-between">
+    <div className="flex flex-col p-4 mx-auto">
+      <div className="flex w-full lg:flex-row sm:flex-col  lg:justify-between sm:justify-center sm:align-center sm:gap-3 lg:gap-4">
         <h1 className="text-2xl font-bold">Mapa de Pré-requisitos - {cur}</h1>
-        <div className="flex flex-row space-x-2">
+        <div className="flex flex-wrap gap-2 justify-right sm:justify-center lg:justify-end items-center">
           {onVoltar && (
             <button
               onClick={onVoltar}

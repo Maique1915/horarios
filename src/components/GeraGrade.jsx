@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import Comum from './Comum';
 import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
-import { ativas } from '../model/Filtro.jsx';
+import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
 import MapaMental from './MapaMental'; // Importar o MapaMental
 
 const GeraGrade = () => {
@@ -19,6 +19,10 @@ const GeraGrade = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [openPeriodKey, setOpenPeriodKey] = useState(null);
     const [gradesResult, setGradesResult] = useState([]);
+    const [arr, setArr] = useState([]);
+    const [possibleGrades, setPossibleGrades] = useState([]);
+    const [courseSchedule, setCourseSchedule] = useState([]);
+    const [courseDimension, setCourseDimension] = useState([0, 0]);
 
     useEffect(() => {
         if (cur !== _cur) {
@@ -27,7 +31,43 @@ const GeraGrade = () => {
         }
     }, [cur]);
 
-    const arr = ativas(cur);
+    useEffect(() => {
+        const fetchData = async () => {
+            const [data, schedule, dimension] = await Promise.all([
+                ativas(cur),
+                horarios(cur),
+                dimencao(cur)
+            ]);
+            setArr(data);
+            setCourseSchedule(schedule);
+            setCourseDimension(dimension);
+        };
+        fetchData();
+    }, [cur]);
+
+    useEffect(() => {
+        const calculatePossibleGrades = async () => {
+            if (state.estado === 2 && gradesResult.length > 0) {
+                console.log('GeraGrade: Calculando grades possíveis...');
+                console.log('GeraGrade: gradesResult length:', gradesResult.length);
+                console.log('GeraGrade: state.x:', state.x);
+                
+                const m = gradesResult.filter(item => !state.x.includes(item._re));
+                console.log('GeraGrade: Matérias após filtro:', m.length);
+                
+                const escolhe = await new Escolhe(m, cur).init();
+                let gp = escolhe.exc();
+                console.log('GeraGrade: Grades geradas:', gp.length);
+                
+                setPossibleGrades(gp.slice(0, 50));
+                console.log('GeraGrade: possibleGrades atualizado com', gp.slice(0, 50).length, 'grades');
+            } else {
+                console.log('GeraGrade: Não calculando grades. Estado:', state.estado, 'gradesResult:', gradesResult.length);
+            }
+        };
+        calculatePossibleGrades();
+    }, [state.estado, state.x, gradesResult, cur]);
+
     let _cur = '';
     let gr = [];
 
@@ -203,7 +243,12 @@ const GeraGrade = () => {
     function mudaTela(i) {
         if (i === 1) {
             const cr = state.crs.reduce((a, b) => a + b, 0);
+            console.log('mudaTela(1): Créditos totais:', cr);
+            console.log('mudaTela(1): Matérias feitas (state.names):', state.names);
+            console.log('mudaTela(1): Total de disciplinas (arr):', arr.length);
             const calculatedGr = new Grafos(arr, cr, state.names).matriz();
+            console.log('mudaTela(1): Matérias que pode fazer (calculatedGr):', calculatedGr.length);
+            console.log('mudaTela(1): Primeiras 3 matérias calculadas:', calculatedGr.slice(0, 3).map(m => ({ _re: m._re, _di: m._di, _pr: m._pr })));
             setGradesResult(calculatedGr);
             setState(e => ({ ...e, estado: i }));
         } else {
@@ -227,23 +272,24 @@ const GeraGrade = () => {
         const totalCredits = state.crs.reduce((a, b) => a + b, 0);
         if (state.estado === 0 && state.names.length === 0)
             return (
-                <p className="text-slate-500 dark:text-slate-400 text-sm text-center py-2">
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
                     Nenhuma matéria selecionada
                 </p>
             )
         return (
-            <div className="flex flex-row flex-rows-2 gap-4">
-                <div className="flex justify-left w-70 gap-4">
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">
-                        Matérias Selecionadas:
+            <div className="flex flex-row sm:flex-row gap-3 sm:gap-6 items-center">
+                <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                        Matérias:
                     </p>
                     <p className="text-lg font-bold text-primary">
                         {state.names.length}
                     </p>
                 </div>
-                <div className="flex justify-left w-70 gap-4">
-                    <p className="text-lg font-bold text-slate-900 dark:text-white">
-                        Total de Crédios:
+                <div className="hidden sm:block w-px h-6 bg-border-light dark:bg-border-dark"></div>
+                <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                        Créditos:
                     </p>
                     <p className="text-lg font-bold text-primary">
                         {state.crs.reduce((a, b) => a + b, 0)}
@@ -313,13 +359,36 @@ const GeraGrade = () => {
                 </div>
             );
         } else { // This block is for state.estado === 2
-            const m = gradesResult.filter(item => !state.x.includes(item._re));
-            let gp = new Escolhe(m, cur).exc();
-            console.log(gp);
-
-            gp = gp.slice(0, 50);
             const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
-            return <Comum materias={gp} tela={2} fun={b} cur={cur} separa={false} g={"ª"} f={" Grade Possível"} />;
+            
+            // Mostra loading enquanto as grades estão sendo calculadas
+            if (possibleGrades.length === 0 && gradesResult.length > 0) {
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                        <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
+                            Calculando grades possíveis...
+                        </p>
+                        <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                            Processando {gradesResult.length} disciplinas
+                        </p>
+                    </div>
+                );
+            }
+            
+            return (
+                <Comum 
+                    materias={possibleGrades} 
+                    tela={2} 
+                    fun={b} 
+                    cur={cur} 
+                    separa={false} 
+                    g={"ª"} 
+                    f={" Grade Possível"}
+                    courseSchedule={courseSchedule}
+                    courseDimension={courseDimension}
+                />
+            );
         }
     }
 
@@ -340,67 +409,72 @@ const GeraGrade = () => {
     return (
 
         <>
-            <aside className="fixed flex justify-between w-full left-0 xl:flex-row z-10 bg-background-light dark:bg-background-dark border-b border-slate-200 dark:border-slate-800 p-2">
+            <aside className="flex flex-col items-center p-4  mx-auto ">
+                <div className="px-4 py-4 w-full">
+                    {/* Primeira Linha: Título e Botões */}
+                    <div className="flex w-full lg:flex-row sm:flex-col  lg:justify-between sm:justify-center sm:align-center sm:gap-3 lg:gap-4">
+                        {/* Título */}
+                        <h1 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary lg:text-left">
+                            {getStepTitle()}
+                        </h1>
 
-                {/* Direita: Botões e H1 */}
-                <h1 className="text-2xl font-bold container flex flex-wrap items-center text-slate-800">
-                    {getStepTitle()}
-                </h1>
-                {/* Centro: Selecionados e Créditos */}
-                <div className="flex flex-col items-center md:absolute md:left-1/2 md:-translate-x-1/2">
-                    {getStepDescription()}
+                        {/* Botões */}
+                        <div className="flex flex-wrap gap-2 justify-right sm:justify-center lg:justify-end items-center">
+                            {state.estado === 1 && (
+                                <button
+                                    onClick={() => mudaTela(0)}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-surface-light dark:hover:bg-surface-dark"
+                                >
+                                    <span className="material-symbols-outlined text-lg">arrow_back</span>
+                                    <span>Voltar</span>
+                                </button>
+                            )}
+
+                            {state.estado === 0 && (
+                                <button
+                                    onClick={() => mudaTela(1)}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors bg-primary text-white hover:bg-primary/90 shadow-sm"
+                                >
+                                    <span>Avançar</span>
+                                    <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                </button>
+                            )}
+
+                            {state.estado === 1 && (
+                                <>
+                                    <button
+                                        onClick={handleOpenMapaMental}
+                                        className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">account_tree</span>
+                                        <span>Cronograma</span>
+                                    </button>
+                                    <button
+                                        onClick={() => mudaTela(2)}
+                                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors bg-primary text-white hover:bg-primary/90 shadow-sm"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">grid_view</span>
+                                        <span>Gerar Grades</span>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Segunda Linha: Descrição/Contadores - Centralizado */}
+                    <div className="flex justify-center items-center mt-4">
+                        {getStepDescription()}
+                    </div>
                 </div>
-                <div className="flex gap-2">
-
-                    {state.estado === 1 && (
-                        <button
-                            onClick={() => mudaTela(0)}
-                            className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary-300 hover:bg-primary/30 focus:ring-2 focus:ring-primary/50 focus:outline-none whitespace-nowrap"
-                        >
-                            Voltar
-                        </button>
-                    )}
-
-                    {state.estado === 0 && (
-                        <button
-                            onClick={() => mudaTela(1)}
-                            className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                        >
-                            Avançar
-                        </button>
-                    )}
-
-                    {state.estado === 1 && (
-                        <>
-                            <button
-                                onClick={() => mudaTela(2)}
-                                className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none whitespace-nowrap"
-                            >
-                                Gerar Grades
-                            </button>
-                            <button
-                                onClick={handleOpenMapaMental}
-                                className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 text-base font-bold leading-normal tracking-[0.015em] transition-colors bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none whitespace-nowrap"
-                            >
-                                Cronograma
-                            </button>
-                        </>
-                    )}
-                </div>
-
             </aside>
 
 
-
-            <div className="font-display bg-background-light dark:bg-background-dark h-full flex-grow mt-28 md:mt-0">
-                <div className="layout-container flex h-full grow flex-col">
-                    <div className="flex flex-1 flex-row">
-                        <main className="w-full p-4 xl:pt-20">
-                            <div className="layout-content-container flex flex-col w-full">
-                                {renderStepContent()}
-                            </div>
-                        </main>
-
+            <div className="font-display bg-background-light dark:bg-background-dark min-h-screen">
+                <div className="max-w-7xl mx-auto">
+                    <div className="px-4 py-6">
+                        <div className="layout-content-container flex flex-col w-full">
+                            {renderStepContent()}
+                        </div>
                     </div>
                 </div>
             </div>

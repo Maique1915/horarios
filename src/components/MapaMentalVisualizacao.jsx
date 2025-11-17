@@ -4,7 +4,17 @@ import MapaMentalLink from './MapaMentalLink';
 
 const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, graphBounds, svgRef }) => {
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 800, height: 600 });
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+  // Listener para detectar mudanças no tamanho da janela
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (svgRef.current && graphBounds) {
@@ -19,7 +29,7 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
       // Calcular a escala para caber o grafo inteiro
       const scaleX = svgWidth / graphWidth;
       const scaleY = svgHeight / graphHeight;
-      const scale = Math.min(scaleX, scaleY) * 0.95; // 0.95 para uma pequena margem
+      const scale = Math.min(scaleX, scaleY); // 0.95 para uma pequena margem
   
       // O width/height do viewBox é o tamanho da tela dividido pela escala
       const viewboxWidth = svgWidth / scale;
@@ -27,7 +37,14 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
   
       // Centralizar o viewBox no centro do grafo
       const viewboxX = graphBounds.minX + (graphWidth - viewboxWidth) / 2;
-      const viewboxY = graphBounds.minY + (graphHeight - viewboxHeight) / 2;
+      
+      // Detectar se é desktop (largura >= 1024px)
+      const isDesktop = windowWidth >= 1024;
+      
+      // Fixar Y em -200 para desktop, calcular dinamicamente para mobile
+      const viewboxY = isDesktop 
+        ? -200 
+        : graphBounds.minY + (graphHeight - viewboxHeight) / 2;
   
       setViewBox({
         x: viewboxX,
@@ -36,7 +53,7 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
         height: viewboxHeight,
       });
     }
-  }, [graphBounds]); 
+  }, [graphBounds, windowWidth]); 
   
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
@@ -105,7 +122,7 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
       if (newHeight > graphHeight) newHeight = graphHeight;
 
       // Limitar zoom in (ex: não menor que o tamanho de um nó)
-      const MIN_ZOOM_WIDTH = 240;
+      const MIN_ZOOM_WIDTH = 360; // Ajustado para o novo tamanho do card
       if (newWidth < MIN_ZOOM_WIDTH) newWidth = MIN_ZOOM_WIDTH;
       if (newHeight < MIN_ZOOM_WIDTH * (viewBox.height / viewBox.width)) newHeight = MIN_ZOOM_WIDTH * (viewBox.height / viewBox.width);
 
