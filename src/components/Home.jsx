@@ -95,7 +95,7 @@ const Home = () => {
                         <div
                             key={course.code}
                             onClick={() => navigate(`/${course.code}`)}
-                            className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] group bg-surface-light dark:bg-surface-dark rounded-xl border-2 border-border-light dark:border-border-dark p-5 cursor-pointer hover:shadow-xl hover:scale-105 hover:border-primary transition-all duration-300"
+                            className="w-full group bg-surface-light dark:bg-surface-dark rounded-xl border-2 border-border-light dark:border-border-dark p-5 cursor-pointer hover:shadow-xl hover:scale-105 hover:border-primary transition-all duration-300"
                         >
                             <div className="flex flex-col items-center text-center">
                                 {/* Icon */}
