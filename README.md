@@ -1,70 +1,137 @@
-# Getting Started with Create React App
+# 🎓 Sistema de Gestão de Grades Curriculares - CEFET
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Sistema web desenvolvido para gerenciar grades curriculares, horários e matrícula de cursos do CEFET. Integrado com Google Sheets para armazenamento de dados.
 
-## Available Scripts
+## 🚀 Tecnologias
 
-In the project directory, you can run:
+- **React 18** - Framework principal
+- **Vite** - Build tool e dev server
+- **React Router** - Navegação
+- **Tailwind CSS** - Estilização
+- **Google Apps Script** - Backend/Database
+- **Lucide React** - Ícones
 
-### `npm start`
+## ✨ Funcionalidades
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 📚 Gestão de Cursos
+- Visualização de grades curriculares por curso
+- Mapa mental interativo de pré-requisitos
+- Gerador de grade personalizada
+- Visualização de horários e períodos
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🔐 Autenticação
+- Sistema de login com Google Sheets
+- Três níveis de acesso:
+  - **Admin**: Gestão completa
+  - **Editor**: Edição de disciplinas
+  - **Viewer**: Apenas visualização
+- Rotas protegidas para edição
 
-### `npm test`
+### 📝 Editor de Dados
+- Interface CRUD para disciplinas
+- Editor de horários visual
+- Exportação de dados (CSV/JSON)
+- Sincronização em tempo real com Google Sheets
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🎨 Interface
+- Design responsivo e moderno
+- Menu lateral retrátil
+- Loading padronizado
+- Feedback visual de ações
 
-### `npm run build`
+## 📦 Instalação
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+# Instalar dependências
+npm install
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Rodar em desenvolvimento
+npm run dev
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Build para produção
+npm run build
 
-### `npm run eject`
+# Deploy no GitHub Pages
+npm run deploy
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🔧 Configuração
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Google Apps Script
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Crie uma planilha no Google Sheets
+2. Configure as abas conforme estrutura:
+   - **gid=0**: Lista de cursos
+   - **Cursos**: Abas por curso com disciplinas
+   - **users**: Usuários (username, password_hash, role)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. Adicione o script do arquivo `google-apps-script-database.js`
+4. Publique como Web App
+5. Configure a URL no `src/utils/loadData.js`
 
-## Learn More
+### Estrutura de Dados
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**Cursos (gid=0)**
+- `_di`: Sigla do curso
+- `name`: Nome completo
+- `_da`: Dimensão [horários, dias]
+- `gid`: ID da aba
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**Disciplinas**
+- `_di`: Código único
+- `name`: Nome da disciplina
+- `_re`: Pré-requisitos
+- `_pr`: Período recomendado
+- Outros campos configuráveis
 
-### Code Splitting
+## 🌐 Deploy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+O sistema está configurado para deploy automático no GitHub Pages:
 
-### Analyzing the Bundle Size
+```bash
+npm run deploy
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Acesse em: https://maique1915.github.io/Matricula/
 
-### Making a Progressive Web App
+## 📁 Estrutura do Projeto
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+src/
+├── components/         # Componentes React
+│   ├── Home.jsx       # Página inicial
+│   ├── GeraGrade.jsx  # Gerador de grades
+│   ├── MapaMental.jsx # Visualização de dependências
+│   ├── Quadro.jsx     # Quadro de horários
+│   ├── EditDb.jsx     # Editor de disciplinas
+│   └── ...
+├── contexts/          # Context API
+│   └── AuthContext.jsx
+├── model/             # Classes de domínio
+├── utils/             # Funções utilitárias
+└── App.jsx           # Componente raiz
+```
 
-### Advanced Configuration
+## 🔒 Segurança
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Senhas hasheadas (SHA-256)
+- Tokens de sessão (localStorage)
+- Rotas protegidas por nível de acesso
+- Validação de permissões no backend
 
-### Deployment
+## 📝 Licença
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Este projeto é de uso interno do CEFET.
 
-### `npm run build` fails to minify
+## 👥 Contribuindo
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Para contribuir:
+1. Fork o projeto
+2. Crie uma branch para sua feature
+3. Commit suas mudanças
+4. Push para a branch
+5. Abra um Pull Request
+
+## 🐛 Reportar Bugs
+
+Abra uma issue descrevendo o problema e os passos para reproduzi-lo.
