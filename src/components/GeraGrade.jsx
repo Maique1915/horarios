@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Comum from './Comum';
 import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
 import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
+import { getDataSourceStatus } from '../model/loadData';
 import MapaMental from './MapaMental'; // Importar o MapaMental
 import LoadingSpinner from './LoadingSpinner';
 
@@ -26,17 +27,23 @@ const GeraGrade = () => {
     const [courseDimension, setCourseDimension] = useState([0, 0]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (cur !== _cur) {
-            _cur = cur;
-            setState({ names: [], keys: [], crs: [], estado: 0, x: [] });
-        }
-    }, [cur]);
+    const _cur = useRef(cur);
+    const [cacheInfo, setCacheInfo] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             try {
+                // Status do cache para feedback visual
+                const cacheStatus = getDataSourceStatus();
+                setCacheInfo(cacheStatus);
+
+                // Reset do estado se o curso mudou
+                if (cur !== _cur.current) {
+                    _cur.current = cur;
+                    setState({ names: [], keys: [], crs: [], estado: 0, x: [] });
+                }
+
                 const [data, schedule, dimension] = await Promise.all([
                     ativas(cur),
                     horarios(cur),
@@ -60,14 +67,14 @@ const GeraGrade = () => {
                 console.log('GeraGrade: Calculando grades possíveis...');
                 console.log('GeraGrade: gradesResult length:', gradesResult.length);
                 console.log('GeraGrade: state.x:', state.x);
-                
+
                 const m = gradesResult.filter(item => !state.x.includes(item._re));
                 console.log('GeraGrade: Matérias após filtro:', m.length);
-                
+
                 const escolhe = await new Escolhe(m, cur).init();
                 let gp = escolhe.exc();
                 console.log('GeraGrade: Grades geradas:', gp.length);
-                
+
                 setPossibleGrades(gp.slice(0, 50));
                 console.log('GeraGrade: possibleGrades atualizado com', gp.slice(0, 50).length, 'grades');
             } else {
@@ -77,7 +84,6 @@ const GeraGrade = () => {
         calculatePossibleGrades();
     }, [state.estado, state.x, gradesResult, cur]);
 
-    let _cur = '';
     let gr = [];
 
     function handleCheck(e) {
@@ -369,7 +375,7 @@ const GeraGrade = () => {
             );
         } else { // This block is for state.estado === 2
             const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
-            
+
             // Mostra loading enquanto as grades estão sendo calculadas
             if (possibleGrades.length === 0 && gradesResult.length > 0) {
                 return (
@@ -384,15 +390,15 @@ const GeraGrade = () => {
                     </div>
                 );
             }
-            
+
             return (
-                <Comum 
-                    materias={possibleGrades} 
-                    tela={2} 
-                    fun={b} 
-                    cur={cur} 
-                    separa={false} 
-                    g={"ª"} 
+                <Comum
+                    materias={possibleGrades}
+                    tela={2}
+                    fun={b}
+                    cur={cur}
+                    separa={false}
+                    g={"ª"}
                     f={" Grade Possível"}
                     courseSchedule={courseSchedule}
                     courseDimension={courseDimension}
@@ -402,7 +408,12 @@ const GeraGrade = () => {
     }
 
     if (loading) {
-        return <LoadingSpinner message="Carregando dados da grade..." />;
+        return (
+            <LoadingSpinner
+                message="Carregando dados da grade..."
+                submessage={cacheInfo?.cacheValid ? '✅ Usando cache' : '🔄 Buscando do servidor'}
+            />
+        );
     }
 
     if (state.estado === 4) {
