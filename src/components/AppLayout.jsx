@@ -16,8 +16,8 @@ const AppLayout = () => {
     };
 
     const menuItems = [
-        { to: `/${cur}`, icon: 'grid_on', label: 'Horários', end: true },
-        { to: `/${cur}/grades`, icon: 'add_task', label: 'Gera Grade' },
+        { to: `/${cur}`, icon: 'add_task', label: 'Gera Grade', end: true },
+        { to: `/${cur}/grades`, icon: 'grid_on', label: 'Horários' },
         { to: `/${cur}/cronograma`, icon: 'timeline', label: 'Cronograma' },
     ];
 
@@ -36,7 +36,7 @@ const AppLayout = () => {
                         title="Voltar para página inicial"
                     >
                         <img
-                            src={`${import.meta.env.BASE_URL}CEFETRJ.png`}
+                            src={`${import.meta.env.BASE_URL}public/cefet-rj.jpg`}
                             alt="Logo"
                             className="w-10 h-10 rounded-full flex-shrink-0"
                         />
@@ -126,7 +126,7 @@ const AppLayout = () => {
                                     </button>
                                 </div>
                             )}
-                            
+
                             <NavLink
                                 to={`/${cur}/edit`}
                                 className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"

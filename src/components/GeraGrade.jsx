@@ -5,6 +5,7 @@ import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
 import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
 import MapaMental from './MapaMental'; // Importar o MapaMental
+import LoadingSpinner from './LoadingSpinner';
 
 const GeraGrade = () => {
     const { cur = 'engcomp' } = useParams();
@@ -23,6 +24,7 @@ const GeraGrade = () => {
     const [possibleGrades, setPossibleGrades] = useState([]);
     const [courseSchedule, setCourseSchedule] = useState([]);
     const [courseDimension, setCourseDimension] = useState([0, 0]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (cur !== _cur) {
@@ -33,14 +35,21 @@ const GeraGrade = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [data, schedule, dimension] = await Promise.all([
-                ativas(cur),
-                horarios(cur),
-                dimencao(cur)
-            ]);
-            setArr(data);
-            setCourseSchedule(schedule);
-            setCourseDimension(dimension);
+            setLoading(true);
+            try {
+                const [data, schedule, dimension] = await Promise.all([
+                    ativas(cur),
+                    horarios(cur),
+                    dimencao(cur)
+                ]);
+                setArr(data);
+                setCourseSchedule(schedule);
+                setCourseDimension(dimension);
+            } catch (error) {
+                console.error("Error fetching data for GeraGrade:", error);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchData();
     }, [cur]);
@@ -390,6 +399,10 @@ const GeraGrade = () => {
                 />
             );
         }
+    }
+
+    if (loading) {
+        return <LoadingSpinner message="Carregando dados da grade..." />;
     }
 
     if (state.estado === 4) {

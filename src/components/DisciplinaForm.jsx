@@ -5,7 +5,7 @@ import * as z from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loadCoursesRegistry } from '../model/loadData';
-import { InlineLoadingSpinner } from './LoadingSpinner';
+import LoadingSpinner from './LoadingSpinner';
 
 const animatedComponents = makeAnimated();
 
@@ -92,27 +92,32 @@ const DisciplinaForm = ({
 
   useEffect(() => {
     const fetchCourseData = async () => {
-      // Se recebeu dados via props, usa eles
-      if (courseSchedule && courseDimension) {
-        console.log('DisciplinaForm: Usando dados das props');
-        setCourseData({
-          _da: courseDimension,
-          _hd: courseSchedule
-        });
+      setLoading(true);
+      try {
+        // Se recebeu dados via props, usa eles
+        if (courseSchedule && courseDimension) {
+          console.log('DisciplinaForm: Usando dados das props');
+          setCourseData({
+            _da: courseDimension,
+            _hd: courseSchedule
+          });
+          return;
+        }
+        
+        // Senão, busca do servidor
+        console.log('DisciplinaForm: Buscando dados do servidor');
+        const startTime = performance.now();
+        const coursesRegistry = await loadCoursesRegistry();
+        const data = coursesRegistry.find(c => c._cu === cur);
+        const endTime = performance.now();
+        
+        console.log(`DisciplinaForm: Dados carregados em ${(endTime - startTime).toFixed(2)}ms`);
+        setCourseData(data);
+      } catch (error) {
+        console.error("Error fetching course data in DisciplinaForm:", error);
+      } finally {
         setLoading(false);
-        return;
       }
-      
-      // Senão, busca do servidor
-      console.log('DisciplinaForm: Buscando dados do servidor');
-      const startTime = performance.now();
-      const coursesRegistry = await loadCoursesRegistry();
-      const data = coursesRegistry.find(c => c._cu === cur);
-      const endTime = performance.now();
-      
-      console.log(`DisciplinaForm: Dados carregados em ${(endTime - startTime).toFixed(2)}ms`);
-      setCourseData(data);
-      setLoading(false);
     };
     fetchCourseData();
   }, [cur, courseSchedule, courseDimension]);
@@ -126,10 +131,11 @@ const DisciplinaForm = ({
 
   const getPrerequisiteOptions = useCallback(() => {
     if (!disciplinas) return [];
-    const activeDisciplinas = disciplinas.filter(d => d._ag);
+    const currentSemester = watch('_se');
+    const activeDisciplinas = disciplinas.filter(d => d._ag && d._se < currentSemester);
     const uniquePrerequisites = Array.from(new Set(activeDisciplinas.map(d => d._re)));
     return uniquePrerequisites.map(re => ({ value: re, label: `${re} - ${activeDisciplinas.find(d => d._re === re)?._di || ''}` }));
-  }, [disciplinas]);
+  }, [disciplinas, watch]);
 
   // Função para resetar o formulário completamente
   const handleCancel = () => {
@@ -187,7 +193,7 @@ const DisciplinaForm = ({
 
   // Mostra loading enquanto carrega dados do curso (APÓS todos os hooks)
   if (loading || !courseData) {
-    return <InlineLoadingSpinner message="Carregando formulário..." size="md" />;
+    return <LoadingSpinner message="Carregando formulário..." />;
   }
 
   return (
