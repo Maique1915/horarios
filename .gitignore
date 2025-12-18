@@ -27,6 +27,4 @@ download.zip
 download/
 *.png
 package copy.json
-vite.config.ts
 src/index.html
-src/index.jsx
