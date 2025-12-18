@@ -1,6 +1,5 @@
 {
   "name": "horarios4",
-  "homepage": "https://maique1915.github.io/Matricula/",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -30,7 +29,6 @@
     "web-vitals": "^2.1.4",
     "zod": "^4.1.12"
   },
-  
   "scripts": {
     "dev": "vite",
     "build": "vite build",
