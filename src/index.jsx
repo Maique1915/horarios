@@ -24,9 +24,9 @@ const router = createBrowserRouter(
         { path: 'login', element: <Login /> },
         { path: ':cur', element: <GeraGrade /> },
         { path: ':cur/grades', element: <Quadro /> },
-        { 
-          path: ':cur/edit', 
-          element: <ProtectedRoute><EditDb /></ProtectedRoute> 
+        {
+          path: ':cur/edit',
+          element: <ProtectedRoute><EditDb /></ProtectedRoute>
         },
         { path: ':cur/cronograma', element: <MapaMental /> }
       ]
@@ -35,15 +35,15 @@ const router = createBrowserRouter(
       path: '/edit',
       element: <AppLayout />,
       children: [
-        { 
-          index: true, 
-          element: <ProtectedRoute><EditDb /></ProtectedRoute> 
+        {
+          index: true,
+          element: <ProtectedRoute><EditDb /></ProtectedRoute>
         }
       ]
     }
   ],
   {
-    basename: '/'
+    basename: '/Matricula/'
   }
 );
 
