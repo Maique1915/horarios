@@ -44,7 +44,7 @@ const AppLayout = () => {
                             title="Voltar para página inicial"
                         >
                             <img
-                                src={`${import.meta.env.BASE_URL}public/cefet-rj.jpg`}
+                                src={`${import.meta.env.BASE_URL}/cefet-rj.jpg`}
                                 alt="Logo"
                                 className="w-10 h-10 rounded-full flex-shrink-0"
                             />
