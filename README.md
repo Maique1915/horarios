@@ -92,7 +92,7 @@ O sistema está configurado para deploy automático no GitHub Pages:
 npm run deploy
 ```
 
-Acesse em: https://maique1915.github.io/Matricula/
+Acesse o sistema implantado via Vercel.
 
 ## 📁 Estrutura do Projeto
 
