@@ -253,6 +253,29 @@ const Login = () => {
                             </div>
                         </div>
 
+                        {/* Confirm Password */}
+                        {isRegistering && (
+                            <div className="space-y-2 animate-fadeIn">
+                                <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                                    Confirmar Senha
+                                </label>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary text-xl">
+                                        lock_clock
+                                    </span>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        placeholder="Confirme sua senha"
+                                        required
+                                        minLength={6}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         {/* Submit Button */}
                         <button
                             type="submit"
