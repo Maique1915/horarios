@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
-import { getDataSourceStatus } from '../model/loadData';
+
 import Comum from './Comum.jsx';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -10,37 +10,32 @@ const Quadro = () => {
     const [a, setA] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [cacheInfo, setCacheInfo] = useState(null);
+
     const [courseSchedule, setCourseSchedule] = useState([]);
     const [courseDimension, setCourseDimension] = useState([0, 0]);
-    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                
-                // Verifica status do cache
-                const cacheStatus = getDataSourceStatus();
-                setCacheInfo(cacheStatus);
-                
-                console.log('Quadro: Status do cache:', cacheStatus);
+
                 console.log('Quadro: Carregando dados para curso:', cur);
-                
+
                 const startTime = performance.now();
-                
+
                 // Carrega todos os dados em paralelo
                 const [data, schedule, dimension] = await Promise.all([
                     ativas(cur),
                     horarios(cur),
                     dimencao(cur)
                 ]);
-                
+
                 const endTime = performance.now();
-                
+
                 console.log('Quadro: Dados recebidos em', (endTime - startTime).toFixed(2), 'ms');
                 console.log('Quadro:', data?.length, 'disciplinas');
-                console.log('Quadro: Fonte:', cacheStatus.cacheValid ? 'cache' : 'rede');
-                
+
+
                 setA(data);
                 setCourseSchedule(schedule);
                 setCourseDimension(dimension);
@@ -54,16 +49,15 @@ const Quadro = () => {
         };
         fetchData();
     }, [cur]);
-    
+
     if (loading) {
         return (
-            <LoadingSpinner 
+            <LoadingSpinner
                 message="Carregando disciplinas..."
-                submessage={cacheInfo?.cacheValid ? '✅ Usando cache' : '🔄 Buscando do servidor'}
             />
         );
     }
-    
+
     if (error) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -74,7 +68,7 @@ const Quadro = () => {
             </div>
         );
     }
-    
+
     if (!a || a.length === 0) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -89,14 +83,14 @@ const Quadro = () => {
             </div>
         );
     }
-    
+
     return (
-        <Comum 
-            materias={[a]} 
-            tela={1} 
-            cur={cur} 
-            separa={true} 
-            g={"º"} 
+        <Comum
+            materias={a}
+            tela={1}
+            cur={cur}
+            separa={true}
+            g={"º"}
             f={' Período'}
             courseSchedule={courseSchedule}
             courseDimension={courseDimension}

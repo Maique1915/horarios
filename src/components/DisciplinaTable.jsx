@@ -73,10 +73,11 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     initialState: {
-        pagination: {
-            pageSize: 10,
-        }
-    }
+      pagination: {
+        pageSize: 10,
+      }
+    },
+    autoResetPageIndex: false, // Evita que a paginação seja reiniciada ao mudar os dados
   });
 
   return (
@@ -103,15 +104,23 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id} className="border-b border-border-light dark:border-border-dark">
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="px-4 py-2 align-middle">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="border-b border-border-light dark:border-border-dark">
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="px-4 py-2 align-middle">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={columns.length} className="text-center p-4">
+                Nenhuma disciplina encontrada.
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
       <div className="flex items-center justify-between p-4">
@@ -119,34 +128,34 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
           Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
         </span>
         <div className="flex gap-2">
-            <button 
-                onClick={() => table.setPageIndex(0)} 
-                disabled={!table.getCanPreviousPage()}
-                className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
-            >
-                Primeira
-            </button>
-            <button 
-                onClick={() => table.previousPage()} 
-                disabled={!table.getCanPreviousPage()}
-                className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
-            >
-                Anterior
-            </button>
-            <button 
-                onClick={() => table.nextPage()} 
-                disabled={!table.getCanNextPage()}
-                className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
-            >
-                Próxima
-            </button>
-            <button 
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)} 
-                disabled={!table.getCanNextPage()}
-                className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
-            >
-                Última
-            </button>
+          <button
+            onClick={() => table.setPageIndex(0)}
+            disabled={!table.getCanPreviousPage()}
+            className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
+          >
+            Primeira
+          </button>
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
+          >
+            Próxima
+          </button>
+          <button
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+            className="p-2 rounded-md hover:bg-primary/10 disabled:opacity-50"
+          >
+            Última
+          </button>
         </div>
       </div>
     </div>

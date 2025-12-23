@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadDbData, clearCache, loadCoursesRegistry } from '../model/loadData';
+import { loadDbData, clearCache, loadCoursesRegistry } from '../services/disciplinaService';
 
 // 🔧 CONFIGURE A URL DO GOOGLE APPS SCRIPT AQUI:
 // Depois de criar o script, cole a URL aqui
@@ -23,19 +23,19 @@ const CourseSelector = () => {
         const fetchCourses = async () => {
             try {
                 setLoading(true);
-                
+
                 // Carregar registro de cursos do gid=0
                 const coursesRegistry = await loadCoursesRegistry();
                 console.log('Cursos do registro:', coursesRegistry);
-                
+
                 if (coursesRegistry.length > 0) {
                     // Usar dados do registro
                     const data = await loadDbData();
-                    
+
                     const coursesWithInfo = coursesRegistry.map(courseReg => {
                         const courseCode = courseReg._cu;
                         const disciplineCount = data.filter(d => d._cu === courseCode && d._ag === true).length;
-                        
+
                         return {
                             code: courseCode,
                             name: courseReg.name || courseCode.toUpperCase(),
@@ -44,17 +44,17 @@ const CourseSelector = () => {
                             gid: courseReg.gid
                         };
                     });
-                    
+
                     setCourses(coursesWithInfo);
                 } else {
                     // Fallback para o método antigo se o registro não estiver disponível
                     const data = await loadDbData();
                     const uniqueCourses = [...new Set(data.map(d => d._cu))];
-                    
+
                     const coursesWithInfo = uniqueCourses.map(courseCode => {
                         const courseInfo = db2.find(c => c._cu === courseCode);
                         const disciplineCount = data.filter(d => d._cu === courseCode && d._ag === true).length;
-                        
+
                         return {
                             code: courseCode,
                             name: courseInfo?.name || courseCode.toUpperCase(),
@@ -107,7 +107,7 @@ const CourseSelector = () => {
 
         const courseCode = newCourse._cu.toLowerCase();
         const courseName = newCourse.name.toUpperCase();
-        
+
         // Criar linha CSV para registro de cursos (gid=0)
         // Formato: gid	_cu	name	_da	_hd
         const registryLine = `-1\t${courseCode}\t${courseName}\t${JSON.stringify(newCourse._da)}\t${JSON.stringify(newCourse._hd)}`;
@@ -115,7 +115,7 @@ const CourseSelector = () => {
         try {
             // Tentar copiar para clipboard
             await navigator.clipboard.writeText(registryLine);
-            
+
             alert(
                 `✅ Dados copiados!\n\n` +
                 `📋 INSTRUÇÕES IMPORTANTES:\n\n` +
@@ -136,24 +136,24 @@ const CourseSelector = () => {
 
             // Limpa cache
             clearCache();
-            
+
             // Aguarda um momento antes de navegar
             setTimeout(() => {
                 navigate(`/${courseCode}/edit`);
                 setShowAddModal(false);
             }, 500);
-            
+
         } catch (error) {
             // Fallback: download CSV
             console.error('Erro ao copiar:', error);
-            
+
             const confirmed = window.confirm(
                 `❌ Não foi possível copiar automaticamente.\n\n` +
                 `Vou baixar um arquivo CSV.\n\n` +
                 `LEMBRE-SE: Crie uma aba chamada "${courseCode}" no Google Sheets!\n\n` +
                 `Clique OK para baixar.`
             );
-            
+
             if (confirmed) {
                 downloadCSV(courseData);
             }
@@ -164,12 +164,12 @@ const CourseSelector = () => {
 
     const downloadCSV = (courseData) => {
         const courseCode = courseData._cu;
-        
+
         // Criar CSV com cabeçalho
         const header = '_cu,_se,_di,_re,_ap,_at,_el,_ag,_pr,_ho,_au,_ha,_da';
         const csvLine = `${courseData._cu},${courseData._se},"${courseData._di}",${courseData._re},${courseData._ap},${courseData._at},${courseData._el},${courseData._ag},"${courseData._pr}","${courseData._ho}","${courseData._au}","${courseData._ha}","${courseData._da}"`;
         const csvContent = `${header}\n${csvLine}`;
-        
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -195,7 +195,7 @@ const CourseSelector = () => {
             `9. Salve e recarregue\n\n` +
             `⚠️ A ABA DEVE se chamar "${courseCode}"`
         );
-        
+
         setTimeout(() => {
             navigate(`/${courseCode}/edit`);
             setShowAddModal(false);
@@ -228,7 +228,7 @@ const CourseSelector = () => {
                             Escolha um curso para gerenciar ou adicione um novo
                         </p>
                     </div>
-                    
+
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="flex items-center gap-2 px-5 py-3 rounded-lg text-sm font-medium transition-colors bg-primary text-white hover:bg-primary/90 shadow-md"

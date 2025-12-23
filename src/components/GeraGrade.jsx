@@ -4,7 +4,7 @@ import Comum from './Comum';
 import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
 import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
-import { getDataSourceStatus } from '../model/loadData';
+
 import MapaMental from './MapaMental'; // Importar o MapaMental
 import LoadingSpinner from './LoadingSpinner';
 
@@ -34,10 +34,6 @@ const GeraGrade = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                // Status do cache para feedback visual
-                const cacheStatus = getDataSourceStatus();
-                setCacheInfo(cacheStatus);
-
                 // Reset do estado se o curso mudou
                 if (cur !== _cur.current) {
                     _cur.current = cur;
@@ -411,7 +407,6 @@ const GeraGrade = () => {
         return (
             <LoadingSpinner
                 message="Carregando dados da grade..."
-                submessage={cacheInfo?.cacheValid ? '✅ Usando cache' : '🔄 Buscando do servidor'}
             />
         );
     }

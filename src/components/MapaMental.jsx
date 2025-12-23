@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { loadDbData } from '../model/loadData';
+import { loadDbData } from '../services/disciplinaService';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
 // Remover import html2canvas from 'html2canvas';
 

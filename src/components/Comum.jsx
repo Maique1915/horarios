@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useCourseDimension, useCourseSchedule, useCourseConfig } from '../model/CourseConfigContext';
+import { getDays, getTimeSlots } from '../services/scheduleService';
+import { loadClassesForGrid } from '../services/disciplinaService';
 
 const cores = ["#E3F2FD", "#E8F5E9", "#FFFDE7", "#FBE9E7", "#F3E5F5", "#E0F7FA", "#F1F8E9", "#FFF3E0", "#EDE7F6", "#FFEBEE"];
-const diasSemana = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const rand = Math.floor(Math.random() * cores.length);
 
 const dataAtual = new Date();
@@ -14,131 +14,100 @@ const Comum = (props) => {
     const [state, setState] = useState({
         id: 0,
         pageBlockStart: 0,
-        materias: props.materias
+        materias: props.materias || []
     });
     const [isPrinting, setIsPrinting] = useState(false);
     const [transitioningTo, setTransitioningTo] = useState(null);
     const [previousGrade, setPreviousGrade] = useState(null);
 
-    // Props opcionais para dimensão e horários
-    const { courseSchedule: propsSchedule, courseDimension: propsDimension } = props;
-
-    // Sincroniza state.materias quando props.materias muda
-    useEffect(() => {
-        console.log('Comum: Props materias mudou, atualizando state', props.materias.length);
-        setState(prevState => ({
-            ...prevState,
-            materias: props.materias,
-            id: 0, // Reset para primeira página
-            pageBlockStart: 0
-        }));
-    }, [props.materias]);
-
-    // Tenta usar o Context se disponível, senão usa props ou infere dos dados
-    let th, td, h, loading, error;
-    
-    try {
-        const dimension = useCourseDimension();
-        const schedule = useCourseSchedule();
-        const config = useCourseConfig();
-        
-        th = dimension[0];
-        td = dimension[1];
-        h = schedule;
-        loading = config.loading;
-        error = config.error;
-        
-        console.log('Comum: Usando dados do Context');
-    } catch (e) {
-        // Context não disponível, tenta usar props
-        if (propsDimension && propsSchedule) {
-            console.log('Comum: Usando dados das props');
-            [th, td] = propsDimension;
-            h = propsSchedule;
-            loading = false;
-            error = null;
-        } else {
-            // Infere dimensão dos dados de horários das matérias
-            console.log('Comum: Inferindo dimensão dos dados das matérias');
-            
-            const allMaterias = props.materias.flat();
-            if (allMaterias.length > 0 && allMaterias[0]._ho) {
-                const maxDia = Math.max(...allMaterias.flatMap(m => m._ho?.map(h => h[0]) || []));
-                const maxHorario = Math.max(...allMaterias.flatMap(m => m._ho?.map(h => h[1]) || []));
-                td = maxDia + 1;
-                th = maxHorario + 1;
-                
-                // Gera horários genéricos
-                h = Array.from({ length: th }, (_, i) => [`${7 + i}:00`, `${8 + i}:00`]);
-            } else {
-                // Valores padrão
-                th = 6;
-                td = 5;
-                h = [
-                    ['07:00', '08:00'],
-                    ['08:00', '09:00'],
-                    ['09:00', '10:00'],
-                    ['10:00', '11:00'],
-                    ['11:00', '12:00'],
-                    ['12:00', '13:00']
-                ];
-            }
-            
-            loading = false;
-            error = null;
-        }
-    }
+    // Dynamic Schedule Data
+    const [dbDays, setDbDays] = useState([]);
+    const [dbTimeSlots, setDbTimeSlots] = useState([]);
+    const [scheduleLoading, setScheduleLoading] = useState(true);
 
     // Desestruturando a prop 'separa' para fácil acesso
     let { cur: _cur, fun: _fun, separa: _separa, g, f } = props;
     _cur = _cur || window.location.href.split("/")[3] || "engcomp";
 
-    const dias = diasSemana.slice(0, td);
+    // Sincroniza state.materias quando props.materias muda
+    useEffect(() => {
+        if (props.materias && props.materias.length > 0) {
+            setState(prevState => ({
+                ...prevState,
+                materias: props.materias,
+                id: 0,
+                pageBlockStart: 0
+            }));
+        }
+    }, [props.materias]);
 
-    // Só mostra loading se Context existe E está carregando
-    if (loading && !th) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-text-light-secondary dark:text-text-dark-secondary">
-                        Carregando horários...
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    useEffect(() => {
+        const fetchScheduleData = async () => {
+            try {
+                const [d, t] = await Promise.all([getDays(), getTimeSlots()]);
+                setDbDays(d);
+                setDbTimeSlots(t);
 
-    if (error) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <div className="text-red-500">
-                    Erro ao carregar configuração do curso: {error}
-                </div>
-            </div>
-        );
-    }
+                // Se não houver matérias via props, carrega do Serviço
+                if (!props.materias || props.materias.length === 0) {
+                    const gridData = await loadClassesForGrid();
+                    console.log("Comum: Loaded grid data from service", gridData.length);
+
+                    const filteredData = gridData.filter(item => item._ag === true && item._cu === _cur);
+
+                    setState(prevState => ({
+                        ...prevState,
+                        materias: filteredData,
+                        id: 0,
+                        pageBlockStart: 0
+                    }));
+                }
+
+            } catch (error) {
+                console.error("Erro ao carregar dados do cronograma:", error);
+            } finally {
+                setScheduleLoading(false);
+            }
+        };
+        fetchScheduleData();
+    }, [_cur]);
+
+    // Determina se está carregando 
+    const loading = scheduleLoading;
+
+    const th = dbTimeSlots.length;
+    const td = dbDays.length;
+
+    // Usando nomes dos dias do banco
+    const dias = dbDays.map(d => d.name);
 
     function separarPorSemestre(arr) {
         const aux = [];
-        const aux2 = arr[0] || [];
+        const aux2 = arr;
         for (const i of aux2) {
             while (aux.length < i._se) {
                 aux.push([]);
             }
-            aux[i._se - 1].push(i);
+            if (aux[i._se - 1]) {
+                aux[i._se - 1].push(i);
+            }
         }
-        return aux.filter(e => e.length > 0);
+        return aux.filter(e => e && e.length > 0);
     }
 
-    const bd = _separa ? separarPorSemestre([...state.materias]) : [...state.materias];
-
-    console.log('Comum: Criando grades');
-    console.log('Comum: state.materias.length:', state.materias.length);
-    console.log('Comum: bd.length:', bd.length);
-    console.log('Comum: _separa:', _separa);
+    let bd;
+    if (_separa) {
+        bd = separarPorSemestre(state.materias);
+    } else {
+        bd = [state.materias];
+    }
 
     function criarGrade() {
+        if (state.materias.length > 0) {
+            console.log("Comum: Starting grade creation with", state.materias.length, "disciplines");
+            console.log("Comum: Schedule Refs - Days:", dbDays, "Slots:", dbTimeSlots);
+        }
+
         const grades = [];
         const coresGrade = [];
 
@@ -150,19 +119,31 @@ const Comum = (props) => {
                 const opt = !disciplina._el && !disciplina._di.includes(" - OPT") ? " - OPT" : "";
 
                 if (Array.isArray(disciplina._ho)) {
-                    disciplina._ho.forEach(([dia, horario], i) => {
-                        if (dia < td && horario < th) {
-                            const nomeMateria = (disciplina._da && disciplina._da[i])
-                                ? `${disciplina._di}\n${disciplina._da[i]}`
-                                : disciplina._di;
-                            if (gradeVazia[horario][dia] === "") {
-                                gradeVazia[horario][dia] = nomeMateria + opt;
+                    disciplina._ho.forEach(([dayId, slotId], i) => {
+                        // ROBUST MAPPING: Find index by ID instead of assuming direct index mapping
+                        const numDia = dbDays.findIndex(d => d.id === dayId);
+                        const numHorario = dbTimeSlots.findIndex(s => s.id === slotId);
+
+                        // Debug mapping failures
+                        if (numDia === -1 || numHorario === -1) {
+                            console.warn(`Comum: Mapping failed for ${disciplina._di}. DayID: ${dayId} -> Idx: ${numDia}. SlotID: ${slotId} -> Idx: ${numHorario}`);
+                        }
+
+                        const nomeMateria = (disciplina._da && disciplina._da[i])
+                            ? `${disciplina._di}\n${disciplina._da[i]}`
+                            : disciplina._di;
+
+                        if (numHorario >= 0 && numHorario < th && numDia >= 0 && numDia < td) {
+                            if (gradeVazia[numHorario][numDia] === "") {
+                                gradeVazia[numHorario][numDia] = nomeMateria + opt;
                             } else {
-                                gradeVazia[horario][dia] += ` / ${nomeMateria}${opt}`;
+                                gradeVazia[numHorario][numDia] += ` / ${nomeMateria}${opt}`;
                             }
-                            coresVazias[horario][dia] = cores[(index + rand) % cores.length];
+                            coresVazias[numHorario][numDia] = cores[(index + rand) % cores.length];
                         }
                     });
+                } else {
+                    console.warn(`Comum: Disciplina ${disciplina._di} has invalid _ho:`, disciplina._ho);
                 }
             });
             grades.push(gradeVazia);
@@ -181,7 +162,7 @@ const Comum = (props) => {
                 setState(s => ({ ...s, id: newId }));
                 setTransitioningTo(null);
                 setPreviousGrade(null);
-            }, 500); // Duração da animação
+            }, 500);
         }
     };
 
@@ -204,24 +185,24 @@ const Comum = (props) => {
         const isTransitioning = transitioningTo !== null;
         const newGradeId = transitioningTo !== null ? transitioningTo : state.id;
 
-        // Dados da grade "nova" (a que está na tela ou para a qual estamos transicionando)
+        // Dados da grade "nova" 
         const conteudoNovo = grades[newGradeId]?.[numLinha]?.[numCelula] || "";
         const corNova = coresGrade[newGradeId]?.[numLinha]?.[numCelula] || "transparent";
 
-        // Dados da grade anterior (só existem durante a transição)
+        // Dados da grade anterior 
         const conteudoAnterior = previousGrade?.grade?.[numLinha]?.[numCelula] || "";
         const corAnterior = previousGrade?.cores?.[numLinha]?.[numCelula] || "transparent";
 
         return (
             <td key={key} className="relative border p-0 text-center text-xs" style={{ minHeight: '50px' }}>
-                {/* Conteúdo Antigo (saindo) */}
+                {/* Conteúdo Antigo */}
                 {isTransitioning && (
                     <div className="absolute inset-0 p-1 animate-fade-out" style={{ backgroundColor: corAnterior }}>
                         {conteudoAnterior.split('\n').map((line, i) => <div key={i}>{line}</div>)}
                     </div>
                 )}
 
-                {/* Conteúdo Novo (entrando) */}
+                {/* Conteúdo Novo */}
                 <div className={`absolute inset-0 p-1 ${isTransitioning ? 'animate-fade-in' : ''}`} style={{ backgroundColor: corNova }}>
                     {conteudoNovo.split('\n').map((line, i) => <div key={i}>{line}</div>)}
                 </div>
@@ -230,13 +211,17 @@ const Comum = (props) => {
     }
 
     function renderLinha(numLinha) {
-        if (!grades[state.id] || !h[numLinha]) return null;
+        if (!grades || !grades[state.id]) return null;
+
+        const slot = dbTimeSlots[numLinha];
+        const labelHorario = slot ? `${slot.start_time ? slot.start_time.substring(0, 5) : ""} - ${slot.end_time ? slot.end_time.substring(0, 5) : ""}` : "???";
+
         const celulas = Array.from({ length: td }).map((_, numCelula) =>
             renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
             <tr key={`row-${numLinha}`}>
-                <td className="border p-1 py-4 text-xs whitespace-nowrap">{`${h[numLinha][0]} - ${h[numLinha][1]}`}</td>
+                <td className="border p-1 py-4 text-xs whitespace-nowrap">{labelHorario}</td>
                 {celulas}
             </tr>
         );
@@ -247,20 +232,29 @@ const Comum = (props) => {
     }
 
     function renderTabela() {
-        console.log('Comum: renderTabela chamado');
-        console.log('Comum: grades.length:', grades?.length);
-        console.log('Comum: state.id:', state.id);
-        console.log('Comum: grades[state.id]:', grades?.[state.id]);
-        
         if (!grades || grades.length === 0 || !grades[state.id]) {
-            console.log('Comum: Sem grades para exibir');
+            // Show loading or empty state properly
+            if (loading) {
+                return (
+                    <div className="flex justify-center items-center h-32">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                );
+            }
             return <p className="text-center my-4">Não há grades para exibir.</p>;
         }
-        
+
         const corpoTabela = [];
         for (let i = 0; i < th; i++) {
-            if (i > 0 && h[i] && h[i-1] && h[i][0] !== h[i - 1][1]) {
-                 corpoTabela.push(renderIntervalo(`interval-${i}`));
+            // Logic to check for intervals
+            if (i > 0) {
+                const prevEnd = dbTimeSlots[i - 1].end_time;
+                const currStart = dbTimeSlots[i].start_time;
+
+                // Robust check: ensure times exist and are different
+                if (prevEnd && currStart && prevEnd !== currStart) {
+                    corpoTabela.push(renderIntervalo(`interval-${i}`));
+                }
             }
             corpoTabela.push(renderLinha(i));
         }
@@ -281,60 +275,28 @@ const Comum = (props) => {
         );
     }
 
-    function renderPaginacao() {
-        const totalPages = grades.length;
-        if (totalPages <= 1) return null;
-
-        const showNavButtons = !_separa && totalPages > 10;
-
-        const { pageBlockStart } = state;
-        const pagesToRender = showNavButtons
-            ? grades.slice(pageBlockStart, pageBlockStart + 10)
-            : grades;
-
-        const startIndex = showNavButtons ? pageBlockStart : 0;
-
-        return (
-            <div className={`flex justify-center items-center my-4 ${isPrinting ? 'invisible' : ''}`}>
-                {showNavButtons && (
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-l"
-                        onClick={handlePrevBlock}
-                        disabled={pageBlockStart === 0}
-                    >
-                        {"<<"}
-                    </button>
-                )}
-
-                {pagesToRender.map((_, index) => {
-                    const actualPageIndex = startIndex + index;
-                    return (
-                        <button
-                            key={actualPageIndex}
-                            onClick={() => handlePageChange(actualPageIndex)}
-                            className={`py-2 px-4 w-12 h-10 ${state.id === actualPageIndex ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-700 text-white'}`}
-                        >
-                            {actualPageIndex + 1}
-                        </button>
-                    );
-                })}
-
-                {showNavButtons && (
-                    <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r"
-                        onClick={handleNextBlock}
-                        disabled={pageBlockStart + 10 >= totalPages}
-                    >
-                        {'>>'}
-                    </button>
-                )}
-            </div>
-        );
-    }
-
     return (
         <div className={'flex flex-col items-center p-4  mx-auto min-w-[calc(1312px)]'}>
-            {renderPaginacao()}
+
+            {(grades && grades.length > 1) && (
+                <div className={`flex justify-center items-center my-4 ${isPrinting ? 'invisible' : ''}`}>
+                    {(!_separa && grades.length > 10) && (
+                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-l" onClick={() => setState(s => ({ ...s, pageBlockStart: Math.max(0, s.pageBlockStart - 10) }))} disabled={state.pageBlockStart === 0}>{"<<"}</button>
+                    )}
+                    {
+                        grades.slice(state.pageBlockStart, state.pageBlockStart + 10).map((_, i) => {
+                            const idx = state.pageBlockStart + i;
+                            return (
+                                <button key={idx} onClick={() => handlePageChange(idx)} className={`py-2 px-4 w-12 h-10 ${state.id === idx ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-700 text-white'}`}>{idx + 1}</button>
+                            )
+                        })
+                    }
+                    {(!_separa && grades.length > 10) && (
+                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r" onClick={() => setState(s => ({ ...s, pageBlockStart: s.pageBlockStart + 10 }))} disabled={state.pageBlockStart + 10 >= grades.length}>{">>"}</button>
+                    )}
+                </div>
+            )}
+
             <div className="bg-white shadow-md rounded-lg p-4 flex flex-col flex-1 w-full max-w-7xl">
 
                 <div className="flex justify-between items-center mb-4">

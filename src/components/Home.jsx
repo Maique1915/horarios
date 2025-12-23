@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadDbData, loadCoursesRegistry } from '../model/loadData';
+import { loadDbData, loadCoursesRegistry } from '../services/disciplinaService';
 import LoadingSpinner from './LoadingSpinner';
 
 const Home = () => {
@@ -12,24 +12,24 @@ const Home = () => {
         const fetchCourses = async () => {
             try {
                 setLoading(true);
-                
+
                 // Carregar registro de cursos do gid=0
                 const coursesRegistry = await loadCoursesRegistry();
                 console.log('Home - Cursos do registro:', coursesRegistry);
-                
+
                 if (coursesRegistry.length > 0) {
                     // Usar dados do registro
                     const data = await loadDbData();
                     console.log('Home - Dados carregados:', data);
-                    
+
                     const coursesWithInfo = coursesRegistry.map(courseReg => {
                         const courseCode = courseReg._cu;
                         // Contar apenas disciplinas ativas (_ag === true)
                         const disciplineCount = data.filter(d => d._cu === courseCode && d._ag === true).length;
                         const periods = [...new Set(data.filter(d => d._cu === courseCode && d._ag === true).map(d => d._se))].length;
-                        
+
                         console.log(`Home - Curso ${courseCode}: ${disciplineCount} disciplinas, ${periods} períodos`);
-                        
+
                         return {
                             code: courseCode,
                             name: courseReg.name || courseCode.toUpperCase(),
@@ -38,17 +38,17 @@ const Home = () => {
                             gid: courseReg.gid
                         };
                     });
-                    
+
                     setCourses(coursesWithInfo);
                 } else {
                     // Fallback para o método antigo se o registro não estiver disponível
                     console.log('Home - Usando fallback');
                     const data = await loadDbData();
                     const uniqueCourses = [...new Set(data.map(d => d._cu))];
-                    
+
                     const coursesWithInfo = uniqueCourses.map(courseCode => {
                         const disciplineCount = data.filter(d => d._cu === courseCode && d._ag === true).length;
-                        
+
                         return {
                             code: courseCode,
                             name: courseCode.toUpperCase(),

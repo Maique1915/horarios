@@ -1,4 +1,4 @@
-import { loadDbData, loadCoursesRegistry } from './loadData';
+import { loadDbData, loadCoursesRegistry, loadClassesForGrid } from '../services/disciplinaService';
 
 // Cache estático para coursesRegistry
 let coursesRegistryCache = null;
@@ -8,32 +8,33 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 // Função auxiliar para buscar coursesRegistry com cache
 async function getCachedCoursesRegistry() {
     const now = Date.now();
-    
+
     // Verifica se o cache ainda é válido
     if (coursesRegistryCache && coursesRegistryCacheTime && (now - coursesRegistryCacheTime) < CACHE_DURATION) {
         console.log('Filtro: Usando cache de coursesRegistry');
         return coursesRegistryCache;
     }
-    
+
     // Busca do servidor
     console.log('Filtro: Buscando coursesRegistry do servidor');
     const startTime = performance.now();
     const data = await loadCoursesRegistry();
     const endTime = performance.now();
-    
+
     console.log(`Filtro: coursesRegistry carregado em ${(endTime - startTime).toFixed(2)}ms`);
-    
+
     // Atualiza o cache
     coursesRegistryCache = data;
     coursesRegistryCacheTime = now;
-    
+
     return data;
 }
 
 async function ativas(e) {
     console.log('ativas: Chamada para curso:', e);
-    const db = await loadDbData();
-    console.log('ativas: Dados recebidos do loadDbData:', db?.length, 'total de disciplinas');
+    // Use loadClassesForGrid to get the flat structure required by Comum/Grid
+    const db = await loadClassesForGrid();
+    console.log('ativas: Dados recebidos do loadClassesForGrid:', db?.length, 'total de turmas/disciplinas');
     const a = db.filter((item) => (item._ag === true) && item._cu === e);
     console.log('ativas: Disciplinas ativas filtradas para', e, ':', a.length);
     return a !== undefined ? a : [];

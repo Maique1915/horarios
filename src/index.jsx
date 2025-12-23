@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import './index.css';
+import './styles/index.css';
 import AppLayout from './components/AppLayout';
 import Home from './components/Home';
 import GeraGrade from './components/GeraGrade';

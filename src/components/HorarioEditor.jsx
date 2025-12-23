@@ -1,151 +1,224 @@
-import React, { useState, useEffect } from 'react';
-import { useCourseConfig } from '../model/CourseConfigContext';
-import './HorarioEditor.css'; // CSS para o editor de horários
+import React, { useState, useEffect, useCallback } from 'react';
+import '../styles/HorarioEditor.css';
+import LoadingSpinner from './LoadingSpinner';
+import { getDays, getTimeSlots } from '../services/scheduleService';
 
-const HorarioEditor = ({ initialHo, initialDa, onHoChange, onDaChange, cur }) => {
+
+const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCancel, isReviewing }) => {
+  const [days, setDays] = useState([]);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [ho, setHo] = useState(initialHo || []);
   const [da, setDa] = useState(initialDa || []);
-  
-  // Usa o Context em vez de carregar dados
-  const { courseConfig, loading, error } = useCourseConfig();
-
-  const numHorarios = courseConfig?._da[0] || 0; // Número de horários
-  const numDias = courseConfig?._da[1] || 0;     // Número de dias
-  const horariosDefinidos = courseConfig?._hd || []; // Definições dos horários
-
-  const diasSemana = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
   useEffect(() => {
     setHo(initialHo || []);
-    // Garante que `da` tenha o mesmo tamanho de `ho`, preenchendo com null se necessário
-    const initialDaSized = (initialHo || []).map((_, index) => (initialDa && initialDa[index]) ? initialDa[index] : null);
-    setDa(initialDaSized);
+    setDa(initialDa || []);
   }, [initialHo, initialDa]);
 
   useEffect(() => {
-    onHoChange(ho); // Notificar o componente pai sobre as mudanças
+    const fetchScheduleData = async () => {
+      setLoading(true);
+      try {
+        const [d, t] = await Promise.all([getDays(), getTimeSlots()]);
+        setDays(d || []);
+        setTimeSlots(t || []);
+
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching schedule data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchScheduleData();
+  }, []); // Empty dependency array means it runs once on mount
+
+  const isSelected = useCallback((dayId, timeSlotId) => {
+    return ho.some(item => item[0] === dayId && item[1] === timeSlotId);
   }, [ho]);
 
-  const isSelected = (diaIndex, horarioIndex) => {
-    return ho.some(item => item[0] === diaIndex && item[1] === horarioIndex);
-  };
+  const toggleSelection = (dayId, timeSlotId) => {
+    if (isReviewing) return;
 
-  const toggleSelection = (diaIndex, horarioIndex) => {
-    const itemIndex = ho.findIndex(item => item[0] === diaIndex && item[1] === horarioIndex);
-    
-    let newHo, newDa;
+    const itemIndex = ho.findIndex(item => item[0] === dayId && item[1] === timeSlotId);
 
-    if (itemIndex > -1) { // Se já está selecionado, remove
-      newHo = [...ho];
-      newDa = [...da];
-      newHo.splice(itemIndex, 1);
-      newDa.splice(itemIndex, 1);
-    } else { // Se não está selecionado, adiciona
-      newHo = [...ho, [diaIndex, horarioIndex]];
-      newDa = [...da, null]; // Adiciona um placeholder para o novo horário
+    let newHo;
+    let newDa;
+
+    if (itemIndex > -1) {
+      newHo = ho.filter((_, idx) => idx !== itemIndex);
+      newDa = da.filter((_, idx) => idx !== itemIndex); // Filter da based on ho changes
+    } else {
+      newHo = [...ho, [dayId, timeSlotId]];
+      newDa = [...da, null]; // Add placeholder for new custom time
     }
-
     setHo(newHo);
     setDa(newDa);
-    onHoChange(newHo);
-    onDaChange(newDa);
   };
 
-  const handleTimeChange = (newValue, index, timeIndex) => {
+  const handleTimeChange = (newValue, hoIndex, timeComponentIndex) => {
+    if (isReviewing) return;
+
     const newDa = [...da];
-    if (!newDa[index]) {
-      // Se não houver um array, cria um a partir do horário predefinido ou um vazio
-      const horarioPredefinido = horariosDefinidos[ho[index][1]] || ['', ''];
-      newDa[index] = [...horarioPredefinido];
+    let daValue = newDa[hoIndex];
+
+    if (!daValue) {
+      const hoItem = ho[hoIndex];
+      const timeSlot = timeSlots.find(ts => ts.id === hoItem[1]);
+      daValue = [formatTime(timeSlot?.start_time), formatTime(timeSlot?.end_time)];
     }
-    newDa[index][timeIndex] = newValue;
+
+    daValue[timeComponentIndex] = newValue;
+    newDa[hoIndex] = daValue;
 
     setDa(newDa);
-    onDaChange(newDa);
+  };
+
+  const formatTime = (timeString) => {
+    if (!timeString) return '';
+    return timeString.substring(0, 5);
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-            Carregando horários...
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando grade de horários..." />;
   }
 
   if (error) {
-    return <div className="text-red-500 p-4">Erro ao carregar horários: {error}</div>;
+    return <div className="text-red-500 p-4">Erro ao carregar grade de horários: {error}</div>;
   }
 
-  if (!courseConfig) {
-    return <div>{`Erro: Dados de horários para o curso "${cur}" não encontrados no registro.`}</div>;
-  }
+  const sortedSelectedHoDa = initialHo
+    .map((hoItem, index) => ({ hoItem, daItem: initialDa[index], originalIndex: index }))
+    .sort((a, b) => {
+      const dayA = days.find(d => d.id === a.hoItem[0]);
+      const dayB = days.find(d => d.id === b.hoItem[0]);
+      const slotA = timeSlots.find(ts => ts.id === a.hoItem[1]);
+      const slotB = timeSlots.find(ts => ts.id === b.hoItem[1]);
+
+      if (!dayA || !dayB || !slotA || !slotB) return 0;
+
+      const dayIndexA = days.indexOf(dayA);
+      const dayIndexB = days.indexOf(dayB);
+      if (dayIndexA !== dayIndexB) return dayIndexA - dayIndexB;
+
+      return slotA.start_time.localeCompare(slotB.start_time);
+    });
 
   return (
     <div className="horario-editor-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Horário</th>
-            {diasSemana.slice(0, numDias).map((dia, index) => (
-              <th key={index}>{dia}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: numHorarios }).map((_, horarioIndex) => (
-            <tr key={horarioIndex}>
-              <td>{horariosDefinidos[horarioIndex] ? `${horariosDefinidos[horarioIndex][0]} - ${horariosDefinidos[horarioIndex][1]}` : ''}</td>
-              {Array.from({ length: numDias }).map((_, diaIndex) => (
-                <td key={diaIndex}>
-                  <button
-                    className={`horario-toggle-button ${isSelected(diaIndex, horarioIndex) ? 'selected' : ''}`}
-                    onClick={() => toggleSelection(diaIndex, horarioIndex)}
-                  >
-                    {/* Pode adicionar um ícone ou texto aqui se quiser */}
-                  </button>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="flex justify-between">
+        <div className="mb-4">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">Nome da Turma</h4>
+          <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{initialClassName}</p>
+        </div>
 
-      {/* Nova Seção para Edição de Horários Customizados */}
-      <div className="custom-time-editor" style={{ marginTop: '20px' }}>
-        <h4>Horários Selecionados</h4>
-        {ho
-          .map((item, index) => ({ ho: item, da: da[index], originalIndex: index })) // Combina os dados
-          .sort((a, b) => a.ho[0] - b.ho[0] || a.ho[1] - b.ho[1]) // Ordena por dia, depois por horário
-          .map((sortedItem) => { // Mapeia os itens ordenados para a UI
-            const { ho: item, da: daValue, originalIndex } = sortedItem;
-            const dia = diasSemana[item[0]];
-            const horarioPredefinido = horariosDefinidos[item[1]];
-            const displayValue = daValue || horarioPredefinido || ['', ''];
-
-            return (
-              <div key={originalIndex} className="custom-time-row">
-                <span>{`${dia} - ${horarioPredefinido ? `${horarioPredefinido[0]}-${horarioPredefinido[1]}` : `Custom`}`}</span>
-                <input 
-                  type="time" 
-                  value={displayValue[0]}
-                  onChange={(e) => handleTimeChange(e.target.value, originalIndex, 0)}
-                  className="time-input"
-                />
-                <input 
-                  type="time" 
-                  value={displayValue[1]}
-                  onChange={(e) => handleTimeChange(e.target.value, originalIndex, 1)}
-                  className="time-input"
-                />
-              </div>
-            )
-        })}
+        <div className="flex items-center gap-4 mt-4">
+          <button
+            type="button"
+            onClick={() => onSave({ class_name: initialClassName, ho, da })}
+            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+            disabled={isReviewing || !initialClassName || !initialClassName.trim()}
+          >
+            Salvar Turma
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary border border-border-light dark:border-border-dark text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/10 transition-colors"
+            disabled={isReviewing}
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
+
+
+
+      <h3>Grade de Horários</h3>
+      <div
+        className="schedule-grid"
+        style={{ gridTemplateColumns: `120px repeat(${days.length}, 1fr)` }} // Dynamic columns
+      >
+        <div></div> {/* Empty cell for alignment */}
+
+        {days.map(day => (
+          <div key={day.id} className="day-header">{day.name}</div>
+        ))}
+
+        {timeSlots.map(slot => (
+          <React.Fragment key={slot.id}>
+            <div className="time-label">{`${formatTime(slot.start_time)} - ${formatTime(slot.end_time)}`}</div>
+            {days.map(day => (
+              <label key={day.id} className="slot">
+                <input
+                  type="checkbox"
+                  checked={isSelected(day.id, slot.id)}
+                  onChange={() => toggleSelection(day.id, slot.id)}
+                  disabled={isReviewing}
+                />
+                <span></span> {/* Visual representation of the slot */}
+              </label>
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Seção para Edição de Horários Customizados (Restaurada) */}
+      {ho.length > 0 && (
+        <div className="custom-time-editor" style={{ marginTop: '20px' }}>
+          <h4>Horários Selecionados</h4>
+          {ho
+            .map((hoItem, index) => ({ hoItem, daItem: da[index], originalIndex: index }))
+            .sort((a, b) => {
+              const dayA = days.find(d => d.id === a.hoItem[0]);
+              const dayB = days.find(d => d.id === b.hoItem[0]);
+              const slotA = timeSlots.find(ts => ts.id === a.hoItem[1]);
+              const slotB = timeSlots.find(ts => ts.id === b.hoItem[1]);
+
+              if (!dayA || !dayB || !slotA || !slotB) return 0;
+
+              const dayIndexA = days.indexOf(dayA);
+              const dayIndexB = days.indexOf(dayB);
+              if (dayIndexA !== dayIndexB) return dayIndexA - dayIndexB;
+
+              return slotA.start_time.localeCompare(slotB.start_time);
+            })
+            .map((item) => {
+              const { hoItem, daItem, originalIndex } = item;
+              const day = days.find(d => d.id === hoItem[0]);
+              const timeSlot = timeSlots.find(ts => ts.id === hoItem[1]);
+
+              const displayValueStart = daItem?.[0] || formatTime(timeSlot?.start_time);
+              const displayValueEnd = daItem?.[1] || formatTime(timeSlot?.end_time);
+
+              return (
+                <div key={originalIndex} className="custom-time-row">
+                  <span>{`${day?.name || 'Dia'} ${timeSlot ? `(${formatTime(timeSlot.start_time)}-${formatTime(timeSlot.end_time)})` : ''}`}</span>
+                  <input
+                    type="time"
+                    value={displayValueStart}
+                    onChange={(e) => handleTimeChange(e.target.value, originalIndex, 0)}
+                    className="time-input"
+                    disabled={isReviewing}
+                  />
+                  <input
+                    type="time"
+                    value={displayValueEnd}
+                    onChange={(e) => handleTimeChange(e.target.value, originalIndex, 1)}
+                    className="time-input"
+                    disabled={isReviewing}
+                  />
+                </div>
+              );
+            })}
+        </div>
+      )}
+
+
     </div>
   );
 };

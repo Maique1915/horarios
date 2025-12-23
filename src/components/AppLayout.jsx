@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { preloadData } from '../model/loadData';
+import { loadDbData } from '../services/disciplinaService';
 
 const AppLayout = () => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -10,7 +10,7 @@ const AppLayout = () => {
     const { user, logout } = useAuth();
 
     useEffect(() => {
-        preloadData();
+        loadDbData();
     }, []);
 
     const hasCourseSelected = !!cur;
