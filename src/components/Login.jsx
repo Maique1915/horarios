@@ -114,18 +114,18 @@ const Login = () => {
                         {/* Username */}
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                                E-mail
+                                Usuário
                             </label>
                             <div className="relative">
                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary text-xl">
-                                    mail
+                                    person
                                 </span>
                                 <input
-                                    type="email"
+                                    type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                    placeholder="Digite seu e-mail"
+                                    placeholder="Digite seu usuário"
                                     required
                                     autoFocus
                                 />
