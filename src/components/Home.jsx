@@ -1,10 +1,12 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { loadDbData, loadCoursesRegistry } from '../services/disciplinaService';
 import LoadingSpinner from './LoadingSpinner';
 
 const Home = () => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -94,7 +96,7 @@ const Home = () => {
                     {courses.map((course) => (
                         <div
                             key={course.code}
-                            onClick={() => navigate(`/${course.code}`)}
+                            onClick={() => router.push(`/${course.code}`)}
                             className="w-full group bg-surface-light dark:bg-surface-dark rounded-xl border-2 border-border-light dark:border-border-dark p-5 cursor-pointer hover:shadow-xl hover:scale-105 hover:border-primary transition-all duration-300"
                         >
                             <div className="flex flex-col items-center text-center">
@@ -174,7 +176,7 @@ const Home = () => {
                 {/* Footer Actions */}
                 <div className="flex justify-center gap-4 mt-12">
                     <button
-                        onClick={() => navigate('/edit')}
+                        onClick={() => router.push('/edit')}
                         className="flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-background-light dark:hover:bg-background-dark"
                     >
                         <span className="material-symbols-outlined text-lg">settings</span>

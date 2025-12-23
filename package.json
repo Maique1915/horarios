@@ -1,6 +1,7 @@
 {
   "name": "horarios4",
   "version": "0.1.0",
+  "homepage": "https://Maique1915.github.io/horarios",
   "private": true,
   "engines": {
     "node": "22.x"
@@ -20,10 +21,10 @@
     "html2pdf": "^0.0.11",
     "html2pdf.js": "^0.10.1",
     "lucide-react": "^0.552.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "next": "^16.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-hook-form": "^7.65.0",
-    "react-router-dom": "^6.20.1",
     "react-select": "^5.10.2",
     "sass": "^1.69.5",
     "tailwind-merge": "^3.3.1",
@@ -31,10 +32,11 @@
     "zod": "^4.1.12"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "deploy": "next build && gh-pages -d out"
   },
   "eslintConfig": {
     "extends": [
@@ -58,10 +60,9 @@
     "@babel/plugin-transform-private-property-in-object": "^7.27.1",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4.1.16",
-    "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",
     "gh-pages": "^6.3.0",
     "tailwindcss": "^4.1.16",
-    "vite": "^7.1.10"
+    "typescript": "5.9.3"
   }
 }

@@ -1,16 +1,24 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Outlet, NavLink, useParams, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { loadDbData } from '../services/disciplinaService';
 
-const AppLayout = () => {
+const AppLayout = ({ children }) => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-    const { cur } = useParams();
-    const navigate = useNavigate();
+    const params = useParams();
+    const cur = params?.cur; // Handle potential undefined
+    const router = useRouter();
+    const pathname = usePathname();
     const { user, logout } = useAuth();
 
     useEffect(() => {
-        loadDbData();
+        // Ensure this only runs on client and if needed
+        if (typeof window !== 'undefined') {
+            loadDbData();
+        }
     }, []);
 
     const hasCourseSelected = !!cur;
@@ -18,15 +26,23 @@ const AppLayout = () => {
     const handleLogout = () => {
         if (confirm('Deseja realmente sair?')) {
             logout();
-            navigate('/');
+            router.push('/');
         }
     };
 
     const menuItems = [
-        { to: `/${cur}`, icon: 'add_task', label: 'Gera Grade', end: true },
+        { to: `/${cur}`, icon: 'add_task', label: 'Gera Grade', exact: true },
         { to: `/${cur}/grades`, icon: 'grid_on', label: 'Horários' },
         { to: `/${cur}/cronograma`, icon: 'timeline', label: 'Cronograma' },
     ];
+
+    const isActiveLink = (to, exact) => {
+        if (!to) return false;
+        if (exact) {
+            return pathname === to;
+        }
+        return pathname.startsWith(to);
+    };
 
     return (
         <div className="min-h-screen bg-background-light dark:bg-background-dark flex">
@@ -39,17 +55,17 @@ const AppLayout = () => {
                     {/* Header da Sidebar */}
                     <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark">
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => router.push('/')}
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
                             title="Voltar para página inicial"
                         >
                             <img
-                                src={`${import.meta.env.BASE_URL}/cefet-rj.jpg`}
+                                src={`/horarios/cefet-rj.jpg`}
                                 alt="Logo"
                                 className="w-10 h-10 rounded-full flex-shrink-0"
                             />
                             {/* Label que só aparece quando o menu está expandido */}
-                            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
+                            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'}`}>
                                 CEFET-PET
                             </span>
                         </button>
@@ -62,21 +78,18 @@ const AppLayout = () => {
                                 {item.divider && (
                                     <div className="h-px bg-border-light dark:bg-border-dark my-3" />
                                 )}
-                                <NavLink
-                                    to={item.to}
-                                    end={item.end}
-                                    className={({ isActive }) =>
-                                        `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all group relative ${isActive
-                                            ? 'bg-primary text-white shadow-md'
-                                            : 'text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10'
-                                        }`
-                                    }
+                                <Link
+                                    href={item.to}
+                                    className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all group relative ${isActiveLink(item.to, item.exact)
+                                        ? 'bg-primary text-white shadow-md'
+                                        : 'text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10'
+                                        }`}
                                     title={!isSidebarExpanded ? item.label : ''}
                                 >
                                     <span className="material-symbols-outlined text-2xl flex-shrink-0">
                                         {item.icon}
                                     </span>
-                                    <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'
+                                    <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'
                                         }`}>
                                         {item.label}
                                     </span>
@@ -88,7 +101,7 @@ const AppLayout = () => {
                                             <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-gray-900 dark:border-r-gray-700"></div>
                                         </div>
                                     )}
-                                </NavLink>
+                                </Link>
                             </React.Fragment>
                         ))}
                     </nav>
@@ -137,14 +150,14 @@ const AppLayout = () => {
                             )}
 
                             {hasCourseSelected && (
-                                <NavLink
-                                    to={`/${cur}/edit`}
+                                <Link
+                                    href={`/${cur}/edit`}
                                     className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
                                     title="Gerenciar disciplinas"
                                 >
                                     <span className="material-symbols-outlined text-lg">settings</span>
                                     <span>Admin</span>
-                                </NavLink>
+                                </Link>
                             )}
                         </div>
                     </div>
@@ -152,7 +165,7 @@ const AppLayout = () => {
 
                 {/* Content Area */}
                 <main className="min-h-screen">
-                    <Outlet />
+                    {children}
                 </main>
             </div>
         </div>

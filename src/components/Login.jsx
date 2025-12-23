@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -9,12 +11,13 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    
-    const { login } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
 
-    const from = location.state?.from?.pathname || '/';
+    const { login } = useAuth();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // In Next.js, we will use query param 'from' instead of state for redirects
+    const from = searchParams.get('from') || '/';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +27,7 @@ const Login = () => {
         const result = await login(username, password);
 
         if (result.success) {
-            navigate(from, { replace: true });
+            router.push(from);
         } else {
             setError(result.error);
         }
@@ -147,7 +150,7 @@ const Login = () => {
                     {/* Footer */}
                     <div className="px-8 pb-8 text-center">
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => router.push('/')}
                             className="text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors flex items-center gap-1 mx-auto"
                         >
                             <span className="material-symbols-outlined text-base">

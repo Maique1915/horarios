@@ -1,8 +1,10 @@
+'use client';
+
 import React, { useState } from 'react';
 import Select from 'react-select';
 // import makeAnimated from 'react-select/animated'; // Not used in this View directly anymore if only in Form
 import '../styles/EditDb.css';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import DisciplinaForm from './DisciplinaForm';
 import DisciplinaTable from './DisciplinaTable';
 import LoadingSpinner, { SavingSpinner } from './LoadingSpinner';
@@ -11,7 +13,8 @@ import { useDisciplinas } from '../hooks/useDisciplinas';
 // const animatedComponents = makeAnimated(); // Not used
 
 const EditDb = () => {
-  const { cur } = useParams(); // Obter o curso da URL
+  const params = useParams();
+  const cur = params?.cur; // Obter o curso da URL. Pode ser undefined em /edit
 
   // Use the Controller Hook
   const {

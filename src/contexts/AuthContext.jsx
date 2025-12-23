@@ -1,3 +1,4 @@
+'use client';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
@@ -52,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
                 // Gerar token simples (em produção, use JWT)
                 const token = btoa(`${username}:${Date.now()}`);
-                
+
                 // Expira em 8 horas
                 const expiry = new Date();
                 expiry.setHours(expiry.getHours() + 8);

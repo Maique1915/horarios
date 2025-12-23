@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import Comum from './Comum';
 import Grafos from '../model/util/Grafos';
 import Escolhe from '../model/util/Escolhe';
@@ -9,7 +11,8 @@ import MapaMental from './MapaMental'; // Importar o MapaMental
 import LoadingSpinner from './LoadingSpinner';
 
 const GeraGrade = () => {
-    const { cur = 'engcomp' } = useParams();
+    const params = useParams();
+    const cur = params?.cur || 'engcomp';
     // const navigate = useNavigate(); // Não é mais necessário para o mapa
     const [state, setState] = useState({
         names: [],

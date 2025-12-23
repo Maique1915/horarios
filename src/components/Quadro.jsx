@@ -1,12 +1,15 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
 
 import Comum from './Comum.jsx';
 import LoadingSpinner from './LoadingSpinner';
 
 const Quadro = () => {
-    const { cur = 'engcomp' } = useParams();
+    const params = useParams();
+    const cur = params?.cur || 'engcomp';
     const [a, setA] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

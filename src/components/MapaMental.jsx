@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import { loadDbData } from '../services/disciplinaService';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
 // Remover import html2canvas from 'html2canvas';
@@ -14,7 +16,8 @@ const TITLE_HEIGHT = 50;
 const VERTICAL_PADDING = 30; // Manter se for usado em ROW_HEIGHT
 
 const MapaMental = ({ subjectStatus, onVoltar }) => {
-  const { cur } = useParams();
+  const params = useParams();
+  const cur = params?.cur;
 
   const [mindMapData, setMindMapData] = useState(null);
   const [loading, setLoading] = useState(true);

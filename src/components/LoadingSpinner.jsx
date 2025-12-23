@@ -3,13 +3,14 @@ import React from 'react';
 /**
  * Componente de Loading padronizado para todo o sistema
  * 
- * @param {string} message - Mensagem principal a ser exibida (padrão: "Carregando...")
- * @param {string} submessage - Mensagem secundária opcional
- * @param {boolean} fullscreen - Se true, ocupa a tela inteira (padrão: true)
- * @param {string} size - Tamanho do spinner: 'sm', 'md', 'lg', 'xl' (padrão: 'lg')
+ * @param {Object} props
+ * @param {string} [props.message] - Mensagem principal a ser exibida (padrão: "Carregando...")
+ * @param {string} [props.submessage] - Mensagem secundária opcional
+ * @param {boolean} [props.fullscreen] - Se true, ocupa a tela inteira (padrão: true)
+ * @param {'sm'|'md'|'lg'|'xl'} [props.size] - Tamanho do spinner: 'sm', 'md', 'lg', 'xl' (padrão: 'lg')
  */
-const LoadingSpinner = ({ 
-    message = "Carregando...", 
+const LoadingSpinner = ({
+    message = "Carregando...",
     submessage = null,
     fullscreen = true,
     size = 'lg'
@@ -30,12 +31,12 @@ const LoadingSpinner = ({
             <div className="text-center">
                 {/* Spinner animado */}
                 <div className={`animate-spin rounded-full ${sizeClasses[size]} border-b-2 border-primary mx-auto mb-4`}></div>
-                
+
                 {/* Mensagem principal */}
                 <p className="text-text-light-secondary dark:text-text-dark-secondary text-lg font-medium mb-2">
                     {message}
                 </p>
-                
+
                 {/* Mensagem secundária (opcional) */}
                 {submessage && (
                     <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary opacity-75">
@@ -52,9 +53,9 @@ const LoadingSpinner = ({
  */
 export const InlineLoadingSpinner = ({ message = "Carregando...", size = 'md' }) => {
     return (
-        <LoadingSpinner 
-            message={message} 
-            fullscreen={false} 
+        <LoadingSpinner
+            message={message}
+            fullscreen={false}
             size={size}
         />
     );
@@ -77,7 +78,7 @@ export const SavingSpinner = ({ message = "Salvando no Google Sheets..." }) => {
                             <div className="animate-spin rounded-full h-20 w-20 border-b-2 border-primary opacity-30"></div>
                         </div>
                     </div>
-                    
+
                     {/* Mensagem */}
                     <p className="text-text-light-primary dark:text-text-dark-primary text-lg font-semibold mb-2">
                         {message}
