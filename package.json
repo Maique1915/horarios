@@ -36,7 +36,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "next build && gh-pages -d out"
+    "deploy": "GITHUB_PAGES=true next build && gh-pages -d out"
   },
   "eslintConfig": {
     "extends": [
