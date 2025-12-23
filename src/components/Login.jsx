@@ -11,6 +11,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
 
     const { login } = useAuth();
     const router = useRouter();
@@ -23,6 +24,13 @@ const Login = () => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
+        if (isRegistering) {
+            // Mock registration or implement if backend supports
+            setError('Cadastro ainda não implementado no sistema.');
+            setLoading(false);
+            return;
+        }
 
         const result = await login(username, password);
 
@@ -48,14 +56,14 @@ const Login = () => {
                     <div className="bg-gradient-to-r from-primary to-primary/80 p-8 text-center">
                         <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
                             <span className="material-symbols-outlined text-5xl text-white">
-                                lock
+                                {isRegistering ? 'person_add' : 'lock'}
                             </span>
                         </div>
                         <h1 className="text-3xl font-bold text-white mb-2">
-                            Área Restrita
+                            {isRegistering ? 'Criar Conta' : 'Área Restrita'}
                         </h1>
                         <p className="text-white/90 text-sm">
-                            Acesso exclusivo para administradores
+                            {isRegistering ? 'Preencha os dados para se cadastrar' : 'Acesso exclusivo para administradores'}
                         </p>
                     </div>
 
@@ -96,6 +104,26 @@ const Login = () => {
                             </div>
                         </div>
 
+                        {/* Name Field for Registration */}
+                        {isRegistering && (
+                            <div className="space-y-2 animate-fadeIn">
+                                <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                                    Nome Completo
+                                </label>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary text-xl">
+                                        badge
+                                    </span>
+                                    <input
+                                        type="text"
+                                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        placeholder="Digite seu nome"
+                                    // Not enforcing required for mock
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         {/* Password */}
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
@@ -134,17 +162,32 @@ const Login = () => {
                             {loading ? (
                                 <>
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    <span>Autenticando...</span>
+                                    <span>{isRegistering ? 'Cadastrando...' : 'Autenticando...'}</span>
                                 </>
                             ) : (
                                 <>
-                                    <span>Entrar</span>
+                                    <span>{isRegistering ? 'Cadastrar' : 'Entrar'}</span>
                                     <span className="material-symbols-outlined text-xl">
-                                        arrow_forward
+                                        {isRegistering ? 'person_add' : 'arrow_forward'}
                                     </span>
                                 </>
                             )}
                         </button>
+
+                        <div className="text-center pt-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsRegistering(!isRegistering);
+                                    setError('');
+                                }}
+                                className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                            >
+                                {isRegistering
+                                    ? 'Já tem uma conta? Faça login'
+                                    : 'Não tem conta? Cadastre-se'}
+                            </button>
+                        </div>
                     </form>
 
                     {/* Footer */}

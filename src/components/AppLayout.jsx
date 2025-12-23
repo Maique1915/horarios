@@ -154,14 +154,25 @@ const AppLayout = ({ children }) => {
                             )}
 
                             {hasCourseSelected && (
-                                <Link
-                                    href={`/${cur}/edit`}
-                                    className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
-                                    title="Gerenciar disciplinas"
-                                >
-                                    <span className="material-symbols-outlined text-lg">settings</span>
-                                    <span>Admin</span>
-                                </Link>
+                                user ? (
+                                    <Link
+                                        href={`/${cur}/edit`}
+                                        className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
+                                        title="Gerenciar disciplinas"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">settings</span>
+                                        <span>Admin</span>
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
+                                        title="Fazer login"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">login</span>
+                                        <span>Logar</span>
+                                    </Link>
+                                )
                             )}
                         </div>
                     </div>
