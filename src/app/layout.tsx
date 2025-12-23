@@ -4,8 +4,8 @@ import AppLayout from '../components/AppLayout';
 import './globals.css';
 
 export const metadata = {
-    title: 'Sistema de Matrículas',
-    description: 'Sistema de Matrículas CEFET-PET',
+    title: 'Horários CEFET',
+    description: 'Sistema de Grade Horária e Planejamento',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

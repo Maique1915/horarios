@@ -81,7 +81,7 @@ const Home = () => {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-5xl font-bold text-text-light-primary dark:text-text-dark-primary mb-4">
-                        Sistema de Matrícula
+                        Horários CEFET
                     </h1>
                     <p className="text-xl text-text-light-secondary dark:text-text-dark-secondary mb-2">
                         Selecione seu curso para começar

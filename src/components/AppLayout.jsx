@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { loadDbData } from '../services/disciplinaService';
@@ -59,14 +60,17 @@ const AppLayout = ({ children }) => {
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
                             title="Voltar para página inicial"
                         >
-                            <img
-                                src={`/horarios/cefet-rj.jpg`}
+                            <Image
+                                src="/logo.png"
                                 alt="Logo"
-                                className="w-10 h-10 rounded-full flex-shrink-0"
+                                width={40}
+                                height={40}
+                                className="rounded-full flex-shrink-0"
+                                unoptimized
                             />
                             {/* Label que só aparece quando o menu está expandido */}
                             <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'}`}>
-                                CEFET-PET
+                                Horários CEFET
                             </span>
                         </button>
                     </div>
@@ -126,7 +130,7 @@ const AppLayout = ({ children }) => {
                 <header className="sticky top-0 z-40 h-16 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark shadow-sm">
                     <div className="h-full px-6 flex items-center justify-between">
                         <h1 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
-                            Sistema de Matrículas {hasCourseSelected ? `- ${cur.toUpperCase()}` : ''}
+                            Horários CEFET {hasCourseSelected ? `- ${cur.toUpperCase()}` : ''}
                         </h1>
 
                         {/* Info adicional ou breadcrumbs podem ir aqui */}
