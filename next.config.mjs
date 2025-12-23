@@ -3,11 +3,14 @@ const isGithubPages = process.env.GITHUB_PAGES === 'true';
 
 const nextConfig = {
     reactStrictMode: true,
-    basePath: isGithubPages ? '/horarios' : undefined,
-    output: isGithubPages ? 'export' : undefined,
     images: {
         unoptimized: true,
     },
 };
+
+if (isGithubPages) {
+    nextConfig.basePath = '/horarios';
+    nextConfig.output = 'export';
+}
 
 export default nextConfig;
