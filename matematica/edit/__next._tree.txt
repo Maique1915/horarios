@@ -1,5 +1,5 @@
-:HL["/horarios/_next/static/chunks/156908419288f42f.css","style"]
+:HL["/horarios/_next/static/chunks/4e3ba5fc91b920b5.css","style"]
 :HL["/horarios/_next/static/chunks/2395cf9850fb44db.css","style"]
 :HL["https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200","style"]
 :HL["https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap","style"]
-0:{"buildId":"21H9gZleokTAO3qDVJEYx","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"cur","paramType":"d","paramKey":"matematica","hasRuntimePrefetch":false,"slots":{"children":{"name":"edit","paramType":null,"paramKey":"edit","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"ZjEGZVdB6_ow86d6Qr8hR","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"cur","paramType":"d","paramKey":"matematica","hasRuntimePrefetch":false,"slots":{"children":{"name":"edit","paramType":null,"paramKey":"edit","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
