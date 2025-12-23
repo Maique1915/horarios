@@ -3,17 +3,23 @@
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
+import { usePayment } from '../hooks/usePayment';
 import LoadingSpinner from './LoadingSpinner';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [fullName, setFullName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [isRegistering, setIsRegistering] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [paymentLink, setPaymentLink] = useState('');
 
-    const { login } = useAuth();
+    const { login, register } = useAuth();
+    const { createPreference, paymentLink: hookPaymentLink, loading: paymentLoading } = usePayment();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -25,30 +31,121 @@ const Login = () => {
         setError('');
         setLoading(true);
 
-        if (isRegistering) {
-            // Mock registration or implement if backend supports
-            setError('Cadastro ainda não implementado no sistema.');
-            setLoading(false);
-            return;
-        }
+        try {
+            if (isRegistering) {
+                if (password !== confirmPassword) {
+                    setError('As senhas não coincidem.');
+                    setLoading(false);
+                    return;
+                }
+                // 1. Cadastro no Supabase
+                const result = await register(username, password, fullName);
 
-        const result = await login(username, password);
+                if (result.success) {
+                    // 2. Criar Link de Pagamento (Mercado Pago)
+                    const paymentResult = await createPreference(
+                        "Acesso Vitalício - Horários CEFET",
+                        50.00,
+                        username,
+                        fullName,
+                        result.user.id
+                    );
 
-        if (result.success) {
-            router.push(from);
-        } else {
-            setError(result.error);
+                    if (paymentResult.success) {
+                        setPaymentLink(paymentResult.init_point);
+                        setShowPaymentModal(true);
+                    } else {
+                        console.error("Erro ao gerar pagamento:", paymentResult.error);
+                        setError("Conta criada, mas houve um erro ao gerar o pagamento. Tente fazer login.");
+                    }
+                } else {
+                    setError(result.error);
+                }
+            } else {
+                // Login
+                const result = await login(username, password);
+
+                if (result.success) {
+                    router.push(from);
+                } else {
+                    setError(result.error);
+                }
+            }
+        } catch (err) {
+            setError('Ocorreu um erro inesperado. Tente novamente.');
+            console.error(err);
         }
 
         setLoading(false);
     };
 
-    if (loading) {
-        return <LoadingSpinner message="Autenticando..." />;
+    if (loading && !showPaymentModal) {
+        return <LoadingSpinner message={isRegistering ? "Criando sua conta..." : "Autenticando..."} />;
     }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background-light via-surface-light to-background-light dark:from-background-dark dark:via-surface-dark dark:to-background-dark flex items-center justify-center p-4">
+            {/* Payment Modal */}
+            {showPaymentModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl max-w-md w-full p-8 border border-border-light dark:border-border-dark animate-scaleIn">
+                        <div className="text-center mb-6">
+                            <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                                <span className="material-symbols-outlined text-5xl text-green-500">
+                                    payments
+                                </span>
+                            </div>
+                            <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
+                                Conta Criada com Sucesso!
+                            </h2>
+                            <p className="text-text-light-secondary dark:text-text-dark-secondary">
+                                Para liberar seu acesso, é necessário realizar o pagamento da taxa de adesão.
+                            </p>
+                        </div>
+
+                        <div className="bg-surface-light dark:bg-background-dark p-4 rounded-xl mb-6 border border-border-light dark:border-border-dark">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary">Item</span>
+                                <span className="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary">Valor</span>
+                            </div>
+                            <div className="flex justify-between items-center text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
+                                <span>Acesso Vitalício</span>
+                                <span>R$ 50,00</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {paymentLink ? (
+                                <a
+                                    href={paymentLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-center transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    <span>Pagar com Mercado Pago</span>
+                                    <span className="material-symbols-outlined">open_in_new</span>
+                                </a>
+                            ) : (
+                                <div className="text-red-500 text-center text-sm p-2 bg-red-100 dark:bg-red-900/20 rounded">
+                                    Erro ao carregar link de pagamento. Tente novamente mais tarde.
+                                </div>
+                            )}
+
+                            <button
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setIsRegistering(false); // Voltar para login
+                                    setError('Após o pagamento, aguarde a liberação do seu acesso.');
+                                }}
+                                className="w-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-text-light-secondary dark:text-text-dark-secondary font-semibold py-3 rounded-xl transition-colors"
+                            >
+                                Já realizei o pagamento
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="w-full max-w-md">
                 {/* Card */}
                 <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden">
@@ -86,18 +183,18 @@ const Login = () => {
                         {/* Username */}
                         <div className="space-y-2">
                             <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
-                                Usuário
+                                E-mail
                             </label>
                             <div className="relative">
                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary text-xl">
-                                    person
+                                    mail
                                 </span>
                                 <input
-                                    type="text"
+                                    type="email"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                    placeholder="Digite seu usuário"
+                                    placeholder="Digite seu e-mail"
                                     required
                                     autoFocus
                                 />
@@ -116,9 +213,11 @@ const Login = () => {
                                     </span>
                                     <input
                                         type="text"
+                                        value={fullName}
+                                        onChange={(e) => setFullName(e.target.value)}
                                         className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                         placeholder="Digite seu nome"
-                                    // Not enforcing required for mock
+                                        required
                                     />
                                 </div>
                             </div>
@@ -140,6 +239,7 @@ const Login = () => {
                                     className="w-full pl-12 pr-12 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     placeholder="Digite sua senha"
                                     required
+                                    minLength={6}
                                 />
                                 <button
                                     type="button"
@@ -205,14 +305,16 @@ const Login = () => {
                 </div>
 
                 {/* Info Card */}
-                <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center">
-                    <p className="text-sm text-blue-600 dark:text-blue-400 flex items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-base">
-                            info
-                        </span>
-                        <span>Entre em contato com o administrador para obter credenciais</span>
-                    </p>
-                </div>
+                {!isRegistering && (
+                    <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center">
+                        <p className="text-sm text-blue-600 dark:text-blue-400 flex items-center justify-center gap-2">
+                            <span className="material-symbols-outlined text-base">
+                                info
+                            </span>
+                            <span>Acesso restrito a usuários autorizados</span>
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );

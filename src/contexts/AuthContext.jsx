@@ -1,94 +1,111 @@
 'use client';
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext();
-
-// URL do Apps Script - MESMA URL usada para dados do sistema
-const AUTH_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8E80OOXc9pjXZos9XHuxwT1DkwXZqVshjRPX7DVfEdCDGEYaB89w8P2oyRRQGJSYI4A/exec';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        // Verificar se há sessão salva no localStorage
-        const savedUser = localStorage.getItem('auth_user');
-        const savedToken = localStorage.getItem('auth_token');
-        const savedExpiry = localStorage.getItem('auth_expiry');
+        // Obter sessão atual
+        const fetchSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                setUser(session.user);
+                // Buscar dados extras do perfil (pagamento, etc)
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('is_paid')
+                    .eq('id', session.user.id)
+                    .single();
 
-        if (savedUser && savedToken && savedExpiry) {
-            const expiry = new Date(savedExpiry);
-            if (expiry > new Date()) {
-                setUser(JSON.parse(savedUser));
-            } else {
-                // Token expirado
-                logout();
+                if (profile) {
+                    session.user.is_paid = profile.is_paid;
+                    setUser(session.user);
+                }
             }
-        }
-        setLoading(false);
-    }, []);
+            setLoading(false);
+        };
 
-    const login = async (username, password) => {
+        fetchSession();
+
+        // Escutar mudanças de estado (login, logout)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth State Changed:', event);
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('is_paid')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profile) {
+                    session.user.is_paid = profile.is_paid;
+                }
+                setUser(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                setUser(null);
+                router.push('/');
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [router]);
+
+    const login = async (email, password) => {
         try {
-            // Hash simples da senha (SHA-256)
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-            // Fazer requisição ao Apps Script
-            const response = await fetch(`${AUTH_SCRIPT_URL}?action=login&username=${encodeURIComponent(username)}&passwordHash=${passwordHash}`, {
-                method: 'GET',
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
             });
 
-            const result = await response.json();
-
-            if (result.success) {
-                const userData = {
-                    username: result.username,
-                    name: result.name,
-                    role: result.role
-                };
-
-                // Gerar token simples (em produção, use JWT)
-                const token = btoa(`${username}:${Date.now()}`);
-
-                // Expira em 8 horas
-                const expiry = new Date();
-                expiry.setHours(expiry.getHours() + 8);
-
-                // Salvar no localStorage
-                localStorage.setItem('auth_user', JSON.stringify(userData));
-                localStorage.setItem('auth_token', token);
-                localStorage.setItem('auth_expiry', expiry.toISOString());
-
-                setUser(userData);
-                return { success: true };
-            } else {
-                return { success: false, error: result.error || 'Credenciais inválidas' };
-            }
+            if (error) throw error;
+            return { success: true };
         } catch (error) {
-            console.error('Erro no login:', error);
-            return { success: false, error: 'Erro ao conectar com o servidor' };
+            console.error('Erro no login Supabase:', error);
+            return { success: false, error: error.message };
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('auth_user');
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('auth_expiry');
-        setUser(null);
+    const register = async (email, password, fullName) => {
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                    },
+                },
+            });
+
+            if (error) throw error;
+            return { success: true, user: data.user, session: data.session };
+        } catch (error) {
+            console.error('Erro no cadastro Supabase:', error);
+            return { success: false, error: error.message };
+        }
+    };
+
+    const logout = async () => {
+        await supabase.auth.signOut();
     };
 
     const isAuthenticated = () => {
-        return user !== null;
+        return !!user;
     };
 
     const value = {
         user,
         loading,
         login,
+        register, // Nova função exportada
         logout,
         isAuthenticated
     };
