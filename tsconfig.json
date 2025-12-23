@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "mercadopago-nextjs-by-andredev-main"
+    "mercadopago-nextjs-by-andredev-main",
+    "supabase"
   ]
 }
