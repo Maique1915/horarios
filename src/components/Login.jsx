@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
-import { usePayment } from '../hooks/usePayment';
 import LoadingSpinner from './LoadingSpinner';
 
 const Login = () => {
@@ -15,11 +14,8 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [isRegistering, setIsRegistering] = useState(false);
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [paymentLink, setPaymentLink] = useState('');
 
     const { login, register } = useAuth();
-    const { createPreference, paymentLink: hookPaymentLink, loading: paymentLoading } = usePayment();
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -42,21 +38,17 @@ const Login = () => {
                 const result = await register(username, password, fullName);
 
                 if (result.success) {
-                    // 2. Criar Link de Pagamento (Mercado Pago)
-                    const paymentResult = await createPreference(
-                        "Acesso Vitalício - Horários CEFET",
-                        50.00,
-                        username,
-                        fullName,
-                        result.user.id
-                    );
-
-                    if (paymentResult.success) {
-                        setPaymentLink(paymentResult.init_point);
-                        setShowPaymentModal(true);
+                    // Registration successful, redirect to home or login
+                    // If supabase returns a session, we can redirect immediately
+                    if (result.session) {
+                        router.push(from);
                     } else {
-                        console.error("Erro ao gerar pagamento:", paymentResult.error);
-                        setError("Conta criada, mas houve um erro ao gerar o pagamento. Tente fazer login.");
+                        // Probably waiting for email confirmation if enabled, 
+                        // but assuming immediate access for now given the context.
+                        // If no session, they might need to log in.
+                        // Let's try auto-login or just redirect to login mode
+                        setIsRegistering(false);
+                        setError('Conta criada com sucesso! Faça login para continuar.');
                     }
                 } else {
                     setError(result.error);
@@ -79,73 +71,12 @@ const Login = () => {
         setLoading(false);
     };
 
-    if (loading && !showPaymentModal) {
+    if (loading) {
         return <LoadingSpinner message={isRegistering ? "Criando sua conta..." : "Autenticando..."} />;
     }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background-light via-surface-light to-background-light dark:from-background-dark dark:via-surface-dark dark:to-background-dark flex items-center justify-center p-4">
-            {/* Payment Modal */}
-            {showPaymentModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-                    <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl max-w-md w-full p-8 border border-border-light dark:border-border-dark animate-scaleIn">
-                        <div className="text-center mb-6">
-                            <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
-                                <span className="material-symbols-outlined text-5xl text-green-500">
-                                    payments
-                                </span>
-                            </div>
-                            <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
-                                Conta Criada com Sucesso!
-                            </h2>
-                            <p className="text-text-light-secondary dark:text-text-dark-secondary">
-                                Para liberar seu acesso, é necessário realizar o pagamento da taxa de adesão.
-                            </p>
-                        </div>
-
-                        <div className="bg-surface-light dark:bg-background-dark p-4 rounded-xl mb-6 border border-border-light dark:border-border-dark">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary">Item</span>
-                                <span className="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary">Valor</span>
-                            </div>
-                            <div className="flex justify-between items-center text-lg font-bold text-text-light-primary dark:text-text-dark-primary">
-                                <span>Acesso Vitalício</span>
-                                <span>R$ 50,00</span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            {paymentLink ? (
-                                <a
-                                    href={paymentLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-center transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2"
-                                >
-                                    <span>Pagar com Mercado Pago</span>
-                                    <span className="material-symbols-outlined">open_in_new</span>
-                                </a>
-                            ) : (
-                                <div className="text-red-500 text-center text-sm p-2 bg-red-100 dark:bg-red-900/20 rounded">
-                                    Erro ao carregar link de pagamento. Tente novamente mais tarde.
-                                </div>
-                            )}
-
-                            <button
-                                onClick={() => {
-                                    setShowPaymentModal(false);
-                                    setIsRegistering(false); // Voltar para login
-                                    setError('Após o pagamento, aguarde a liberação do seu acesso.');
-                                }}
-                                className="w-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-text-light-secondary dark:text-text-dark-secondary font-semibold py-3 rounded-xl transition-colors"
-                            >
-                                Já realizei o pagamento
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <div className="w-full max-w-md">
                 {/* Card */}
                 <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden">
@@ -168,12 +99,12 @@ const Login = () => {
                     <form onSubmit={handleSubmit} className="p-8 space-y-6">
                         {/* Error Message */}
                         {error && (
-                            <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-start gap-3">
-                                <span className="material-symbols-outlined text-red-500 text-xl">
-                                    error
+                            <div className={`border rounded-lg p-4 flex items-start gap-3 ${error.includes('sucesso') ? 'bg-green-500/10 border-green-500/50' : 'bg-red-500/10 border-red-500/50'}`}>
+                                <span className={`material-symbols-outlined text-xl ${error.includes('sucesso') ? 'text-green-500' : 'text-red-500'}`}>
+                                    {error.includes('sucesso') ? 'check_circle' : 'error'}
                                 </span>
                                 <div className="flex-1">
-                                    <p className="text-sm font-medium text-red-500">
+                                    <p className={`text-sm font-medium ${error.includes('sucesso') ? 'text-green-500' : 'text-red-500'}`}>
                                         {error}
                                     </p>
                                 </div>

@@ -16,17 +16,6 @@ export const AuthProvider = ({ children }) => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 setUser(session.user);
-                // Buscar dados extras do perfil (pagamento, etc)
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('is_paid')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (profile) {
-                    session.user.is_paid = profile.is_paid;
-                    setUser(session.user);
-                }
             }
             setLoading(false);
         };
@@ -37,15 +26,6 @@ export const AuthProvider = ({ children }) => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth State Changed:', event);
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('is_paid')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (profile) {
-                    session.user.is_paid = profile.is_paid;
-                }
                 setUser(session.user);
             } else if (event === 'SIGNED_OUT') {
                 setUser(null);
