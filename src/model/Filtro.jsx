@@ -33,7 +33,7 @@ async function getCachedCoursesRegistry() {
 async function ativas(e) {
     console.log('ativas: Chamada para curso:', e);
     // Use loadClassesForGrid to get the flat structure required by Comum/Grid
-    const db = await loadClassesForGrid();
+    const db = await loadClassesForGrid(e);
     console.log('ativas: Dados recebidos do loadClassesForGrid:', db?.length, 'total de turmas/disciplinas');
     const a = db.filter((item) => (item._ag === true) && item._cu === e);
     console.log('ativas: Disciplinas ativas filtradas para', e, ':', a.length);

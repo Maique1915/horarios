@@ -7,7 +7,7 @@ export default class Escolhe {
         this.genesis = genesis
         this.cur = cur
         this.dimensao = null
-        this.reduz()
+        // Removed this.reduz() as we want to process all options
     }
 
     async init() {
@@ -15,82 +15,88 @@ export default class Escolhe {
         return this
     }
 
-    reduz() {
-        while (this.genesis.length > 15) {
-            const max = this.genesis.length
-            const a = Math.floor(Math.random() * (max))
-            this.genesis.splice(a, 1)
-        }
-    }
+    // Helper to check collision between a set of occupied slots and a candidate class
+    colide(occupiedSlots, candidateClass) {
+        if (!candidateClass._ho) return false;
 
-    count(str) {
-        return str.reduce((acc, char) => char === '1' ? acc + 1 : acc, 0);
+        for (const slot of candidateClass._ho) {
+            // slot is [dayId, timeId]
+            const key = slot.join(',');
+            if (occupiedSlots.has(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     exc() {
-        const aux = []
-        let i = 2 ** this.genesis.length - 1
-        while (i > 0) {
-            const f = i.toString(2).padStart(this.genesis.length, '0').split('')
-            i--
+        console.log("Escolhe: Starting backtracking with", this.genesis.length, "classes");
 
-            if (this.count(f) >= 9) continue
+        // 1. Group classes by Subject (using _re as unique identifier for discipline)
+        const subjectsMap = {};
+        this.genesis.forEach(cls => {
+            if (!subjectsMap[cls._re]) {
+                subjectsMap[cls._re] = [];
+            }
+            subjectsMap[cls._re].push(cls);
+        });
 
-            const c = []
-            let m = new Materias(this.cur, this.dimensao || [0, 0]).m
-            let b = true
+        const subjectKeys = Object.keys(subjectsMap);
+        const results = [];
+        const MAX_RESULTS = 50; // Limit to prevent browser freeze if too many combinations
 
-            for(const j in f){
-                if(f[j] === "1"){
-                    const a = this.genesis[j]
-                    if(this.colide(m, a) && !this.existe(c, a)){
-                        c.push(a)
-                        m = this.merge(a, m)
-                    }else{
-                        b = false
-                        break
+        // 2. Backtracking function
+        const backtrack = (index, currentSolution, occupiedSlots) => {
+            // Optimization: Stop if we already have enough results
+            if (results.length >= MAX_RESULTS) return;
+
+            // Base case: All subjects processed
+            if (index === subjectKeys.length) {
+                results.push([...currentSolution]);
+                return;
+            }
+
+            const currentSubject = subjectKeys[index];
+            const possibleClasses = subjectsMap[currentSubject];
+
+            // Try each class for the current subject
+            for (const cls of possibleClasses) {
+                if (!this.colide(occupiedSlots, cls)) {
+                    // Add class to solution
+                    currentSolution.push(cls);
+
+                    // Add slots to occupied set to track usage for this path
+                    const newSlots = [];
+                    if (cls._ho) {
+                        for (const slot of cls._ho) {
+                            const key = slot.join(',');
+                            occupiedSlots.add(key);
+                            newSlots.push(key);
+                        }
                     }
+
+                    // Recurse
+                    backtrack(index + 1, currentSolution, occupiedSlots);
+
+                    // Backtrack: Remove class and slots
+                    currentSolution.pop();
+                    newSlots.forEach(key => occupiedSlots.delete(key));
+
+                    if (results.length >= MAX_RESULTS) return;
                 }
             }
-            if(b)
-                aux.push(c)
-        }
-        
-        return aux.sort(this.compare)
-    }
+        };
 
-    compare(a, b) {
-        return b.length - a.length
-    }
+        // Start recursion
+        const start = performance.now();
+        backtrack(0, [], new Set());
+        const end = performance.now();
+        console.log(`Escolhe: Found ${results.length} valid grades in ${(end - start).toFixed(2)}ms`);
 
-    merge(a, b) {
-        // Mescla os horários de a em b (evita duplicatas)
-        const horariosSet = new Set(b._ho.map(h => h.join(',')))
-        for (const tupla of a._ho) {
-            const key = tupla.join(',')
-            if (!horariosSet.has(key)) {
-                b._ho.push(tupla)
-                horariosSet.add(key)
-            }
-        }
-        return b
-    }
+        // Sort by "quality" (e.g. density, or just keep order) 
+        // Original code sorted by length, but here all valid grades have same length (one per subject)
+        // We can keep it or sort by other criteria if needed.
 
-    existe(c, a) {
-        for(const b of c)
-            if(a._re === b._re)
-                return true
-        return false
-    }
-
-    colide(b, a) {
-        // Verifica se há colisão entre os horários de b e a
-        const horariosB = new Set(b._ho.map(h => h.join(',')))
-        for (const tupla of a._ho) {
-            if (horariosB.has(tupla.join(','))) {
-                return false
-            }
-        }
-        return true
+        return results;
     }
 }

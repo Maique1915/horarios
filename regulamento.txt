@@ -1,0 +1,701 @@
+    CENTRO FEDERAL DE EDUCAÇÃO TECNOLÓGICA
+CELSO SUCKOW DA FONSECA - CEFET/RJ UNED PETRÓPOLIS
+CURSO: BACHARELADO EM ENGENHARIA DE COMPUTAÇÃO
+     COMISSÃO DE ATIVIDADES COMPLEMENTARES
+
+
+
+
+        Regulamento para Atividades Complementares
+         Bacharelado em Engenharia de Computação
+
+
+
+
+                        Décima edição
+
+
+
+
+                         Petrópolis
+                           2022
+c 2022 - 10a edição
+Centro Federal de Educação Tecnologica Celso Suckow da Fonseca -
+Cefet/RJ UnED Petrópolis
+Curso: Bacharelado em Engenharia de Computação
+Comissão de Atividades Complementares
+Biblioteca do CEFET/RJ UnED Petrópolis
+
+Direção-Geral                                                             Organização e elaboração do documento
+Maurício Saldanha Motta                                                                       Colegiado do Curso
+
+Vice-Direção                                                       Comissão de Atividades Complementares (CAT)
+Gisele Maria Ribeiro Vieira                                                          Carlos Eduardo Leme Nóbrega
+                                                                                       Dalbert Matos Mascarenhas
+Direção da UnED Petrópolis                                                               Pedro Carlos da Silva Lara
+Felipe da Rocha Henriques
+Gerência Acadêmica                                                                                  Colaboradores
+Jurair Rosa de Paula Junior                                                   Núcleo Docente Estruturante - (NDE)
+Gerência Administrativa                                                      Daphne Holzer Velihovetchi - NAPNE
+Michele Marques Gonzales                                                    Luciana de Souza Castro - Bibliotecária
+                                                                          Márcia Rodrigues Ferreira Alves - SAPED
+
+
+
+Bacharelado em Engenharia de Computação                                                              Layout e Arte
+Coordenador                                                                              Jurair Rosa de Paula Junior
+Luís Domingues Tomé Jardim Tarrataca                                                            Laura Silva de Assis
+
+Colegiado do Curso
+Ana Elisa Leitão Alonso Ferreira
+André Felipe de Almeida Monteiro
+Carlos Eduardo Leme Nóbrega
+Cláudio Maia Alves José
+Dalbert Matos Mascarenhas
+Diego Barreto Haddad
+Jurair Rosa de Paula Junior
+Laura Silva de Assis
+Luis Carlos dos Santos Coutinho Retondaro
+Luís Domingues Tomé Jardim Tarrataca
+Pedro Carlos da Silva Lara
+Rafael Saraiva Campos
+                  CEFET/RJ - Sistema de Bibliotecas / Uned Petrópolis
+
+R344
+
+  Regulamento para atividades complementares: Bacharelado em Engenharia
+    de Computação / Comissão de Atividades Complementares (CAT).
+    Centro Federal de Educação Tecnológica Celso Suckow da Fonseca,
+    Uned Petrópolis, 2022.
+
+       15 p.
+
+       1. Atividades Complementares - Regulamento. 2. Curso Bacharelado em
+       Engenharia de Computação - Atividades Complementares. I. Título.
+       II. Coordenação do Curso: Bacharelado em Engenharia de Computação.
+
+                                                                        CDD 378.16
+                   Elaborada por Luciana de Souza Castro CRB7/4812
+Sumário
+1   Objetivos e disposições preliminares                                          1
+
+2   Das atividades abrangidas                                                     2
+
+3   Do registro, comprovação e validação                                          2
+
+4   Competências e disposições finais                                             4
+
+5   Apresentação                                                                  7
+
+Apêndices                                                                         8
+
+Apêndice A Tabelas de Enquadramento das Atividades Complementares                 8
+
+Apêndice B Formulário de Solicitação de Revisão das Atividades Complementares    14
+
+Apêndice C Formulário de Registro de Atividades Complementares Especiais - MIC   15
+1. Objetivos e disposições preliminares                                                              1
+
+
+1    Objetivos e disposições preliminares
+    Art. 1o - O presente Regulamento destina-se a orientar e normatizar as Atividades Complemen-
+tares do curso de Engenharia de Computação do CEFET/RJ, campus Petrópolis, tendo por base a
+legislação em vigor, a Lei 13.005 que aprova o Plano Nacional de Educação e a Lei 9.394/96 que
+estabelece as diretrizes e bases da educação nacional.
+    Art. 2o - As Atividades Complementares se constituem em parte integrante do currículo dos cursos
+de Graduação e têm a finalidade de enriquecer o processo de ensino-aprendizagem, privilegiando a
+complementação da formação social e profissional.
+
+      §1o As Atividades Complementares são desenvolvidas dentro do prazo de conclusão do
+      curso, conforme definido em seu Projeto Pedagógico, sendo componente curricular obri-
+      gatório para a graduação do aluno.
+      §2o Caberá ao aluno participar de Atividades Complementares. Estas atividades, serão
+      adicionais às demais atividades acadêmicas e deverão contemplar os grupos de atividades
+      descritos neste Regulamento.
+      §3o As Atividades Complementares têm por objetivo:
+      I - flexibilizar o currículo obrigatório, deixando-o aberto a acréscimo de determinada carga
+      horária com atividades relevantes para os alunos e para o curso;
+      II - reconhecer a prática de estudos e atividades independentes por parte dos alunos, no
+      aprofundamento temático e multidisciplinar de suas formações;
+      III - incentivar o envolvimento dos alunos no ambiente acadêmico e do trabalho;
+      IV - aproximar o universitário da realidade social e profissional;
+      V - promover a integração entre a Universidade e a sociedade, por meio da participação
+      do universitário em atividades que visem à formação profissional e à cidadania.
+
+    Art. 3o - As Atividades Complementares do Curso de Engenharia de Computação deverão totalizar
+carga horária de 210 horas, sem requisito, equivalente a 14 créditos.
+    Art. 4o - A solicitação de aproveitamento, a validação e a devida integralização de horas em
+Atividades Complementares seguirão o seguinte cronograma:
+
+      I - para o aproveitamento: o aluno poderá solicitar semestralmente, até 30 (trinta) dias an-
+      tes do último dia letivo do semestre corrente, segundo o calendário acadêmico do campus;
+      II - para validação: a comissão elencada pela Coordenação de Curso deverá apresentar
+      seu parecer final até 30 (trinta) dias antes do último dia letivo do semestre seguinte ao da
+      solicitação;
+      III - para integralização: o registro acadêmico deverá ser realizado até o último dia letivo
+      do semestre seguinte ao da solicitação.
+2
+
+
+2    Das atividades abrangidas
+   Art. 5o - As Atividades Complementares abrangidas por estas normas estão delimitadas, especifi-
+cadas e agrupadas nas tabelas de enquadramento do apêndice A.
+    Art. 6o - Há no contexto das Atividades Complementares uma situação especial relacionada espe-
+cificamente às atividades de Monitoria e Iniciação Científica denominada Atividades Complementares
+Especiais, ou simplesmente “MIC", cujo exercício tem características distintas dos Programas de Bol-
+sas de Monitoria e Programa de Iniciação Científica proporcionados pelo CEFET/RJ através de Edital
+interno.
+
+      §1o As características peculiares das Atividades MIC, seus objetivos, bem como as nor-
+      mas de implementação e as competências de alunos e docentes estão detalhadas em docu-
+      mento próprio denominado: “Regulamento para Implementação de Monitoria e Iniciação
+      Científica (MIC) contempladas como Atividades Complementares Especiais".
+      §2o Assim como as demais Atividades Complementares, a contabilização das horas exer-
+      cidas através das atividades MIC, segue estritamente este Regulamento, considerando em
+      particular os dados descritos no Grupo H da tabela de enquadramento.
+
+    Art. 7o - Em hipótese alguma, as atividades realizadas de forma curricular, associada às discipli-
+nas constantes na Matriz Curricular do Curso, poderão ser quantificadas para fins de aproveitamento
+e registro como atividades complementares, ou seja, só poderão ser consideradas desde que não apro-
+veitadas para convalidar outra disciplina do currículo.
+
+      Parágrafo único - Excetuam-se à regra de convalidação mencionada no caput deste Ar-
+      tigo, as disciplinas vinculadas às atividades especificadas no Artigo 6o .
+
+    Art. 8o - Somente serão aceitas as atividades realizadas após a primeira matrícula no Curso.
+    Art. 9o - O universitário oriundo de transferência externa poderá solicitar a validação das ativida-
+des realizadas a partir do ingresso em seu Curso de origem, mediante comprovação.
+
+
+
+3    Do registro, comprovação e validação
+    Art. 10o - A validação das atividades caberá à Comissão de Atividades Complementares - CAT.
+
+      §1o A CAT será instituída pela Coordenação do Curso e será formada por no mínimo 3
+      (três) professores do Colegiado.
+      §2o O prazo de atuação da CAT será por tempo indeterminado, porém a escala e a seleção
+      dos professores será submetida ao Colegiado do Curso.
+3. Do registro, comprovação e validação                                                                 3
+
+
+      §3o O parecer da CAT será encaminhado à Coordenação do curso de acordo com as atri-
+      buições que seguem:
+      I - o aproveitamento de créditos referentes à realização das Atividades Complementares
+      só deve ser aceito quando houver parecer favorável da CAT. Não serão aceitas atividades
+      realizadas sem o referido parecer;
+      II - se entender necessário, ao apreciar o requerimento, o Coordenador do Curso e a CAT
+      poderão pedir informações adicionais sobre a atividade desenvolvida, podendo desconsiderá-
+      la, se entenderem como insuficiente o aproveitamento do aluno;
+      III - sendo aceita a Atividade Complementar realizada pelo aluno, o Coordenador do
+      Curso encaminhará à Secretaria de Registro Acadêmico (SERAC) do campus, o apro-
+      veitamento de crédito de cada aluno. A SERAC lançará os créditos referentes às horas
+      correspondentes, obedecidos os limites previstos, no sistema acadêmico, ficando assim
+      formalizados os créditos aproveitados por cada aluno. Após a avaliação, fica sob respon-
+      sabilidade dos alunos o arquivamento dos comprovantes originais;
+      IV - após o término do período de entrega das documentações comprobatórias em período
+      estabelecido neste regulamento, a CAT irá se reunir para avaliações das solicitações, de-
+      vendo processar as documentações e emitir o parecer final.
+      §4o O requerimento do aluno, bem como a validação e o parecer da CAT será efetuado
+      através de um sistema on-line. O Sistema de Gerenciamento de Horas Complementares
+      (SGHC) implementa as regras de enquadramento deste manual e permite o aluno acom-
+      panhar seu processo de solicitação. Além disso, o sistema permite que o aluno visualize o
+      parecer da CAT e possibilita à CAT realizar a validação e emitir relatórios por grupo e por
+      atividade. Os procedimentos para acesso e uso do SGHC estão impressos e disponíveis
+      nos murais dos laboratórios.
+
+    Art. 11o - Serão reconhecidos como documentos válidos para fins de comprovação da realização
+das atividades: certificados, históricos escolares, declarações, certidões, atestados, contratos firmados,
+tíquetes, carteira de trabalho e outros documentos oficiais. O tipo de documento deverá estar conforme
+a especificidade que cada atividade requer.
+
+      §1o Os documentos relacionados no caput deste artigo terão validade se devidamente
+      registrados e assinados pelo representante legal da Instituição que o expediu.
+      §2o Os documentos deverão ser anexados no sistema SGHC em processo próprio.
+      §3o A apresentação de documento falso implicará em sanção ao aluno, de acordo com as
+      normas da instituição e a legislação vigente.
+
+   Art. 12o - As atividades registradas serão avaliadas sob os seguintes aspectos:
+4
+
+
+      I - enquadramento da atividade à natureza dentro dos grupos definidos neste regulamento,
+      conforme as especificações do apêndice A;
+
+      II - validade dos documentos comprobatórios fornecidos, conforme as regras deste Regu-
+      lamento e especificações definidas no apêndice A;
+
+      III - prazo de validade da atividade, conforme as regras deste Regulamento.
+
+      Parágrafo único - Quando a quantidade de horas a ser integralizado for considerada
+      variável, dependendo do tipo de atividade, caberá à CAT a definição do limite específico
+      daquela atividade. Este limite não deve ultrapassar as especificações descritas nas do
+      apêndice A. Esta informação deverá ser divulgada aos alunos tempestivamente pela CAT.
+
+   Art. 13o - Compete à CAT esta avaliação descrita no Artigo 12o , da qual poderá resultar uma das
+seguintes conclusões:
+
+      I - validação da atividade: quando houver aparente enquadramento da natureza da ativi-
+      dade, o documento comprobatório for adequado ou entendido como suficiente, e a ativi-
+      dade houver sido realizada dentro do prazo devido;
+
+      II - rejeição da atividade: quando houver aparente ou evidente descumprimento de qual-
+      quer dos aspectos avaliados, sejam eles formais ou substanciais.
+
+      §1o Entende-se como motivos formais para rejeição: erro de digitação, rasura, erro de
+      enquadramento da atividade no grupo ou documentação comprobatória insuficiente.
+
+      §2o Entende-se como motivos substanciais para rejeição: documentação comprobatória
+      não aceita como válida, atividade fora do prazo determinado ou divergente das contem-
+      pladas na norma.
+
+    Art. 14o - Da decisão de rejeição da atividade, o aluno poderá:
+
+      I - no caso de motivos formais: corrigir os equívocos ou complementar a documentação
+      comprobatória, e tentar nova validação;
+
+      II - no caso de motivos substanciais: fornecer outros documentos e tentar nova validação.
+
+   Art. 15o - Os casos omissos serão resolvidos pela CAT, com auxílio do Colegiado do Curso,
+quando solicitado pela primeira, e de acordo com a legislação vigente.
+
+
+
+4    Competências e disposições finais
+    Art. 16o - Compete ao Colegiado do Curso de Engenharia de Computação:
+4. Competências e disposições finais                                                              5
+
+
+     I - aprovar alterações nos artigos e anexos do presente Regulamento;
+     II - aprovar a constituição da Comissão de Atividades Complementares - CAT.
+
+   Art. 17o - Compete à Coordenação do Curso:
+
+     I - instituir a CAT, indicando e orientando suas ações de acordo com a legislação vigente;
+     II - lançar ou solicitar o lançamento via SERAC no sistema acadêmico, os créditos corres-
+     pondentes às horas/aula dos alunos relativas às Atividades Complementares, obedecendo
+     aos limites estabelecidos.
+
+   Art. 18o - Compete à Comissão de Atividades Complementares - CAT:
+
+     I - aplicar esta norma para validação e formalização das Atividades Complementares;
+     II - propor ao Colegiado do Curso aprimoramentos nos artigos e anexos deste Regula-
+     mento, mediante iniciativa própria e sugestões recebidas do quadro de Professores do
+     Curso;
+     III - oferecer divulgação deste Regulamento aos alunos;
+     IV - esclarecer dúvidas sobre a aplicação do Regulamento, resguardando a competência
+     do Colegiado do Curso;
+     V - emitir, sob demanda, relatório sobre o cumprimento das Atividades Complementares
+     de cada aluno, indicando suas atividades realizadas, créditos aproveitados e advertências,
+     quando existirem;
+     VI - acompanhar os limites máximos para lançamento das atividades complementares por
+     aluno por tipo de atividades;
+     VII - divulgar à comunidade acadêmica o cronograma estabelecido no Art. 4o .
+
+    Art. 19o - As alterações promovidas pelo Colegiado no Regulamento terão aplicação imediata a
+partir da sua publicação.
+
+     Parágrafo único - Apenas as atividades previamente registradas pelos alunos e já va-
+     lidadas pela Comissão não serão afetadas pelas alterações mencionadas no caput deste
+     Artigo.
+
+   Art. 20o - Compete aos alunos do Curso, submetidos a este Regulamento:
+
+     I - comparecer e realizar as atividades de eventos que possam ser aproveitados como
+     Atividades Complementares;
+     II - buscar conhecimento desta norma e suas eventuais atualizações;
+6
+
+
+     III - procurar esclarecer eventuais dúvidas sobre sua aplicação, de modo tempestivo, junto
+     à CAT ou Coordenação do Curso;
+     IV - encaminhar os documentos comprobatórios fidedignos das atividades de modo orde-
+     nado e completo dentro do prazo e das formalidades estabelecidas, conforme especificado
+     no Artigo 11o ;
+     V - guardar todos os comprovantes de realização das atividades e de entrega de documen-
+     tos para integralização das mesmas;
+     VI - consultar frequentemente seus créditos referentes às Atividades Complementares
+     lançados no sistema acadêmico;
+     VII - solicitar, quando necessário, revisão das horas lançadas, mediante apresentação do
+     comprovante de lançamento junto ao formulário de solicitação de revisão;
+     VIII - apresentar qualquer solicitação de integralização, no prazo mínimo de 60 dias antes
+     da conclusão do curso.
+
+   Art. 21o - Este Regulamento entrou em vigor a partir do dia 25 de setembro de 2019, logo após
+aprovação do Colegiado do Curso de Engenharia de Computação (conforme relatado na ata da reunião
+ordinária que ocorreu no dia 24 de setembro de 2019), revogando as normas anteriores sobre a mesma
+matéria, no âmbito deste Curso e currículo a que se refere.
+5. Apresentação                                                                                   7
+
+
+5    Apresentação
+    Sendo o Curso de Engenharia de Computação voltado para a qualificação em diversos setores de
+atuação no mercado tecnológico, sua oferta pelo CEFET/RJ, em Petrópolis, vai ao encontro de uma
+demanda crescente por profissionalização dos serviços relacionados a esta área na mesorregião, com
+foco no teleprocessamento, eletrônica e na computação de alto desempenho.
+    O curso busca contribuir com o desenvolvimento sustentável da sociedade, promovendo o incen-
+tivo à pesquisa e ciência, criando mecanismos de inclusão e aprimoramento humano, social e na área
+de negócios.
+    Neste cenário, a flexibilização do currículo pode ser contemplada com atividades complementares,
+visando o desenvolvimento integral, a maior especialização e melhor adequação das habilidades e
+competências do aluno.
+    Atividades complementares correspondem a uma das atividades curriculares suplementares de-
+senvolvidas durante o curso de Engenharia de Computação. Tais atividades constituem um conjunto
+de estratégias pedagógico-didáticas que permitem, no âmbito do currículo, a articulação entre teoria
+e prática e a complementação, por parte do estudante, dos saberes e habilidades necessárias à sua
+formação.
+    Este texto contém o Regulamento para as Atividades Complementares e foi composto, revisado e
+atualizado mediante a compilação, análise e aplicação das normas adequadas exclusivamente ao Curso
+de Engenharia de Computação do CEFET/RJ, campus Petrópolis.
+    Os alunos que necessitarem de esclarecimentos, após a leitura atenciosa deste Regulamento, de-
+vem procurar diretamente a Comissão de Atividades Complementares (CAT), ou podem ainda, buscar
+orientação inicial na Coordenação do Curso. As informações contidas no mural e site do curso também
+devem ser observados com zelo e constância.
+8
+
+
+Apêndices
+A         Tabelas de Enquadramento das Atividades Complementares
+          GRUPO A - Atividades de Iniciação à Docência, à Pesquisa ou à Extensão
+Carga Horária Integralizada durante o curso neste grupo - Mínimo: 20 hs - Máximo: 80 hs† / 120 hs‡
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso † Válido durante período pré e
+pós-isolamento ‡ Válido durante período de isolamento por conta do novo coronavírus (COVID-19)
+    Cód     Atividade                                 Carga Horária     Limite∗∗   Requisitos/Documentos
+                                                      Integralizada∗               Comprobatórios
+    A1      Exercício de Monitoria ou Tutoria         20 hs† / 40 hs‡   80 hs      - Declaração do prof.
+            de atividades de ensino à distância,      por semestre                 responsável.
+            como bolsista, mediante Edital espe-
+            cífico.
+    A2      Iniciação Científica.                     20 hs† / 40 hs‡   80 hs      - Certificado do órgão de
+            Atuação como bolsista, mediante           por semestre                 fomento correspondente
+            Edital específico.                                                     ou declaração do orienta-
+                                                                                   dor.
+    A3      Participação em pesquisas e projetos      10 hs† / 20 hs‡   40 hs      - Declaração do prof. su-
+            institucionais, outros projetos de pes-   por semestre                 pervisor.
+            quisa ou trabalho técnico, sob super-
+            visão de professores do curso.
+    A4      Frequentar defesas de dissertação de      02 hs             20 hs      - Comprovante de parti-
+            mestrado e/ou tese de doutorado em        por defesa                   cipação.
+            área correlata ao curso.
+    A5      Frequentar apresentação de TCC do         05 hs             80 hs      - Comprovante de parti-
+            seu curso ou outro curso relacionado      por apresent.                cipação.
+            a área de computação.
+    A6      Visitas técnicas em área de atuação       até 02 hs         20 hs      - Comprovante de parti-
+            do curso, coordenadas por professo-       por visita                   cipação.
+            res do curso.
+A. Tabelas de Enquadramento das Atividades Complementares                                            9
+
+
+                             GRUPO B - Participação em eventos
+             Máximo de carga Horária Integralizada durante o curso neste grupo: 100 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                                Carga Horária      Limite∗∗   Requisitos/Documentos
+                                                   Integralizada∗                Comprobatórios
+  B1      Palestras ou minicursos ministrados      até 08 hs          32 hs      - Certificado ou decla-
+          - específicos da área de atuação do      por atividade                 ração da organização do
+          curso na instituição.                                                  evento.
+ B2       Participação externa em eventos,         até 08 hs          40 hs      - Certificado ou decla-
+          congressos, seminários, simpósios e      por dia de                    ração da organização do
+          conferências em áreas correlatas ao      participação                  evento.
+          curso.
+ B3       Participação como competidor em          até 08 hs          80 hs      - Certificado ou decla-
+          competições científicas (maratonas       por atividade, e              ração da organização do
+          de programação, workshop de pro-         + 20 hs                       evento.
+          gramação de jogos, robótica, etc) co-    por atividade
+          ordenados por professores do curso.      que obter o
+                                                   1o , 2o ou 3o
+                                                   lugares
+
+
+
+
+                             GRUPO C - Atividades de Extensão
+             Máximo de carga Horária Integralizada durante o curso neste grupo: 80 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                                Carga Horária      Limite∗∗   Requisitos/Documentos
+                                                   Integralizada∗                Comprobatórios
+  C1      Participação em projetos ou ativida-     20 hs              80 hs      - Certificado ou declara-
+          des de extensão na área do curso, sob    por projeto                   ção de participação.
+          supervisão de professor do curso.        ou atividade
+ C2       Participação em Curso de extensão        até 08 hs          20 hs      - Certificado ou decla-
+          na área do curso.                                                      ração da organização do
+                                                                                 evento.
+ C3       Atividades de extensão oferecidas        até 08 hs          20 hs      - Certificado ou decla-
+          por outras instituições ou outros cur-   por atividade                 ração da organização do
+          sos.                                                                   evento.
+10
+
+
+
+
+                         GRUPO D - Produção Técnica ou Científica
+             Máximo de carga Horária Integralizada durante o curso neste grupo: 90 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                               Carga Horária      Limite∗∗   Requisitos/Documentos
+                                                  Integralizada∗                Comprobatórios
+  D1      Publicação de trabalhos científicos     até 15 hs          90 hs      - Cópia da publicação.
+          em congressos ou simpósios - com-       por trabalho
+          pleto.
+ D2       Publicação de trabalhos científicos     até 05 hs          50 hs      - Cópia da publicação.
+          em congressos ou simpósios - re-        por trabalho
+          sumo.
+ D3       Projeto de desenvolvimento de pro-      até 20 hs          40 hs, ou - Declaração do profes-
+          duto (Hardware ou Software).            por projeto        02 proje- sor ou empregador.
+                                                                     tos
+
+ D4       Publicação de trabalhos científicos     45 hs              90 hs      - Cópia da publicação.
+          em journal ou revista - com índice      por trabalho
+          Qualis
+
+
+                       GRUPO E - Vivência profissional complementar
+             Máximo de carga Horária Integralizada durante o curso neste grupo: 100 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                               Carga Horária      Limite∗∗   Requisitos/Documentos
+                                                  Integralizada∗                Comprobatórios
+  E1      Realização de estágio não-curricular    30 hs              90 hs      - Termo de compromisso
+          em Instituições conveniadas ao          por semestre                  do estágio, e
+          CEFET/RJ, ou realização de es-                                        - Relatório de atividades
+          tágio em Empresa Júnior ou em                                         do semestre.
+          Incubadora de Empresa.
+ E2       Atividade profissional específica na    até 15 hs          90 hs      - Declaração do empre-
+          área correlata ao curso.                por semestre                  gador (com CNPJ) ou
+                                                                                Carteira de Trabalho.
+ E3       Atividade profissional específica em    até 05 hs          20 hs      - Declaração do empre-
+          outras áreas.                           por semestre                  gador (com CNPJ) ou
+                                                                                Carteira de Trabalho.
+A. Tabelas de Enquadramento das Atividades Complementares                                             11
+
+
+
+ E4       Participação como titular ou suplente   05 hs por perío-   15 hs      - Ata de eleição, e
+          em entidade de representação estu-      do mínimo de                  - Declaração de
+          dantil específica (diretórios, centro   6 meses, não                  participação.
+          acadêmico, etc).                        cumulativo no
+                                                  período
+ E5       Curso de aperfeiçoamento técnico.       até 20 hs          80 hs      - Certificado ou declara-
+                                                  por curso                     ção da entidade organi-
+                                                                                zadora.
+ E6       Certificação específica.                até 50 hs          100 hs     - Certificado.
+ E7       Curso de língua estrangeira.            20% da carga       50 hs      - Certificado ou Decla-
+                                                  horária                       ração do curso atestando
+                                                                                matrícula e aprovação no
+                                                                                módulo ou nível.
+ E8       Disciplinas de outros cursos ou ins-    Carga horária      30 hs      - Histórico Escolar
+          tituições de ens. superior, desde que   da disciplina,                Oficial ou declaração do
+          não sejam aproveitadas como disci-      até 20 hs                     professor e,
+          plinas eletivas, com conteúdos perti-   por disciplina                - Programa da disciplina.
+          nentes à área correlata do curso.
+ E9       Vivência de gestão ou representação     até 25 hs          50 hs      - Declaração da entidade
+          de entidades relacionadas à área cor-   por semestre                  ou Ata de posse/eleição
+          relata do curso.                                                      com assinatura dos pre-
+                                                                                sentes.
+
+
+
+
+       GRUPO F - Atividades de complementação da formação social, humana e cultural
+           Máximo de carga Horária Integralizada durante o curso neste grupo: 60 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                               Carga Horária      Limite∗∗   Requisitos/Documentos
+                                                  Integralizada∗                Comprobatórios
+  F1      Participação em projetos sociais ou     até 20 hs          60 hs      - Declaração da coorde-
+          atividades beneficentes.                por semestre                  nação do projeto.
+ F2       Participação como atleta ou organi-     até 02 hs          40 hs      - Comprovante de parti-
+          zador de atividades esportivas.         por atividade                 cipação.
+ F3       Participação como autor de traba-       até 05 hs          40 hs      - Comprovante de parti-
+          lho cultural ou obra de cunho artís-    por atividade                 cipação.
+          tico em concursos, exposições, fei-
+          ras, mostras e festivais.
+12
+
+
+
+ F4       Participação em eventos de caráter      01 h                20 hs       - Tíquete ou compro-
+          cultural ou esportivo (competições,     por evento                      vante de participação.
+          entretenimento, cinema, teatro, mu-
+          seu, etc).
+ F5       Participação de intercâmbio ou con-     20 hs               40 hs       - Comprovante de parti-
+          vênio cultural.                         por semestre                    cipação.
+
+
+
+
+                GRUPO G - Participação na Semana Acadêmica e de Extensão
+Carga Horária Integralizada durante o curso neste grupo - Mínimo: 40 hs† / 50 hs‡ - Máximo: 85 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso † Válido para todos os alunos
+que passaram pelo isolamento por conta do novo coronavírus ‡ Válido no período pós-isolamento
+ Cód      Atividade                               Carga Horária       Limite∗∗    Requisitos/Documentos
+                                                  Integralizada∗                  Comprobatórios
+  G1      Participação na “Semana de En-          Carga horária do 60 hs          - Certificado ou decla-
+          genharia de Computação” realizada       certificado ou                  ração da organização do
+          pelo curso.                             declaração                      evento.
+
+ G2       Semana de Extensão.                     Carga horária do 25 hs          - Certificado ou decla-
+                                                  certificado ou                  ração da organização do
+                                                  declaração                      evento.
+
+ G3       Participação na comissão organiza-      10 hs               20 hs       - Certificado ou decla-
+          dora da “Semana de Engenharia de        por evento                      ração da organização do
+          Computação” realizada pelo curso.                                       evento.
+A. Tabelas de Enquadramento das Atividades Complementares                                           13
+
+
+ GRUPO H - Atividades Complementares Especiais (MIC): Monitoria ou Iniciação Científica
+                        como Crédito em Disciplinas Optativas
+         Máximo de carga Horária Integralizada durante o curso neste grupo: 60 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                                Carga Horária     Limite∗∗   Requisitos/Documentos
+                                                   Integralizada∗               Comprobatórios
+  H1      Disciplina Optativa: Monitoria I, II,    10 hs             40 hs      - Aprovação na Disciplina
+          III ou IV; Exercício de Monitoria        por semestre                 Monitoria I, II, III ou IV.
+          sem vínculo como Atividade Com-          +                            - Relatório do Professor
+          plementar Especial - MIC, mediante       Créditos da                  da Disciplina onde foi
+          orientação do professor responsável      respectiva disci-            praticada a monitoria.
+          de disciplina do ciclo Profissionali-    plina optativa
+          zante (P) ou Prof. Específico (PE).
+ H2       Disciplina Optativa: Iniciação Ci-       10 hs             40 hs      - Aprovação na Disciplina
+          entífica I, II, III ou IV; Exercí-       por semestre                 Iniciação Científica
+          cio de atividades acadêmicas de pes-     +                            I, II, III ou IV.
+          quisa, realização intelectual e estudo   Créditos da                  - Relatório do Professor
+          aprofundado, com vínculo de Projeto      respectiva disci-            Orientador do Projeto.
+          de IC cadastrado, como Atividade         plina optativa
+          Complementar Especial - MIC, me-
+          diante orientação de professor res-
+          ponsável e aprovação do projeto.
+
+
+
+
+          GRUPO I - Atividades Complementares não enquadradas em outros grupos
+            Máximo de carga Horária Integralizada durante o curso neste grupo: 50 hs
+
+* Carga Horária em horas-relógio ** Limite máximo aplicado a todo o curso
+ Cód      Atividade                                Carga Horária     Limite∗∗   Requisitos/Documentos
+                                                   Integralizada∗               Comprobatórios
+  I1      Aceitação mediante critério da CAT,      até 10 hs         50 hs      - Observar a natureza da
+          visando a correlação com os grupos       por semestre                 atividade.
+          anteriores e o objetivo de uma Ativi-
+          dade Complementar no curso.
+14
+
+
+B    Formulário de Solicitação de Revisão das Atividades Comple-
+     mentares
+
+
+                       CENTRO FEDERAL DE EDUCAÇÃO TECNOLÓGICA
+                       CELSO SUCKOW DA FONSECA - CEFET/RJ
+                       CAMPUS PETRÓPOLIS
+
+                                 FORMULÁRIO DE SOLICITAÇÃO DE REVISÃO
+                                    DAS ATIVIDADES COMPLEMENTARES
+                                         Anexo I - Regulamento (VIII-062020)
+
+                                             Favor revisar as solicitações abaixo
+                                                  referentes ao Processo Nº
+                                         (apenas uma solicitação para cada Processo)
+
+
+
+                                        Os     documentos       originais   foram
+                                        apresentados junto ao Formulário Nº
+                                                (anexar cópia do Protocolo)
+
+
+
+
+             Data        Aluno                                                             Matrícula
+
+
+
+
+                                               Justificativas - Detalhamento
+
+
+
+
+         Assinatura do Aluno:
+
+         ---------------------------------------------------------------------
+
+                                                        Protocolo
+                                   Solicitação de Revisão de Atividades Complementares
+             Data        Observação                                                      Nº Formulário
+                                                                                         a ser revisado
+
+
+
+
+            SIAPE        Nome e Assinatura
+C. Formulário de Registro de Atividades Complementares Especiais - MIC                                                                                15
+
+
+C    Formulário de Registro de Atividades Complementares Espe-
+     ciais - MIC
+
+
+                              CENTRO FEDERAL DE EDUCAÇÃO TECNOLÓGICA
+                              CELSO SUCKOW DA FONSECA - CEFET/RJ
+                              CAMPUS PETRÓPOLIS
+                                            FORMULÁRIO DE REGISTRO DE
+                                     ATIVIDADES COMPLEMENTARES ESPECIAIS - MIC
+                                                    Anexo II - Regulamento (VIII-062020)
+
+                                                                 Nº do Formulário
+                                                                 (preenchido pela CAT)
+
+
+
+
+                 Data          Aluno                                                                                                Matrícula
+
+
+
+                                Solicitação de Matrícula na Disciplina (selecione apenas uma por semestre):
+            [ ] Monitoria I               [ ] Monitoria II                  [ ] Monitoria III                    [ ] Monitoria IV
+
+            [ ] Iniciação Científica I    [ ] Iniciação Científica II       [ ] Iniciação Científica III         [ ] Iniciação Científica IV
+                  Apresentar Histórico Escolar (para análise pré-requisito) e comprovante de Inscrição em outra disciplina no período.
+
+                                                            Exclusivo para Monitoria:
+             Nome da Disciplina do ciclo Profissionalizante (P)                 Nome do Professor Orientador
+                  ou Profissionalizante Específico (PE)                           (professor da disciplina)                          SIAPE
+                        a ser Exercida Monitoria
+
+
+                                Data do Aceite                                        Assinatura do Professor Orientador
+                                                                        Concordo em orientar o aluno no processo de monitoria desta disciplina e me
+                                                                        comprometo a cumprir o Regulamento vigente de controle, frequência e
+                                                                        avaliação, do qual me declaro ciente, até o final deste semestre letivo:
+            Petrópolis, _______ de _____________ de ________.
+                                                                        Ass.:
+                                                       Exclusivo para Iniciação Científica:
+               Título do Projeto de IC vinculado no CEFET                      Nome do Professor Orientador
+                                                                             (professor do Colegiado do Curso)                       SIAPE
+
+
+             ( )1ª Fase do Projeto         (   ) 2ª Fase do Projeto
+                                Data do Aceite                                        Assinatura do Professor Orientador
+                                                                        Concordo em orientar o aluno no Projeto de Iniciação Científica e me
+                                                                        comprometo a cumprir o Regulamento vigente de controle, frequência e
+                                                                        avaliação, do qual me declaro ciente, até o final deste semestre letivo:
+            Petrópolis, _______ de _____________ de ________.
+                                                                        Ass.:
+
+            Data e Assinatura do Coordenador:
+
+            Assinatura do Aluno:
+            -------------------------------------------------------------------------------------------------------
+
+                                   Protocolo - Registro de Atividades Complementares Especiais - MIC
+            Data ___/___/____       Observação:                                                                                Nº
+                  SIAPE             Nome e Assinatura
+

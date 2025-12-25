@@ -165,7 +165,7 @@ const EditDb = () => {
       {/* Overlay de salvamento */}
       {syncing && <SavingSpinner message="Salvando no Supabase..." />}
 
-      <div className="mx-auto max-w-1x1 p-6 lg:p-8">
+      <div className="mx-auto max-w-[1920px] p-6 lg:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex flex-col gap-1">
             <p className="text-3xl font-bold leading-tight tracking-tight">Gerenciamento de Disciplinas do Curso</p>
@@ -190,90 +190,93 @@ const EditDb = () => {
               <span className="material-symbols-outlined text-xl">save</span>
               <span className="truncate">Commit ({pendingChanges.length})</span>
             </button>
+
             <button
-              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => {
-                setEditingDisciplina(null);
-                setNewDisciplina({
-                  _se: '', _di: '', _re: '', _at: '', _ap: '', _pr: [], _el: false, _ag: false, _cu: cur, _ho: [], _da: []
-                });
-                setShowForm(true); // Mostrar o formulário
-              }}
+              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-purple-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => window.location.href = `/${cur}/turmas`}
               disabled={syncing}
             >
-              <span className="material-symbols-outlined text-xl">add</span>
-              <span className="truncate">Nova disciplina</span>
+              <span className="material-symbols-outlined text-xl">calendar_month</span>
+              <span className="truncate">Novas Grades</span>
             </button>
           </div>
         </div>
-        {showForm ? (
-          <DisciplinaForm
-            disciplina={editingDisciplina || newDisciplina}
-            onSubmit={editingDisciplina ? handleSaveDisciplinaInteraction : handleAddDisciplinaInteraction}
-            onCancel={handleCancelFormInteraction}
-            // onStateChange={handleDisciplineUpdateState} // Removed as we handle state via hook now mostly, but if needed we can re-add
-            cur={cur}
-            disciplinas={disciplinas}
-            courseSchedule={courseSchedule}
-            courseDimension={courseDimension}
-          />
-        ) : (
-          <div className="grid grid-cols gap-6">
-            {/* Subjects Table */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
-              <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm">
-                <div className="flex gap-3 p-4 border-b border-border-light dark:border-border-dark">
-                  <div className="w-1/12">
-                    <Select
-                      placeholder="Período"
-                      options={opcoesPeriodo}
-                      onChange={setFiltroPeriodo}
-                      isClearable
-                    />
-                  </div>
-                  <div className="w-1/9">
-                    <Select
-                      placeholder="Eletiva/Optativa"
-                      options={opcoesEl}
-                      onChange={setFiltroEl}
-                      isClearable
-                    />
-                  </div>
-                  <div className="w-1/15">
-                    <Select
-                      placeholder="Status"
-                      options={opcoesStatus}
-                      onChange={setFiltroStatus}
-                      isClearable
-                    />
-                  </div>
-                  <div className="w-1/4 md:w-1/4 lg:w-1/3">
-                    <label className="flex flex-col min-w-40 h-10 w-full">
-                      <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
-                        <div className="text-text-light-secondary dark:text-text-dark-secondary flex border-r-0 items-center justify-center pl-3 pr-2 bg-background-light dark:bg-background-dark rounded-l-lg">
-                          <span className="material-symbols-outlined text-xl">search</span>
-                        </div>
-                        <input
-                          className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary h-full placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary px-2 rounded-l-none border-l-0 text-sm font-normal leading-normal"
-                          placeholder="Pesquisar por nome ou código da disciplina..."
-                          value={filtroTexto}
-                          onChange={(e) => setFiltroTexto(e.target.value)}
-                        />
-                      </div>
-                    </label>
-                  </div>
-                </div>
 
-                <DisciplinaTable
-                  data={disciplinasFiltradas}
-                  handleEditDisciplina={handleEditDisciplinaInteraction}
-                  removeDisciplina={handleRemoveDisciplinaInteraction}
-                  handleToggleStatus={toggleStatus}
-                />
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Left Column: Table and Filters */}
+          <div className="lg:col-span-3 flex flex-col gap-4">
+            <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm">
+              <div className="flex gap-3 p-4 border-b border-border-light dark:border-border-dark">
+                <div className="w-1/6">
+                  <Select
+                    placeholder="Período"
+                    options={opcoesPeriodo}
+                    onChange={setFiltroPeriodo}
+                    isClearable
+                    classNamePrefix="select"
+                  />
+                </div>
+                <div className="w-1/6">
+                  <Select
+                    placeholder="Tipo"
+                    options={opcoesEl}
+                    onChange={setFiltroEl}
+                    isClearable
+                    classNamePrefix="select"
+                  />
+                </div>
+                <div className="w-1/6">
+                  <Select
+                    placeholder="Status"
+                    options={opcoesStatus}
+                    onChange={setFiltroStatus}
+                    isClearable
+                    classNamePrefix="select"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="flex flex-col h-10 w-full">
+                    <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
+                      <div className="text-text-light-secondary dark:text-text-dark-secondary flex border-r-0 items-center justify-center pl-3 pr-2 bg-background-light dark:bg-background-dark rounded-l-lg border border-border-light dark:border-border-dark border-r-0">
+                        <span className="material-symbols-outlined text-xl">search</span>
+                      </div>
+                      <input
+                        className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary h-full placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary px-2 border-l-0 text-sm font-normal leading-normal"
+                        placeholder="Pesquisar..."
+                        value={filtroTexto}
+                        onChange={(e) => setFiltroTexto(e.target.value)}
+                      />
+                    </div>
+                  </label>
+                </div>
               </div>
+
+              <DisciplinaTable
+                data={disciplinasFiltradas}
+                handleEditDisciplina={handleEditDisciplinaInteraction}
+                removeDisciplina={handleRemoveDisciplinaInteraction}
+                handleToggleStatus={toggleStatus}
+                selectedId={editingDisciplineId}
+              />
             </div>
           </div>
-        )}
+
+          {/* Right Column: Form */}
+          <div className="lg:col-span-2">
+            <div className="sticky top-6">
+              <DisciplinaForm
+                disciplina={editingDisciplina || newDisciplina}
+                onSubmit={editingDisciplina ? handleSaveDisciplinaInteraction : handleAddDisciplinaInteraction}
+                onCancel={handleCancelFormInteraction}
+                cur={cur}
+                disciplinas={disciplinas}
+                courseSchedule={courseSchedule}
+                courseDimension={courseDimension}
+                isReviewing={false}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );

@@ -2,6 +2,13 @@ import React from 'react';
 import { AuthProvider } from '../contexts/AuthContext';
 import AppLayout from '../components/AppLayout';
 import './globals.css';
+import { Lexend } from 'next/font/google';
+
+const lexend = Lexend({
+    subsets: ['latin'],
+    display: 'swap',
+    variable: '--font-lexend',
+});
 
 export const metadata = {
     title: 'Horários CEFET',
@@ -10,14 +17,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="pt-BR">
+        <html lang="pt-BR" className={lexend.variable}>
             <head>
-                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet" />
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
             </head>
-            <body>
+            <body className={lexend.className}>
                 <AuthProvider>
                     <AppLayout>
                         {children}

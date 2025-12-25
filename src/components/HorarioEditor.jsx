@@ -64,16 +64,27 @@ const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCance
     if (isReviewing) return;
 
     const newDa = [...da];
-    let daValue = newDa[hoIndex];
+    // Start with current daValue or derive from default slot time
+    const hoItem = ho[hoIndex];
+    const timeSlot = timeSlots.find(ts => ts.id === hoItem[1]);
 
-    if (!daValue) {
-      const hoItem = ho[hoIndex];
-      const timeSlot = timeSlots.find(ts => ts.id === hoItem[1]);
-      daValue = [formatTime(timeSlot?.start_time), formatTime(timeSlot?.end_time)];
+    // Current effective custom times (if null, use formatted default)
+    let currentStart = newDa[hoIndex] ? newDa[hoIndex][0] : formatTime(timeSlot?.start_time);
+    let currentEnd = newDa[hoIndex] ? newDa[hoIndex][1] : formatTime(timeSlot?.end_time);
+
+    if (timeComponentIndex === 0) currentStart = newValue;
+    else currentEnd = newValue;
+
+    // Default times for comparison
+    const defaultStart = formatTime(timeSlot?.start_time);
+    const defaultEnd = formatTime(timeSlot?.end_time);
+
+    // If both match default, set to null (no custom time needed)
+    if (currentStart === defaultStart && currentEnd === defaultEnd) {
+      newDa[hoIndex] = null;
+    } else {
+      newDa[hoIndex] = [currentStart, currentEnd];
     }
-
-    daValue[timeComponentIndex] = newValue;
-    newDa[hoIndex] = daValue;
 
     setDa(newDa);
   };

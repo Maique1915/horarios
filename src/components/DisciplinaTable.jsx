@@ -7,7 +7,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleToggleStatus }) => {
+const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleToggleStatus, selectedId }) => {
   const columns = useMemo(
     () => [
       {
@@ -105,15 +105,22 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
         </thead>
         <tbody>
           {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map(row => (
-              <tr key={row.id} className="border-b border-border-light dark:border-border-dark">
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="px-4 py-2 align-middle">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))
+            table.getRowModel().rows.map(row => {
+              const isSelected = selectedId === row.original._re;
+              return (
+                <tr
+                  key={row.id}
+                  className={`border-b border-border-light dark:border-border-dark hover:bg-surface-hover-light dark:hover:bg-surface-hover-dark transition-colors cursor-pointer ${isSelected ? 'bg-primary/10 border-l-4 border-l-primary' : ''}`}
+                  onClick={() => handleEditDisciplina(row.original)}
+                >
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 align-middle">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })
           ) : (
             <tr>
               <td colSpan={columns.length} className="text-center p-4">

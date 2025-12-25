@@ -22,7 +22,26 @@ const AppLayout = ({ children }) => {
         }
     }, []);
 
-    const hasCourseSelected = !!cur;
+    // Persist last active course
+    useEffect(() => {
+        if (cur) {
+            localStorage.setItem('last_active_course', cur);
+        }
+    }, [cur]);
+
+    // Get effective course (URL param > localStorage)
+    const [effectiveCur, setEffectiveCur] = useState(cur);
+
+    useEffect(() => {
+        if (cur) {
+            setEffectiveCur(cur);
+        } else {
+            const stored = localStorage.getItem('last_active_course');
+            if (stored) setEffectiveCur(stored);
+        }
+    }, [cur]);
+
+    const hasCourseSelected = !!effectiveCur;
 
     const handleLogout = () => {
         if (confirm('Deseja realmente sair?')) {
@@ -32,9 +51,9 @@ const AppLayout = ({ children }) => {
     };
 
     const menuItems = [
-        { to: `/${cur}`, icon: 'add_task', label: 'Gera Grade', exact: true },
-        { to: `/${cur}/grades`, icon: 'grid_on', label: 'Horários' },
-        { to: `/${cur}/cronograma`, icon: 'timeline', label: 'Cronograma' },
+        { to: `/${effectiveCur}`, icon: 'add_task', label: 'Gera Grade', exact: true },
+        { to: `/${effectiveCur}/grades`, icon: 'grid_on', label: 'Horários' },
+        { to: `/${effectiveCur}/cronograma`, icon: 'timeline', label: 'Cronograma' },
     ];
 
     const isActiveLink = (to, exact) => {
@@ -130,7 +149,7 @@ const AppLayout = ({ children }) => {
                 <header className="sticky top-0 z-40 h-16 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark shadow-sm">
                     <div className="h-full px-6 flex items-center justify-between">
                         <h1 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
-                            Horários CEFET {hasCourseSelected ? `- ${cur.toUpperCase()}` : ''}
+                            Horários CEFET {hasCourseSelected && effectiveCur ? `- ${effectiveCur.toUpperCase()}` : ''}
                         </h1>
 
                         {/* Info adicional ou breadcrumbs podem ir aqui */}
@@ -138,10 +157,14 @@ const AppLayout = ({ children }) => {
                         <div className="flex items-center gap-4">
                             {user && (
                                 <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg">
-                                        <span className="material-symbols-outlined text-lg text-primary">account_circle</span>
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors cursor-pointer group"
+                                        title="Ver Perfil"
+                                    >
+                                        <span className="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">account_circle</span>
                                         <span className="text-sm font-medium text-primary">{user.name || user.username}</span>
-                                    </div>
+                                    </Link>
                                     <button
                                         onClick={handleLogout}
                                         className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors"
@@ -156,7 +179,7 @@ const AppLayout = ({ children }) => {
                             {hasCourseSelected && (
                                 user ? (
                                     <Link
-                                        href={`/${cur}/edit`}
+                                        href={`/${effectiveCur}/edit`}
                                         className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
                                         title="Gerenciar disciplinas"
                                     >

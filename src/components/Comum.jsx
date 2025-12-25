@@ -50,7 +50,7 @@ const Comum = (props) => {
 
                 // Se não houver matérias via props, carrega do Serviço
                 if (!props.materias || props.materias.length === 0) {
-                    const gridData = await loadClassesForGrid();
+                    const gridData = await loadClassesForGrid(_cur);
                     console.log("Comum: Loaded grid data from service", gridData.length);
 
                     const filteredData = gridData.filter(item => item._ag === true && item._cu === _cur);
@@ -116,7 +116,7 @@ const Comum = (props) => {
             const coresVazias = Array.from({ length: th }, () => Array(td).fill(""));
 
             semestre.forEach((disciplina, index) => {
-                const opt = !disciplina._el && !disciplina._di.includes(" - OPT") ? " - OPT" : "";
+                const opt = !disciplina._el && disciplina._di && !disciplina._di.includes(" - OPT") ? " - OPT" : "";
 
                 if (Array.isArray(disciplina._ho)) {
                     disciplina._ho.forEach(([dayId, slotId], i) => {
