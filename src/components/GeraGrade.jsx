@@ -9,6 +9,9 @@ import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
 
 import MapaMental from './MapaMental'; // Importar o MapaMental
 import LoadingSpinner from './LoadingSpinner';
+import { useAuth } from '../contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { loadCompletedSubjects } from '../services/disciplinaService';
 
 const GeraGrade = () => {
     const params = useParams();
@@ -24,41 +27,83 @@ const GeraGrade = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [openPeriodKey, setOpenPeriodKey] = useState(null);
     const [gradesResult, setGradesResult] = useState([]);
-    const [arr, setArr] = useState([]);
     const [possibleGrades, setPossibleGrades] = useState([]);
-    const [courseSchedule, setCourseSchedule] = useState([]);
-    const [courseDimension, setCourseDimension] = useState([0, 0]);
-    const [loading, setLoading] = useState(true);
+
+
 
     const _cur = useRef(cur);
     const [cacheInfo, setCacheInfo] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                // Reset do estado se o curso mudou
-                if (cur !== _cur.current) {
-                    _cur.current = cur;
-                    setState({ names: [], keys: [], crs: [], estado: 0, x: [] });
-                }
+    // React Query for Course Data
+    const { data: arr = [], isLoading: loadingArr } = useQuery({
+        queryKey: ['ativas', cur],
+        queryFn: () => ativas(cur),
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        enabled: !!cur,
+    });
 
-                const [data, schedule, dimension] = await Promise.all([
-                    ativas(cur),
-                    horarios(cur),
-                    dimencao(cur)
-                ]);
-                setArr(data);
-                setCourseSchedule(schedule);
-                setCourseDimension(dimension);
-            } catch (error) {
-                console.error("Error fetching data for GeraGrade:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
+    const { data: courseSchedule = [], isLoading: loadingSchedule } = useQuery({
+        queryKey: ['horarios', cur],
+        queryFn: () => horarios(cur),
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        enabled: !!cur,
+    });
+
+    const { data: courseDimension = [0, 0], isLoading: loadingDimension } = useQuery({
+        queryKey: ['dimencao', cur],
+        queryFn: () => dimencao(cur),
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        enabled: !!cur,
+    });
+
+    // Reset state on course change
+    useEffect(() => {
+        if (cur !== _cur.current) {
+            _cur.current = cur;
+            setState({ names: [], keys: [], crs: [], estado: 0, x: [] });
+        }
     }, [cur]);
+
+    // Combined loading
+    // We only consider it "loading" if we don't have the main list of subjects (arr) yet
+    const loading = loadingArr || (loadingSchedule && !courseSchedule.length) || (loadingDimension && !courseDimension[0]);
+
+    // Auto-select completed subjects if user is logged in
+    const { user } = useAuth();
+    const { data: completedSubjects = [] } = useQuery({
+        queryKey: ['completedSubjects', user?.id],
+        queryFn: () => loadCompletedSubjects(user.id),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    // Populate state with completed subjects once arr (all subjects) is loaded
+    useEffect(() => {
+        if (arr.length > 0 && completedSubjects.length > 0 && state.names.length === 0) {
+            const newNames = [];
+            const newKeys = [];
+            const newCrs = [];
+
+            completedSubjects.forEach(completed => {
+                const index = arr.findIndex(item => item._re === completed._re);
+                if (index > -1) {
+                    newNames.push(completed._re);
+                    newKeys.push(index);
+                    newCrs.push(parseInt(completed._ap || 0) + parseInt(completed._at || 0));
+                }
+            });
+
+            if (newNames.length > 0) {
+                console.log("Auto-selecting completed subjects:", newNames.length);
+                setState(prev => ({
+                    ...prev,
+                    names: newNames,
+                    keys: newKeys,
+                    crs: newCrs
+                }));
+            }
+        }
+    }, [arr, completedSubjects]);
 
     useEffect(() => {
         const calculatePossibleGrades = async () => {
@@ -153,7 +198,7 @@ const GeraGrade = () => {
                 e.add(i._re);
                 if (i._di.includes(" - A") || i._di.includes(" - B")) {
                     i._di = i._di.substring(0, i._di.length - 4);
-                } else if (!i._el && !i._di.includes(" - OPT")) {
+                } else if (i._el && !i._di.includes(" - OPT")) {
                     i._di += " - OPT";
                 }
                 aux.push(i);

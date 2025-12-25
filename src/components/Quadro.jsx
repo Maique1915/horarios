@@ -1,57 +1,55 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'next/navigation';
 import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
 
 import Comum from './Comum.jsx';
 import LoadingSpinner from './LoadingSpinner';
+import { useQuery } from '@tanstack/react-query';
 
 const Quadro = () => {
     const params = useParams();
     const cur = params?.cur || 'engcomp';
-    const [a, setA] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    const [courseSchedule, setCourseSchedule] = useState([]);
-    const [courseDimension, setCourseDimension] = useState([0, 0]);
+    // 1. Fetch Subjects (Ativas)
+    const {
+        data: a = [],
+        isLoading: loadingA,
+        error: errorA
+    } = useQuery({
+        queryKey: ['ativas', cur],
+        queryFn: () => ativas(cur),
+        staleTime: 1000 * 60 * 60 * 24, // 24 hours
+        enabled: !!cur,
+    });
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
+    // 2. Fetch Schedule (Horarios)
+    const {
+        data: courseSchedule = [],
+        isLoading: loadingSchedule,
+        error: errorSchedule
+    } = useQuery({
+        queryKey: ['horarios', cur],
+        queryFn: () => horarios(cur),
+        staleTime: 1000 * 60 * 60 * 24,
+        enabled: !!cur,
+    });
 
-                console.log('Quadro: Carregando dados para curso:', cur);
+    // 3. Fetch Dimension (Dimensao)
+    const {
+        data: courseDimension = [0, 0],
+        isLoading: loadingDimension,
+        error: errorDimension
+    } = useQuery({
+        queryKey: ['dimencao', cur],
+        queryFn: () => dimencao(cur),
+        staleTime: 1000 * 60 * 60 * 24,
+        enabled: !!cur,
+    });
 
-                const startTime = performance.now();
-
-                // Carrega todos os dados em paralelo
-                const [data, schedule, dimension] = await Promise.all([
-                    ativas(cur),
-                    horarios(cur),
-                    dimencao(cur)
-                ]);
-
-                const endTime = performance.now();
-
-                console.log('Quadro: Dados recebidos em', (endTime - startTime).toFixed(2), 'ms');
-                console.log('Quadro:', data?.length, 'disciplinas');
-
-
-                setA(data);
-                setCourseSchedule(schedule);
-                setCourseDimension(dimension);
-                setError(null);
-            } catch (err) {
-                console.error('Quadro: Erro ao carregar dados:', err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [cur]);
+    const loading = loadingA || (loadingSchedule && !courseSchedule.length) || (loadingDimension && !courseDimension[0]);
+    const error = errorA || errorSchedule || errorDimension;
 
     if (loading) {
         return (
@@ -66,7 +64,7 @@ const Quadro = () => {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center text-red-500">
                     <p className="text-xl font-bold mb-2">Erro ao carregar dados</p>
-                    <p>{error}</p>
+                    <p>{error?.message || "Erro desconhecido"}</p>
                 </div>
             </div>
         );

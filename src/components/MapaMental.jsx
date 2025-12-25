@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { loadDbData } from '../services/disciplinaService';
+import { useQuery } from '@tanstack/react-query';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
 // Remover import html2canvas from 'html2canvas';
 
@@ -20,7 +21,6 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   const cur = params?.cur;
 
   const [mindMapData, setMindMapData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const svgRef = useRef(null);
   // Remover const containerRef = useRef(null);
@@ -129,22 +129,22 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
     return { nodes, links, graphBounds };
   }, []); // Dependências vazias para useCallback
 
+  // React Query for Subjects Data
+  const { data: dbData = [], isLoading } = useQuery({
+    queryKey: ['subjects', cur],
+    queryFn: () => loadDbData(cur),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    enabled: !!cur,
+  });
+
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const db = await loadDbData();
-      const filteredDb = db.filter(d => d._cu === cur);
+    if (dbData.length > 0) {
+      const data = processarDadosParaMapa(dbData, subjectStatus);
+      setMindMapData(data);
+    }
+  }, [dbData, processarDadosParaMapa, subjectStatus]);
 
-      if (filteredDb.length > 0) {
-        const data = processarDadosParaMapa(filteredDb, subjectStatus); // Remover isDownloadMode
-        setMindMapData(data);
-      }
-
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [cur, subjectStatus, processarDadosParaMapa]); // Remover isDownloadMode das dependências
+  const loading = isLoading; // Alias for compatibility with existing code
 
   if (loading) {
     return <div>Carregando mapa mental...</div>;
