@@ -341,7 +341,7 @@ const Comum = (props) => {
         }
         return (
             <div className="rounded-2xl border border-border-light/60 overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
-                <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-340px)] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                     <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
                             <tr className="bg-slate-50/80 backdrop-blur-sm border-b border-border-light sticky top-0 z-30">

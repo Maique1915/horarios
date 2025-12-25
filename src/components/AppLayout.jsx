@@ -204,7 +204,7 @@ const AppLayout = ({ children }) => {
                 </header>
 
                 {/* Content Area */}
-                <main className="min-h-screen">
+                <main className="">
                     {children}
                 </main>
             </div>
