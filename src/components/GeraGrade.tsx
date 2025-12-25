@@ -345,7 +345,7 @@ const GeraGrade = () => {
 
         const isOpen = openPeriodKey === periodKey;
 
-        const handleSummaryClick = (e) => {
+        const handleSummaryClick = (e: React.MouseEvent) => {
             if (isOpen) {
                 setOpenPeriodKey(null); // Close if already open
             } else {
@@ -394,7 +394,7 @@ const GeraGrade = () => {
             console.log('mudaTela(1): Total de disciplinas (arr):', arr.length);
             const calculatedGr = new Grafos(arr, cr, state.names).matriz();
             console.log('mudaTela(1): Matérias que pode fazer (calculatedGr):', calculatedGr.length);
-            console.log('mudaTela(1): Primeiras 3 matérias calculadas:', calculatedGr.slice(0, 3).map(m => ({ _re: m._re, _di: m._di, _pr: m._pr })));
+            console.log('mudaTela(1): Primeiras 3 matérias calculadas:', calculatedGr.slice(0, 3).map((m: any) => ({ _re: m._re, _di: m._di, _pr: m._pr })));
             setGradesResult(calculatedGr);
             setState(e => ({ ...e, estado: i }));
         } else if (i === 2) {
