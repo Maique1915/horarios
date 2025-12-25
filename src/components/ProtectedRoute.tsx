@@ -5,7 +5,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 
-const ProtectedRoute = ({ children, requiredRole = null }) => {
+interface ProtectedRouteProps {
+    children: React.ReactNode;
+    requiredRole?: string | null;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = null }) => {
     const { user, loading } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
@@ -32,7 +37,7 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
         return null; // or Access Denied component
     }
 
-    return children;
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;
