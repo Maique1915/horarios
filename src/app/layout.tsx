@@ -17,6 +17,8 @@ export const metadata = {
 
 import QueryProvider from '@/components/QueryProvider';
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="pt-BR" className={lexend.variable}>
@@ -28,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <AuthProvider>
                         <AppLayout>
                             {children}
+                            <SpeedInsights />
                         </AppLayout>
                     </AuthProvider>
                 </QueryProvider>
