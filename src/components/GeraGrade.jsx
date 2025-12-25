@@ -105,28 +105,96 @@ const GeraGrade = () => {
         }
     }, [arr, completedSubjects]);
 
+    const [calculating, setCalculating] = useState(false);
+
     useEffect(() => {
         const calculatePossibleGrades = async () => {
             if (state.estado === 2 && gradesResult.length > 0) {
+                setCalculating(true);
+                // Allow UI to update before heavy calculation
+                await new Promise(resolve => setTimeout(resolve, 0));
+
                 console.log('GeraGrade: Calculando grades possíveis...');
                 console.log('GeraGrade: gradesResult length:', gradesResult.length);
                 console.log('GeraGrade: state.x:', state.x);
 
                 const m = gradesResult.filter(item => !state.x.includes(item._re));
+                console.log('GeraGrade: Matérias após filtro (indo para Escolhe):', m);
                 console.log('GeraGrade: Matérias após filtro:', m.length);
 
-                const escolhe = await new Escolhe(m, cur).init();
+                const escolhe = new Escolhe(m, cur, courseDimension, courseSchedule);
                 let gp = escolhe.exc();
                 console.log('GeraGrade: Grades geradas:', gp.length);
 
                 setPossibleGrades(gp.slice(0, 50));
                 console.log('GeraGrade: possibleGrades atualizado com', gp.slice(0, 50).length, 'grades');
+                setCalculating(false);
             } else {
                 console.log('GeraGrade: Não calculando grades. Estado:', state.estado, 'gradesResult:', gradesResult.length);
             }
         };
         calculatePossibleGrades();
     }, [state.estado, state.x, gradesResult, cur]);
+
+    // ... (rest of code) ...
+
+    function renderStepContent() {
+        // ... (state 0 and 1 content) ...
+    }
+
+    // Custom render for State 2 check
+    if (state.estado === 2) {
+        if (calculating) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                    <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
+                        Calculando grades possíveis...
+                    </p>
+                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                        Processando combinações...
+                    </p>
+                </div>
+            );
+        }
+
+        if (possibleGrades.length === 0) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-fadeIn">
+                    <span className="material-symbols-outlined text-6xl text-yellow-500 mb-4">warning</span>
+                    <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
+                        Nenhuma grade possível encontrada
+                    </h2>
+                    <p className="text-text-light-secondary dark:text-text-dark-secondary mb-6 max-w-md">
+                        Não foi possível encaixar todas as matérias selecionadas sem conflito de horários.
+                    </p>
+                    <button
+                        onClick={() => mudaTela(1)}
+                        className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
+                    >
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        Voltar e remover matérias
+                    </button>
+                </div>
+            )
+        }
+
+        // Success case (render Comum)
+        const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
+        return (
+            <Comum
+                materias={possibleGrades}
+                tela={2}
+                fun={b}
+                cur={cur}
+                separa={false}
+                g={"ª"}
+                f={" Grade Possível"}
+                courseSchedule={courseSchedule}
+                courseDimension={courseDimension}
+            />
+        );
+    }
 
     let gr = [];
 
@@ -310,6 +378,9 @@ const GeraGrade = () => {
             console.log('mudaTela(1): Primeiras 3 matérias calculadas:', calculatedGr.slice(0, 3).map(m => ({ _re: m._re, _di: m._di, _pr: m._pr })));
             setGradesResult(calculatedGr);
             setState(e => ({ ...e, estado: i }));
+        } else if (i === 2) {
+            setCalculating(true);
+            setState(e => ({ ...e, estado: i }));
         } else {
             setState(e => ({ ...e, estado: i }));
         }
@@ -418,22 +489,42 @@ const GeraGrade = () => {
                 </div>
             );
         } else { // This block is for state.estado === 2
-            const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
-
-            // Mostra loading enquanto as grades estão sendo calculadas
-            if (possibleGrades.length === 0 && gradesResult.length > 0) {
+            if (calculating) {
                 return (
-                    <div className="flex flex-col items-center justify-center min-h-screen">
+                    <div className="flex flex-col items-center justify-center min-h-[50vh]">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
                         <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
                             Calculando grades possíveis...
                         </p>
                         <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                            Processando {gradesResult.length} disciplinas
+                            Processando combinações...
                         </p>
                     </div>
                 );
             }
+
+            if (possibleGrades.length === 0) {
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-fadeIn">
+                        <span className="material-symbols-outlined text-6xl text-yellow-500 mb-4">warning</span>
+                        <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
+                            Nenhuma grade possível encontrada
+                        </h2>
+                        <p className="text-text-light-secondary dark:text-text-dark-secondary mb-6 max-w-md">
+                            Não foi possível encaixar todas as matérias selecionadas sem conflito de horários.
+                        </p>
+                        <button
+                            onClick={() => mudaTela(1)}
+                            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
+                        >
+                            <span className="material-symbols-outlined">arrow_back</span>
+                            Voltar e remover matérias
+                        </button>
+                    </div>
+                )
+            }
+
+            const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
 
             return (
                 <Comum

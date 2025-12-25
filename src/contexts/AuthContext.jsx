@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
                 .insert([
                     {
                         username,
-                        // password_hash: password, // Idealmente hashear antes ou usar RPC
+                        password_hash: password, // Store password (should be hashed in prod)
                         name: fullName,
                         role: 'user',
                         active: true
@@ -109,11 +109,42 @@ export const AuthProvider = ({ children }) => {
         return !!user;
     };
 
+    const updateUser = async (userId, updates) => {
+        try {
+            // Prepare update object
+            const dataToUpdate = {};
+            if (updates.name) dataToUpdate.name = updates.name;
+            if (updates.username) dataToUpdate.username = updates.username;
+            if (updates.password) dataToUpdate.password_hash = updates.password; // Map to correct DB column
+
+            if (Object.keys(dataToUpdate).length === 0) return { success: true };
+
+            const { data, error } = await supabase
+                .from('users')
+                .update(dataToUpdate)
+                .eq('id', userId)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            // Update local state and storage
+            localStorage.setItem('app_user', JSON.stringify(data));
+            setUser(data);
+
+            return { success: true, user: data };
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
+            return { success: false, error: error.message };
+        }
+    };
+
     const value = {
         user,
         loading,
         login,
-        register, // Nova função exportada
+        register,
+        updateUser, // Exporting new function
         logout,
         isAuthenticated
     };

@@ -355,6 +355,7 @@ export const loadClassesForGrid = async (courseCode) => {
                 subject._classSchedules.forEach(cls => {
                     let displayName = cls.class_name || subject._di;
                     gridData.push({
+                        _id: subject._id, // Required for saving
                         _cu: subject._cu,
                         _se: subject._se, // Uses logic from processCategoryAndElective now implicitly? No, loadDbData uses it.
                         _di: displayName,
@@ -366,7 +367,8 @@ export const loadClassesForGrid = async (courseCode) => {
                         _pr: subject._pr,
                         _pr_creditos_input: subject._pr_creditos_input,
                         _ho: cls.ho,
-                        _da: cls.da || ""
+                        _da: cls.da || "",
+                        class_name: cls.class_name // Passed for saving
                     });
                 });
             }
@@ -444,6 +446,8 @@ export const loadCurrentEnrollments = async (userId) => {
         .from('current_enrollments')
         .select(`
             class_name,
+            semester,
+            schedule_data,
             created_at,
             subjects (
                 id,
@@ -460,6 +464,8 @@ export const loadCurrentEnrollments = async (userId) => {
     return data.map(item => ({
         ...item.subjects,
         class_name: item.class_name,
+        semester: item.semester, // Prefer enrollment semester if available
+        schedule_data: typeof item.schedule_data === 'string' ? JSON.parse(item.schedule_data) : item.schedule_data,
         created_at: item.created_at,
         course_name: item.subjects.courses?.name
     }));
@@ -482,4 +488,32 @@ export const toggleCompletedSubject = async (userId, subjectId, isCompleted) => 
         const { error } = await supabase.from('completed_subjects').delete().eq('user_id', userId).eq('subject_id', subjectId);
         if (error) throw error;
     }
+};
+
+export const saveCurrentEnrollments = async (userId, enrollments, semester) => {
+    // 1. Clear existing enrollments for this specific semester
+    const { error: deleteError } = await supabase
+        .from('current_enrollments')
+        .delete()
+        .eq('user_id', userId)
+        .eq('semester', semester);
+
+    if (deleteError) throw deleteError;
+
+    if (!enrollments || enrollments.length === 0) return;
+
+    // 2. Insert new enrollments
+    const rows = enrollments.map(item => ({
+        user_id: userId,
+        subject_id: item._id,
+        class_name: item.class_name || null,
+        semester: semester,
+        schedule_data: item._ho || []
+    }));
+
+    const { error: insertError } = await supabase
+        .from('current_enrollments')
+        .insert(rows);
+
+    if (insertError) throw insertError;
 };
