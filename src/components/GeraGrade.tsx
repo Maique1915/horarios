@@ -285,7 +285,7 @@ const GeraGrade = () => {
                 e.add(i._re);
                 if (i._di.includes(" - A") || i._di.includes(" - B")) {
                     i._di = i._di.substring(0, i._di.length - 4);
-                } else if (i._el && !i._di.includes(" - OPT")) {
+                } else if (!i._el && !i._di.includes(" - OPT")) {
                     i._di += " - OPT";
                 }
                 aux.push(i);
