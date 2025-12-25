@@ -2,90 +2,130 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { getUserActivities, addUserActivity, deleteUserActivity, getComplementaryActivities } from '../services/complementaryService';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserActivities, addUserActivity, deleteUserActivity, getComplementaryActivities, getActivityGroups } from '../services/complementaryService';
 import LoadingSpinner from './LoadingSpinner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const UserActivitiesManager = () => {
-    const [userActivities, setUserActivities] = useState([]);
-    const [catalog, setCatalog] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [userId, setUserId] = useState(null);
     const [showForm, setShowForm] = useState(false);
+    const queryClient = useQueryClient();
 
     // Form State
     const [selectedActivityId, setSelectedActivityId] = useState('');
+    const [selectedGroup, setSelectedGroup] = useState('');
     const [hours, setHours] = useState('');
     const [semester, setSemester] = useState('');
     const [documentLink, setDocumentLink] = useState('');
     const [description, setDescription] = useState('');
 
+    const { user } = useAuth();
+
+    // Set userId
     useEffect(() => {
-        const init = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    setUserId(user.id);
-                    const [activitiesData, catalogData] = await Promise.all([
-                        getUserActivities(user.id),
-                        getComplementaryActivities()
-                    ]);
-                    setUserActivities(activitiesData);
-                    setCatalog(catalogData);
-                }
-            } catch (error) {
-                console.error("Error loading data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        init();
-    }, []);
+        if (user) setUserId(user.id);
+    }, [user]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!userId) return;
+    // 1. Fetch User Activities
+    const {
+        data: userActivities = [],
+        isLoading: loadingActivities,
+        isError: isActivitiesError,
+        error: activitiesError
+    } = useQuery({
+        queryKey: ['userActivities', userId],
+        queryFn: () => getUserActivities(userId),
+        enabled: !!userId,
+    });
 
-        try {
-            await addUserActivity({
-                user_id: userId,
-                activity_id: selectedActivityId,
-                hours: parseFloat(hours),
-                semester,
-                document_link: documentLink,
-                description,
-                status: 'PENDING'
-            });
+    // 2. Fetch Catalog (Grouped)
+    const {
+        data: catalog = {},
+        isLoading: loadingCatalog
+    } = useQuery({
+        queryKey: ['complementaryCatalog'],
+        queryFn: async () => {
+            const data = await getComplementaryActivities();
+            const grouped = data.reduce((acc, item) => {
+                const key = item.group;
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(item);
+                return acc;
+            }, {});
+            console.log("--- DEBUGGER: Grouped Data (RQ) ---", grouped);
+            return grouped;
+        },
+        staleTime: 1000 * 60 * 60, // 1 hour cache
+    });
 
-            // Refresh list
-            const updatedList = await getUserActivities(userId);
-            setUserActivities(updatedList);
+    const loading = loadingActivities || loadingCatalog;
 
-            // Reset form
+    if (isActivitiesError) {
+        console.error("Error loading activities (Check DB Schema):", activitiesError);
+    }
+
+    // Mutations
+    const addActivityMutation = useMutation({
+        mutationFn: addUserActivity,
+        onSuccess: () => {
+            // Invalidate all related queries to refresh data across the app
+            queryClient.invalidateQueries(['userActivities', userId]);
+            queryClient.invalidateQueries(['userGroupProgress', userId]);
+            queryClient.invalidateQueries(['userTotalHours', userId]);
+
             setShowForm(false);
+            // Reset form
             setHours('');
             setSemester('');
             setDocumentLink('');
             setDescription('');
             setSelectedActivityId('');
-        } catch (error) {
-            console.error(error);
-            alert('Erro ao registrar atividade. Verifique os dados.');
+        },
+        onError: (error) => {
+            console.error("Error adding activity:", error);
+            alert("Erro ao registrar atividade.");
         }
+    });
+
+    const deleteActivityMutation = useMutation({
+        mutationFn: deleteUserActivity,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['userActivities', userId]);
+            queryClient.invalidateQueries(['userGroupProgress', userId]);
+            queryClient.invalidateQueries(['userTotalHours', userId]);
+        },
+        onError: (error) => {
+            console.error(error);
+            alert("Erro ao excluir.");
+        }
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!userId) return;
+
+        addActivityMutation.mutate({
+            user_id: userId,
+            activity_id: selectedActivityId,
+            hours: parseFloat(hours),
+            semester,
+            document_link: documentLink,
+            description,
+            status: 'PENDING'
+        });
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = (id) => {
         if (!confirm('Excluir esta atividade?')) return;
-        try {
-            await deleteUserActivity(id);
-            setUserActivities(userActivities.filter(a => a.id !== id));
-        } catch (error) {
-            console.error(error);
-            alert('Erro ao excluir.');
-        }
+        deleteActivityMutation.mutate(id);
     };
 
     // Derived state for selected catalog item
-    const selectedCatalogItem = catalog.find(c => c.id.toString() === selectedActivityId);
+    const selectedCatalogItem = React.useMemo(() => {
+        if (!selectedGroup || !selectedActivityId) return null;
+        return catalog[selectedGroup]?.find(c => c.id.toString() === selectedActivityId);
+    }, [catalog, selectedGroup, selectedActivityId]);
 
     if (loading) return <LoadingSpinner message="Carregando suas atividades..." />;
 
@@ -119,25 +159,57 @@ const UserActivitiesManager = () => {
             {/* Form */}
             {showForm && (
                 <form onSubmit={handleSubmit} className="bg-background-light dark:bg-background-dark p-6 rounded-xl border border-border-light dark:border-border-dark shadow-inner animate-fadeIn grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium mb-1">Atividade (Catálogo)</label>
-                        <select
-                            required
-                            className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary"
-                            value={selectedActivityId}
-                            onChange={(e) => setSelectedActivityId(e.target.value)}
-                        >
-                            <option value="">Selecione uma atividade...</option>
-                            {catalog.map(c => (
-                                <option key={c.id} value={c.id}>{c.code} - {c.description.substring(0, 80)}...</option>
-                            ))}
-                        </select>
-                        {selectedCatalogItem && (
-                            <p className="text-xs text-text-light-secondary mt-1 ml-1">
-                                Limite: {selectedCatalogItem.limit_hours}h • Fórmula: {selectedCatalogItem.workload_formula}
-                            </p>
-                        )}
+                    {/* Group Selection */}
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Grupo da Atividade</label>
+                            <select
+                                className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary"
+                                value={selectedGroup}
+                                onChange={(e) => {
+                                    setSelectedGroup(e.target.value);
+                                    setSelectedActivityId(''); // Reset activity when group changes
+                                }}
+                            >
+                                <option value="">Selecione um grupo...</option>
+                                {Object.keys(catalog).sort().map(g => (
+                                    <option key={g} value={g}>Grupo {g}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Código da Atividade</label>
+                            <select
+                                required
+                                disabled={!selectedGroup}
+                                className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary disabled:opacity-50"
+                                value={selectedActivityId}
+                                onChange={(e) => setSelectedActivityId(e.target.value)}
+                            >
+                                <option value="">Selecione o código...</option>
+                                {selectedGroup && catalog[selectedGroup] && catalog[selectedGroup].map(c => (
+                                    <option key={c.id} value={c.id}>{c.code}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
+
+                    {selectedCatalogItem && (
+                        <div className="md:col-span-2 bg-primary/5 p-4 rounded-lg border border-primary/20">
+                            <h4 className="font-bold text-primary mb-1 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-sm">info</span>
+                                {selectedCatalogItem.code}
+                            </h4>
+                            <p className="text-sm text-text-light-primary dark:text-text-dark-primary mb-2">
+                                {selectedCatalogItem.description}
+                            </p>
+                            <div className="flex gap-4 text-xs text-text-light-secondary border-t border-primary/10 pt-2 mt-2">
+                                <span><strong>Limite:</strong> {selectedCatalogItem.limit_hours}h</span>
+                                <span><strong>Fórmula:</strong> {selectedCatalogItem.workload_formula}</span>
+                            </div>
+                        </div>
+                    )}
 
                     <div>
                         <label className="block text-sm font-medium mb-1">Semestre de Realização</label>
@@ -200,64 +272,81 @@ const UserActivitiesManager = () => {
             )}
 
             {/* List */}
-            <div className="space-y-4">
+            <div className="space-y-8">
                 {userActivities.length === 0 ? (
                     <div className="text-center py-12 bg-surface-light/50 dark:bg-surface-dark/50 rounded-xl border border-dashed border-border-light dark:border-border-dark">
                         <span className="material-symbols-outlined text-4xl text-text-light-secondary opacity-50 mb-2">inbox</span>
                         <p className="text-text-light-secondary">Nenhuma atividade registrada ainda.</p>
                     </div>
                 ) : (
-                    userActivities.map((activity) => (
-                        <div key={activity.id} className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark hover:border-primary/30 transition-all shadow-sm group relative">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="flex items-center gap-3">
-                                    <span className="bg-primary/10 text-primary font-bold px-2 py-1 rounded text-sm">
-                                        {activity.activity?.code}
-                                    </span>
-                                    <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary">
-                                        {activity.description || activity.activity?.description}
-                                    </h3>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium bg-background-light dark:bg-background-dark px-3 py-1 rounded-full border border-border-light dark:border-border-dark">
-                                        {activity.hours}h
-                                    </span>
-                                    <button
-                                        onClick={() => handleDelete(activity.id)}
-                                        className="text-text-light-secondary hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                                        title="Excluir"
-                                    >
-                                        <span className="material-symbols-outlined">delete</span>
-                                    </button>
-                                </div>
-                            </div>
+                    Object.entries(
+                        userActivities.reduce((groups, activity) => {
+                            const groupName = activity.activity?.group || 'Outros';
+                            if (!groups[groupName]) groups[groupName] = [];
+                            groups[groupName].push(activity);
+                            return groups;
+                        }, {})
+                    ).sort().map(([groupName, activities]) => (
+                        <div key={groupName} className="space-y-3">
+                            <h3 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2 border-b border-border-light dark:border-border-dark pb-2">
+                                <span className="material-symbols-outlined text-primary">folder_open</span>
+                                {groupName === 'Outros' ? 'Outras Atividades' : `Grupo ${groupName}`}
+                            </h3>
+                            <div className="space-y-3 pl-2">
+                                {activities.map((activity) => (
+                                    <div key={activity.id} className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark hover:border-primary/30 transition-all shadow-sm group relative">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className="bg-primary/10 text-primary font-bold px-2 py-1 rounded text-sm min-w-[3rem] text-center">
+                                                    {activity.activity?.code}
+                                                </span>
+                                                <h4 className="font-semibold text-text-light-primary dark:text-text-dark-primary">
+                                                    {activity.description || activity.activity?.description}
+                                                </h4>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium bg-background-light dark:bg-background-dark px-3 py-1 rounded-full border border-border-light dark:border-border-dark whitespace-nowrap">
+                                                    {activity.hours}h
+                                                </span>
+                                                <button
+                                                    onClick={() => handleDelete(activity.id)}
+                                                    className="text-text-light-secondary hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                                    title="Excluir"
+                                                >
+                                                    <span className="material-symbols-outlined">delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
 
-                            <div className="flex flex-wrap gap-4 text-sm text-text-light-secondary dark:text-text-dark-secondary mt-3">
-                                <span className="flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-base">calendar_month</span>
-                                    {activity.semester}
-                                </span>
-                                {activity.document_link && (
-                                    <a
-                                        href={activity.document_link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-primary hover:underline"
-                                    >
-                                        <span className="material-symbols-outlined text-base">link</span>
-                                        Ver Comprovante
-                                    </a>
-                                )}
-                                <span className="flex items-center gap-1 ml-auto">
-                                    Status:
-                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${activity.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
-                                        activity.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                                            'bg-yellow-100 text-yellow-700'
-                                        }`}>
-                                        {activity.status === 'APPROVED' ? 'Aprovado' :
-                                            activity.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
-                                    </span>
-                                </span>
+                                        <div className="flex flex-wrap gap-4 text-sm text-text-light-secondary dark:text-text-dark-secondary mt-2 pl-12">
+                                            <span className="flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-base">calendar_month</span>
+                                                {activity.semester}
+                                            </span>
+                                            {activity.document_link && (
+                                                <a
+                                                    href={activity.document_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 text-primary hover:underline"
+                                                >
+                                                    <span className="material-symbols-outlined text-base">link</span>
+                                                    Ver Comprovante
+                                                </a>
+                                            )}
+                                            <span className="flex items-center gap-1 ml-auto">
+                                                Status:
+                                                <span className={`px-2 py-0.5 rounded text-xs font-bold ${activity.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                                                    activity.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                                        'bg-yellow-100 text-yellow-700'
+                                                    }`}>
+                                                    {activity.status === 'APPROVED' ? 'Aprovado' :
+                                                        activity.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     ))

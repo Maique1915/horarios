@@ -15,6 +15,8 @@ export const metadata = {
     description: 'Sistema de Grade Horária e Planejamento',
 };
 
+import QueryProvider from '@/components/QueryProvider';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="pt-BR" className={lexend.variable}>
@@ -22,11 +24,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
             </head>
             <body className={lexend.className}>
-                <AuthProvider>
-                    <AppLayout>
-                        {children}
-                    </AppLayout>
-                </AuthProvider>
+                <QueryProvider>
+                    <AuthProvider>
+                        <AppLayout>
+                            {children}
+                        </AppLayout>
+                    </AuthProvider>
+                </QueryProvider>
             </body>
         </html>
     );

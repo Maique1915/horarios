@@ -1,24 +1,61 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
     loadCompletedSubjects,
     loadCurrentEnrollments,
     getCourseTotalSubjects,
     loadDbData,
     toggleCompletedSubject
-} from '../../services/disciplinaService';
+} from '../../../services/disciplinaService';
+import { getUserTotalHours } from '../../../services/complementaryService';
 import { useRouter } from 'next/navigation';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import LoadingSpinner from '../../../components/LoadingSpinner';
 
 const ProfilePage = () => {
     const { user, isAuthenticated, loading: authLoading } = useAuth();
     const router = useRouter();
-    const [completedSubjects, setCompletedSubjects] = useState([]);
-    const [currentEnrollments, setCurrentEnrollments] = useState([]);
-    const [totalSubjects, setTotalSubjects] = useState(0);
-    const [loadingData, setLoadingData] = useState(true);
+    const queryClient = useQueryClient();
+
+    // 1. Completed Subjects
+    const { data: completedSubjects = [], isLoading: loadingCompleted } = useQuery({
+        queryKey: ['completedSubjects', user?.id],
+        queryFn: () => loadCompletedSubjects(user.id),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    // 2. Current Enrollments
+    const { data: currentEnrollments = [], isLoading: loadingEnrollments } = useQuery({
+        queryKey: ['currentEnrollments', user?.id],
+        queryFn: () => loadCurrentEnrollments(user.id),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    // 3. Total Subjects
+    const courseCode = typeof window !== 'undefined' ? localStorage.getItem('last_active_course') : null;
+    const { data: totalSubjects = 0, isLoading: loadingTotal } = useQuery({
+        queryKey: ['totalSubjects', courseCode],
+        queryFn: () => getCourseTotalSubjects(courseCode),
+        enabled: !!courseCode,
+        staleTime: 1000 * 60 * 60, // 1 hour
+    });
+
+    // 4. Complementary Hours (Already migrated)
+    const { data: complementaryHours = 0, isLoading: loadingHours } = useQuery({
+        queryKey: ['userTotalHours', user?.id],
+        queryFn: () => getUserTotalHours(user.id),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    // Combined loading state
+    // We only block UI if CRITICAL data is missing (Completed & Total)
+    // Enrollments and hours can fade in or be skeleton
+    const loadingData = loadingCompleted || loadingTotal;
 
     // Edit Mode State
     const [isEditing, setIsEditing] = useState(false);
@@ -31,31 +68,6 @@ const ProfilePage = () => {
         }
     }, [authLoading, isAuthenticated, router]);
 
-    const fetchData = async () => {
-        if (user && user.id) {
-            try {
-                const courseCode = localStorage.getItem('last_active_course');
-                const [completed, enrollments, total] = await Promise.all([
-                    loadCompletedSubjects(user.id),
-                    loadCurrentEnrollments(user.id),
-                    getCourseTotalSubjects(courseCode)
-                ]);
-                setCompletedSubjects(completed);
-                setCurrentEnrollments(enrollments);
-                setTotalSubjects(total);
-            } catch (error) {
-                console.error("Failed to load profile data", error);
-            } finally {
-                setLoadingData(false);
-            }
-        }
-    };
-
-    useEffect(() => {
-        if (user) fetchData();
-    }, [user]);
-
-    // Load all subjects when entering edit mode
     useEffect(() => {
         if (isEditing && allSubjects.length === 0) {
             const loadAll = async () => {
@@ -74,7 +86,7 @@ const ProfilePage = () => {
             await toggleCompletedSubject(user.id, subjectId, newStatus);
 
             // Optimistic update or refetch? Refetch is safer for consistency
-            await fetchData();
+            queryClient.invalidateQueries(['completedSubjects', user.id]);
         } catch (error) {
             console.error("Error toggling subject:", error);
             alert("Erro ao atualizar disciplina.");
@@ -111,7 +123,7 @@ const ProfilePage = () => {
     if (!user) return null;
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-5xl animate-fadeIn">
+        <div className="container mx-auto px-4 py-8 animate-fadeIn">
             {/* Header do Perfil */}
             <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 mb-8 text-white shadow-lg">
                 <div className="flex flex-col md:flex-row items-center gap-8">
@@ -177,12 +189,14 @@ const ProfilePage = () => {
                 />
                 <CategoryProgress
                     title="Atividades Comp."
-                    subjects={completedSubjects.filter(s => s._category === 'COMPLEMENTARY')}
+                    subjects={[]}
                     reqHours={210}
                     reqCredits={0}
                     color="text-orange-500"
                     bgColor="bg-orange-500"
                     icon="extension"
+                    customTotalHours={complementaryHours}
+                    onClick={() => router.push('/activities')}
                 />
             </div>
 
@@ -316,19 +330,14 @@ const ProfilePage = () => {
                                     Nenhuma disciplina concluída registrada.
                                 </p>
                             ) : (
-                                <ul className="space-y-3">
-                                    {completedSubjects.map((subject) => (
-                                        <li key={subject._id} className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 flex items-center gap-3 animate-fadeIn">
-                                            <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-lg">done</span>
-                                            <div>
-                                                <h3 className="font-medium text-text-light-primary dark:text-text-dark-primary">{subject._di}</h3>
-                                                <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                                                    {subject._re} • {subject._se}º Período
-                                                </p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
+                                    <span className="text-6xl font-black text-primary/80 mb-2">
+                                        {completedSubjects.length}
+                                    </span>
+                                    <span className="text-text-light-secondary dark:text-text-dark-secondary font-medium uppercase tracking-wide text-sm">
+                                        Matérias Concluídas
+                                    </span>
+                                </div>
                             )
                         )}
                     </div>
@@ -338,19 +347,22 @@ const ProfilePage = () => {
     );
 };
 
-const CategoryProgress = ({ title, subjects, reqHours, reqCredits, color, bgColor, icon }) => {
+const CategoryProgress = ({ title, subjects, reqHours, reqCredits, color, bgColor, icon, customTotalHours, onClick }) => {
     // Calculate totals
     const totalCredits = subjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
 
     // Workload calculation: User specific request: credits * 18
-    const totalHours = totalCredits * 18;
+    const totalHours = customTotalHours !== undefined ? customTotalHours : totalCredits * 18;
 
     // Percentages
     const hoursPct = reqHours > 0 ? Math.min(100, Math.round((totalHours / reqHours) * 100)) : 0;
     const creditsPct = reqCredits > 0 ? Math.min(100, Math.round((totalCredits / reqCredits) * 100)) : 0;
 
     return (
-        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-5 flex flex-col gap-4">
+        <div
+            onClick={onClick}
+            className={`bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-5 flex flex-col gap-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+        >
             <div className="flex items-center gap-3 mb-1">
                 <div className={`w-10 h-10 rounded-lg ${bgColor}/10 flex items-center justify-center`}>
                     <span className={`material-symbols-outlined ${color}`}>{icon}</span>
