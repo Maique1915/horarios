@@ -218,7 +218,7 @@ const ClassManager = ({ cur }) => { // Accept cur as prop or use hook, prop is s
                                     {editingClassIndex !== null ? 'Editar Turma' : 'Nova Turma'}
                                 </h2>
                                 <HorarioEditor
-                                    initialClassName={editingClassIndex !== null ? classes[editingClassIndex].class_name : `${selectedDisciplina.label} - ${String.fromCharCode(65 + classes.length)}`}
+                                    initialClassName={editingClassIndex !== null ? classes[editingClassIndex].class_name : (classes.length === 0 ? selectedDisciplina.label : `${selectedDisciplina.label} - ${String.fromCharCode(65 + classes.length)}`)}
                                     initialHo={editingClassIndex !== null ? classes[editingClassIndex].ho : []}
                                     initialDa={editingClassIndex !== null ? classes[editingClassIndex].da : []}
                                     onSave={handleSaveClass}
