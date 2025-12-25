@@ -6,7 +6,8 @@ import {
     loadCompletedSubjects,
     loadCurrentEnrollments,
     loadDbData,
-    toggleCompletedSubject
+    toggleCompletedSubject,
+    toggleMultipleSubjects
 } from '../../../services/disciplinaService';
 import { getDays, getTimeSlots } from '../../../services/scheduleService';
 import { getUserTotalHours } from '../../../services/complementaryService';
@@ -171,6 +172,22 @@ const ProfilePage = () => {
         }
     };
 
+    const handleTogglePeriod = async (semester, isChecked) => {
+        try {
+            setSaving(true);
+            const subjectsInSemester = subjectsBySemester[semester];
+            const subjectIds = subjectsInSemester.map(s => s._id);
+
+            await toggleMultipleSubjects(user.id, subjectIds, isChecked);
+            queryClient.invalidateQueries(['completedSubjects', user.id]);
+        } catch (error) {
+            console.error("Error toggling period:", error);
+            alert("Erro ao atualizar período.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
     // Requirements Constants (TODO: Should come from database/course registry)
     const MANDATORY_REQ_HOURS = 3774;
     const ELECTIVE_REQ_HOURS = 360;
@@ -198,7 +215,9 @@ const ProfilePage = () => {
         return acc;
     }, {});
 
-    const sortedSemesters = Object.keys(subjectsBySemester).sort((a, b) => a - b);
+    const sortedSemesters = Object.keys(subjectsBySemester)
+        .filter(sem => Number(sem) > 0)
+        .sort((a, b) => a - b);
     const [selectedSemester, setSelectedSemester] = useState('all');
 
     // Filter semesters based on selection
@@ -383,47 +402,66 @@ const ProfilePage = () => {
                                         <LoadingSpinner />
                                     </div>
                                 ) : (
-                                    filteredSemesters.map(sem => (
-                                        <div key={sem} className="animate-fadeIn">
-                                            <h3 className="text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider mb-3">
-                                                {sem}º Período
-                                            </h3>
-                                            <div className="space-y-2">
-                                                {subjectsBySemester[sem].map(subject => {
-                                                    const isCompleted = completedSubjects.some(cs => cs.id === subject._id);
-                                                    return (
-                                                        <label
-                                                            key={subject._id}
-                                                            className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${isCompleted
-                                                                ? 'bg-green-500/5 border-green-500/30'
-                                                                : 'bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark hover:border-primary/50'
-                                                                }`}
-                                                        >
-                                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-500 border-green-500' : 'border-text-light-secondary'
-                                                                }`}>
-                                                                {isCompleted && <span className="material-symbols-outlined text-white text-sm">check</span>}
-                                                            </div>
-                                                            <input
-                                                                type="checkbox"
-                                                                className="hidden"
-                                                                checked={isCompleted}
-                                                                disabled={saving}
-                                                                onChange={() => handleToggleSubject(subject._id, isCompleted)}
-                                                            />
-                                                            <div className="flex-1">
-                                                                <span className={`font-medium ${isCompleted ? 'text-green-700 dark:text-green-400' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
-                                                                    {subject._di}
-                                                                </span>
-                                                                <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary ml-2">
-                                                                    {subject._re}
-                                                                </span>
-                                                            </div>
-                                                        </label>
-                                                    );
-                                                })}
+                                    filteredSemesters.map(sem => {
+                                        const semesterSubjects = subjectsBySemester[sem];
+                                        const allCompleted = semesterSubjects.every(s => completedSubjects.some(cs => cs._id === s._id));
+
+                                        return (
+                                            <div key={sem} className="animate-fadeIn">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h3 className="text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider">
+                                                        {sem}º Período
+                                                    </h3>
+                                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                                        <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary group-hover:text-primary transition-colors">
+                                                            Selecionar todos
+                                                        </span>
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                                            checked={allCompleted}
+                                                            onChange={(e) => handleTogglePeriod(sem, e.target.checked)}
+                                                            disabled={saving}
+                                                        />
+                                                    </label>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {subjectsBySemester[sem].map(subject => {
+                                                        const isCompleted = completedSubjects.some(cs => cs._id === subject._id);
+                                                        return (
+                                                            <label
+                                                                key={subject._id}
+                                                                className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${isCompleted
+                                                                    ? 'bg-green-500/5 border-green-500/30'
+                                                                    : 'bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark hover:border-primary/50'
+                                                                    }`}
+                                                            >
+                                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-500 border-green-500' : 'border-text-light-secondary'
+                                                                    }`}>
+                                                                    {isCompleted && <span className="material-symbols-outlined text-white text-sm">check</span>}
+                                                                </div>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="hidden"
+                                                                    checked={isCompleted}
+                                                                    disabled={saving}
+                                                                    onChange={() => handleToggleSubject(subject._id, isCompleted)}
+                                                                />
+                                                                <div className="flex-1">
+                                                                    <span className={`font-medium ${isCompleted ? 'text-green-700 dark:text-green-400' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                                                                        {subject._di}
+                                                                    </span>
+                                                                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary ml-2">
+                                                                        {subject._re}
+                                                                    </span>
+                                                                </div>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        )
+                                    })
                                 )}
                             </div>
                         ) : (
@@ -433,13 +471,43 @@ const ProfilePage = () => {
                                     Nenhuma disciplina concluída registrada.
                                 </p>
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-10 animate-fadeIn">
-                                    <span className="text-6xl font-black text-primary/80 mb-2">
-                                        {completedSubjects.length}
-                                    </span>
-                                    <span className="text-text-light-secondary dark:text-text-dark-secondary font-medium uppercase tracking-wide text-sm">
-                                        Matérias Concluídas
-                                    </span>
+                                <div className="space-y-6 animate-fadeIn">
+                                    {Object.keys(completedSubjects.reduce((acc, subject) => {
+                                        const sem = subject._se;
+                                        if (!acc[sem]) acc[sem] = [];
+                                        acc[sem].push(subject);
+                                        return acc;
+                                    }, {}))
+                                        .filter(sem => Number(sem) > 0)
+                                        .sort((a, b) => a - b).map(sem => (
+                                            <div key={sem}>
+                                                <h3 className="text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider mb-3">
+                                                    {sem}º Período
+                                                </h3>
+                                                <div className="space-y-2">
+                                                    {completedSubjects
+                                                        .filter(s => s._se == sem)
+                                                        .map(subject => (
+                                                            <div
+                                                                key={subject._id}
+                                                                className="flex items-center gap-3 p-3 rounded-lg bg-green-500/5 border border-green-500/30"
+                                                            >
+                                                                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                                                                    <span className="material-symbols-outlined text-white text-xs">check</span>
+                                                                </div>
+                                                                <div className="flex-1">
+                                                                    <span className="font-medium text-green-700 dark:text-green-400 block">
+                                                                        {subject._di}
+                                                                    </span>
+                                                                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                                                                        {subject._re} • {subject._ap + subject._at} créditos
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                </div>
+                                            </div>
+                                        ))}
                                 </div>
                             )
                         )}
@@ -448,108 +516,110 @@ const ProfilePage = () => {
             </div>
 
             {/* Edit Profile Modal */}
-            {isEditingProfile && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-                    <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-border-light dark:border-border-dark">
-                        <div className="p-6 border-b border-border-light dark:border-border-dark">
-                            <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Editar Perfil</h2>
-                        </div>
-                        <form onSubmit={handleUpdateProfile} className="p-6 space-y-4">
-                            {updateError && (
-                                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
-                                    {updateError}
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                    Nome Completo
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editForm.name}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                                    className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
-                                    placeholder="Seu nome"
-                                />
+            {
+                isEditingProfile && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-border-light dark:border-border-dark">
+                            <div className="p-6 border-b border-border-light dark:border-border-dark">
+                                <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Editar Perfil</h2>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                    Usuário (Login)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editForm.username}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                                    className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
-                                    placeholder="seu.usuario"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                    Senha
-                                </label>
-                                {!showPassword ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(true)}
-                                        className="text-sm text-primary hover:underline font-medium"
-                                    >
-                                        Alterar senha
-                                    </button>
-                                ) : (
-                                    <div className="space-y-4 animate-fadeIn">
-                                        <input
-                                            type="password"
-                                            value={editForm.password}
-                                            onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))}
-                                            className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
-                                            placeholder="Nova senha"
-                                        />
-                                        <input
-                                            type="password"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
-                                            placeholder="Confirmar nova senha"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setShowPassword(false);
-                                                setEditForm(prev => ({ ...prev, password: '' }));
-                                                setConfirmPassword('');
-                                            }}
-                                            className="text-xs text-red-500 hover:underline"
-                                        >
-                                            Cancelar alteração de senha
-                                        </button>
+                            <form onSubmit={handleUpdateProfile} className="p-6 space-y-4">
+                                {updateError && (
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+                                        {updateError}
                                     </div>
                                 )}
-                            </div>
 
-                            <div className="flex gap-3 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsEditingProfile(false)}
-                                    className="flex-1 px-4 py-2 rounded-lg border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-medium"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors font-bold shadow-lg shadow-primary/20"
-                                >
-                                    Salvar Alterações
-                                </button>
-                            </div>
-                        </form>
+                                <div>
+                                    <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
+                                        Nome Completo
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                        className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                        placeholder="Seu nome"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
+                                        Usuário (Login)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editForm.username}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                                        className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                        placeholder="seu.usuario"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
+                                        Senha
+                                    </label>
+                                    {!showPassword ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(true)}
+                                            className="text-sm text-primary hover:underline font-medium"
+                                        >
+                                            Alterar senha
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-4 animate-fadeIn">
+                                            <input
+                                                type="password"
+                                                value={editForm.password}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))}
+                                                className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                                placeholder="Nova senha"
+                                            />
+                                            <input
+                                                type="password"
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                                placeholder="Confirmar nova senha"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowPassword(false);
+                                                    setEditForm(prev => ({ ...prev, password: '' }));
+                                                    setConfirmPassword('');
+                                                }}
+                                                className="text-xs text-red-500 hover:underline"
+                                            >
+                                                Cancelar alteração de senha
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditingProfile(false)}
+                                        className="flex-1 px-4 py-2 rounded-lg border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-medium"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors font-bold shadow-lg shadow-primary/20"
+                                    >
+                                        Salvar Alterações
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

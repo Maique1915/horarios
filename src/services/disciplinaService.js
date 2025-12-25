@@ -490,6 +490,19 @@ export const toggleCompletedSubject = async (userId, subjectId, isCompleted) => 
     }
 };
 
+export const toggleMultipleSubjects = async (userId, subjectIds, isCompleted) => {
+    if (!subjectIds || subjectIds.length === 0) return;
+
+    if (isCompleted) {
+        const rows = subjectIds.map(id => ({ user_id: userId, subject_id: id }));
+        const { error } = await supabase.from('completed_subjects').upsert(rows, { onConflict: 'user_id, subject_id' });
+        if (error) throw error;
+    } else {
+        const { error } = await supabase.from('completed_subjects').delete().eq('user_id', userId).in('subject_id', subjectIds);
+        if (error) throw error;
+    }
+};
+
 export const saveCurrentEnrollments = async (userId, enrollments, semester) => {
     // 1. Clear existing enrollments for this specific semester
     const { error: deleteError } = await supabase
