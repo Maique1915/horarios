@@ -13,11 +13,31 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { loadCompletedSubjects } from '../services/disciplinaService';
 
+interface Subject {
+    _re: string;
+    _di: string;
+    _ap: number;
+    _at: number;
+    _se: number;
+    _pr: string;
+    _el?: boolean;
+    // Add other properties as needed
+    [key: string]: any;
+}
+
+interface GradeState {
+    names: string[];
+    keys: number[];
+    estado: number;
+    x: string[];
+    crs: number[];
+}
+
 const GeraGrade = () => {
     const params = useParams();
     const cur = params?.cur || 'engcomp';
     // const navigate = useNavigate(); // Não é mais necessário para o mapa
-    const [state, setState] = useState({
+    const [state, setState] = useState<GradeState>({
         names: [],
         keys: [],
         estado: 0,
@@ -25,9 +45,9 @@ const GeraGrade = () => {
         crs: []
     });
     const [searchTerm, setSearchTerm] = useState('');
-    const [openPeriodKey, setOpenPeriodKey] = useState(null);
-    const [gradesResult, setGradesResult] = useState([]);
-    const [possibleGrades, setPossibleGrades] = useState([]);
+    const [openPeriodKey, setOpenPeriodKey] = useState<string | null>(null);
+    const [gradesResult, setGradesResult] = useState<Subject[]>([]);
+    const [possibleGrades, setPossibleGrades] = useState<Subject[][]>([]);
 
 
 
@@ -35,7 +55,7 @@ const GeraGrade = () => {
     const [cacheInfo, setCacheInfo] = useState(null);
 
     // React Query for Course Data
-    const { data: arr = [], isLoading: loadingArr } = useQuery({
+    const { data: arr = [], isLoading: loadingArr } = useQuery<Subject[]>({
         queryKey: ['ativas', cur],
         queryFn: () => ativas(cur),
         staleTime: 1000 * 60 * 60 * 24, // 24 hours
@@ -80,12 +100,12 @@ const GeraGrade = () => {
     // Populate state with completed subjects once arr (all subjects) is loaded
     useEffect(() => {
         if (arr.length > 0 && completedSubjects.length > 0 && state.names.length === 0) {
-            const newNames = [];
-            const newKeys = [];
-            const newCrs = [];
+            const newNames: string[] = [];
+            const newKeys: number[] = [];
+            const newCrs: number[] = [];
 
-            completedSubjects.forEach(completed => {
-                const index = arr.findIndex(item => item._re === completed._re);
+            completedSubjects.forEach((completed: any) => {
+                const index = arr.findIndex((item: any) => item._re === completed._re);
                 if (index > -1) {
                     newNames.push(completed._re);
                     newKeys.push(index);
@@ -138,9 +158,7 @@ const GeraGrade = () => {
 
     // ... (rest of code) ...
 
-    function renderStepContent() {
-        // ... (state 0 and 1 content) ...
-    }
+    // Removed duplicate dummy function
 
     // Custom render for State 2 check
     if (state.estado === 2) {
@@ -198,7 +216,7 @@ const GeraGrade = () => {
 
     let gr = [];
 
-    function handleCheck(e) {
+    function handleCheck(e: any) {
         const r = e.target;
 
         if (r.classList.contains('period-toggle')) {
@@ -208,7 +226,8 @@ const GeraGrade = () => {
             if (subjectGroup) {
                 const subjectCheckboxes = subjectGroup.getElementsByClassName("subject-checkbox");
 
-                for (const mat of subjectCheckboxes) {
+                Array.from(subjectCheckboxes).forEach((element) => {
+                    const mat = element as HTMLInputElement;
                     const idNoEstado = (state.estado === 0)
                         ? state.keys.indexOf(parseInt(mat.value))
                         : state.x.indexOf(mat.id);
@@ -218,7 +237,7 @@ const GeraGrade = () => {
                     } else if (!isChecked && idNoEstado > -1) {
                         altera(false, mat);
                     }
-                }
+                });
             }
         }
         else if (r.classList.contains('subject-checkbox')) {
@@ -226,7 +245,7 @@ const GeraGrade = () => {
         }
     }
 
-    function altera(add, target) {
+    function altera(add: boolean, target: any) {
         if (state.estado === 0) {
             const value = parseInt(target.value);
             setState(prevState => {
@@ -258,7 +277,7 @@ const GeraGrade = () => {
         }
     }
 
-    function remove(m) {
+    function remove(m: Subject[]) {
         const aux = [];
         const e = new Set();
         for (const i of m) {
@@ -275,8 +294,8 @@ const GeraGrade = () => {
         return aux;
     }
 
-    function periodo(m) {
-        const aux = {};
+    function periodo(m: Subject[]) {
+        const aux: { [key: string]: Subject[] } = {};
         for (const item of m) {
             if (!aux[item._se]) {
                 aux[item._se] = [];
@@ -286,7 +305,7 @@ const GeraGrade = () => {
         return aux;
     }
 
-    function renderSubjectItem(key, itemData) {
+    function renderSubjectItem(key: any, itemData: Subject) {
         const isChecked = (state.estado === 0)
             ? state.names.includes(itemData._re)
             : state.x.includes(itemData._re);
@@ -314,7 +333,7 @@ const GeraGrade = () => {
         );
     }
 
-    function PeriodAccordion({ periodKey, subjectsData, openPeriodKey, setOpenPeriodKey }) {
+    function PeriodAccordion({ periodKey, subjectsData, openPeriodKey, setOpenPeriodKey }: { periodKey: string, subjectsData: Subject[], openPeriodKey: string | null, setOpenPeriodKey: (k: string | null) => void }) {
         const allSubjectIdsInPeriod = subjectsData.map(s => s._re);
         const selectedSubjects = (state.estado === 0) ? state.names : state.x;
         const areAllSelected = allSubjectIdsInPeriod.length > 0 &&
@@ -367,7 +386,7 @@ const GeraGrade = () => {
         );
     }
 
-    function mudaTela(i) {
+    function mudaTela(i: number) {
         if (i === 1) {
             const cr = state.crs.reduce((a, b) => a + b, 0);
             console.log('mudaTela(1): Créditos totais:', cr);
@@ -429,9 +448,9 @@ const GeraGrade = () => {
         )
     }
 
-    function renderStepContent() {
+    function renderStepContent(): JSX.Element | null {
         if (state.estado === 0) {
-            const filteredArr = arr.filter(item =>
+            const filteredArr = arr.filter((item: any) =>
                 item._di.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item._re.toLowerCase().includes(searchTerm.toLowerCase())
             );
@@ -540,6 +559,7 @@ const GeraGrade = () => {
                 />
             );
         }
+        return null;
     }
 
     if (loading) {
