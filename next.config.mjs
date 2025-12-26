@@ -3,7 +3,7 @@ const isGithubPages = process.env.GITHUB_PAGES === 'true';
 
 const nextConfig = {
     reactStrictMode: true,
-    output: 'export',
+    // output: 'export', // Comentado para habilitar API Routes (Vercel suporta serverless)
     images: {
         unoptimized: true,
     },
