@@ -3,10 +3,13 @@
 import React from 'react';
 import useMercadoPago from '@/hooks/useMercadoPago';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSearchParams } from 'next/navigation';
 
 export default function PlansPage() {
     const { createMercadoPagoCheckout } = useMercadoPago();
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const alertType = searchParams.get('alert');
 
     const handleSubscribe = () => {
         if (!user) {
@@ -23,6 +26,23 @@ export default function PlansPage() {
     return (
         <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
+                {alertType === 'expired' && (
+                    <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <span className="material-symbols-outlined text-red-500">priority_high</span>
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-red-800">Sua conta expirou</h3>
+                                <div className="mt-1 text-sm text-red-700">
+                                    <p>
+                                        Para continuar acessando todas as funcionalidades, por favor, renove sua assinatura escolhendo um dos planos abaixo.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="text-center">
                     <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
                         Escolha seu Plano

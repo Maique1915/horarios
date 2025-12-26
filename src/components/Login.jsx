@@ -27,15 +27,20 @@ const Login = () => {
             const result = await login(username, password);
 
             if (result.success) {
-                // Verificar se o usuário pagou (opcional aqui, mas também checado nas rotas protegidas)
-                // Se quisermos bloquear o login:
-                /*
-                if (!result.user.is_paid && result.user.role !== 'admin') {
-                     router.push('/plans');
-                     return;
+                // Check if user is expired
+                let isExpired = false;
+                if (result.user.subscription_expires_at) {
+                    const expiresAt = new Date(result.user.subscription_expires_at);
+                    if (new Date() > expiresAt) {
+                        isExpired = true;
+                    }
                 }
-                */
-                router.push(from);
+
+                if (isExpired) {
+                    router.push('/plans?alert=expired');
+                } else {
+                    router.push(from);
+                }
             } else {
                 setError(result.error);
                 setLoading(false); // Only stop loading on error, on success we redirect

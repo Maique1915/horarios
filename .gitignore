@@ -36,7 +36,7 @@ next-env.d.ts
 # User specific from previous gitignore
 download.zip
 download/
-*.png
+# *.png
 'package copy.json'
 package copy.json
 mercadopago-nextjs-by-andredev-main/

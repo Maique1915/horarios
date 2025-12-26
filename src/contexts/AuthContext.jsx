@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }) => {
                 // Login com sucesso
                 localStorage.setItem('app_user', JSON.stringify(user));
                 setUser(user);
-                return { success: true };
+                return { success: true, user };
             }
 
             // 2. Verificação de Hash (Padrão e Seguro)
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
             if (isMatch) {
                 localStorage.setItem('app_user', JSON.stringify(user));
                 setUser(user);
-                return { success: true };
+                return { success: true, user };
             }
 
             return { success: false, error: 'Senha incorreta.' };
