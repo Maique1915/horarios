@@ -13,6 +13,7 @@ const UserActivitiesManager = () => {
 
     // Form State
     const [editingId, setEditingId] = useState(null);
+    const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedActivityId, setSelectedActivityId] = useState('');
     const [selectedGroup, setSelectedGroup] = useState('');
     const [hours, setHours] = useState('');
@@ -115,6 +116,7 @@ const UserActivitiesManager = () => {
         // Keep selectedGroup if desired, but reseting is safer to avoid confusion
         // setSelectedGroup(''); 
         setEditingId(null);
+        setIsFormOpen(false);
     };
 
     const handleSubmit = (e) => {
@@ -132,9 +134,17 @@ const UserActivitiesManager = () => {
         };
 
         if (editingId) {
-            updateActivityMutation.mutate({ id: editingId, data: payload });
+            updateActivityMutation.mutate({ id: editingId, data: payload }, {
+                onSuccess: () => {
+                    setIsFormOpen(false);
+                }
+            });
         } else {
-            addActivityMutation.mutate(payload);
+            addActivityMutation.mutate(payload, {
+                onSuccess: () => {
+                    setIsFormOpen(false);
+                }
+            });
         }
     };
 
@@ -151,6 +161,12 @@ const UserActivitiesManager = () => {
         setSemester(activity.semester || '');
         setDocumentLink(activity.document_link || '');
         setDescription(activity.description || '');
+        setIsFormOpen(true);
+    };
+
+    const handleNewActivity = () => {
+        resetForm();
+        setIsFormOpen(true);
     };
 
     const handleCancelEdit = () => {
@@ -236,7 +252,7 @@ const UserActivitiesManager = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex items-center justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={() => handleEdit(activity)}
                                                             className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-primary hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-border-light hover:shadow-sm"
@@ -262,9 +278,9 @@ const UserActivitiesManager = () => {
                     </div>
                 </div>
 
-                {/* Right Column: Sticky Form */}
-                <div className="lg:col-span-1 order-1 lg:order-2">
-                    <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark shadow-sm sticky top-6">
+                {/* Right Column: Sticky Form (Desktop) / Modal (Mobile) */}
+                <div className={`lg:col-span-1 order-1 lg:order-2 ${isFormOpen ? 'fixed inset-0 z-50 overflow-y-auto bg-background-light dark:bg-background-dark p-4 animate-in fade-in slide-in-from-bottom-10 lg:static lg:p-0 lg:overflow-visible lg:bg-transparent lg:animate-none' : 'hidden lg:block'}`}>
+                    <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark shadow-sm sticky top-6 h-full lg:h-auto overflow-y-auto lg:overflow-visible">
                         <div className="flex items-center justify-between mb-6 pb-4 border-b border-border-light dark:border-border-dark">
                             <h3 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
                                 <span className="material-symbols-outlined text-primary">
@@ -272,7 +288,7 @@ const UserActivitiesManager = () => {
                                 </span>
                                 {editingId ? 'Editar Atividade' : 'Nova Atividade'}
                             </h3>
-                            {editingId && (
+                            {(editingId || isFormOpen) && (
                                 <button
                                     onClick={handleCancelEdit}
                                     className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded bg-red-50 dark:bg-red-900/10 hover:bg-red-100 transition-colors"
@@ -411,6 +427,16 @@ const UserActivitiesManager = () => {
                 </div>
 
             </div>
+            {/* Mobile Floating Action Button for New Activity */}
+            {!isFormOpen && (
+                <button
+                    onClick={handleNewActivity}
+                    className="fixed bottom-6 right-6 lg:hidden w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-40"
+                    title="Adicionar Nova Atividade"
+                >
+                    <span className="material-symbols-outlined text-3xl">add</span>
+                </button>
+            )}
         </div>
     );
 };
