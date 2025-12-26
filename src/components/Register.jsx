@@ -13,7 +13,7 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [fullName, setFullName] = useState('');
     const [error, setError] = useState('');
-    const [error, setError] = useState('');
+
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [courses, setCourses] = useState([]);
