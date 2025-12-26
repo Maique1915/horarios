@@ -93,6 +93,49 @@ export default function ActivitiesPage() {
                         );
                     })
                 )}
+
+                {/* Summary Card (replaces Group J) */}
+                {!loading && (
+                    <div className="bg-primary text-white p-4 rounded-xl border border-primary shadow-lg flex flex-col justify-between hover:shadow-xl transition-shadow relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-10">
+                            <span className="material-symbols-outlined text-9xl">school</span>
+                        </div>
+                        <div className="flex justify-between items-start mb-2 relative z-10">
+                            <div className="p-1.5 rounded-lg bg-white/20 text-white">
+                                <span className="material-symbols-outlined text-xl">emoji_events</span>
+                            </div>
+                            <span className="text-xl font-bold">{groupProgress.reduce((acc, curr) => acc + curr.total, 0)}h</span>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="font-bold text-sm mb-0.5 truncate" title="Minhas Atividades Complementares">
+                                Total Acumulado
+                            </h3>
+                            <p className="text-[10px] text-white/80 mb-2 truncate">
+                                Progresso Geral
+                            </p>
+
+                            {(() => {
+                                const total = groupProgress.reduce((acc, curr) => acc + curr.total, 0);
+                                const limit = 210;
+                                const percent = Math.min(100, (total / limit) * 100);
+                                return (
+                                    <>
+                                        <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden mb-1">
+                                            <div
+                                                className="h-full bg-white transition-all duration-500 rounded-full"
+                                                style={{ width: `${percent}%` }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-between text-[10px] text-white/90">
+                                            <span>{Math.round(percent)}%</span>
+                                            <span>Meta: {limit}h</span>
+                                        </div>
+                                    </>
+                                );
+                            })()}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="animate-fadeIn">

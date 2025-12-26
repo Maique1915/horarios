@@ -20,6 +20,13 @@ const ProfilePage = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
 
+    useEffect(() => {
+        console.log("ProfilePage mounted");
+        return () => console.log("ProfilePage unmounted");
+    }, []);
+
+
+
     // Metadata for schedule formatting
     const [scheduleMeta, setScheduleMeta] = useState({ days: [], slots: [] });
 
@@ -196,10 +203,10 @@ const ProfilePage = () => {
 
     // Calculate effective hours (capped at requirements)
     const mandatorySubjects = completedSubjects.filter(s => !s._el);
-    const electiveSubjects = completedSubjects.filter(s => s._el && s._category !== 'COMPLEMENTARY');
+    const electiveSubjects = completedSubjects.filter(s => s._el);
 
-    const mandatoryTotalCredits = mandatorySubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const electiveTotalCredits = electiveSubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+    const electiveTotalCredits = mandatorySubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+    const mandatoryTotalCredits = electiveSubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
 
     const mandatoryHours = Math.min(MANDATORY_REQ_HOURS, mandatoryTotalCredits * 18);
     const electiveHours = Math.min(ELECTIVE_REQ_HOURS, electiveTotalCredits * 18);
@@ -226,11 +233,23 @@ const ProfilePage = () => {
         : sortedSemesters.filter(sem => sem === selectedSemester);
 
 
+    // Log when key data changes to debug re-renders (can be removed later)
+    useEffect(() => {
+        console.log("ProfilePage data updated:", {
+            completedSubjectsCount: completedSubjects.length,
+            enrollmentsCount: currentEnrollments.length,
+            user: user?.id
+        });
+    }, [completedSubjects.length, currentEnrollments.length, user?.id]);
+
     if (authLoading || (loadingData && user)) {
         return <LoadingSpinner message="Carregando perfil..." />;
     }
 
     if (!user) return null;
+
+
+
 
     return (
         <div className="container mx-auto px-4 py-8 animate-fadeIn">
@@ -288,7 +307,7 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
                 <CategoryProgress
                     title="Obrigatórias"
-                    subjects={completedSubjects.filter(s => !s._el)}
+                    subjects={completedSubjects.filter(s => s._el)}
                     reqHours={3774}
                     reqCredits={198}
                     color="text-blue-500"
@@ -297,7 +316,7 @@ const ProfilePage = () => {
                 />
                 <CategoryProgress
                     title="Optativas"
-                    subjects={completedSubjects.filter(s => s._el && s._category !== 'COMPLEMENTARY')}
+                    subjects={completedSubjects.filter(s => !s._el)}
                     reqHours={360}
                     reqCredits={20}
                     color="text-purple-500"
@@ -317,9 +336,9 @@ const ProfilePage = () => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Turmas Atuais */}
-                <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-md border border-border-light dark:border-border-dark overflow-hidden h-fit">
+                <div className="bg-surface-light dark:bg-surface-dark col-span-2 rounded-xl shadow-md border border-border-light dark:border-border-dark overflow-hidden h-fit">
                     <div className="p-6 border-b border-border-light dark:border-border-dark bg-background-light/50 dark:bg-background-dark/50">
                         <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
                             <span className="material-symbols-outlined text-primary">calendar_today</span>
@@ -363,7 +382,7 @@ const ProfilePage = () => {
                     <div className="p-6 border-b border-border-light dark:border-border-dark bg-background-light/50 dark:bg-background-dark/50 flex flex-wrap justify-between items-center gap-4">
                         <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
                             <span className="material-symbols-outlined text-green-600">check_circle</span>
-                            Matérias Concluídas
+                            Matérias Concluídas ({completedSubjects.length})
                         </h2>
                         <div className="flex items-center gap-2">
                             {isEditing && (
@@ -466,51 +485,19 @@ const ProfilePage = () => {
                             </div>
                         ) : (
                             // View Mode: List
-                            completedSubjects.length === 0 ? (
-                                <p className="text-text-light-secondary dark:text-text-dark-secondary italic text-center py-4">
-                                    Nenhuma disciplina concluída registrada.
-                                </p>
-                            ) : (
-                                <div className="space-y-6 animate-fadeIn">
-                                    {Object.keys(completedSubjects.reduce((acc, subject) => {
-                                        const sem = subject._se;
-                                        if (!acc[sem]) acc[sem] = [];
-                                        acc[sem].push(subject);
-                                        return acc;
-                                    }, {}))
-                                        .filter(sem => Number(sem) > 0)
-                                        .sort((a, b) => a - b).map(sem => (
-                                            <div key={sem}>
-                                                <h3 className="text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider mb-3">
-                                                    {sem}º Período
-                                                </h3>
-                                                <div className="space-y-2">
-                                                    {completedSubjects
-                                                        .filter(s => s._se == sem)
-                                                        .map(subject => (
-                                                            <div
-                                                                key={subject._id}
-                                                                className="flex items-center gap-3 p-3 rounded-lg bg-green-500/5 border border-green-500/30"
-                                                            >
-                                                                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shrink-0">
-                                                                    <span className="material-symbols-outlined text-white text-xs">check</span>
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                    <span className="font-medium text-green-700 dark:text-green-400 block">
-                                                                        {subject._di}
-                                                                    </span>
-                                                                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                                                                        {subject._re} • {subject._ap + subject._at} créditos
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                </div>
-                                            </div>
-                                        ))}
+                            <div className="animate-fadeIn text-center py-8">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
+                                    <span className="material-symbols-outlined text-3xl text-green-600 dark:text-green-400">school</span>
                                 </div>
-                            )
-                        )}
+                                <p className="text-lg font-medium text-text-light-primary dark:text-text-dark-primary">
+                                    Você concluiu <span className="text-green-600 dark:text-green-400 font-bold">{completedSubjects.length}</span> disciplinas!
+                                </p>
+                                <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">
+                                    Clique em "Gerenciar" para ver ou editar a lista completa.
+                                </p>
+                            </div>
+                        )
+                        }
                     </div>
                 </div>
             </div>

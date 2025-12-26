@@ -110,6 +110,18 @@ export const addUserActivity = async (activityData) => {
     return data;
 };
 
+export const updateUserActivity = async (id, activityData) => {
+    const { data, error } = await supabase
+        .from('user_complementary_activities')
+        .update(activityData)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+};
+
 export const deleteUserActivity = async (id) => {
     const { error } = await supabase
         .from('user_complementary_activities')
@@ -181,8 +193,7 @@ export const getUserGroupProgress = async (userId) => {
         { group: 'F', label: 'Grupo F', limit: 40, desc: 'Formação Social/Humana' },
         { group: 'G', label: 'Grupo G', limit: 40, desc: 'Semana Acadêmica' },
         { group: 'H', label: 'Grupo H', limit: 40, desc: 'Atividades Especiais' },
-        { group: 'I', label: 'Grupo I', limit: 40, desc: 'Outros' },
-        { group: 'J', label: 'Grupo J', limit: 40, desc: 'Extra' }
+        { group: 'I', label: 'Grupo I', limit: 40, desc: 'Outros' }
     ];
 
     // 4. Format result

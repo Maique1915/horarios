@@ -9,17 +9,31 @@ let globalDbPromise = null;
 let globalRegistryPromise = null;
 const CACHE_DURATION = 0; // Disable cache for debugging
 
+import { getDays, getTimeSlots } from './scheduleService.js';
+
+// ... (existing imports)
+
 // Carrega o registro de cursos
 export const loadCoursesRegistry = async () => {
     if (globalRegistryPromise) return globalRegistryPromise;
     globalRegistryPromise = (async () => {
-        const { data, error } = await supabase.from('courses').select('*');
+        const [coursesResult, days, timeSlots] = await Promise.all([
+            supabase.from('courses').select('*'),
+            getDays(),
+            getTimeSlots()
+        ]);
+
+        const { data, error } = coursesResult;
         if (error) throw error;
+
+        // Populate _hd with [days, timeSlots]
+        const hd = [days, timeSlots];
+
         return data.map(course => ({
             _cu: course.code,
             name: course.name,
             _da: course.dimension || [15, 5],
-            _hd: [],
+            _hd: hd,
             gid: course.id
         }));
     })();

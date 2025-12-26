@@ -4,20 +4,22 @@ export default class Escolhe {
 
     constructor(genesis, cur, dimension, schedule) {
         this.cur = cur
-        this.dimension = dimension || [0, 0] // [rows, cols] based on Materias expectation
-        this.schedule = schedule || [[], []] // [days, timeslots]
+        this.dimension = dimension || [0, 0]
+        this.schedule = schedule || [[], []]
 
-        // Normalize genesis subjects to have boolean grid _ho
+        // Normalize genesis subjects 
         this.genesis = genesis.map(subject => this.normalize(subject))
 
-        console.log(genesis)
-
         this.reduz()
+
+        // Initialize NxN collision matrix with -1
+        this.n = this.genesis.length;
+        this.matrix = Array(this.n).fill(null).map(() => Array(this.n).fill(-1));
     }
 
     normalize(subject) {
-        // Create an empty grid
-        const m = new Materias(this.cur, this.dimension).m
+        // Active slots as sparse list of strings "dayIndex:timeIndex"
+        let activeSlots = [];
 
         if (subject._ho && Array.isArray(subject._ho)) {
             let dbDays = [], dbTimeSlots = [];
@@ -25,32 +27,25 @@ export default class Escolhe {
                 [dbDays, dbTimeSlots] = this.schedule;
             }
 
-            // Early return or check if mapping is possible
-            if (!dbDays || !dbTimeSlots) return { ...subject, _grid: m._ho };
+            if (dbDays && dbTimeSlots) {
+                subject._ho.forEach(slot => {
+                    if (Array.isArray(slot) && slot.length === 2) {
+                        const [dayId, timeId] = slot
+                        const dayIndex = dbDays.findIndex(d => d.id === dayId)
+                        const timeIndex = dbTimeSlots.findIndex(t => t.id === timeId)
 
-            subject._ho.forEach(slot => {
-                // Check if slot is array [dayId, timeId]
-                if (Array.isArray(slot) && slot.length === 2) {
-                    const [dayId, timeId] = slot
-                    const dayIndex = dbDays.findIndex(d => d.id === dayId)
-                    const timeIndex = dbTimeSlots.findIndex(t => t.id === timeId)
-
-                    if (dayIndex !== -1 && timeIndex !== -1) {
-                        // Materias structure: _ho[dayIndex][timeIndex]
-                        if (m._ho[dayIndex] && m._ho[dayIndex][timeIndex] !== undefined) {
-                            m._ho[dayIndex][timeIndex] = true
+                        if (dayIndex !== -1 && timeIndex !== -1) {
+                            activeSlots.push(`${dayIndex}:${timeIndex}`)
                         }
                     }
-                }
-            })
+                })
+            }
         }
-
-        // Return original subject with new _grid property for calculation
-        return { ...subject, _grid: m._ho }
+        return { ...subject, _grid: activeSlots }
     }
 
     reduz() {
-        while (this.genesis.length > 15) {
+        while (this.genesis.length > 20) {
             const max = this.genesis.length
             const a = Math.floor(Math.random() * (max))
             this.genesis.splice(a, 1)
@@ -61,38 +56,79 @@ export default class Escolhe {
         return str.reduce((acc, char) => char === '1' ? acc + 1 : acc, 0);
     }
 
+    // Check collision between index i and j (memoized)
+    // Returns 1 if safe (no collision), 0 if collision
+    checkCollision(i, j) {
+        if (i === j) return 1; // Same subject doesn't collide with self in this context? Or irrelevant.
+
+        // Ensure i < j for matrix access
+        let r = i, c = j;
+        if (r > c) { r = j; c = i; }
+
+        if (this.matrix[r][c] !== -1) {
+            return this.matrix[r][c];
+        }
+
+        const subjectsCollide = !this.semColisao(this.genesis[r], this.genesis[c]);
+        // User said: "se as duas colidirem ponha ... um 0, se não ponha 1"
+        const res = subjectsCollide ? 0 : 1;
+
+        this.matrix[r][c] = res;
+        return res;
+    }
+
     exc() {
         const aux = []
         let i = 2 ** this.genesis.length - 1
+
         while (i > 0) {
             const f = i.toString(2).padStart(this.genesis.length, '0').split('')
             i--
 
             if (this.count(f) >= 9) continue
 
-            const c = []
-            // Create initial empty mask from template (or just null and handle first merge)
-            let m = new Materias(this.cur, this.dimension).m
-            // We need m to have _grid, not _ho for calculation now
-            // But Materias returns m with _ho. Let's alias it.
-            let mask = { _grid: m._ho }
+            const currentCombinationIndices = [];
+            const currentCombinationSubjects = [];
+            let valid = true;
 
-            let b = true
-
-            for (const j in f) {
+            for (let j = 0; j < f.length; j++) {
                 if (f[j] === "1") {
-                    const a = this.genesis[j]
-                    if (this.colide(mask, a) && !this.existe(c, a)) {
-                        c.push(a)
-                        mask = this.merge(a, mask)
-                    } else {
-                        b = false
-                        break
+                    const idx = j; // Index in this.genesis
+
+                    // Check against all already added subjects in this combination
+                    for (const prevIdx of currentCombinationIndices) {
+                        if (this.checkCollision(prevIdx, idx) === 0) {
+                            valid = false;
+                            break;
+                        }
                     }
+
+                    if (!valid) break;
+
+                    // Also check for "duplicate subject reference" (same subject code) 
+                    // although normally genesis shouldn't have dupes, but legacy existing check did this.
+                    // legacy: !this.existe(c, a). 
+                    // Let's keep it if we want to be safe, but collision check is the main one.
+                    const subject = this.genesis[idx];
+                    if (this.existe(currentCombinationSubjects, subject)) {
+                        // Treat as valid skip? Or invalid combo?
+                        // If we have same subject twice, it's effectively a collision of headers.
+                        // But physically they might not collide time-wise.
+                        // Just don't add it? Or mark invalid?
+                        // Original code: if (semColisao && !existe) -> add. else -> break.
+                        // So if it exists, it breaks (b=false).
+                        valid = false;
+                        break;
+                    }
+
+                    currentCombinationIndices.push(idx);
+                    currentCombinationSubjects.push(subject);
                 }
             }
-            if (b)
-                aux.push(c)
+
+            if (valid) {
+                aux.push(currentCombinationSubjects);
+            }
         }
 
         return aux.sort(this.compare)
@@ -102,15 +138,6 @@ export default class Escolhe {
         return b.length - a.length
     }
 
-    merge(a, b) {
-        // Merge a's _grid into b's _grid
-        for (const i in a._grid)
-            for (const j in a._grid[i])
-                if (a._grid[i][j])
-                    b._grid[i][j] = true
-        return b
-    }
-
     existe(c, a) {
         for (const b of c)
             if (a._re === b._re)
@@ -118,18 +145,17 @@ export default class Escolhe {
         return false
     }
 
-    colide(b, a) {
-        // Compare b._grid and a._grid
-        for (const i in a._grid) {
-            const e = a._grid[i]
-            const f = b._grid[i]
+    // Returns true if NO collision (safe)
+    semColisao(a, b) {
+        // a._grid and b._grid are arrays of strings
+        // Iterate smaller one for efficiency
+        const [small, large] = a._grid.length < b._grid.length ? [a, b] : [b, a];
 
-            for (const d in e) {
-                if (e[d] && f[d]) {
-                    return false
-                }
+        for (const slot of small._grid) {
+            if (large._grid.includes(slot)) {
+                return false; // Collision
             }
         }
-        return true
+        return true;
     }
 }
