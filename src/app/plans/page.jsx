@@ -1,11 +1,12 @@
 "use client";
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import useMercadoPago from '@/hooks/useMercadoPago';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearchParams } from 'next/navigation';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-export default function PlansPage() {
+function PlansContent() {
     const { createMercadoPagoCheckout } = useMercadoPago();
     const { user } = useAuth();
     const searchParams = useSearchParams();
@@ -134,5 +135,13 @@ export default function PlansPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function PlansPage() {
+    return (
+        <Suspense fallback={<LoadingSpinner message="Carregando planos..." />}>
+            <PlansContent />
+        </Suspense>
     );
 }
