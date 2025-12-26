@@ -23,6 +23,11 @@ const useMercadoPago = () => {
                 body: JSON.stringify(checkoutData),
             });
 
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Request failed with status ${response.status}: ${text}`);
+            }
+
             const data = await response.json();
 
             if (data.initPoint) {
