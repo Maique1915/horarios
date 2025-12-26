@@ -75,11 +75,11 @@ export default function PlansPage() {
                             Popular
                         </div>
                         <div className="p-6">
-                            <h2 className="text-lg leading-6 font-medium text-gray-900">Premium</h2>
-                            <p className="mt-4 text-sm text-gray-500">Acesso ilimitado e recursos exclusivos.</p>
+                            <h2 className="text-lg leading-6 font-medium text-gray-900">Semestral</h2>
+                            <p className="mt-4 text-sm text-gray-500">Acesso ilimitado por um semestre.</p>
                             <p className="mt-8">
-                                <span className="text-4xl font-extrabold text-gray-900">R$19,90</span>
-                                <span className="text-base font-medium text-gray-500">/mês</span>
+                                <span className="text-4xl font-extrabold text-gray-900">R$3,00</span>
+                                <span className="text-base font-medium text-gray-500">/semestre</span>
                             </p>
                             <button
                                 onClick={handleSubscribe}

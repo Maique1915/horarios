@@ -159,8 +159,8 @@ const Register = () => {
 
                         <div className="pt-2">
                             <div className="flex items-center justify-between mb-4">
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano Premium</span>
-                                <span className="text-lg font-bold text-primary">R$ 19,90</span>
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Plano Semestral</span>
+                                <span className="text-lg font-bold text-primary">R$ 3,00</span>
                             </div>
                             <button
                                 type="submit"

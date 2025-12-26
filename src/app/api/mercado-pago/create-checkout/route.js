@@ -23,11 +23,11 @@ export async function POST(req) {
 
                 items: [
                     {
-                        id: "plano-premium",
-                        description: "Acesso total ao Gerador de Horários",
-                        title: "Assinatura Premium",
+                        id: "plano-semestral",
+                        description: "Acesso semestral ao Gerador de Horários",
+                        title: "Assinatura Semestral",
                         quantity: 1,
-                        unit_price: 19.90, // Preço exemplo
+                        unit_price: 3.00,
                         currency_id: "BRL",
                         category_id: "services",
                     },
