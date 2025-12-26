@@ -424,17 +424,17 @@ const Comum = (props) => {
 
                     <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
 
-                        <div className="flex justify-between items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark gap-4 md:gap-0">
                             <div className="flex flex-col">
                                 <span className="text-xs font-bold text-primary tracking-widest uppercase mb-1">{periodoAtual}</span>
                                 <h3 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight">
                                     {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
                                 </h3>
                             </div>
-                            <div className={`flex items-center gap-3 ${isPrinting ? 'invisible' : ''}`}>
-                                {_fun}
+                            <div className={`flex flex-wrap items-center gap-2 md:gap-3 w-full md:w-auto ${isPrinting ? 'invisible' : ''}`}>
+                                {(_fun && g !== "ª") && _fun}
 
-                                {(g === "ª" && user) && (
+                                {(g === "ª" && user && !isExpired) && (
                                     <button
                                         onClick={handleSave}
                                         disabled={saving || isExpired}
@@ -453,7 +453,7 @@ const Comum = (props) => {
                                 {g !== "ª" ? "" : (
                                     <button
                                         onClick={handlePrint}
-                                        className="group flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
+                                        className="group hidden md:flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
                                     >
                                         <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">print</span>
                                         Imprimir

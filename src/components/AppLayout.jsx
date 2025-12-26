@@ -9,6 +9,7 @@ import { loadDbData } from '../services/disciplinaService';
 
 const AppLayout = ({ children }) => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const params = useParams();
     const cur = params?.cur; // Handle potential undefined
     const router = useRouter();
@@ -66,17 +67,17 @@ const AppLayout = ({ children }) => {
 
     return (
         <div className="min-h-screen bg-background-light dark:bg-background-dark flex">
-            {/* Sidebar */}
+            {/* Desktop Sidebar */}
             {hasCourseSelected && (
                 <aside
-                    className={`fixed left-0 top-0 h-screen bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark transition-all duration-300 ease-in-out z-50 ${isSidebarExpanded ? 'w-64' : 'w-20'
+                    className={`fixed left-0 top-0 h-screen bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark transition-all duration-300 ease-in-out z-50 hidden md:flex flex-col ${isSidebarExpanded ? 'w-64' : 'w-20'
                         }`}
                 >
                     {/* Header da Sidebar */}
                     <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
                         <button
                             onClick={() => router.push('/')}
-                            className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
+                            className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3 w-full"
                             title="Voltar para página inicial"
                         >
                             <Image
@@ -88,7 +89,7 @@ const AppLayout = ({ children }) => {
                                 unoptimized
                             />
                             {/* Label que só aparece quando o menu está expandido */}
-                            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 font-semibold text-text-light-primary dark:text-text-dark-primary ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'}`}>
+                            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 font-semibold text-text-light-primary dark:text-text-dark-primary ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden md:block'}`}>
                                 Horários CEFET
                             </span>
                         </button>
@@ -142,15 +143,85 @@ const AppLayout = ({ children }) => {
                 </aside>
             )}
 
+            {/* Mobile Sidebar Overlay */}
+            {hasCourseSelected && isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
+            {/* Mobile Sidebar Drawer */}
+            {hasCourseSelected && (
+                <aside
+                    className={`fixed inset-y-0 left-0 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark transition-transform duration-300 ease-in-out z-50 w-64 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                >
+                    <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
+                        <button
+                            onClick={() => router.push('/')}
+                            className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
+                        >
+                            <Image
+                                src="/logo.png"
+                                alt="Logo"
+                                width={32}
+                                height={32}
+                                className="rounded-lg flex-shrink-0"
+                                unoptimized
+                            />
+                            <span className="font-semibold text-text-light-primary dark:text-text-dark-primary ml-2">
+                                Horários CEFET
+                            </span>
+                        </button>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <nav className="flex flex-col gap-1 p-3 mt-4">
+                        {menuItems.map((item) => (
+                            <React.Fragment key={item.to}>
+                                {item.divider && <div className="h-px bg-border-light dark:bg-border-dark my-3 mx-2" />}
+                                <Link
+                                    href={item.to}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActiveLink(item.to, item.exact)
+                                        ? 'bg-blue-50 dark:bg-primary/20 text-primary dark:text-blue-300'
+                                        : 'text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        }`}
+                                >
+                                    <span className={`material-symbols-outlined text-2xl ${isActiveLink(item.to, item.exact) ? 'fill-current' : ''}`}>
+                                        {item.icon}
+                                    </span>
+                                    <span>{item.label}</span>
+                                </Link>
+                            </React.Fragment>
+                        ))}
+                    </nav>
+                </aside>
+            )}
+
             {/* Main Content */}
-            <div className={`flex-1 transition-all duration-300 ${hasCourseSelected ? (isSidebarExpanded ? 'ml-64' : 'ml-20') : 'ml-0'
+            <div className={`flex-1 transition-all duration-300 min-w-0 ${hasCourseSelected ? (isSidebarExpanded ? 'md:ml-64' : 'md:ml-20') : 'md:ml-0'
                 }`}>
                 {/* Top Bar */}
                 <header className="sticky top-0 z-40 h-16 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark shadow-sm">
-                    <div className="h-full px-6 flex items-center justify-between">
-                        <h1 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
-                            Horários CEFET {hasCourseSelected && effectiveCur ? `- ${effectiveCur.toUpperCase()}` : ''}
-                        </h1>
+                    <div className="h-full px-4 md:px-6 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            {hasCourseSelected && (
+                                <button
+                                    onClick={() => setIsMobileMenuOpen(true)}
+                                    className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary"
+                                >
+                                    <span className="material-symbols-outlined">menu</span>
+                                </button>
+                            )}
+                            <h1 className="text-lg md:text-xl font-bold text-text-light-primary dark:text-text-dark-primary truncate max-w-[200px] md:max-w-none">
+                                Horários CEFET {hasCourseSelected && effectiveCur ? `- ${effectiveCur.toUpperCase()}` : ''}
+                            </h1>
+                        </div>
 
                         {/* Info adicional ou breadcrumbs podem ir aqui */}
 
@@ -163,7 +234,7 @@ const AppLayout = ({ children }) => {
                                         title="Ver Perfil"
                                     >
                                         <span className="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">account_circle</span>
-                                        <span className="text-sm font-medium text-primary">{user.name || user.username}</span>
+                                        <span className="text-sm font-medium text-primary hidden sm:block">{user.name || user.username}</span>
                                     </Link>
                                     <button
                                         onClick={handleLogout}
@@ -171,7 +242,7 @@ const AppLayout = ({ children }) => {
                                         title="Sair"
                                     >
                                         <span className="material-symbols-outlined text-lg">logout</span>
-                                        <span>Sair</span>
+                                        <span className="hidden sm:block">Sair</span>
                                     </button>
                                 </div>
                             )}
@@ -191,7 +262,7 @@ const AppLayout = ({ children }) => {
                                     }}
                                 >
                                     <span className="material-symbols-outlined text-lg">settings</span>
-                                    <span>Admin</span>
+                                    <span className="hidden sm:block">Admin</span>
                                 </Link>
                             )}
 
@@ -203,7 +274,7 @@ const AppLayout = ({ children }) => {
                                     title="Fazer login"
                                 >
                                     <span className="material-symbols-outlined text-lg">login</span>
-                                    <span>Logar</span>
+                                    <span className="hidden sm:block">Logar</span>
                                 </Link>
                             )}
                         </div>
