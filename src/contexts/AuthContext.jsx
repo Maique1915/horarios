@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
                 .from('users')
                 .select('id')
                 .eq('username', username)
-                .single();
+                .maybeSingle();
 
             if (existingUser) {
                 return { success: false, error: 'Usuário já existe.' };
