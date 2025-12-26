@@ -354,7 +354,7 @@ const Comum = (props) => {
         }
         return (
             <div className="rounded-2xl border border-border-light dark:border-border-dark overflow-hidden bg-white dark:bg-slate-900 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
-                <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-340px)] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                     <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
                             <tr className="bg-slate-50 dark:bg-slate-800 border-b border-border-light dark:border-border-dark sticky top-0 z-30">
@@ -421,7 +421,7 @@ const Comum = (props) => {
                 </div>
             )}
 
-            <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col flex-1 w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
+            <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
 
                 <div className="flex justify-between items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark">
                     <div className="flex flex-col">
