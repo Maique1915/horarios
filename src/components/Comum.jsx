@@ -298,7 +298,7 @@ const Comum = (props) => {
             renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
-            <tr key={`row-${numLinha}`} className="group h-14 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+            <tr key={`row-${numLinha}`} className="group h-24 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
                 <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
                     <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-wide border border-slate-200 dark:border-slate-700">{labelHorario}</span>
                 </td>
@@ -378,90 +378,93 @@ const Comum = (props) => {
     }
 
     return (
-        <div className={'flex flex-col items-center p-6 mx-auto w-full max-w-[1400px] max-h-[calc(100vh-80px)] overflow-y-auto'}>
-
-            {(grades && grades.length > 1) && (
-                <div className={`flex justify-center items-center gap-1 mb-6 ${isPrinting ? 'invisible' : ''}`}>
-                    {(!_separa && grades.length > 10) && (
-                        <button
-                            className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() => setState(s => ({ ...s, pageBlockStart: Math.max(0, s.pageBlockStart - 10) }))}
-                            disabled={state.pageBlockStart === 0}
-                        >
-                            <span className="material-symbols-outlined text-sm">chevron_left</span>
-                        </button>
+        <div className="w-full h-[calc(100vh-64px)] relative">
+            <div className="absolute inset-0 overflow-y-auto p-6 flex flex-col items-center scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                <div className="w-full max-w-[1400px]">
+                    {(grades && grades.length > 1) && (
+                        <div className={`flex justify-center items-center gap-1 mb-6 ${isPrinting ? 'invisible' : ''}`}>
+                            {(!_separa && grades.length > 10) && (
+                                <button
+                                    className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() => setState(s => ({ ...s, pageBlockStart: Math.max(0, s.pageBlockStart - 10) }))}
+                                    disabled={state.pageBlockStart === 0}
+                                >
+                                    <span className="material-symbols-outlined text-sm">chevron_left</span>
+                                </button>
+                            )}
+                            <div className="flex gap-1 bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-border-light/50 dark:border-border-dark/50">
+                                {
+                                    grades.slice(state.pageBlockStart, state.pageBlockStart + 10).map((_, i) => {
+                                        const idx = state.pageBlockStart + i;
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => handlePageChange(idx)}
+                                                className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200 ${state.id === idx
+                                                    ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
+                                                    : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'}`}
+                                            >
+                                                {idx + 1}
+                                            </button>
+                                        )
+                                    })
+                                }
+                            </div>
+                            {(!_separa && grades.length > 10) && (
+                                <button
+                                    className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={() => setState(s => ({ ...s, pageBlockStart: s.pageBlockStart + 10 }))}
+                                    disabled={state.pageBlockStart + 10 >= grades.length}
+                                >
+                                    <span className="material-symbols-outlined text-sm">chevron_right</span>
+                                </button>
+                            )}
+                        </div>
                     )}
-                    <div className="flex gap-1 bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-border-light/50 dark:border-border-dark/50">
-                        {
-                            grades.slice(state.pageBlockStart, state.pageBlockStart + 10).map((_, i) => {
-                                const idx = state.pageBlockStart + i;
-                                return (
+
+                    <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
+
+                        <div className="flex justify-between items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark">
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-primary tracking-widest uppercase mb-1">{periodoAtual}</span>
+                                <h3 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                                    {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
+                                </h3>
+                            </div>
+                            <div className={`flex items-center gap-3 ${isPrinting ? 'invisible' : ''}`}>
+                                {_fun}
+
+                                {(g === "ª" && user) && (
                                     <button
-                                        key={idx}
-                                        onClick={() => handlePageChange(idx)}
-                                        className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200 ${state.id === idx
-                                            ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
-                                            : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'}`}
+                                        onClick={handleSave}
+                                        disabled={saving || isExpired}
+                                        title={isExpired ? "Conta expirada. Renove para salvar." : "Salvar Grade"}
+                                        className={`group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-light text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isExpired ? 'cursor-not-allowed opacity-50' : ''}`}
                                     >
-                                        {idx + 1}
+                                        {saving ? (
+                                            <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                                        ) : (
+                                            <span className="material-symbols-outlined text-lg">save</span>
+                                        )}
+                                        Salvar
                                     </button>
-                                )
-                            })
-                        }
-                    </div>
-                    {(!_separa && grades.length > 10) && (
-                        <button
-                            className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() => setState(s => ({ ...s, pageBlockStart: s.pageBlockStart + 10 }))}
-                            disabled={state.pageBlockStart + 10 >= grades.length}
-                        >
-                            <span className="material-symbols-outlined text-sm">chevron_right</span>
-                        </button>
-                    )}
-                </div>
-            )}
-
-            <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
-
-                <div className="flex justify-between items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark">
-                    <div className="flex flex-col">
-                        <span className="text-xs font-bold text-primary tracking-widest uppercase mb-1">{periodoAtual}</span>
-                        <h3 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight">
-                            {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
-                        </h3>
-                    </div>
-                    <div className={`flex items-center gap-3 ${isPrinting ? 'invisible' : ''}`}>
-                        {_fun}
-
-                        {(g === "ª" && user) && (
-                            <button
-                                onClick={handleSave}
-                                disabled={saving || isExpired}
-                                title={isExpired ? "Conta expirada. Renove para salvar." : "Salvar Grade"}
-                                className={`group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-light text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isExpired ? 'cursor-not-allowed opacity-50' : ''}`}
-                            >
-                                {saving ? (
-                                    <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-                                ) : (
-                                    <span className="material-symbols-outlined text-lg">save</span>
                                 )}
-                                Salvar
-                            </button>
-                        )}
 
-                        {g !== "ª" ? "" : (
-                            <button
-                                onClick={handlePrint}
-                                className="group flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
-                            >
-                                <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">print</span>
-                                Imprimir
-                            </button>
-                        )}
+                                {g !== "ª" ? "" : (
+                                    <button
+                                        onClick={handlePrint}
+                                        className="group flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
+                                    >
+                                        <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">print</span>
+                                        Imprimir
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {renderTabela()}
                     </div>
                 </div>
-
-                {renderTabela()}
             </div>
         </div>
     );
