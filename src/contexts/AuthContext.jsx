@@ -44,9 +44,16 @@ export const AuthProvider = ({ children }) => {
 
             // Se não pagou OU expirou
             if (!isPaid || isExpired) {
-                // Allow access to plans page, login, or api routes
-                const allowedPaths = ['/plans', '/login', '/register'];
-                const isAllowed = allowedPaths.includes(pathname) || pathname?.startsWith('/api');
+                // Allow access to plans page, login, api routes, and root
+                const allowedPaths = ['/plans', '/login', '/register', '/'];
+                const isStaticAllowed = allowedPaths.includes(pathname) || pathname?.startsWith('/api');
+
+                // Allow /[cur], /[cur]/cronograma, /[cur]/grades
+                // But block /profile, /activities, /edit (which matches /[cur] pattern)
+                const isCoursePublicRoute = /^\/[^\/]+(\/(cronograma|grades))?$/.test(pathname);
+                const isProtectedUserRoute = ['/profile', '/activities', '/edit', '/admin'].some(path => pathname?.startsWith(path));
+
+                const isAllowed = isStaticAllowed || (isCoursePublicRoute && !isProtectedUserRoute);
 
                 if (!isAllowed) {
                     console.log("Acesso negado (Não pago ou Expirado), redirecionando para /plans");
