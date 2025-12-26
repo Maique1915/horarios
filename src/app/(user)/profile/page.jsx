@@ -312,6 +312,12 @@ const ProfilePage = () => {
                                     <span className="material-symbols-outlined text-sm">school</span>
                                     {user.role === 'admin' ? 'Administrador' : 'Estudante'}
                                 </span>
+                                {user.subscription_expires_at && (
+                                    <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2.5 py-0.5 rounded-md border border-blue-100 dark:border-blue-900/30">
+                                        <span className="material-symbols-outlined text-sm">hourglass_bottom</span>
+                                        Vence em: {new Date(user.subscription_expires_at).toLocaleDateString('pt-BR')}
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>

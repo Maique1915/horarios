@@ -25,9 +25,15 @@ export async function POST(request) {
                     const userId = paymentData.external_reference;
 
                     if (userId) {
+                        const expirationDate = new Date();
+                        expirationDate.setMonth(expirationDate.getMonth() + 6); // Adiciona 6 meses
+
                         const { error } = await supabase
                             .from('users')
-                            .update({ is_paid: true }) // Assumindo que criamos essa coluna
+                            .update({
+                                is_paid: true,
+                                subscription_expires_at: expirationDate.toISOString()
+                            })
                             .eq('id', userId);
 
                         if (error) {
