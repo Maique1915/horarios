@@ -717,7 +717,7 @@ const GeraGrade = () => {
             </aside>
 
 
-            <div className="bg-background-light dark:bg-background-dark min-h-[calc(100vh-80px)]">
+            <div className="bg-background-light dark:bg-background-dark min-h-[calc(100vh-80px)] scroll-mt-20">
                 <div className="max-w-5xl mx-auto px-4 py-8">
                     {renderStepContent()}
                 </div>
