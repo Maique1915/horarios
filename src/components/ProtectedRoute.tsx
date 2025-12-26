@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    requiredRole?: string | null;
+    requiredRole?: string | string[] | null;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = null }) => {
@@ -15,15 +15,40 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     const router = useRouter();
     const pathname = usePathname();
 
+    const params = useParams(); // Add useParams
+    const cur = params?.cur; // Get 'cur' slug from URL
+
     useEffect(() => {
         if (!loading) {
             if (!user) {
                 router.push(`/login?from=${encodeURIComponent(pathname)}`);
-            } else if (requiredRole && user.role !== requiredRole) {
-                router.push('/'); // Redirect unauthorized role to home
+            } else if (requiredRole) {
+                // Check if user has one of the required roles
+                const hasAllowedRole = Array.isArray(requiredRole)
+                    ? requiredRole.includes(user.role)
+                    : user.role === requiredRole;
+
+                // Allow 'curso' if 'admin' is required (Implicit support/Legacy) OR if explicitly included
+                const isImplicitlyAllowed = requiredRole === 'admin' && user.role === 'curso';
+
+                if (!hasAllowedRole && !isImplicitlyAllowed) {
+                    router.push('/');
+                    return;
+                }
+
+                // Additional Security Check for 'curso' role
+                if (user.role === 'curso') {
+                    // Check if the current route has a 'cur' param and if it matches the user's course
+                    if (cur && user.courses?.code === cur) {
+                        return; // Allowed
+                    }
+                    // If mismatch or accessing generic admin route without matching context
+                    router.push('/');
+                    return;
+                }
             }
         }
-    }, [user, loading, router, pathname, requiredRole]);
+    }, [user, loading, router, pathname, requiredRole, cur]);
 
     if (loading) {
         return <LoadingSpinner message="Verificando autenticação..." />;
@@ -33,8 +58,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
         return null; // or spinner while redirecting
     }
 
-    if (requiredRole && user.role !== requiredRole) {
-        return null; // or Access Denied component
+    const hasAllowedRole = requiredRole
+        ? (Array.isArray(requiredRole) ? requiredRole.includes(user.role) : user.role === requiredRole)
+        : true;
+
+    // Implicit 'curso' allowed if 'admin' required
+    const isImplicitlyAllowed = requiredRole === 'admin' && user.role === 'curso';
+
+    if (requiredRole && !hasAllowedRole && !isImplicitlyAllowed) {
+        return null;
+    }
+
+    // Specific 'curso' check for render
+    if (user.role === 'curso') {
+        if (cur && user.courses?.code !== cur) return null;
     }
 
     return <>{children}</>;

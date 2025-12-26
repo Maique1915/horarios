@@ -91,27 +91,59 @@ const ProfilePage = () => {
         loadMeta();
     }, []);
 
-    // Helper to format schedule
-    const formatSchedule = (scheduleData) => {
-        if (!scheduleData || !Array.isArray(scheduleData) || scheduleMeta.days.length === 0) return null;
+    // Helper to format schedule and group by day
+    const getFormattedSchedule = (scheduleData) => {
+        if (!scheduleData || !Array.isArray(scheduleData) || scheduleMeta.days.length === 0) return [];
 
-        // Map to readable strings
-        const parts = scheduleData.map((item) => {
-            // item can be [dayId, slotId] or [dayId, slotId, type]
+        // 1. Enrich data with day/slot info
+        const enriched = scheduleData.map(item => {
             const dayId = Array.isArray(item) ? item[0] : null;
             const slotId = Array.isArray(item) ? item[1] : null;
-
             const day = scheduleMeta.days.find(d => d.id === dayId);
             const slot = scheduleMeta.slots.find(s => s.id === slotId);
-            if (!day || !slot) return null;
+            const slotIndex = scheduleMeta.slots.findIndex(s => s.id === slotId);
+            return { day, slot, slotIndex };
+        }).filter(x => x.day && x.slot);
 
-            const dayName = day.name.substring(0, 3); // Seg, Ter
-            const time = slot.start_time.substring(0, 5); // 08:00
-            return `${dayName} ${time}`;
-        }).filter(Boolean);
+        // 2. Group by Day ID to preserve order
+        const byDay = {};
+        enriched.forEach(({ day, slot, slotIndex }) => {
+            if (!byDay[day.id]) byDay[day.id] = { name: day.name, slots: [] };
+            byDay[day.id].slots.push({ slot, slotIndex });
+        });
 
-        if (parts.length === 0) return null;
-        return [...new Set(parts)].join(' | ');
+        // 3. Format
+        const result = Object.values(byDay).map(dayGroup => {
+            // Sort slots by time
+            dayGroup.slots.sort((a, b) => a.slotIndex - b.slotIndex);
+
+            // Compress consecutive slots
+            const ranges = [];
+            if (dayGroup.slots.length > 0) {
+                let start = dayGroup.slots[0];
+                let end = dayGroup.slots[0];
+
+                for (let i = 1; i < dayGroup.slots.length; i++) {
+                    const current = dayGroup.slots[i];
+                    // Check if consecutive (assuming slot indices are sequential in the array)
+                    if (current.slotIndex === end.slotIndex + 1) {
+                        end = current;
+                    } else {
+                        ranges.push(`${start.slot.start_time.substring(0, 5)} - ${end.slot.end_time.substring(0, 5)}`);
+                        start = current;
+                        end = current;
+                    }
+                }
+                ranges.push(`${start.slot.start_time.substring(0, 5)} - ${end.slot.end_time.substring(0, 5)}`);
+            }
+
+            return {
+                day: dayGroup.name.substring(0, 3), // Seg, Ter
+                times: ranges
+            };
+        });
+
+        return result;
     };
 
     // 1. Completed Subjects
@@ -252,56 +284,53 @@ const ProfilePage = () => {
 
 
     return (
-        <div className="container mx-auto px-4 py-8 animate-fadeIn">
-            {/* Header do Perfil */}
-            <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-8 mb-8 text-white shadow-lg">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                    <div className="flex items-center gap-6 flex-1">
-                        <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm shadow-inner shrink-0">
-                            <span className="material-symbols-outlined text-5xl">person</span>
+        <div className="container mx-auto px-4 py-8 animate-fadeIn max-w-6xl">
+            {/* Header do Perfil - Sober */}
+            <div className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 mb-8 border border-border-light dark:border-border-dark shadow-sm">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                    <div className="flex items-center gap-5 flex-1 w-full md:w-auto">
+                        <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-border-light dark:border-border-dark">
+                            <span className="material-symbols-outlined text-4xl text-slate-400">person</span>
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-3xl font-bold">{user.name || user.username}</h1>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-1">
+                                <h1 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary">{user.name || user.username}</h1>
                                 <button
                                     onClick={() => setIsEditingProfile(true)}
-                                    className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors backdrop-blur-sm"
+                                    className="w-7 h-7 rounded-full text-text-light-secondary hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors"
                                     title="Editar Perfil"
                                 >
                                     <span className="material-symbols-outlined text-sm">edit</span>
                                 </button>
                             </div>
-                            <div className="flex flex-wrap gap-4 opacity-90 text-sm">
-                                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
-                                    <span className="material-symbols-outlined text-base">badge</span>
+                            <div className="flex flex-wrap gap-3 text-sm">
+                                <span className="flex items-center gap-1.5 text-text-light-secondary dark:text-text-dark-secondary bg-background-light dark:bg-background-dark px-2.5 py-0.5 rounded-md border border-border-light dark:border-border-dark">
+                                    <span className="material-symbols-outlined text-sm">badge</span>
                                     {user.username}
                                 </span>
-                                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
-                                    <span className="material-symbols-outlined text-base">school</span>
+                                <span className="flex items-center gap-1.5 text-text-light-secondary dark:text-text-dark-secondary bg-background-light dark:bg-background-dark px-2.5 py-0.5 rounded-md border border-border-light dark:border-border-dark">
+                                    <span className="material-symbols-outlined text-sm">school</span>
                                     {user.role === 'admin' ? 'Administrador' : 'Estudante'}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Progress Stats */}
-                    <div className="bg-white/10 rounded-xl p-4 min-w-[200px] backdrop-blur-sm">
+                    {/* Progress Stats - Minimalist */}
+                    <div className="bg-background-light dark:bg-background-dark rounded-xl p-4 min-w-[240px] border border-border-light dark:border-border-dark w-full md:w-auto">
                         <div className="flex justify-between items-end mb-2 gap-4">
-                            <span className="text-sm font-medium opacity-90 whitespace-nowrap">Progresso do Curso</span>
-                            <span className="text-2xl font-bold">{progressPercentage}%</span>
+                            <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Progresso Total</span>
+                            <span className="text-xl font-bold text-primary">{progressPercentage}%</span>
                         </div>
-                        <div className="w-full bg-black/20 rounded-full h-2.5 mb-2">
+                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
                             <div
-                                className="bg-white h-2.5 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                className="bg-primary h-2 rounded-full transition-all duration-1000 ease-out"
                                 style={{ width: `${progressPercentage}%` }}
                             ></div>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-
 
             {/* Detailed Progress Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
@@ -310,8 +339,8 @@ const ProfilePage = () => {
                     subjects={completedSubjects.filter(s => s._el)}
                     reqHours={3774}
                     reqCredits={198}
-                    color="text-blue-500"
-                    bgColor="bg-blue-500"
+                    color="text-blue-600 dark:text-blue-400"
+                    bgColor="bg-blue-600"
                     icon="school"
                 />
                 <CategoryProgress
@@ -319,8 +348,8 @@ const ProfilePage = () => {
                     subjects={completedSubjects.filter(s => !s._el)}
                     reqHours={360}
                     reqCredits={20}
-                    color="text-purple-500"
-                    bgColor="bg-purple-500"
+                    color="text-purple-600 dark:text-purple-400"
+                    bgColor="bg-purple-600"
                     icon="star"
                 />
                 <CategoryProgress
@@ -328,46 +357,74 @@ const ProfilePage = () => {
                     subjects={[]}
                     reqHours={210}
                     reqCredits={0}
-                    color="text-orange-500"
-                    bgColor="bg-orange-500"
+                    color="text-orange-600 dark:text-orange-400"
+                    bgColor="bg-orange-600"
                     icon="extension"
                     customTotalHours={complementaryHours}
                     onClick={() => router.push('/activities')}
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 {/* Turmas Atuais */}
-                <div className="bg-surface-light dark:bg-surface-dark col-span-2 rounded-xl shadow-md border border-border-light dark:border-border-dark overflow-hidden h-fit">
-                    <div className="p-6 border-b border-border-light dark:border-border-dark bg-background-light/50 dark:bg-background-dark/50">
-                        <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                <div className="bg-surface-light dark:bg-surface-dark lg:col-span-3 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
+                    <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
+                        <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
                             <span className="material-symbols-outlined text-primary">calendar_today</span>
                             Grade Atual (Em Curso)
                         </h2>
                     </div>
                     <div className="p-6">
                         {currentEnrollments.length === 0 ? (
-                            <p className="text-text-light-secondary dark:text-text-dark-secondary italic text-center py-4">
-                                Nenhuma disciplina em curso no momento.
-                            </p>
+                            <div className="text-center py-8">
+                                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_busy</span>
+                                <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                                    Nenhuma disciplina em curso no momento.
+                                </p>
+                            </div>
                         ) : (
                             <ul className="space-y-3">
                                 {currentEnrollments.map((subject) => {
-                                    const formattedSchedule = formatSchedule(subject.schedule_data);
+                                    const scheduleGroups = getFormattedSchedule(subject.schedule_data);
+
                                     return (
-                                        <li key={subject.id} className="p-3 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/50 transition-colors">
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex-1 min-w-0 pr-4">
-                                                    <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary truncate" title={subject.name || "Disciplina"}>{subject.name || subject.class_name || "Disciplina"}</h3>
-                                                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">{subject.acronym || ""} - {subject.course_name || subject.semester || ""}</p>
-                                                </div>
-                                                {
-                                                    subject.schedule_data && (
-                                                        <span className="px-2 py-1 text-xs font-bold rounded bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
-                                                            {formatSchedule(subject.schedule_data)}
+                                        <li key={subject.id} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
+                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-base leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
+                                                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                                            {subject.acronym || "N/A"}
                                                         </span>
-                                                    )
-                                                }
+                                                        {(subject.course_name || subject.semester) && (
+                                                            <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
+                                                                <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                                                                {subject.course_name || subject.semester}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Schedule Display */}
+                                                {scheduleGroups.length > 0 && (
+                                                    <div className="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                                                        {scheduleGroups.map((group, idx) => (
+                                                            <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800/80 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                                <span className="text-xs font-bold text-primary dark:text-blue-400 uppercase tracking-wide min-w-[24px]">
+                                                                    {group.day}
+                                                                </span>
+                                                                <div className="h-3 w-px bg-slate-200 dark:bg-slate-700"></div>
+                                                                <div className="flex flex-wrap gap-x-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                                                                    {group.times.map((time, tIdx) => (
+                                                                        <span key={tIdx} className={tIdx > 0 ? "before:content-[','] before:mr-1 before:text-slate-300 dark:before:text-slate-600" : ""}>
+                                                                            {time}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         </li>
                                     );
@@ -378,46 +435,47 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Disciplinas Concluídas */}
-                <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-md border border-border-light dark:border-border-dark overflow-hidden transition-all duration-300">
-                    <div className="p-6 border-b border-border-light dark:border-border-dark bg-background-light/50 dark:bg-background-dark/50 flex flex-wrap justify-between items-center gap-4">
-                        <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                <div className="bg-surface-light dark:bg-surface-dark lg:col-span-2 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
+                    <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex flex-wrap justify-between items-center gap-4">
+                        <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
                             <span className="material-symbols-outlined text-green-600">check_circle</span>
-                            Matérias Concluídas ({completedSubjects.length})
+                            Concluídas <span className="text-sm font-normal text-slate-500 ml-1">({completedSubjects.length})</span>
                         </h2>
+
                         <div className="flex items-center gap-2">
                             {isEditing && (
                                 <select
                                     value={selectedSemester}
                                     onChange={(e) => setSelectedSemester(e.target.value)}
-                                    className="px-3 py-1.5 rounded-lg text-sm border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary/50 outline-none border"
+                                    className="px-2 py-1.5 rounded-lg text-xs border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-1 focus:ring-primary outline-none"
                                 >
-                                    <option value="all">Todos os Períodos</option>
+                                    <option value="all">Todos</option>
                                     {sortedSemesters.map(sem => (
-                                        <option key={sem} value={sem}>{sem}º Período</option>
+                                        <option key={sem} value={sem}>{sem}º Per</option>
                                     ))}
                                 </select>
                             )}
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
-                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 ${isEditing
-                                    ? 'bg-primary text-white hover:bg-primary/90'
-                                    : 'bg-background-light dark:bg-background-dark text-text-light-secondary hover:text-primary border border-border-light dark:border-border-dark'
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isEditing
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'bg-white dark:bg-slate-800 text-text-light-secondary hover:text-primary border border-border-light dark:border-border-dark'
                                     }`}
+                                title={isEditing ? "Concluir Edição" : "Gerenciar Disciplinas"}
                             >
                                 <span className="material-symbols-outlined text-lg">
                                     {isEditing ? 'check' : 'edit'}
                                 </span>
-                                {isEditing ? 'Concluir' : 'Gerenciar'}
                             </button>
                         </div>
                     </div>
 
-                    <div className="p-6">
+                    <div className="p-0">
                         {isEditing ? (
                             // Edit Mode: Checklist
-                            <div className="space-y-6">
+                            <div className="max-h-[500px] overflow-y-auto p-4 space-y-6 custom-scrollbar">
                                 {allSubjects.length === 0 ? (
-                                    <div className="text-center py-8">
+                                    <div className="py-8">
                                         <LoadingSpinner />
                                     </div>
                                 ) : (
@@ -427,37 +485,37 @@ const ProfilePage = () => {
 
                                         return (
                                             <div key={sem} className="animate-fadeIn">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <h3 className="text-sm font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider">
+                                                <div className="flex items-center justify-between mb-2 sticky top-0 bg-surface-light dark:bg-surface-dark pb-2 z-10">
+                                                    <h3 className="text-xs font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider">
                                                         {sem}º Período
                                                     </h3>
-                                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                                        <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary group-hover:text-primary transition-colors">
-                                                            Selecionar todos
+                                                    <label className="flex items-center gap-2 cursor-pointer group hover:bg-slate-50 dark:hover:bg-slate-800 px-2 rounded transition-colors">
+                                                        <span className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary group-hover:text-primary transition-colors uppercase font-bold tracking-wide">
+                                                            Todos
                                                         </span>
                                                         <input
                                                             type="checkbox"
-                                                            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                                            className="w-3.5 h-3.5 rounded border-slate-300 text-primary focus:ring-primary"
                                                             checked={allCompleted}
                                                             onChange={(e) => handleTogglePeriod(sem, e.target.checked)}
                                                             disabled={saving}
                                                         />
                                                     </label>
                                                 </div>
-                                                <div className="space-y-2">
+                                                <div className="space-y-1">
                                                     {subjectsBySemester[sem].map(subject => {
                                                         const isCompleted = completedSubjects.some(cs => cs._id === subject._id);
                                                         return (
                                                             <label
                                                                 key={subject._id}
-                                                                className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${isCompleted
-                                                                    ? 'bg-green-500/5 border-green-500/30'
-                                                                    : 'bg-background-light dark:bg-background-dark border-border-light dark:border-border-dark hover:border-primary/50'
+                                                                className={`flex items-start gap-3 p-2.5 rounded-lg border transition-all cursor-pointer select-none ${isCompleted
+                                                                    ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30'
+                                                                    : 'bg-white dark:bg-slate-800/50 border-border-light dark:border-border-dark hover:border-primary/30'
                                                                     }`}
                                                             >
-                                                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isCompleted ? 'bg-green-500 border-green-500' : 'border-text-light-secondary'
+                                                                <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${isCompleted ? 'bg-green-500 border-green-500' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
                                                                     }`}>
-                                                                    {isCompleted && <span className="material-symbols-outlined text-white text-sm">check</span>}
+                                                                    {isCompleted && <span className="material-symbols-outlined text-white text-[10px] font-bold">check</span>}
                                                                 </div>
                                                                 <input
                                                                     type="checkbox"
@@ -466,13 +524,14 @@ const ProfilePage = () => {
                                                                     disabled={saving}
                                                                     onChange={() => handleToggleSubject(subject._id, isCompleted)}
                                                                 />
-                                                                <div className="flex-1">
-                                                                    <span className={`font-medium ${isCompleted ? 'text-green-700 dark:text-green-400' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className={`text-sm font-medium leading-tight mb-0.5 ${isCompleted ? 'text-green-900 dark:text-green-100' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
                                                                         {subject._di}
-                                                                    </span>
-                                                                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary ml-2">
-                                                                        {subject._re}
-                                                                    </span>
+                                                                    </div>
+                                                                    <div className="flex gap-2 text-xs opacity-70">
+                                                                        <span>{subject._re}</span>
+                                                                        {subject._ap && <span>• {subject._ap}cr</span>}
+                                                                    </div>
                                                                 </div>
                                                             </label>
                                                         );
@@ -484,17 +543,23 @@ const ProfilePage = () => {
                                 )}
                             </div>
                         ) : (
-                            // View Mode: List
-                            <div className="animate-fadeIn text-center py-8">
-                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
-                                    <span className="material-symbols-outlined text-3xl text-green-600 dark:text-green-400">school</span>
+                            // View Mode: Empty State / Summary
+                            <div className="text-center py-10 px-6">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 mb-3">
+                                    <span className="material-symbols-outlined text-2xl text-green-600 dark:text-green-400">task_alt</span>
                                 </div>
-                                <p className="text-lg font-medium text-text-light-primary dark:text-text-dark-primary">
-                                    Você concluiu <span className="text-green-600 dark:text-green-400 font-bold">{completedSubjects.length}</span> disciplinas!
+                                <h3 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary mb-1">
+                                    Progresso Registrado
+                                </h3>
+                                <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mb-4 max-w-[200px] mx-auto">
+                                    Você já concluiu {completedSubjects.length} disciplinas. Mantenha seu histórico atualizado.
                                 </p>
-                                <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">
-                                    Clique em "Gerenciar" para ver ou editar a lista completa.
-                                </p>
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="px-4 py-2 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark rounded-lg text-sm font-medium text-text-light-secondary hover:text-primary hover:border-primary/30 transition-all shadow-sm"
+                                >
+                                    Gerenciar Histórico
+                                </button>
                             </div>
                         )
                         }
@@ -505,100 +570,107 @@ const ProfilePage = () => {
             {/* Edit Profile Modal */}
             {
                 isEditingProfile && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-                        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-border-light dark:border-border-dark">
-                            <div className="p-6 border-b border-border-light dark:border-border-dark">
-                                <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Editar Perfil</h2>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+                        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-border-light dark:border-border-dark scale-100 transform transition-transform">
+                            <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Editar Perfil</h2>
+                                <button onClick={() => setIsEditingProfile(false)} className="text-text-light-secondary hover:text-primary">
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
                             </div>
                             <form onSubmit={handleUpdateProfile} className="p-6 space-y-4">
                                 {updateError && (
-                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm flex gap-2 items-center">
+                                        <span className="material-symbols-outlined text-lg">error</span>
                                         {updateError}
                                     </div>
                                 )}
 
-                                <div>
-                                    <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
                                         Nome Completo
                                     </label>
                                     <input
                                         type="text"
                                         value={editForm.name}
                                         onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                                        className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                        className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
                                         placeholder="Seu nome"
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                        Usuário (Login)
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
+                                        Usuário
                                     </label>
                                     <input
                                         type="text"
                                         value={editForm.username}
                                         onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                                        className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                        className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
                                         placeholder="seu.usuario"
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-1">
-                                        Senha
+                                <div className="pt-2">
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary mb-1.5">
+                                        Segurança
                                     </label>
                                     {!showPassword ? (
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(true)}
-                                            className="text-sm text-primary hover:underline font-medium"
+                                            className="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10 w-full justify-center"
                                         >
+                                            <span className="material-symbols-outlined text-lg">lock_reset</span>
                                             Alterar senha
                                         </button>
                                     ) : (
-                                        <div className="space-y-4 animate-fadeIn">
+                                        <div className="space-y-3 animate-fadeIn bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-border-light dark:border-border-dark">
                                             <input
                                                 type="password"
                                                 value={editForm.password}
                                                 onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))}
-                                                className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                                className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
                                                 placeholder="Nova senha"
                                             />
                                             <input
                                                 type="password"
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                                className="w-full px-4 py-2 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/50 outline-none transition-all text-text-light-primary dark:text-text-dark-primary"
+                                                className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
                                                 placeholder="Confirmar nova senha"
                                             />
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setShowPassword(false);
-                                                    setEditForm(prev => ({ ...prev, password: '' }));
-                                                    setConfirmPassword('');
-                                                }}
-                                                className="text-xs text-red-500 hover:underline"
-                                            >
-                                                Cancelar alteração de senha
-                                            </button>
+                                            <div className="flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setShowPassword(false);
+                                                        setEditForm(prev => ({ ...prev, password: '' }));
+                                                        setConfirmPassword('');
+                                                    }}
+                                                    className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="flex gap-3 pt-2">
+                                <div className="flex gap-3 pt-4 border-t border-border-light dark:border-border-dark">
                                     <button
                                         type="button"
                                         onClick={() => setIsEditingProfile(false)}
-                                        className="flex-1 px-4 py-2 rounded-lg border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-medium"
+                                        className="flex-1 px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium text-sm"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors font-bold shadow-lg shadow-primary/20"
+                                        className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors font-medium text-sm shadow-sm"
                                     >
-                                        Salvar Alterações
+                                        Salvar
                                     </button>
                                 </div>
                             </form>
@@ -624,40 +696,40 @@ const CategoryProgress = ({ title, subjects, reqHours, reqCredits, color, bgColo
     return (
         <div
             onClick={onClick}
-            className={`bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-5 flex flex-col gap-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+            className={`bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 flex flex-col gap-4 group ${onClick ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
         >
-            <div className="flex items-center gap-3 mb-1">
-                <div className={`w-10 h-10 rounded-lg ${bgColor}/10 flex items-center justify-center`}>
-                    <span className={`material-symbols-outlined ${color}`}>{icon}</span>
+            <div className="flex items-center gap-4 mb-2">
+                <div className={`w-10 h-10 rounded-lg ${bgColor}/10 flex items-center justify-center shrink-0`}>
+                    <span className={`material-symbols-outlined ${color} text-xl`}>{icon}</span>
                 </div>
-                <h3 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">{title}</h3>
+                <h3 className="font-bold text-base text-text-light-primary dark:text-text-dark-primary leading-tight">{title}</h3>
             </div>
 
             <div className="space-y-4">
                 {/* Hours Progress */}
                 <div>
-                    <div className="flex justify-between text-sm mb-1.5">
-                        <span className="text-text-light-secondary dark:text-text-dark-secondary">Carga Horária</span>
+                    <div className="flex justify-between text-xs mb-2">
+                        <span className="text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wide font-semibold">Carga Horária</span>
                         <span className="font-medium text-text-light-primary dark:text-text-dark-primary">
                             {Math.round(totalHours)} / {reqHours} h
                         </span>
                     </div>
-                    <div className="w-full bg-border-light dark:border-border-dark rounded-full h-2">
-                        <div className={`h-2 rounded-full ${bgColor} transition-all duration-1000`} style={{ width: `${hoursPct}%` }}></div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div className={`h-full rounded-full ${bgColor} transition-all duration-1000`} style={{ width: `${hoursPct}%` }}></div>
                     </div>
                 </div>
 
                 {/* Credits Progress (only if reqCredits > 0) */}
                 {reqCredits > 0 && (
                     <div>
-                        <div className="flex justify-between text-sm mb-1.5">
-                            <span className="text-text-light-secondary dark:text-text-dark-secondary">Créditos</span>
+                        <div className="flex justify-between text-xs mb-2">
+                            <span className="text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wide font-semibold">Créditos</span>
                             <span className="font-medium text-text-light-primary dark:text-text-dark-primary">
                                 {totalCredits} / {reqCredits}
                             </span>
                         </div>
-                        <div className="w-full bg-border-light dark:border-border-dark rounded-full h-2">
-                            <div className={`h-2 rounded-full ${bgColor} opacity-70 transition-all duration-1000`} style={{ width: `${creditsPct}%` }}></div>
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div className={`h-full rounded-full ${bgColor} opacity-70 transition-all duration-1000`} style={{ width: `${creditsPct}%` }}></div>
                         </div>
                     </div>
                 )}

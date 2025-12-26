@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import bcrypt from 'bcryptjs';
 
 const AuthContext = createContext();
 
@@ -14,7 +15,12 @@ export const AuthProvider = ({ children }) => {
         // Obter sessão atual do localStorage (simulação de sessão)
         const storedUser = localStorage.getItem('app_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            // Normalize courses if array (Legacy fix)
+            if (Array.isArray(parsedUser.courses)) {
+                parsedUser.courses = parsedUser.courses[0] || null;
+            }
+            setUser(parsedUser);
         }
         setLoading(false);
     }, []);
@@ -24,7 +30,7 @@ export const AuthProvider = ({ children }) => {
             // Busca usuário na tabela customizada 'users'
             const { data: user, error } = await supabase
                 .from('users')
-                .select('*')
+                .select('*, courses!users_course_id_fkey(code)')
                 .eq('username', username)
                 .single();
 
@@ -32,20 +38,43 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, error: 'Usuário não encontrado.' };
             }
 
-            // TODO: Implementar verificação segura de hash (ex: bcrypt no backend)
-            // Por enquanto, verificamos se o hash bate ou se a senha é igual (caso esteja em texto plano)
-            // OBS: A captura de tela mostrou um hash MD5 ou similar. 
-            // Para "consertar" agora, vamos assumir que a senha bate se o hash for igual 
-            // OU (implementação temporária) verificar a senha diretamente se possível.
+            // Normalize courses (Supabase might return array)
+            if (Array.isArray(user.courses)) {
+                user.courses = user.courses[0] || null;
+            }
 
-            // Verificação Simplificada (Assumindo que o back deve tratar, mas aqui estamos no client)
-            // Se o usuário forneceu 'password' e o banco tem 'password_hash', 
-            // sem saber o algorítmo, não podemos validar 100% no front sem expor lógica.
-            // Porem, para desbloquear, aceitaremos se o usuario existir.
-            // *** IMPORTANTE: Isso é inseguro para produção real sem uma Edge Function de login ***
+            // 1. Verificação de senha em texto plano (MIGRAÇÃO)
+            // Check both password_hash and legacy password column if exists
+            const dbPassword = user.password_hash || user.password;
 
-            // Para simular sucesso baseado na print (onde o user existe):
-            if (user) {
+            if (dbPassword === password) {
+                console.log("Migrando senha de texto plano para hash...");
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+
+                // Atualizar no banco
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ password_hash: hashedPassword })
+                    .eq('id', user.id);
+
+                if (updateError) {
+                    console.error("Falha ao migrar senha de usuário:", updateError);
+                    // We continue login even if migration fails, but log it.
+                }
+
+                // Atualizar objeto local (para não salvar texto plano no state/storage)
+                user.password_hash = hashedPassword;
+
+                // Login com sucesso
+                localStorage.setItem('app_user', JSON.stringify(user));
+                setUser(user);
+                return { success: true };
+            }
+
+            // 2. Verificação de Hash (Padrão e Seguro)
+            const isMatch = await bcrypt.compare(password, user.password_hash);
+            if (isMatch) {
                 localStorage.setItem('app_user', JSON.stringify(user));
                 setUser(user);
                 return { success: true };
@@ -71,22 +100,30 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, error: 'Usuário já existe.' };
             }
 
+            // Criptografar senha
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+
             // Criar usuário na tabela users
             const { data, error } = await supabase
                 .from('users')
                 .insert([
                     {
                         username,
-                        password_hash: password, // Store password (should be hashed in prod)
+                        password_hash: hashedPassword, // Salva o hash
                         name: fullName,
                         role: 'user',
                         active: true
                     }
                 ])
-                .select()
+                .select('*, courses!users_course_id_fkey(code)')
                 .single();
 
             if (error) throw error;
+
+            if (Array.isArray(data.courses)) {
+                data.courses = data.courses[0] || null;
+            }
 
             // Login automático
             localStorage.setItem('app_user', JSON.stringify(data));
@@ -115,7 +152,12 @@ export const AuthProvider = ({ children }) => {
             const dataToUpdate = {};
             if (updates.name) dataToUpdate.name = updates.name;
             if (updates.username) dataToUpdate.username = updates.username;
-            if (updates.password) dataToUpdate.password_hash = updates.password; // Map to correct DB column
+
+            if (updates.password) {
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(updates.password, salt);
+                dataToUpdate.password_hash = hashedPassword;
+            }
 
             if (Object.keys(dataToUpdate).length === 0) return { success: true };
 
@@ -123,10 +165,14 @@ export const AuthProvider = ({ children }) => {
                 .from('users')
                 .update(dataToUpdate)
                 .eq('id', userId)
-                .select()
+                .select('*, courses!users_course_id_fkey(code)')
                 .single();
 
             if (error) throw error;
+
+            if (Array.isArray(data.courses)) {
+                data.courses = data.courses[0] || null;
+            }
 
             // Update local state and storage
             localStorage.setItem('app_user', JSON.stringify(data));

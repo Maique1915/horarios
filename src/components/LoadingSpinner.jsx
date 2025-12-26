@@ -30,7 +30,7 @@ const LoadingSpinner = ({
         <div className={containerClasses}>
             <div className="text-center">
                 {/* Spinner animado */}
-                <div className={`animate-spin rounded-full ${sizeClasses[size]} border-b-2 border-primary mx-auto mb-4`}></div>
+                <div className={`animate-spin rounded-full ${sizeClasses[size]} border-4 border-slate-200 dark:border-slate-700 border-t-primary mx-auto mb-4`}></div>
 
                 {/* Mensagem principal */}
                 <p className="text-text-light-secondary dark:text-text-dark-secondary text-lg font-medium mb-2">

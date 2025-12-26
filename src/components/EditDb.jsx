@@ -2,15 +2,11 @@
 
 import React, { useState } from 'react';
 import Select from 'react-select';
-// import makeAnimated from 'react-select/animated'; // Not used in this View directly anymore if only in Form
-import '../styles/EditDb.css';
 import { useParams } from 'next/navigation';
 import DisciplinaForm from './DisciplinaForm';
 import DisciplinaTable from './DisciplinaTable';
 import LoadingSpinner, { SavingSpinner } from './LoadingSpinner';
 import { useDisciplinas } from '../hooks/useDisciplinas';
-
-// const animatedComponents = makeAnimated(); // Not used
 
 const EditDb = () => {
   const params = useParams();
@@ -21,7 +17,7 @@ const EditDb = () => {
     disciplinas,
     loading,
     error,
-    pendingChanges,
+    // pendingChanges,
     syncing,
     courseSchedule,
     courseDimension,
@@ -29,7 +25,7 @@ const EditDb = () => {
     updateDisciplina,
     removeDisciplina,
     toggleStatus,
-    handleCommit,
+    // handleCommit,
     refresh
   } = useDisciplinas(cur);
 
@@ -50,19 +46,24 @@ const EditDb = () => {
   const [filtroTexto, setFiltroTexto] = useState('');
 
   // Handlers for UI interactions
+  // Handlers for UI interactions
   const handleEditDisciplinaInteraction = (disciplinaToEdit) => {
     setEditingDisciplineId(disciplinaToEdit._re);
     setEditingDisciplina({ ...disciplinaToEdit });
     setShowForm(true);
   };
 
-  const handleSaveDisciplinaInteraction = (updatedDataFromForm) => {
+  const handleSaveDisciplinaInteraction = async (updatedDataFromForm) => {
     // If editing, we update
-    updateDisciplina(editingDisciplina._re, updatedDataFromForm);
-
-    setEditingDisciplina(null);
-    setEditingDisciplineId(null);
-    setShowForm(false);
+    const result = await updateDisciplina(editingDisciplina._re, updatedDataFromForm);
+    if (result.success) {
+      setEditingDisciplina(null);
+      setEditingDisciplineId(null);
+      setShowForm(false);
+      alert('✅ Disciplina atualizada com sucesso!');
+    } else {
+      alert('❌ Erro ao atualizar disciplina: ' + (result.error?.message || result.error));
+    }
   };
 
   const handleCancelFormInteraction = () => {
@@ -73,31 +74,34 @@ const EditDb = () => {
     setShowForm(false);
   };
 
-  const handleAddDisciplinaInteraction = (newDisciplineData) => {
-    addDisciplina(newDisciplineData);
-    handleCancelFormInteraction();
+  const handleAddDisciplinaInteraction = async (newDisciplineData) => {
+    const result = await addDisciplina(newDisciplineData);
+    if (result.success) {
+      handleCancelFormInteraction();
+      alert('✅ Disciplina adicionada com sucesso!');
+    } else {
+      alert('❌ Erro ao adicionar disciplina: ' + (result.error?.message || result.error));
+    }
   };
 
-  const handleRemoveDisciplinaInteraction = (disciplinaToCheck) => {
+  const handleRemoveDisciplinaInteraction = async (disciplinaToCheck) => {
     if (!window.confirm(`Excluir removerá a matéria do sistema. Se a matéria só não vai ser dada no semestre seguinte, basta desativá-la. Tem certeza que deseja remover a disciplina "${disciplinaToCheck._di}" (${disciplinaToCheck._re})?`)) {
       return;
     }
-    removeDisciplina(disciplinaToCheck);
-    setEditingDisciplina(null);
-  };
-
-  const onCommitClick = async () => {
-    if (!window.confirm(`Você tem certeza que deseja commitar ${pendingChanges.length} alterações?`)) {
-      return;
-    }
-    const result = await handleCommit();
+    const result = await removeDisciplina(disciplinaToCheck);
     if (result.success) {
-      alert('✅ Alterações salvas com sucesso no Supabase!');
+      setEditingDisciplina(null);
+      alert('✅ Disciplina removida com sucesso!');
     } else {
-      alert(`❌ Erro ao salvar no Supabase: ${result.error.message}`);
+      alert('❌ Erro ao remover disciplina: ' + (result.error?.message || result.error));
     }
-  };
 
+  };
+  /*
+    const onCommitClick = async () => {
+       // Commit logic removed
+    };
+  */
   const onRefreshClick = async () => {
     await refresh();
     alert('✅ Dados recarregados!');
@@ -106,23 +110,7 @@ const EditDb = () => {
   const handleDisciplineUpdateState = (updatedDisciplina) => {
     // This was used when Form updated the state directly. 
     // Now the form calls onSubmit which we handle.
-    // But DisciplinaForm might call onStateChange for class schedule updates that are saved immediately?
-    // In the original code, `handleDisciplineUpdate` updated `disciplinas` state locally.
-    // If DisciplinaForm saves classes directly to DB (as it seems to do in original code),
-    // we might need to refresh or update local state.
-    // The original `handleDisciplineUpdate` was:
-    // setDisciplinas(prev => prev.map(d => d._id === updatedDisciplina._id ? updatedDisciplina : d));
-
-    // We can replicate this local update if needed, but `updateDisciplina` might be cleaner.
-    // However, `updateDisciplina` queues a change. 
-    // `DisciplinaForm` has internal saving for classes that goes DIRECTLY to DB (saveClassSchedule).
-    // So effectively, class updates are side-effects.
-    // Ideally we should move class saving to the service/hook too, but for now let's support the callback.
-
-    // Since `disciplinas` comes from the hook, we can't set it directly here unless exposure.
-    // But we can trigger a re-fetch or ignore if it's just visual.
   };
-
 
   // Filter Logic
   const opcoesPeriodo = [...new Set(disciplinas.map(d => d._se))].sort((a, b) => a - b).map(se => ({ value: se, label: `${se}º Período` }));
@@ -143,6 +131,16 @@ const EditDb = () => {
     return true;
   });
 
+  // Custom styles for react-select to match the design system
+  const customSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
+      borderWidth: 0,
+      boxShadow: 'none',
+    })
+  };
 
   if (loading) {
     return <LoadingSpinner message="Carregando disciplinas..." />;
@@ -161,93 +159,110 @@ const EditDb = () => {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark min-h-screen">
       {/* Overlay de salvamento */}
       {syncing && <SavingSpinner message="Salvando no Supabase..." />}
 
       <div className="mx-auto max-w-[1920px] p-6 lg:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div className="flex flex-col gap-1">
-            <p className="text-3xl font-bold leading-tight tracking-tight">Gerenciamento de Disciplinas do Curso</p>
+            <h1 className="text-3xl font-display font-bold leading-tight tracking-tight text-text-light-primary dark:text-text-dark-primary">
+              Gerenciar Oferta
+            </h1>
             <p className="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">
-              Adicione, edite ou remova disciplinas diretamente no Supabase.
+              Adicione, edite ou remova disciplinas da oferta acadêmica.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
-              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-green-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl h-11 px-5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary text-sm font-bold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed group`}
               onClick={onRefreshClick}
               disabled={syncing}
             >
-              <span className="material-symbols-outlined text-xl">refresh</span>
+              <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
               <span className="truncate">Recarregar</span>
-            </button>
-            <button
-              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-blue-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={onCommitClick}
-              disabled={pendingChanges.length === 0 || syncing}
-            >
-              <span className="material-symbols-outlined text-xl">save</span>
-              <span className="truncate">Commit ({pendingChanges.length})</span>
             </button>
 
             <button
-              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-10 px-4 bg-purple-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl h-11 px-5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary text-sm font-bold shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => window.location.href = `/${cur}/turmas`}
               disabled={syncing}
             >
-              <span className="material-symbols-outlined text-xl">calendar_month</span>
-              <span className="truncate">Novas Grades</span>
+              <span className="material-symbols-outlined text-xl text-primary">calendar_month</span>
+              <span className="truncate">Ver Grades</span>
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left Column: Table and Filters */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <div className="rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm">
-              <div className="flex gap-3 p-4 border-b border-border-light dark:border-border-dark">
-                <div className="w-1/6">
+          <div className="lg:col-span-3 flex flex-col gap-6">
+            <div className="rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm overflow-hidden">
+              {/* Filters Header */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 p-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-900/20">
+                <div className="sm:col-span-3">
                   <Select
                     placeholder="Período"
                     options={opcoesPeriodo}
                     onChange={setFiltroPeriodo}
                     isClearable
                     classNamePrefix="select"
+                    classNames={{
+                      control: () => '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px]',
+                      menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-lg !mt-1',
+                      option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200',
+                      singleValue: () => '!text-slate-800 dark:!text-slate-200',
+                      placeholder: () => '!text-slate-400'
+                    }}
+                    styles={customSelectStyles}
                   />
                 </div>
-                <div className="w-1/6">
+                <div className="sm:col-span-2">
                   <Select
                     placeholder="Tipo"
                     options={opcoesEl}
                     onChange={setFiltroEl}
                     isClearable
                     classNamePrefix="select"
+                    classNames={{
+                      control: () => '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px]',
+                      menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-lg !mt-1',
+                      option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200',
+                      singleValue: () => '!text-slate-800 dark:!text-slate-200',
+                      placeholder: () => '!text-slate-400'
+                    }}
+                    styles={customSelectStyles}
                   />
                 </div>
-                <div className="w-1/6">
+                <div className="sm:col-span-3">
                   <Select
                     placeholder="Status"
                     options={opcoesStatus}
                     onChange={setFiltroStatus}
                     isClearable
                     classNamePrefix="select"
+                    classNames={{
+                      control: () => '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px]',
+                      menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-lg !mt-1',
+                      option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200',
+                      singleValue: () => '!text-slate-800 dark:!text-slate-200',
+                      placeholder: () => '!text-slate-400'
+                    }}
+                    styles={customSelectStyles}
                   />
                 </div>
-                <div className="flex-1">
-                  <label className="flex flex-col h-10 w-full">
-                    <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
-                      <div className="text-text-light-secondary dark:text-text-dark-secondary flex border-r-0 items-center justify-center pl-3 pr-2 bg-background-light dark:bg-background-dark rounded-l-lg border border-border-light dark:border-border-dark border-r-0">
-                        <span className="material-symbols-outlined text-xl">search</span>
-                      </div>
-                      <input
-                        className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:ring-2 focus:ring-primary h-full placeholder:text-text-light-secondary placeholder:dark:text-text-dark-secondary px-2 border-l-0 text-sm font-normal leading-normal"
-                        placeholder="Pesquisar..."
-                        value={filtroTexto}
-                        onChange={(e) => setFiltroTexto(e.target.value)}
-                      />
+                <div className="sm:col-span-4">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <span className="material-symbols-outlined text-xl">search</span>
                     </div>
-                  </label>
+                    <input
+                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm shadow-sm transition-all h-[40px]"
+                      placeholder="Pesquisar disciplina..."
+                      value={filtroTexto}
+                      onChange={(e) => setFiltroTexto(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -277,8 +292,8 @@ const EditDb = () => {
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </div >
+    </main >
   );
 };
 

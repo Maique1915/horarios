@@ -2,17 +2,17 @@
 @plugin "@tailwindcss/forms";
 
 @theme {
-  --color-primary: #135bec;
-  --color-background-light: #f6f6f8;
-  --color-background-dark: #101622;
-  --color-surface-light: #ffffff;
-  --color-surface-dark: #1a2332;
-  --color-text-light-primary: #0d121b;
-  --color-text-dark-primary: #f1f3f7;
-  --color-text-light-secondary: #4c669a;
-  --color-text-dark-secondary: #a0b3d7;
-  --color-border-light: #e7ebf3;
-  --color-border-dark: #344159;
+  --color-primary: #2563EB;
+  --color-background-light: #F8FAFC;
+  --color-background-dark: #0F172A;
+  --color-surface-light: #FFFFFF;
+  --color-surface-dark: #1E293B;
+  --color-text-light-primary: #0F172A;
+  --color-text-dark-primary: #F8FAFC;
+  --color-text-light-secondary: #64748B;
+  --color-text-dark-secondary: #94A3B8;
+  --color-border-light: #E2E8F0;
+  --color-border-dark: #334155;
 
   --font-display: Lexend, sans-serif;
 

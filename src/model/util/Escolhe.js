@@ -1,5 +1,3 @@
-import Materias from '../Materias'
-
 export default class Escolhe {
 
     constructor(genesis, cur, dimension, schedule) {

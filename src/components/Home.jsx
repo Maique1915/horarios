@@ -76,17 +76,17 @@ const Home = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background-light via-surface-light to-background-light dark:from-background-dark dark:via-surface-dark dark:to-background-dark">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark">
             <div className="max-w-7xl mx-auto px-4 py-16">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <h1 className="text-5xl font-bold text-text-light-primary dark:text-text-dark-primary mb-4">
+                <div className="text-center mb-16">
+                    <h1 className="text-5xl font-bold text-text-light-primary dark:text-text-dark-primary mb-6 tracking-tight">
                         Horários CEFET
                     </h1>
-                    <p className="text-xl text-text-light-secondary dark:text-text-dark-secondary mb-2">
+                    <p className="text-xl text-text-light-secondary dark:text-text-dark-secondary mb-2 font-light">
                         Selecione seu curso para começar
                     </p>
-                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary opacity-80">
                         Monte sua grade horária de forma inteligente
                     </p>
                 </div>
@@ -97,58 +97,58 @@ const Home = () => {
                         <div
                             key={course.code}
                             onClick={() => router.push(`/${course.code}`)}
-                            className="w-full group bg-surface-light dark:bg-surface-dark rounded-xl border-2 border-border-light dark:border-border-dark p-5 cursor-pointer hover:shadow-xl hover:scale-105 hover:border-primary transition-all duration-300"
+                            className="w-full group bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 hover:border-primary/50 transition-all duration-300"
                         >
                             <div className="flex flex-col items-center text-center">
                                 {/* Icon */}
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-symbols-outlined text-2xl text-white">
+                                <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300">
+                                    <span className="material-symbols-outlined text-3xl text-primary">
                                         school
                                     </span>
                                 </div>
 
                                 {/* Course Info */}
-                                <h3 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary mb-1 group-hover:text-primary transition-colors">
+                                <h3 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary mb-1.5 group-hover:text-primary transition-colors">
                                     {course.name.toUpperCase()}
                                 </h3>
-                                <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mb-3 line-clamp-2">
+                                <p className="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary mb-6 uppercase tracking-wider">
                                     {course.code}
                                 </p>
 
                                 {/* Stats */}
-                                <div className="flex gap-4 w-full justify-center pt-3 border-t border-border-light dark:border-border-dark">
+                                <div className="flex gap-8 w-full justify-center pt-5 border-t border-border-light dark:border-border-dark">
                                     <div className="flex flex-col items-center">
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <span className="material-symbols-outlined text-sm text-primary">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="material-symbols-outlined text-lg text-primary/80">
                                                 book
                                             </span>
-                                            <span className="text-lg font-bold text-primary">
+                                            <span className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
                                                 {course.disciplineCount}
                                             </span>
                                         </div>
-                                        <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                                        <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wide">
                                             disciplinas
                                         </span>
                                     </div>
                                     <div className="flex flex-col items-center">
-                                        <div className="flex items-center gap-1 mb-0.5">
-                                            <span className="material-symbols-outlined text-sm text-primary">
+                                        <div className="flex items-center gap-1.5 mb-0.5">
+                                            <span className="material-symbols-outlined text-lg text-primary/80">
                                                 calendar_month
                                             </span>
-                                            <span className="text-lg font-bold text-primary">
+                                            <span className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
                                                 {course.periods}
                                             </span>
                                         </div>
-                                        <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                                        <span className="text-xs font-medium text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wide">
                                             períodos
                                         </span>
                                     </div>
                                 </div>
 
-                                {/* Arrow */}
-                                <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="material-symbols-outlined text-primary animate-pulse text-base">
-                                        arrow_forward
+                                {/* Arrow - Subtle indication */}
+                                <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 text-primary">
+                                    <span className="material-symbols-outlined text-xl">
+                                        arrow_downward
                                     </span>
                                 </div>
                             </div>
@@ -159,25 +159,25 @@ const Home = () => {
                 {/* Empty State */}
                 {courses.length === 0 && (
                     <div className="text-center py-20">
-                        <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                            <span className="material-symbols-outlined text-6xl text-primary">
+                        <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6">
+                            <span className="material-symbols-outlined text-5xl text-slate-400">
                                 school
                             </span>
                         </div>
-                        <h3 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-3">
+                        <h3 className="text-xl font-semibold text-text-light-primary dark:text-text-dark-primary mb-2">
                             Nenhum curso encontrado
                         </h3>
-                        <p className="text-text-light-secondary dark:text-text-dark-secondary mb-8">
-                            Configure os cursos no Google Sheets para começar
+                        <p className="text-text-light-secondary dark:text-text-dark-secondary mb-8 text-sm">
+                            Configure os cursos no banco de dados para começar
                         </p>
                     </div>
                 )}
 
                 {/* Footer Actions */}
-                <div className="flex justify-center gap-4 mt-12">
+                <div className="flex justify-center gap-4 mt-16">
                     <button
                         onClick={() => router.push('/edit')}
-                        className="flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-colors bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark hover:bg-background-light dark:hover:bg-background-dark"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light-secondary hover:text-primary hover:border-primary/30 shadow-sm"
                     >
                         <span className="material-symbols-outlined text-lg">settings</span>
                         <span>Gerenciar Cursos</span>

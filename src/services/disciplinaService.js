@@ -264,7 +264,110 @@ const processSubjectData = (item, requirementsMap, schedulesBySubjectId) => {
     };
 };
 
+// Atomic Operations for Immediate Persistence
+
+export const addSubject = async (courseCode, subjectData) => {
+    const { _di, _re, _se, _at, _ap, _el, _ag, _pr, _classSchedules } = subjectData;
+
+    const { data: courseData, error: courseError } = await supabase.from('courses').select('id').eq('code', courseCode).single();
+    if (courseError || !courseData) throw new Error(`Curso ${courseCode} não encontrado.`);
+    const courseId = courseData.id;
+
+    // Logic: _el=true (Optativa) -> DB: elective=false (Not Mandatory)
+    const dbElective = !_el;
+
+    const { data: insertedData, error } = await supabase.from('subjects').insert({
+        name: _di,
+        acronym: _re,
+        semester: _se,
+        has_theory: _at,
+        has_practical: _ap,
+        elective: dbElective,
+        active: _ag,
+        course_id: courseId
+    }).select().single();
+
+    if (error) throw error;
+    const subjectId = insertedData.id;
+
+    const { subjectAcronyms, minCredits } = splitPrerequisites(_pr);
+
+    if (subjectAcronyms.length > 0) {
+        const { data: prereqSubjects, error: prereqError } = await supabase.from('subjects').select('id, acronym').in('acronym', subjectAcronyms);
+        if (prereqError) throw prereqError;
+        const newRequirements = prereqSubjects.map(ps => ({ subject_id: subjectId, prerequisite_subject_id: ps.id, type: 'SUBJECT' }));
+        await supabase.from('subject_requirements').insert(newRequirements);
+    }
+    if (minCredits > 0) {
+        await supabase.from('subject_requirements').insert({
+            subject_id: subjectId,
+            type: 'CREDITS',
+            min_credits: minCredits
+        });
+    }
+
+    if (_classSchedules && _classSchedules.length > 0) await saveClassSchedule(subjectId, _classSchedules);
+    return insertedData;
+};
+
+export const updateSubject = async (courseCode, subjectId, subjectData) => {
+    const { _di, _re, _se, _at, _ap, _el, _ag, _pr } = subjectData;
+
+    // Logic: _el=true (Optativa) -> DB: elective=false (Not Mandatory)
+    const dbElective = !_el;
+
+    const { error } = await supabase.from('subjects').update({
+        name: _di,
+        acronym: _re,
+        semester: _se,
+        has_theory: _at,
+        has_practical: _ap,
+        elective: dbElective,
+        active: _ag
+    }).eq('id', subjectId);
+
+    if (error) throw error;
+
+    // Update requirements
+    await supabase.from('subject_requirements').delete().eq('subject_id', subjectId);
+
+    const { subjectAcronyms, minCredits } = splitPrerequisites(_pr);
+
+    if (subjectAcronyms.length > 0) {
+        const { data: prereqSubjects } = await supabase.from('subjects').select('id, acronym').in('acronym', subjectAcronyms);
+        const newRequirements = prereqSubjects.map(ps => ({ subject_id: subjectId, prerequisite_subject_id: ps.id, type: 'SUBJECT' }));
+        await supabase.from('subject_requirements').insert(newRequirements);
+    }
+    if (minCredits > 0) {
+        await supabase.from('subject_requirements').insert({
+            subject_id: subjectId,
+            type: 'CREDITS',
+            min_credits: minCredits
+        });
+    }
+    return { id: subjectId };
+};
+
+export const deleteSubject = async (subjectId) => {
+    const { error } = await supabase.from('subjects').delete().eq('id', subjectId);
+    if (error) throw error;
+};
+
+export const deleteSubjectByAcronym = async (courseCode, acronym) => {
+    const { data: courseData } = await supabase.from('courses').select('id').eq('code', courseCode).single();
+    if (!courseData) throw new Error("Course not found");
+
+    const { error } = await supabase.from('subjects').delete().eq('acronym', acronym).eq('course_id', courseData.id);
+    if (error) throw error;
+};
+
+export const toggleSubjectStatus = async (subjectId, isActive) => {
+    const { error } = await supabase.from('subjects').update({ active: isActive }).eq('id', subjectId);
+    if (error) throw error;
+};
+
 export const commitChanges = async (changes, courseCode) => {
+    // Legacy function support if needed, or redirect to new atomic functions
     const { data: courseData, error: courseError } = await supabase.from('courses').select('id').eq('code', courseCode).single();
     if (courseError || !courseData) throw new Error(`Curso ${courseCode} não encontrado no Supabase.`);
     const courseId = courseData.id;
@@ -274,87 +377,21 @@ export const commitChanges = async (changes, courseCode) => {
         const appData = payload.data;
 
         if (type === 'addDiscipline') {
-            const { _di, _re, _se, _at, _ap, _el, _ag, _pr, _classSchedules } = appData;
-
-            // CORRECTION: Invert _el for DB (True in App = False in DB for 'elective' column per new logic)
-            // App: _el=true (Optativa) -> DB: elective=false (Not Mandatory)
-            // App: _el=false (Obrigatória) -> DB: elective=true (Mandatory)
-            const dbElective = !_el;
-
-            const { data: insertedData, error } = await supabase.from('subjects').insert({
-                name: _di,
-                acronym: _re,
-                semester: _se,
-                has_theory: _at,          // Integer
-                has_practical: _ap,        // Integer (with typo)
-                elective: dbElective,
-                active: _ag,
-                course_id: courseId
-            }).select().single();
-
-            if (error) throw error;
-            const subjectId = insertedData.id;
-
-            const { subjectAcronyms, minCredits } = splitPrerequisites(_pr);
-
-            if (subjectAcronyms.length > 0) {
-                const { data: prereqSubjects, error: prereqError } = await supabase.from('subjects').select('id, acronym').in('acronym', subjectAcronyms);
-                if (prereqError) throw prereqError;
-                const newRequirements = prereqSubjects.map(ps => ({ subject_id: subjectId, prerequisite_subject_id: ps.id, type: 'SUBJECT' }));
-                await supabase.from('subject_requirements').insert(newRequirements);
-            }
-            if (minCredits > 0) {
-                await supabase.from('subject_requirements').insert({
-                    subject_id: subjectId,
-                    type: 'CREDITS',
-                    min_credits: minCredits
-                });
-            }
-
-            if (_classSchedules && _classSchedules.length > 0) await saveClassSchedule(subjectId, _classSchedules);
-
+            await addSubject(courseCode, appData);
         } else if (type === 'updateDiscipline') {
-            const { _di, _re, _se, _at, _ap, _el, _ag, _pr } = payload.data;
             let subjectId = payload.id;
             if (!subjectId) {
                 const { data: subject } = await supabase.from('subjects').select('id').eq('acronym', payload.reference).eq('course_id', courseId).single();
                 subjectId = subject.id;
             }
-
-            // CORRECTION: Invert _el for DB
-            const dbElective = !_el;
-
-            await supabase.from('subjects').update({
-                name: _di,
-                acronym: _re,
-                semester: _se,
-                has_theory: _at,          // Integer credits
-                has_practical: _ap,        // Integer credits (with typo)
-                elective: dbElective,
-                active: _ag
-            }).eq('id', subjectId);
-
-            await supabase.from('subject_requirements').delete().eq('subject_id', subjectId);
-
-            const { subjectAcronyms, minCredits } = splitPrerequisites(_pr);
-
-            if (subjectAcronyms.length > 0) {
-                const { data: prereqSubjects } = await supabase.from('subjects').select('id, acronym').in('acronym', subjectAcronyms);
-                const newRequirements = prereqSubjects.map(ps => ({ subject_id: subjectId, prerequisite_subject_id: ps.id, type: 'SUBJECT' }));
-                await supabase.from('subject_requirements').insert(newRequirements);
-            }
-            if (minCredits > 0) {
-                await supabase.from('subject_requirements').insert({
-                    subject_id: subjectId,
-                    type: 'CREDITS',
-                    min_credits: minCredits
-                });
-            }
-
+            await updateSubject(courseCode, subjectId, appData);
         } else if (type === 'deleteDiscipline') {
-            if (payload.id) await supabase.from('subjects').delete().eq('id', payload.id);
-            else await supabase.from('subjects').delete().eq('acronym', payload.reference).eq('course_id', courseId);
+            if (payload.id) await deleteSubject(payload.id);
+            else await deleteSubjectByAcronym(courseCode, payload.reference);
         } else if (type === 'activate' || type === 'deactivate') {
+            // This one is tricky because we need ID or Acronym. 
+            // payload.reference is acronym.
+            // Let's look up ID or use acronym updater.
             await supabase.from('subjects').update({ active: type === 'activate' }).eq('acronym', payload.reference).eq('course_id', courseId);
         }
     }

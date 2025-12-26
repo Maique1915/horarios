@@ -76,21 +76,21 @@ const Login = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background-light via-surface-light to-background-light dark:from-background-dark dark:via-surface-dark dark:to-background-dark flex items-center justify-center p-4">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Card */}
-                <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden">
+                <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-border-light dark:border-border-dark overflow-hidden transition-all">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-primary to-primary/80 p-8 text-center">
-                        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                            <span className="material-symbols-outlined text-5xl text-white">
+                    <div className="p-8 text-center border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
+                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
+                            <span className="material-symbols-outlined text-4xl">
                                 {isRegistering ? 'person_add' : 'lock'}
                             </span>
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-2">
+                        <h1 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2 tracking-tight">
                             {isRegistering ? 'Criar Conta' : 'Área Restrita'}
                         </h1>
-                        <p className="text-white/90 text-sm">
+                        <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
                             {isRegistering ? 'Preencha os dados para se cadastrar' : 'Acesso exclusivo para administradores'}
                         </p>
                     </div>
@@ -99,12 +99,12 @@ const Login = () => {
                     <form onSubmit={handleSubmit} className="p-8 space-y-6">
                         {/* Error Message */}
                         {error && (
-                            <div className={`border rounded-lg p-4 flex items-start gap-3 ${error.includes('sucesso') ? 'bg-green-500/10 border-green-500/50' : 'bg-red-500/10 border-red-500/50'}`}>
-                                <span className={`material-symbols-outlined text-xl ${error.includes('sucesso') ? 'text-green-500' : 'text-red-500'}`}>
+                            <div className={`border rounded-lg p-3 flex items-start gap-3 ${error.includes('sucesso') ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                                <span className={`material-symbols-outlined text-lg ${error.includes('sucesso') ? 'text-green-600' : 'text-red-500'}`}>
                                     {error.includes('sucesso') ? 'check_circle' : 'error'}
                                 </span>
                                 <div className="flex-1">
-                                    <p className={`text-sm font-medium ${error.includes('sucesso') ? 'text-green-500' : 'text-red-500'}`}>
+                                    <p className={`text-sm font-medium ${error.includes('sucesso') ? 'text-green-700' : 'text-red-600'}`}>
                                         {error}
                                     </p>
                                 </div>
@@ -112,8 +112,8 @@ const Login = () => {
                         )}
 
                         {/* Username */}
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
                                 Usuário
                             </label>
                             <div className="relative">
@@ -124,8 +124,8 @@ const Login = () => {
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                    placeholder="Digite seu usuário"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-slate-400"
+                                    placeholder="Seu usuário"
                                     required
                                     autoFocus
                                 />
@@ -134,8 +134,8 @@ const Login = () => {
 
                         {/* Name Field for Registration */}
                         {isRegistering && (
-                            <div className="space-y-2 animate-fadeIn">
-                                <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                            <div className="space-y-1.5 animate-fadeIn">
+                                <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
                                     Nome Completo
                                 </label>
                                 <div className="relative">
@@ -146,8 +146,8 @@ const Login = () => {
                                         type="text"
                                         value={fullName}
                                         onChange={(e) => setFullName(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                        placeholder="Digite seu nome"
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-slate-400"
+                                        placeholder="Seu nome completo"
                                         required
                                     />
                                 </div>
@@ -155,8 +155,8 @@ const Login = () => {
                         )}
 
                         {/* Password */}
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
                                 Senha
                             </label>
                             <div className="relative">
@@ -167,8 +167,8 @@ const Login = () => {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full pl-12 pr-12 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                    placeholder="Digite sua senha"
+                                    className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-slate-400"
+                                    placeholder="Sua senha"
                                     required
                                     minLength={6}
                                 />
@@ -186,8 +186,8 @@ const Login = () => {
 
                         {/* Confirm Password */}
                         {isRegistering && (
-                            <div className="space-y-2 animate-fadeIn">
-                                <label className="block text-sm font-medium text-text-light-primary dark:text-text-dark-primary">
+                            <div className="space-y-1.5 animate-fadeIn">
+                                <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
                                     Confirmar Senha
                                 </label>
                                 <div className="relative">
@@ -198,8 +198,8 @@ const Login = () => {
                                         type={showPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                        placeholder="Confirme sua senha"
+                                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-slate-400"
+                                        placeholder="Confirme a senha"
                                         required
                                         minLength={6}
                                     />
@@ -211,17 +211,17 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                            className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:translate-y-px"
                         >
                             {loading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    <span>{isRegistering ? 'Cadastrando...' : 'Autenticando...'}</span>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                                    <span className="text-sm">{isRegistering ? 'Cadastrando...' : 'Autenticando...'}</span>
                                 </>
                             ) : (
                                 <>
-                                    <span>{isRegistering ? 'Cadastrar' : 'Entrar'}</span>
-                                    <span className="material-symbols-outlined text-xl">
+                                    <span className="text-sm">{isRegistering ? 'Cadastrar' : 'Entrar'}</span>
+                                    <span className="material-symbols-outlined text-lg">
                                         {isRegistering ? 'person_add' : 'arrow_forward'}
                                     </span>
                                 </>
@@ -235,7 +235,7 @@ const Login = () => {
                                     setIsRegistering(!isRegistering);
                                     setError('');
                                 }}
-                                className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                                className="text-xs text-text-light-secondary hover:text-primary font-medium transition-colors"
                             >
                                 {isRegistering
                                     ? 'Já tem uma conta? Faça login'
@@ -245,12 +245,12 @@ const Login = () => {
                     </form>
 
                     {/* Footer */}
-                    <div className="px-8 pb-8 text-center">
+                    <div className="px-8 pb-6 text-center border-t border-border-light dark:border-border-dark pt-6 bg-slate-50/30">
                         <button
                             onClick={() => router.push('/')}
-                            className="text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors flex items-center gap-1 mx-auto"
+                            className="text-xs text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors flex items-center gap-1.5 mx-auto font-medium"
                         >
-                            <span className="material-symbols-outlined text-base">
+                            <span className="material-symbols-outlined text-sm">
                                 arrow_back
                             </span>
                             <span>Voltar para Home</span>
@@ -258,14 +258,14 @@ const Login = () => {
                     </div>
                 </div>
 
-                {/* Info Card */}
+                {/* Info Card - Simpler */}
                 {!isRegistering && (
-                    <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 text-center">
-                        <p className="text-sm text-blue-600 dark:text-blue-400 flex items-center justify-center gap-2">
-                            <span className="material-symbols-outlined text-base">
-                                info
+                    <div className="mt-6 text-center">
+                        <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5">
+                            <span className="material-symbols-outlined text-sm">
+                                lock
                             </span>
-                            <span>Acesso restrito a usuários autorizados</span>
+                            <span>Acesso restrito administrativas</span>
                         </p>
                     </div>
                 )}

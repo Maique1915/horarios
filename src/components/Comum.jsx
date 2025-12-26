@@ -4,7 +4,19 @@ import { getDays, getTimeSlots } from '../services/scheduleService';
 import { loadClassesForGrid, saveCurrentEnrollments } from '../services/disciplinaService';
 import { useAuth } from '../contexts/AuthContext';
 
-const cores = ["#E3F2FD", "#E8F5E9", "#FFFDE7", "#FBE9E7", "#F3E5F5", "#E0F7FA", "#F1F8E9", "#FFF3E0", "#EDE7F6", "#FFEBEE"];
+// Cores mais suaves e modernas para o design system
+const cores = [
+    "#E2E8F0", // slate-200
+    "#F1F5F9", // slate-100
+    "#DBEAFE", // blue-100
+    "#E0E7FF", // indigo-100
+    "#FAE8FF", // fuchsia-100
+    "#F3E8FF", // purple-100
+    "#FFE4E6", // rose-100
+    "#FEF3C7", // amber-100
+    "#D1FAE5", // emerald-100
+    "#CCFBF1", // teal-100
+];
 const rand = Math.floor(Math.random() * cores.length);
 
 const dataAtual = new Date();
@@ -229,26 +241,27 @@ const Comum = (props) => {
 
         // Dados da grade "nova" 
         const conteudoNovo = grades[newGradeId]?.[numLinha]?.[numCelula] || "";
-        const corNova = coresGrade[newGradeId]?.[numLinha]?.[numCelula] || "transparent";
+        // Use darker background for dark mode cells if they have content
+        const baseCorNova = coresGrade[newGradeId]?.[numLinha]?.[numCelula] || "transparent";
 
         // Dados da grade anterior 
         const conteudoAnterior = previousGrade?.grade?.[numLinha]?.[numCelula] || "";
-        const corAnterior = previousGrade?.cores?.[numLinha]?.[numCelula] || "transparent";
+        const baseCorAnterior = previousGrade?.cores?.[numLinha]?.[numCelula] || "transparent";
 
         const hasContent = conteudoNovo && conteudoNovo.trim() !== "";
 
         return (
-            <td key={key} className="relative p-0.5 align-middle h-14 min-w-[120px] border border-dashed border-border-light/50 transition-all duration-200 hover:bg-background-light/50">
+            <td key={key} className="relative p-1 align-middle h-14 min-w-[120px] border border-dashed border-border-light/40 dark:border-border-dark/40 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20">
                 {/* Empty State visual helper (optional) */}
                 {!hasContent && !conteudoAnterior && (
-                    <div className="w-full h-full rounded-lg bg-transparent"></div>
+                    <div className="w-full h-full rounded-md bg-transparent"></div>
                 )}
 
                 {/* Conteúdo Antigo (Transition Out) */}
                 {isTransitioning && conteudoAnterior && (
                     <div
-                        className="absolute inset-0.5 p-1 rounded-lg shadow-sm animate-fade-out overflow-hidden text-center flex flex-col justify-center items-center z-10"
-                        style={{ backgroundColor: corAnterior, color: '#333' }}
+                        className="absolute inset-1 p-1 rounded-md shadow-sm animate-fade-out overflow-hidden text-center flex flex-col justify-center items-center z-10"
+                        style={{ backgroundColor: baseCorAnterior, color: '#1e293b' }}
                     >
                         {conteudoAnterior.split('\n').map((line, i) => (
                             <div key={i} className={`text-[10px] leading-tight ${i === 0 ? 'font-bold mb-0.5' : 'opacity-80'}`}>
@@ -261,11 +274,11 @@ const Comum = (props) => {
                 {/* Conteúdo Novo (Transition In) */}
                 {hasContent && (
                     <div
-                        className={`absolute inset-0.5 px-1 py-1 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col justify-center items-center text-center cursor-default group border border-black/5 ${isTransitioning ? 'animate-fade-in' : ''}`}
-                        style={{ backgroundColor: corNova }}
+                        className={`absolute inset-1 px-1 py-1 rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col justify-center items-center text-center cursor-default group border border-black/5 dark:border-white/5 ${isTransitioning ? 'animate-fade-in' : ''}`}
+                        style={{ backgroundColor: baseCorNova }}
                     >
                         {conteudoNovo.split('\n').map((line, i) => (
-                            <div key={i} className={`text-[10px] text-slate-800 break-words w-full leading-tight ${i === 0 ? 'font-bold text-[11px] mb-0.5' : 'font-medium text-slate-600'}`}>
+                            <div key={i} className={`text-[10px] text-slate-800 break-words w-full leading-tight ${i === 0 ? 'font-bold text-[11px] mb-0.5 uppercase tracking-tight' : 'font-medium text-slate-600'}`}>
                                 {line}
                             </div>
                         ))}
@@ -285,9 +298,9 @@ const Comum = (props) => {
             renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
-            <tr key={`row-${numLinha}`} className="group h-14">
-                <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 whitespace-nowrap text-center bg-white border-r border-border-light sticky left-0 z-20 group-hover:text-primary transition-colors">
-                    <span className="bg-slate-50 px-1.5 py-0.5 rounded tracking-wide border border-slate-100">{labelHorario}</span>
+            <tr key={`row-${numLinha}`} className="group h-14 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+                <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
+                    <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-wide border border-slate-200 dark:border-slate-700">{labelHorario}</span>
                 </td>
                 {celulas}
             </tr>
@@ -300,9 +313,9 @@ const Comum = (props) => {
                 <td colSpan={td + 1} className="py-2 px-0 bg-transparent">
                     <div className="flex items-center justify-center relative">
                         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                            <div className="w-full border-t border-slate-200 border-dashed"></div>
+                            <div className="w-full border-t border-border-light/60 dark:border-border-dark/60 border-dashed"></div>
                         </div>
-                        <span className="relative z-10 bg-white/80 backdrop-blur text-slate-400 text-[10px] uppercase tracking-widest font-bold px-3 py-0.5 rounded-full border border-slate-100 shadow-sm">
+                        <span className="relative z-10 bg-background-light dark:bg-background-dark text-slate-400 dark:text-slate-500 text-[10px] uppercase tracking-widest font-bold px-3 py-0.5 rounded-full border border-border-light dark:border-border-dark">
                             Intervalo
                         </span>
                     </div>
@@ -315,14 +328,14 @@ const Comum = (props) => {
         if (!grades || grades.length === 0 || !grades[state.id]) {
             if (loading) {
                 return (
-                    <div className="flex justify-center items-center h-64 w-full bg-white rounded-2xl shadow-sm border border-border-light">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                    <div className="flex justify-center items-center h-64 w-full bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-border-light dark:border-border-dark">
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
                     </div>
                 );
             }
             return (
-                <div className="flex flex-col justify-center items-center h-64 w-full bg-white rounded-2xl shadow-sm border border-border-light text-slate-400">
-                    <svg className="w-12 h-12 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <div className="flex flex-col justify-center items-center h-64 w-full bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary">
+                    <span className="material-symbols-outlined text-4xl mb-2 opacity-50">event_busy</span>
                     <p className="font-medium">Não há grades para exibir.</p>
                 </div>
             );
@@ -340,22 +353,22 @@ const Comum = (props) => {
             corpoTabela.push(renderLinha(i));
         }
         return (
-            <div className="rounded-2xl border border-border-light/60 overflow-hidden bg-white shadow-sm ring-1 ring-black/5">
-                <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-340px)] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            <div className="rounded-2xl border border-border-light dark:border-border-dark overflow-hidden bg-white dark:bg-slate-900 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
+                <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-340px)] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                     <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
-                            <tr className="bg-slate-50/80 backdrop-blur-sm border-b border-border-light sticky top-0 z-30">
-                                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-28 bg-slate-50 border-r border-border-light">
+                            <tr className="bg-slate-50 dark:bg-slate-800 border-b border-border-light dark:border-border-dark sticky top-0 z-30">
+                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-slate-800 border-r border-border-light dark:border-border-dark">
                                     Horário
                                 </th>
                                 {dias.map(dia => (
-                                    <th key={dia} className="p-4 text-xs font-bold text-slate-600 uppercase tracking-widest w-full text-center">
+                                    <th key={dia} className="p-3 text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest w-full text-center">
                                         {dia}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border-light/30">
+                        <tbody className="divide-y divide-border-light/30 dark:divide-border-dark/30 bg-background-light dark:bg-background-dark">
                             {corpoTabela}
                         </tbody>
                     </table>
@@ -371,14 +384,14 @@ const Comum = (props) => {
                 <div className={`flex justify-center items-center gap-1 mb-6 ${isPrinting ? 'invisible' : ''}`}>
                     {(!_separa && grades.length > 10) && (
                         <button
-                            className="bg-white hover:bg-slate-50 text-slate-600 font-bold p-2.5 rounded-xl border border-border-light shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-sm disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                            className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={() => setState(s => ({ ...s, pageBlockStart: Math.max(0, s.pageBlockStart - 10) }))}
                             disabled={state.pageBlockStart === 0}
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+                            <span className="material-symbols-outlined text-sm">chevron_left</span>
                         </button>
                     )}
-                    <div className="flex gap-1 bg-slate-100/50 p-1 rounded-xl border border-border-light/50">
+                    <div className="flex gap-1 bg-slate-100/50 dark:bg-slate-800/50 p-1.5 rounded-xl border border-border-light/50 dark:border-border-dark/50">
                         {
                             grades.slice(state.pageBlockStart, state.pageBlockStart + 10).map((_, i) => {
                                 const idx = state.pageBlockStart + i;
@@ -386,7 +399,9 @@ const Comum = (props) => {
                                     <button
                                         key={idx}
                                         onClick={() => handlePageChange(idx)}
-                                        className={`w-10 h-10 rounded-lg text-sm font-semibold transition-all duration-200 ${state.id === idx ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105' : 'text-slate-500 hover:bg-white hover:text-slate-700 hover:shadow-sm'}`}
+                                        className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200 ${state.id === idx
+                                            ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
+                                            : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'}`}
                                     >
                                         {idx + 1}
                                     </button>
@@ -396,22 +411,22 @@ const Comum = (props) => {
                     </div>
                     {(!_separa && grades.length > 10) && (
                         <button
-                            className="bg-white hover:bg-slate-50 text-slate-600 font-bold p-2.5 rounded-xl border border-border-light shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:shadow-sm disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                            className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={() => setState(s => ({ ...s, pageBlockStart: s.pageBlockStart + 10 }))}
                             disabled={state.pageBlockStart + 10 >= grades.length}
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                            <span className="material-symbols-outlined text-sm">chevron_right</span>
                         </button>
                     )}
                 </div>
             )}
 
-            <div className={`bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-3xl p-6 flex flex-col flex-1 w-full border border-border-light transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
+            <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col flex-1 w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
 
-                <div className="flex justify-between items-end mb-6 border-b border-dashed border-border-light pb-4">
+                <div className="flex justify-between items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark">
                     <div className="flex flex-col">
                         <span className="text-xs font-bold text-primary tracking-widest uppercase mb-1">{periodoAtual}</span>
-                        <h3 className="text-2xl font-display font-bold text-slate-800 tracking-tight">
+                        <h3 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight">
                             {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
                         </h3>
                     </div>
@@ -422,12 +437,12 @@ const Comum = (props) => {
                             <button
                                 onClick={handleSave}
                                 disabled={saving}
-                                className="group flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary hover:text-primary-dark text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-light text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {saving ? (
                                     <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                                 ) : (
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                                    <span className="material-symbols-outlined text-lg">save</span>
                                 )}
                                 Salvar
                             </button>
@@ -436,9 +451,9 @@ const Comum = (props) => {
                         {g !== "ª" ? "" : (
                             <button
                                 onClick={handlePrint}
-                                className="group flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 active:scale-95"
+                                className="group flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
                             >
-                                <svg className="w-4 h-4 text-slate-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">print</span>
                                 Imprimir
                             </button>
                         )}

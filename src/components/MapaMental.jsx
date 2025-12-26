@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { loadDbData } from '../services/disciplinaService';
 import { useQuery } from '@tanstack/react-query';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
+import LoadingSpinner from './LoadingSpinner';
 // Remover import html2canvas from 'html2canvas';
 
 // Constantes para o layout
@@ -147,7 +148,7 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   const loading = isLoading; // Alias for compatibility with existing code
 
   if (loading) {
-    return <div>Carregando mapa mental...</div>;
+    return <LoadingSpinner message="Carregando mapa mental..." />;
   }
 
   if (!mindMapData || mindMapData.nodes.length === 0) {

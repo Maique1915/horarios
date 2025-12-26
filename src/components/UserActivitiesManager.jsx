@@ -55,7 +55,7 @@ const UserActivitiesManager = () => {
             }, {});
             return grouped;
         },
-        staleTime: 1000 * 60 * 60, // 1 hour cache
+        staleTime: Infinity, // Static data, never changes
     });
 
     const loading = loadingActivities || loadingCatalog;
@@ -170,89 +170,86 @@ const UserActivitiesManager = () => {
     const totalHours = userActivities.reduce((sum, a) => sum + (a.hours || 0), 0);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header / Summary */}
-            <div className="bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">Minhas Atividades Complementares</h2>
-                    <p className="text-text-light-secondary dark:text-text-dark-secondary">Registre suas horas e anexe comprovantes.</p>
-                </div>
-                <div className="text-right">
-                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">Total Acumulado</p>
-                    <p className="text-3xl font-bold text-primary">{Number(totalHours).toFixed(1).replace(/\.0$/, '')}h <span className="text-base font-normal text-text-light-secondary">/ 210h</span></p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-
-                {/* Right Column (Form) - Moved to be rendered "on the right" structurally (order-2 lg:order-2) but usually code order matters for mobile stack 
-                   User said "lado direito". 
-                */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
                 {/* Left Column: Table List */}
                 <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
                     <div className="bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
-                                <thead className="bg-background-light dark:bg-background-dark text-text-light-secondary dark:text-text-dark-secondary text-sm uppercase">
+                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-text-light-secondary dark:text-text-dark-secondary text-xs font-semibold uppercase tracking-wider">
                                     <tr>
-                                        <th className="p-4 font-medium border-b border-border-light dark:border-border-dark">Grupo</th>
-                                        <th className="p-4 font-medium border-b border-border-light dark:border-border-dark">Subgrupo</th>
-                                        <th className="p-4 font-medium border-b border-border-light dark:border-border-dark">Descrição</th>
-                                        <th className="p-4 font-medium border-b border-border-light dark:border-border-dark">Ano/Sem</th>
-                                        <th className="p-4 font-medium border-b border-border-light dark:border-border-dark text-right">Ações</th>
+                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark">Grupo</th>
+                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark">Sub</th>
+                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark w-1/3">Descrição</th>
+                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark">Semestre</th>
+                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                                <tbody className="divide-y divide-border-light dark:divide-border-dark text-sm">
                                     {userActivities.length === 0 ? (
                                         <tr>
-                                            <td colSpan="5" className="p-8 text-center text-text-light-secondary">
-                                                Nenhuma atividade registrada.
+                                            <td colSpan="5" className="p-10 text-center text-text-light-secondary">
+                                                <div className="bg-background-light dark:bg-background-dark w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                    <span className="material-symbols-outlined text-3xl text-slate-300">feed</span>
+                                                </div>
+                                                <p>Nenhuma atividade registrada ainda.</p>
+                                                <p className="text-xs opacity-70 mt-1">Use o formulário ao lado para adicionar.</p>
                                             </td>
                                         </tr>
                                     ) : (
                                         userActivities.map((activity) => (
-                                            <tr key={activity.id} className="hover:bg-background-light dark:hover:bg-background-dark/50 transition-colors">
-                                                <td className="p-4 text-text-light-primary dark:text-text-dark-primary font-medium">
-                                                    {activity.activity?.group || '-'}
+                                            <tr key={activity.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+                                                <td className="px-6 py-4 text-text-light-primary dark:text-text-dark-primary font-medium">
+                                                    <span className="py-1 px-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-700">
+                                                        {activity.activity?.group || '-'}
+                                                    </span>
                                                 </td>
-                                                <td className="p-4 text-text-light-secondary dark:text-text-dark-secondary">
-                                                    <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold">
+                                                <td className="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
+                                                    <span className="font-mono text-xs text-primary bg-primary/5 px-1.5 py-0.5 rounded">
                                                         {activity.activity?.code || '-'}
                                                     </span>
                                                 </td>
-                                                <td className="p-4 text-text-light-primary dark:text-text-dark-primary">
-                                                    <div className="flex flex-col">
-                                                        <span>{activity.description || activity.activity?.description}</span>
+                                                <td className="px-6 py-4 text-text-light-primary dark:text-text-dark-primary">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="line-clamp-2" title={activity.description || activity.activity?.description}>
+                                                            {activity.description || activity.activity?.description}
+                                                        </span>
                                                         {activity.document_link && (
-                                                            <a href={activity.document_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
+                                                            <a href={activity.document_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 w-fit px-2 py-0.5 rounded-full bg-primary/5 hover:bg-primary/10 transition-colors">
                                                                 <span className="material-symbols-outlined text-[10px]">link</span>
-                                                                Comprovante
+                                                                Ver Comprovante
                                                             </a>
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="p-4 text-text-light-secondary dark:text-text-dark-secondary text-sm">
-                                                    {activity.semester}
-                                                    <div className="text-xs mt-1 font-semibold">
-                                                        {activity.hours}h
+                                                <td className="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
+                                                            {activity.semester}
+                                                        </span>
+                                                        <span className="text-xs font-bold text-text-light-primary dark:text-text-dark-primary">
+                                                            {activity.hours}h
+                                                        </span>
                                                     </div>
                                                 </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={() => handleEdit(activity)}
-                                                            className="p-1.5 text-text-light-secondary hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                                            className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-primary hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-border-light hover:shadow-sm"
                                                             title="Editar"
                                                         >
-                                                            <span className="material-symbols-outlined text-xl">edit</span>
+                                                            <span className="material-symbols-outlined text-lg">edit</span>
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(activity.id)}
-                                                            className="p-1.5 text-text-light-secondary hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                            className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-red-100 dark:hover:border-red-900/30 hover:shadow-sm"
                                                             title="Excluir"
                                                         >
-                                                            <span className="material-symbols-outlined text-xl">delete</span>
+                                                            <span className="material-symbols-outlined text-lg">delete</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -268,117 +265,144 @@ const UserActivitiesManager = () => {
                 {/* Right Column: Sticky Form */}
                 <div className="lg:col-span-1 order-1 lg:order-2">
                     <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark shadow-sm sticky top-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-border-light dark:border-border-dark">
+                            <h3 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                                <span className="material-symbols-outlined text-primary">
+                                    {editingId ? 'edit_note' : 'post_add'}
+                                </span>
                                 {editingId ? 'Editar Atividade' : 'Nova Atividade'}
                             </h3>
                             {editingId && (
                                 <button
                                     onClick={handleCancelEdit}
-                                    className="text-xs text-red-500 hover:underline"
+                                    className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded bg-red-50 dark:bg-red-900/10 hover:bg-red-100 transition-colors"
                                 >
                                     Cancelar
                                 </button>
                             )}
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Group Selection */}
-                            <div>
-                                <label className="block text-xs font-medium mb-1 uppercase text-text-light-secondary">Grupo</label>
-                                <select
-                                    className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm"
-                                    value={selectedGroup}
-                                    onChange={(e) => {
-                                        setSelectedGroup(e.target.value);
-                                        setSelectedActivityId('');
-                                    }}
-                                >
-                                    <option value="">Selecione...</option>
-                                    {Object.keys(catalog).sort().map(g => (
-                                        <option key={g} value={g}>Grupo {g}</option>
-                                    ))}
-                                </select>
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Grupo</label>
+                                <div className="relative">
+                                    <select
+                                        className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all cursor-pointer hover:border-primary/50"
+                                        value={selectedGroup}
+                                        onChange={(e) => {
+                                            setSelectedGroup(e.target.value);
+                                            setSelectedActivityId('');
+                                        }}
+                                    >
+                                        <option value="">Selecione um grupo...</option>
+                                        {Object.keys(catalog).sort().map(g => (
+                                            <option key={g} value={g}>Grupo {g}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-light-secondary">
+                                        <span className="material-symbols-outlined text-lg">expand_more</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-medium mb-1 uppercase text-text-light-secondary">Atividade</label>
-                                <select
-                                    required
-                                    disabled={!selectedGroup}
-                                    className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary disabled:opacity-50 text-sm"
-                                    value={selectedActivityId}
-                                    onChange={(e) => setSelectedActivityId(e.target.value)}
-                                >
-                                    <option value="">Selecione...</option>
-                                    {selectedGroup && catalog[selectedGroup] && catalog[selectedGroup].map(c => (
-                                        <option key={c.id} value={c.id}>{c.code} - {c.description.substring(0, 30)}...</option>
-                                    ))}
-                                </select>
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Atividade</label>
+                                <div className="relative">
+                                    <select
+                                        required
+                                        disabled={!selectedGroup}
+                                        className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:border-primary/50"
+                                        value={selectedActivityId}
+                                        onChange={(e) => setSelectedActivityId(e.target.value)}
+                                    >
+                                        <option value="">Selecione a atividade...</option>
+                                        {selectedGroup && catalog[selectedGroup] && catalog[selectedGroup].map(c => (
+                                            <option key={c.id} value={c.id}>{c.code} - {c.description.substring(0, 30)}...</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-light-secondary">
+                                        <span className="material-symbols-outlined text-lg">expand_more</span>
+                                    </div>
+                                </div>
                             </div>
 
                             {selectedCatalogItem && (
-                                <div className="bg-primary/5 p-3 rounded-lg border border-primary/20 text-xs">
-                                    <p className="font-bold text-primary mb-1">{selectedCatalogItem.code}</p>
-                                    <p className="text-text-light-primary dark:text-text-dark-primary mb-1 leading-relaxed">
+                                <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-800 text-xs animate-fadeIn">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <span className="font-mono font-bold text-primary bg-white dark:bg-black/20 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+                                            {selectedCatalogItem.code}
+                                        </span>
+                                        <span className="text-text-light-secondary">Limite: <span className="font-bold">{selectedCatalogItem.limit_hours}h</span></span>
+                                    </div>
+                                    <p className="text-text-light-primary dark:text-text-dark-primary leading-relaxed opacity-90">
                                         {selectedCatalogItem.description}
                                     </p>
-                                    <div className="flex gap-3 text-text-light-secondary mt-2 pt-2 border-t border-primary/10">
-                                        <span>Máx: {selectedCatalogItem.limit_hours}h</span>
-                                    </div>
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-medium mb-1 uppercase text-text-light-secondary">Semestre</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Semestre</label>
                                     <input
                                         required
                                         type="text"
                                         placeholder="ex: 2024.1"
-                                        className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-sm"
+                                        className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                         value={semester}
                                         onChange={(e) => setSemester(e.target.value)}
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-medium mb-1 uppercase text-text-light-secondary">Horas</label>
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Horas</label>
+                                    <div className="relative">
+                                        <input
+                                            required
+                                            type="number"
+                                            step="0.1"
+                                            min="0.1"
+                                            placeholder="0.0"
+                                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
+                                            value={hours}
+                                            onChange={(e) => setHours(e.target.value)}
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-light-secondary text-xs font-bold">h</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Descrição</label>
+                                <textarea
+                                    className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Detalhes adicionais da atividade..."
+                                    rows="3"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Link do Comprovante</label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary pointer-events-none">
+                                        <span className="material-symbols-outlined text-lg">link</span>
+                                    </div>
                                     <input
-                                        required
-                                        type="number"
-                                        step="0.1"
-                                        min="0.1"
-                                        className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-sm"
-                                        value={hours}
-                                        onChange={(e) => setHours(e.target.value)}
+                                        type="url"
+                                        className="w-full p-3 pl-10 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        value={documentLink}
+                                        onChange={(e) => setDocumentLink(e.target.value)}
+                                        placeholder="https://drive.google.com/..."
                                     />
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-medium mb-1 uppercase text-text-light-secondary">Descrição</label>
-                                <textarea
-                                    className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-sm"
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="Detalhes da atividade..."
-                                    rows="2"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium mb-1 uppercase text-text-light-secondary">Link (Opcional)</label>
-                                <input
-                                    type="url"
-                                    className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-sm"
-                                    value={documentLink}
-                                    onChange={(e) => setDocumentLink(e.target.value)}
-                                    placeholder="https://..."
-                                />
-                            </div>
-
-                            <button type="submit" className="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-bold shadow-md transition-colors flex items-center justify-center gap-2 mt-2">
+                            <button
+                                type="submit"
+                                className="w-full py-3.5 bg-primary text-white rounded-lg hover:bg-primary-dark font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2"
+                            >
                                 <span className="material-symbols-outlined text-xl">{editingId ? 'save' : 'add_circle'}</span>
                                 {editingId ? 'Salvar Alterações' : 'Adicionar Atividade'}
                             </button>

@@ -69,11 +69,11 @@ const AppLayout = ({ children }) => {
             {/* Sidebar */}
             {hasCourseSelected && (
                 <aside
-                    className={`fixed left-0 top-0 h-screen bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark shadow-lg transition-all duration-300 ease-in-out z-50 ${isSidebarExpanded ? 'w-64' : 'w-20'
+                    className={`fixed left-0 top-0 h-screen bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark transition-all duration-300 ease-in-out z-50 ${isSidebarExpanded ? 'w-64' : 'w-20'
                         }`}
                 >
                     {/* Header da Sidebar */}
-                    <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark">
+                    <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
                         <button
                             onClick={() => router.push('/')}
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
@@ -82,13 +82,13 @@ const AppLayout = ({ children }) => {
                             <Image
                                 src="/logo.png"
                                 alt="Logo"
-                                width={40}
-                                height={40}
-                                className="rounded-full flex-shrink-0"
+                                width={32}
+                                height={32}
+                                className="rounded-lg flex-shrink-0"
                                 unoptimized
                             />
                             {/* Label que só aparece quando o menu está expandido */}
-                            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'}`}>
+                            <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 font-semibold text-text-light-primary dark:text-text-dark-primary ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'}`}>
                                 Horários CEFET
                             </span>
                         </button>
@@ -99,17 +99,17 @@ const AppLayout = ({ children }) => {
                         {menuItems.map((item) => (
                             <React.Fragment key={item.to}>
                                 {item.divider && (
-                                    <div className="h-px bg-border-light dark:bg-border-dark my-3" />
+                                    <div className="h-px bg-border-light dark:bg-border-dark my-3 mx-2" />
                                 )}
                                 <Link
                                     href={item.to}
-                                    className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all group relative ${isActiveLink(item.to, item.exact)
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-text-light-primary dark:text-text-dark-primary hover:bg-primary/10'
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group relative ${isActiveLink(item.to, item.exact)
+                                        ? 'bg-blue-50 dark:bg-primary/20 text-primary dark:text-blue-300'
+                                        : 'text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-text-light-primary dark:hover:text-text-dark-primary'
                                         }`}
                                     title={!isSidebarExpanded ? item.label : ''}
                                 >
-                                    <span className="material-symbols-outlined text-2xl flex-shrink-0">
+                                    <span className={`material-symbols-outlined text-2xl flex-shrink-0 ${isActiveLink(item.to, item.exact) ? 'fill-current' : ''}`}>
                                         {item.icon}
                                     </span>
                                     <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 invisible'
@@ -119,9 +119,9 @@ const AppLayout = ({ children }) => {
 
                                     {/* Tooltip para quando está recolhido */}
                                     {!isSidebarExpanded && (
-                                        <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        <div className="absolute left-full ml-2 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-md">
                                             {item.label}
-                                            <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-gray-900 dark:border-r-gray-700"></div>
+                                            <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800"></div>
                                         </div>
                                     )}
                                 </Link>
@@ -132,7 +132,7 @@ const AppLayout = ({ children }) => {
                     {/* Botão de Expandir/Recolher */}
                     <button
                         onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-                        className="absolute bottom-4 left-1/2 -translate-x-1/2 p-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-all shadow-lg"
+                        className="absolute bottom-4 left-1/2 -translate-x-1/2 p-2 rounded-lg bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light-secondary hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
                         title={isSidebarExpanded ? 'Recolher menu' : 'Expandir menu'}
                     >
                         <span className="material-symbols-outlined text-xl">
@@ -176,28 +176,35 @@ const AppLayout = ({ children }) => {
                                 </div>
                             )}
 
-                            {hasCourseSelected && (
-                                user ? (
-                                    user.role === 'admin' && (
-                                        <Link
-                                            href={`/${effectiveCur}/edit`}
-                                            className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
-                                            title="Gerenciar disciplinas"
-                                        >
-                                            <span className="material-symbols-outlined text-lg">settings</span>
-                                            <span>Admin</span>
-                                        </Link>
-                                    )
-                                ) : (
-                                    <Link
-                                        href="/login"
-                                        className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
-                                        title="Fazer login"
-                                    >
-                                        <span className="material-symbols-outlined text-lg">login</span>
-                                        <span>Logar</span>
-                                    </Link>
-                                )
+                            {/* Admin Link logic - Independent of hasCourseSelected for 'curso' role */}
+                            {user && (user.role === 'admin' || user.role === 'curso') && (
+                                <Link
+                                    href={user.role === 'curso' && user.courses?.code
+                                        ? `/${user.courses.code}/edit`
+                                        : (effectiveCur ? `/${effectiveCur}/edit` : '#')
+                                    }
+                                    className={`flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors ${(!effectiveCur && user.role !== 'curso') ? 'opacity-50 cursor-not-allowed hidden' : ''
+                                        }`}
+                                    title={(!effectiveCur && user.role !== 'curso') ? "Selecione um curso primeiro" : "Gerenciar disciplinas"}
+                                    onClick={(e) => {
+                                        if (!effectiveCur && user.role !== 'curso') e.preventDefault();
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-lg">settings</span>
+                                    <span>Admin</span>
+                                </Link>
+                            )}
+
+                            {/* Login Link - Always visible if not logged in */}
+                            {!user && (
+                                <Link
+                                    href="/login"
+                                    className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
+                                    title="Fazer login"
+                                >
+                                    <span className="material-symbols-outlined text-lg">login</span>
+                                    <span>Logar</span>
+                                </Link>
                             )}
                         </div>
                     </div>

@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 export default function AdminCoursePage() {
     return (
         <Suspense fallback={<LoadingSpinner message="Carregando..." />}>
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute requiredRole={['admin', 'curso']}>
                 <EditDb />
             </ProtectedRoute>
         </Suspense>

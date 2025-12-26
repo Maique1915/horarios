@@ -164,13 +164,13 @@ const GeraGrade = () => {
     if (state.estado === 2) {
         if (calculating) {
             return (
-                <div className="flex flex-col items-center justify-center min-h-screen">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                    <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
+                <div className="flex flex-col items-center justify-center min-h-[50vh] animate-fadeIn">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-6"></div>
+                    <p className="text-lg font-medium text-text-light-primary dark:text-text-dark-primary mb-2">
                         Calculando grades possíveis...
                     </p>
-                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                        Processando combinações...
+                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary animate-pulse">
+                        Analisando combinações sem conflito
                     </p>
                 </div>
             );
@@ -178,27 +178,29 @@ const GeraGrade = () => {
 
         if (possibleGrades.length === 0) {
             return (
-                <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-fadeIn">
-                    <span className="material-symbols-outlined text-6xl text-yellow-500 mb-4">warning</span>
-                    <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
+                <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-fadeIn max-w-2xl mx-auto">
+                    <div className="w-20 h-20 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mb-6">
+                        <span className="material-symbols-outlined text-4xl text-yellow-600 dark:text-yellow-500">warning_amber</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-3">
                         Nenhuma grade possível encontrada
                     </h2>
-                    <p className="text-text-light-secondary dark:text-text-dark-secondary mb-6 max-w-md">
-                        Não foi possível encaixar todas as matérias selecionadas sem conflito de horários.
+                    <p className="text-text-light-secondary dark:text-text-dark-secondary mb-8 leading-relaxed">
+                        Não foi possível encontrar uma combinação de horários para as matérias selecionadas sem conflitos. Tente remover algumas matérias ou flexibilizar suas escolhas.
                     </p>
                     <button
                         onClick={() => mudaTela(1)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>
-                        Voltar e remover matérias
+                        Voltar e ajustar
                     </button>
                 </div>
             )
         }
 
         // Success case (render Comum)
-        const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
+        const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl h-10 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"><span className="material-symbols-outlined text-lg">arrow_back</span>Voltar</button>;
         return (
             <Comum
                 materias={possibleGrades}
@@ -311,23 +313,33 @@ const GeraGrade = () => {
             : state.x.includes(itemData._re);
 
         return (
-            <label key={itemData._re} className="flex items-center gap-x-4 py-3 cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                <input
-                    type="checkbox"
-                    name={String(itemData._ap + itemData._at)}
-                    checked={isChecked}
-                    className="subject-checkbox h-5 w-5 rounded border-slate-300 dark:border-slate-600 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e')] focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900/50 focus:ring-primary/50 focus:outline-none"
-                    id={itemData._re}
-                    value={key}
-                    onChange={handleCheck}
-                />
-                <div className="flex flex-col flex-1">
-                    <p className="text-slate-800 dark:text-slate-200 text-base font-normal leading-normal">
-                        {itemData._re} - {itemData._di}
+            <label key={itemData._re} className="flex items-start gap-3 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" onClick={(e) => e.stopPropagation()}>
+                <div className="relative flex items-center mt-1">
+                    <input
+                        type="checkbox"
+                        name={String(itemData._ap + itemData._at)}
+                        checked={isChecked}
+                        className="subject-checkbox h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
+                        id={itemData._re}
+                        value={key}
+                        onChange={handleCheck}
+                    />
+                    <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
+                        <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                    </span>
+                </div>
+                <div className="flex flex-col flex-1 min-w-0">
+                    <p className={`text-sm font-medium leading-snug transition-colors ${isChecked ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                        {itemData._di}
                     </p>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm">
-                        {itemData._ap + itemData._at} créditos
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            {itemData._re}
+                        </span>
+                        <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                            {itemData._ap + itemData._at} Créditos
+                        </span>
+                    </div>
                 </div>
             </label>
         );
@@ -354,27 +366,36 @@ const GeraGrade = () => {
         };
 
         return (
-            <details className="flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 group" open={isOpen}>
-                <summary className="flex cursor-pointer items-center justify-between gap-6 py-3 px-4" onClick={handleSummaryClick}>
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            className="period-toggle h-5 w-5 rounded border-slate-300 dark:border-slate-600 border-2 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e')] focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900/50 focus:ring-primary/50 focus:outline-none"
-                            checked={areAllSelected}
-                            onChange={handleCheck}
-                            onClick={(e) => e.stopPropagation()}
-                            value={periodKey}
-                        />
-                        <p className="text-slate-900 dark:text-white text-base font-semibold leading-normal">
-                            {`${periodKey}º Período | ${selectedCount} matéria(s) selecionada(s)`}
-                        </p>
+            <details className="flex flex-col rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm overflow-hidden group transition-all duration-300" open={isOpen}>
+                <summary className="flex cursor-pointer items-center justify-between gap-4 py-4 px-5 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors select-none" onClick={handleSummaryClick}>
+                    <div className="flex items-center gap-4">
+                        <div className="relative flex items-center" onClick={(e) => e.stopPropagation()}>
+                            <input
+                                type="checkbox"
+                                className="period-toggle h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
+                                checked={areAllSelected}
+                                onChange={handleCheck}
+                                value={periodKey}
+                            />
+                            <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
+                                <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-text-light-primary dark:text-text-dark-primary text-base font-bold leading-none">
+                                {periodKey}º Período
+                            </p>
+                            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mt-1 font-medium">
+                                {selectedCount} de {subjectsData.length} selecionadas
+                            </p>
+                        </div>
                     </div>
-                    <div className="text-slate-900 dark:text-white group-open:rotate-180 transition-transform">
-                        <span className="material-symbols-outlined">expand_more</span>
+                    <div className={`p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                        <span className="material-symbols-outlined text-xl">expand_more</span>
                     </div>
                 </summary>
-                <div className="border-t border-slate-200 dark:border-slate-800">
-                    <div id={periodKey} className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 px-4 divide-y divide-slate-200 dark:divide-slate-800">
+                <div className="border-t border-border-light dark:border-border-dark animate-slideDown">
+                    <div id={periodKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 p-4 bg-background-light dark:bg-background-dark/50">
                         {subjectsData.map(item => {
                             const originalIndex = arr.findIndex(i => i._re === item._re);
                             const key = (state.estado === 0) ? originalIndex : item._re;
@@ -390,11 +411,7 @@ const GeraGrade = () => {
         if (i === 1) {
             const cr = state.crs.reduce((a, b) => a + b, 0);
             console.log('mudaTela(1): Créditos totais:', cr);
-            console.log('mudaTela(1): Matérias feitas (state.names):', state.names);
-            console.log('mudaTela(1): Total de disciplinas (arr):', arr.length);
             const calculatedGr = new Grafos(arr, cr, state.names).matriz();
-            console.log('mudaTela(1): Matérias que pode fazer (calculatedGr):', calculatedGr.length);
-            console.log('mudaTela(1): Primeiras 3 matérias calculadas:', calculatedGr.slice(0, 3).map((m: any) => ({ _re: m._re, _di: m._di, _pr: m._pr })));
             setGradesResult(calculatedGr);
             setState(e => ({ ...e, estado: i }));
         } else if (i === 2) {
@@ -412,36 +429,38 @@ const GeraGrade = () => {
 
     function getStepTitle() {
         if (state.estado === 0)
-            return "Selecione as máterias já cursadas";
+            return "O que você já cursou?";
         else if (state.estado === 1)
-            return "Exclua as matérias que não deseja fazer agora";
+            return "O que você NÃO quer fazer?";
     }
 
     function getStepDescription() {
-        const totalCredits = state.crs.reduce((a, b) => a + b, 0);
         if (state.estado === 0 && state.names.length === 0)
             return (
-                <p className="text-slate-500 dark:text-slate-400 text-sm">
-                    Nenhuma matéria selecionada
+                <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                    Selecione as matérias que você já foi aprovado.
                 </p>
             )
+
+        const totalCredits = state.crs.reduce((a, b) => a + b, 0);
+
         return (
-            <div className="flex flex-row sm:flex-row gap-3 sm:gap-6 items-center">
-                <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Matérias:
+            <div className="flex flex-row gap-6 items-center">
+                <div className="flex flex-col items-center">
+                    <p className="text-xs uppercase font-bold text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
+                        Matérias
                     </p>
-                    <p className="text-lg font-bold text-primary">
+                    <p className="text-xl font-bold text-primary leading-none mt-1">
                         {state.names.length}
                     </p>
                 </div>
-                <div className="hidden sm:block w-px h-6 bg-border-light dark:bg-border-dark"></div>
-                <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                        Créditos:
+                <div className="w-px h-8 bg-border-light dark:border-border-dark"></div>
+                <div className="flex flex-col items-center">
+                    <p className="text-xs uppercase font-bold text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
+                        Créditos
                     </p>
-                    <p className="text-lg font-bold text-primary">
-                        {state.crs.reduce((a, b) => a + b, 0)}
+                    <p className="text-xl font-bold text-primary leading-none mt-1">
+                        {totalCredits}
                     </p>
                 </div>
             </div>
@@ -457,7 +476,21 @@ const GeraGrade = () => {
             const pe = periodo(remove(filteredArr));
 
             return (
-                <div className="flex flex-col py-4 gap-4">
+                <div className="flex flex-col py-4 gap-4 animate-fadeIn">
+                    {/* Search Bar */}
+                    <div className="relative mb-2">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="material-symbols-outlined text-slate-400">search</span>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Buscar matéria..."
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
                     {Object.keys(pe).map(key => (
                         <PeriodAccordion
                             key={key}
@@ -474,28 +507,31 @@ const GeraGrade = () => {
 
             if (Object.keys(pe).length === 0) {
                 return (
-                    <div className="flex flex-col py-4 gap-4">
-                        <details className="flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 px-4 group">
-                            <summary className="flex cursor-pointer items-center justify-between gap-6 py-3">
-                                <p className="text-slate-900 dark:text-white text-base font-semibold leading-normal">
-                                    Períodos Disponíveis
-                                </p>
-                                <div className="text-slate-900 dark:text-white group-open:rotate-180 transition-transform">
-                                    <span className="material-symbols-outlined">expand_more</span>
-                                </div>
-                            </summary>
-                            <div className="border-t border-slate-200 dark:border-slate-800 -mx-4">
-                                <p className="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal p-4">
-                                    Parabéns, você concluiu todas as matérias!
-                                </p>
+                    <div className="flex flex-col py-4 gap-4 animate-fadeIn">
+                        <div className="flex flex-col items-center justify-center p-10 bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark text-center">
+                            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
+                                <span className="material-symbols-outlined text-3xl text-green-600 dark:text-green-400">check_circle</span>
                             </div>
-                        </details>
+                            <h3 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
+                                Todas as matérias concluídas!
+                            </h3>
+                            <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                                Você não tem mais matérias obrigatórias ou optativas pendentes para matricular.
+                            </p>
+                        </div>
                     </div>
                 );
             }
 
             return (
-                <div className="flex flex-col py-4 gap-4">
+                <div className="flex flex-col py-4 gap-4 animate-fadeIn">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 mb-2 flex gap-3">
+                        <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                            Desmarque as matérias que você <strong>NÃO</strong> quer cursar neste semestre. O gerador tentará encaixar todas as marcadas.
+                        </p>
+                    </div>
+
                     {Object.keys(pe).map(key => (
                         <PeriodAccordion
                             key={key}
@@ -508,58 +544,11 @@ const GeraGrade = () => {
                 </div>
             );
         } else { // This block is for state.estado === 2
-            if (calculating) {
-                return (
-                    <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                        <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
-                            Calculando grades possíveis...
-                        </p>
-                        <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                            Processando combinações...
-                        </p>
-                    </div>
-                );
-            }
-
-            if (possibleGrades.length === 0) {
-                return (
-                    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-fadeIn">
-                        <span className="material-symbols-outlined text-6xl text-yellow-500 mb-4">warning</span>
-                        <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2">
-                            Nenhuma grade possível encontrada
-                        </h2>
-                        <p className="text-text-light-secondary dark:text-text-dark-secondary mb-6 max-w-md">
-                            Não foi possível encaixar todas as matérias selecionadas sem conflito de horários.
-                        </p>
-                        <button
-                            onClick={() => mudaTela(1)}
-                            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors"
-                        >
-                            <span className="material-symbols-outlined">arrow_back</span>
-                            Voltar e remover matérias
-                        </button>
-                    </div>
-                )
-            }
-
-            const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 py-2 px-4 bg-gray-300 text-gray-800 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none">Voltar</button>;
-
-            return (
-                <Comum
-                    materias={possibleGrades}
-                    tela={2}
-                    fun={b}
-                    cur={cur}
-                    separa={false}
-                    g={"ª"}
-                    f={" Grade Possível"}
-                    courseSchedule={courseSchedule}
-                    courseDimension={courseDimension}
-                />
-            );
+            // Redundant handled above but kept for structure completeness if needed, 
+            // actually the function `renderStepContent` is called only for clean render logic.
+            // The main return handles state 2 early return logic.
+            return null;
         }
-        return null;
     }
 
     if (loading) {
@@ -582,78 +571,155 @@ const GeraGrade = () => {
         );
     }
 
-    if (state.estado === 2)
-        return renderStepContent()
+    if (state.estado === 2) {
+        // Render state 2 content directly (the early return above)
+        // But we need to duplicate the logic here because of how the component structure is set up
+        // Or just call the same logic. 
+        // Actually, let's copy the logic from the top since this is where it renders.
+        // WAIT - the top part handles the whole return. We should keep it consistent.
+        // Let's refactor the top part to NOT be an early return outside the layout, OR
+        // keep it as is. The existing code had early returns.
+        // I'll stick to the early return pattern for State 2 as it replaces the whole screen.
+
+        if (calculating) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] animate-fadeIn">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-6"></div>
+                    <p className="text-lg font-medium text-text-light-primary dark:text-text-dark-primary mb-2">
+                        Calculando grades possíveis...
+                    </p>
+                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary animate-pulse">
+                        Analisando combinações sem conflito
+                    </p>
+                </div>
+            );
+        }
+
+        if (possibleGrades.length === 0) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-fadeIn max-w-2xl mx-auto">
+                    <div className="w-20 h-20 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mb-6">
+                        <span className="material-symbols-outlined text-4xl text-yellow-600 dark:text-yellow-500">warning_amber</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-3">
+                        Nenhuma grade possível encontrada
+                    </h2>
+                    <p className="text-text-light-secondary dark:text-text-dark-secondary mb-8 leading-relaxed">
+                        Não foi possível encontrar uma combinação de horários para as matérias selecionadas sem conflitos.
+                    </p>
+                    <button
+                        onClick={() => mudaTela(1)}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5"
+                    >
+                        <span className="material-symbols-outlined">arrow_back</span>
+                        Voltar e ajustar
+                    </button>
+                </div>
+            )
+        }
+
+        const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl h-10 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"><span className="material-symbols-outlined text-lg">arrow_back</span>Voltar</button>;
+        return (
+            <Comum
+                materias={possibleGrades}
+                tela={2}
+                fun={b}
+                cur={cur}
+                separa={false}
+                g={"ª"}
+                f={" Grade Possível"}
+                courseSchedule={courseSchedule}
+                courseDimension={courseDimension}
+            />
+        );
+    }
+
     return (
 
         <>
-            <aside className="flex flex-col items-center p-4  mx-auto ">
-                <div className="px-4 py-4 w-full">
-                    {/* Primeira Linha: Título e Botões */}
-                    <div className="flex w-full lg:flex-row sm:flex-col  lg:justify-between sm:justify-center sm:align-center sm:gap-3 lg:gap-4">
-                        {/* Título */}
-                        <h1 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary lg:text-left">
-                            {getStepTitle()}
-                        </h1>
+            <aside className="sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            {/* Step Indicator */}
+                            <div className="flex items-center gap-2">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${state.estado === 0 ? 'bg-primary border-primary text-white' : 'bg-transparent border-primary text-primary'}`}>
+                                    1
+                                </div>
+                                <div className="w-8 h-0.5 bg-border-light dark:border-border-dark"></div>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 ${state.estado === 1 ? 'bg-primary border-primary text-white' : 'bg-transparent border-slate-300 dark:border-slate-600 text-slate-400'}`}>
+                                    2
+                                </div>
+                            </div>
 
-                        {/* Botões */}
-                        <div className="flex flex-wrap gap-2 justify-right sm:justify-center lg:justify-end items-center">
-                            {state.estado === 1 && (
-                                <button
-                                    onClick={() => mudaTela(0)}
-                                    className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:bg-surface-light dark:hover:bg-surface-dark"
-                                >
-                                    <span className="material-symbols-outlined text-lg">arrow_back</span>
-                                    <span>Voltar</span>
-                                </button>
-                            )}
+                            <div>
+                                <h1 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">
+                                    {getStepTitle()}
+                                </h1>
+                            </div>
+                        </div>
 
-                            {state.estado === 0 && (
-                                <button
-                                    onClick={() => mudaTela(1)}
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors bg-primary text-white hover:bg-primary/90 shadow-sm"
-                                >
-                                    <span>Avançar</span>
-                                    <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                                </button>
-                            )}
+                        {/* Controls */}
+                        <div className="flex items-center gap-6">
+                            {/* Stats */}
+                            <div className="hidden md:block">
+                                {getStepDescription()}
+                            </div>
 
-                            {state.estado === 1 && (
-                                <>
+                            {/* Buttons */}
+                            <div className="flex items-center gap-3">
+                                {state.estado === 1 && (
                                     <button
-                                        onClick={handleOpenMapaMental}
-                                        className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-500 text-white hover:bg-blue-600 shadow-sm"
+                                        onClick={() => mudaTela(0)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-text-light-secondary hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
                                     >
-                                        <span className="material-symbols-outlined text-lg">account_tree</span>
-                                        <span>Cronograma</span>
+                                        <span className="material-symbols-outlined">arrow_back</span>
+                                        <span>Voltar</span>
                                     </button>
+                                )}
+
+                                {state.estado === 0 && (
                                     <button
-                                        onClick={() => mudaTela(2)}
-                                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors bg-primary text-white hover:bg-primary/90 shadow-sm"
+                                        onClick={() => mudaTela(1)}
+                                        className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all bg-primary text-white hover:bg-primary-dark shadow-md hover:shadow-lg hover:-translate-y-0.5"
                                     >
-                                        <span className="material-symbols-outlined text-lg">grid_view</span>
-                                        <span>Gerar Grades</span>
+                                        <span>Próximo</span>
+                                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
                                     </button>
-                                </>
-                            )}
+                                )}
+
+                                {state.estado === 1 && (
+                                    <>
+                                        <button
+                                            onClick={handleOpenMapaMental}
+                                            className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                                            title="Ver Cronograma"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">account_tree</span>
+                                        </button>
+                                        <button
+                                            onClick={() => mudaTela(2)}
+                                            className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all bg-primary text-white hover:bg-primary-dark shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                                            <span>Gerar Grades</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
-
-                    {/* Segunda Linha: Descrição/Contadores - Centralizado */}
-                    <div className="flex justify-center items-center mt-4">
+                    {/* Mobile Stats */}
+                    <div className="md:hidden mt-4 pt-4 border-t border-border-light dark:border-border-dark flex justify-center">
                         {getStepDescription()}
                     </div>
                 </div>
             </aside>
 
 
-            <div className="font-display bg-background-light dark:bg-background-dark min-h-screen">
-                <div className="max-w-7xl mx-auto">
-                    <div className="px-4 py-6">
-                        <div className="layout-content-container flex flex-col w-full">
-                            {renderStepContent()}
-                        </div>
-                    </div>
+            <div className="bg-background-light dark:bg-background-dark min-h-[calc(100vh-80px)]">
+                <div className="max-w-5xl mx-auto px-4 py-8">
+                    {renderStepContent()}
                 </div>
             </div>
         </>
