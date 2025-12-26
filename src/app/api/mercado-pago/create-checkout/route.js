@@ -33,11 +33,6 @@ export async function POST(req) {
                     },
                 ],
                 payment_methods: {
-                    excluded_payment_types: [
-                        {
-                            id: "ticket",
-                        }
-                    ],
                     installments: 12,
                 },
                 auto_return: "approved",
