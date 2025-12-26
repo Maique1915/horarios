@@ -1,7 +1,7 @@
 'use client';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 
 const AuthContext = createContext();
@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+
+    const pathname = usePathname();
 
     useEffect(() => {
         // Obter sessão atual do localStorage (simulação de sessão)
@@ -24,6 +26,20 @@ export const AuthProvider = ({ children }) => {
         }
         setLoading(false);
     }, []);
+
+    // [NEW] Enforce Payment
+    useEffect(() => {
+        if (!loading && user && !user.is_paid) {
+            // Allow access to plans page, login, or api routes
+            const allowedPaths = ['/plans', '/login', '/register'];
+            const isAllowed = allowedPaths.includes(pathname) || pathname?.startsWith('/api');
+
+            if (!isAllowed) {
+                console.log("Usuário não pagou, redirecionando para /plans");
+                router.push('/plans');
+            }
+        }
+    }, [user, loading, pathname, router]);
 
     const login = async (username, password) => {
         try {
