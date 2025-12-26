@@ -29,14 +29,29 @@ export const AuthProvider = ({ children }) => {
 
     // [NEW] Enforce Payment
     useEffect(() => {
-        if (!loading && user && !user.is_paid) {
-            // Allow access to plans page, login, or api routes
-            const allowedPaths = ['/plans', '/login', '/register'];
-            const isAllowed = allowedPaths.includes(pathname) || pathname?.startsWith('/api');
+        if (!loading && user) {
+            // 1. Checar se pagou
+            const isPaid = user.is_paid;
 
-            if (!isAllowed) {
-                console.log("Usuário não pagou, redirecionando para /plans");
-                router.push('/plans');
+            // 2. Checar validade (se tiver data)
+            let isExpired = false;
+            if (user.subscription_expires_at) {
+                const expiresAt = new Date(user.subscription_expires_at);
+                if (new Date() > expiresAt) {
+                    isExpired = true;
+                }
+            }
+
+            // Se não pagou OU expirou
+            if (!isPaid || isExpired) {
+                // Allow access to plans page, login, or api routes
+                const allowedPaths = ['/plans', '/login', '/register'];
+                const isAllowed = allowedPaths.includes(pathname) || pathname?.startsWith('/api');
+
+                if (!isAllowed) {
+                    console.log("Acesso negado (Não pago ou Expirado), redirecionando para /plans");
+                    router.push('/plans');
+                }
             }
         }
     }, [user, loading, pathname, router]);
