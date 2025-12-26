@@ -378,7 +378,7 @@ const Comum = (props) => {
     }
 
     return (
-        <div className={'flex flex-col items-center p-6 mx-auto w-full max-w-[1400px]'}>
+        <div className={'flex flex-col items-center p-6 mx-auto w-full max-w-[1400px] max-h-[calc(100vh-80px)] overflow-y-auto'}>
 
             {(grades && grades.length > 1) && (
                 <div className={`flex justify-center items-center gap-1 mb-6 ${isPrinting ? 'invisible' : ''}`}>
