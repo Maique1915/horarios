@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
                 .from('users')
                 .select('*, courses!users_course_id_fkey(code)')
                 .eq('username', username)
-                .single();
+                .maybeSingle();
 
             if (error || !user) {
                 return { success: false, error: 'Usuário não encontrado.' };
