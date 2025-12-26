@@ -139,7 +139,7 @@ const EditDb = () => {
     if (filtroPeriodo && d._se !== filtroPeriodo.value) return false;
     if (filtroStatus && d._ag !== filtroStatus.value) return false;
     if (filtroEl && d._el !== filtroEl.value) return false;
-    if (filtroTexto && !d._di.toLowerCase().includes(filtroTexto.toLowerCase()) && !d._re.toLowerCase().includes(filtroTexto.toLowerCase())) return false;
+    if (filtroTexto && !(d._di?.toLowerCase() || "").includes(filtroTexto.toLowerCase()) && !(d._re?.toLowerCase() || "").includes(filtroTexto.toLowerCase())) return false;
     return true;
   });
 

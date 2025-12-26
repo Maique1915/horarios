@@ -451,8 +451,8 @@ const GeraGrade = () => {
     function renderStepContent(): JSX.Element | null {
         if (state.estado === 0) {
             const filteredArr = arr.filter((item: any) =>
-                item._di.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item._re.toLowerCase().includes(searchTerm.toLowerCase())
+                (item._di?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+                (item._re?.toLowerCase() || "").includes(searchTerm.toLowerCase())
             );
             const pe = periodo(remove(filteredArr));
 
