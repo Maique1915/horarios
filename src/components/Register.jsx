@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import useMercadoPago from '../hooks/useMercadoPago';
+import { supabase } from '../lib/supabaseClient';
 import LoadingSpinner from './LoadingSpinner';
 
 const Register = () => {
@@ -12,12 +13,24 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [fullName, setFullName] = useState('');
     const [error, setError] = useState('');
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [courses, setCourses] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState('');
 
     const { register } = useAuth();
     const { createMercadoPagoCheckout } = useMercadoPago();
     const router = useRouter();
+
+    React.useEffect(() => {
+        const fetchCourses = async () => {
+            const { data, error } = await supabase.from('courses').select('id, name');
+            if (error) console.error("Error fetching courses:", error);
+            else setCourses(data || []);
+        };
+        fetchCourses();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -32,7 +45,7 @@ const Register = () => {
             }
 
             // 1. Criar conta no Supabase (status is_paid defaults to false)
-            const result = await register(username, password, fullName);
+            const result = await register(username, password, fullName, selectedCourse);
 
             if (result.success && result.user) {
                 // 2. Redirecionar para Pagamento
@@ -100,6 +113,25 @@ const Register = () => {
                                 placeholder="Seu nome completo"
                                 required
                             />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
+                                Curso
+                            </label>
+                            <select
+                                value={selectedCourse}
+                                onChange={(e) => setSelectedCourse(e.target.value)}
+                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary appearance-none cursor-pointer"
+                                required
+                            >
+                                <option value="" disabled>Selecione seu curso</option>
+                                {courses.map(course => (
+                                    <option key={course.id} value={course.id}>
+                                        {course.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="space-y-1.5">

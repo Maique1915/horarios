@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (username, password, fullName) => {
+    const register = async (username, password, fullName, courseId) => {
         try {
             // Verificar se usuário já existe
             const { data: existingUser } = await supabase
@@ -114,7 +114,8 @@ export const AuthProvider = ({ children }) => {
                         name: fullName,
                         role: 'user',
                         active: true,
-                        is_paid: false // Padrão: não pago
+                        is_paid: false, // Padrão: não pago
+                        course_id: courseId
                     }
                 ])
                 .select('*, courses!users_course_id_fkey(code)')
