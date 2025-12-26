@@ -225,15 +225,35 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const value = React.useMemo(() => ({
-        user,
-        loading,
-        login,
-        register,
-        updateUser,
-        logout,
-        isAuthenticated
-    }), [user, loading]);
+    const value = React.useMemo(() => {
+        // Recalculate isExpired for the exposed value to ensure it's up to date
+        // Logic duplicated from useEffect for safety, but ideal would be a state.
+        // Let's use the hook state if we can, but useEffect handles redirection.
+        // Better: add isExpired to the state or derive it here.
+
+        let isExpired = false;
+        if (user && user.subscription_expires_at) {
+            const expiresAt = new Date(user.subscription_expires_at);
+            if (new Date() > expiresAt) {
+                isExpired = true;
+            }
+        }
+        // Force expired if not paid (simpler handling for components)
+        // Actually user request says "se o usuario estiver com a conta expirada".
+        // Let's stick to expiration date or generic "hasAccess" check.
+        // For now, exposing isExpired as strictly date-based + is_paid not check.
+
+        return {
+            user,
+            loading,
+            isExpired, // Exposed property
+            login,
+            register,
+            updateUser,
+            logout,
+            isAuthenticated
+        };
+    }, [user, loading]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

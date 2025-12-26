@@ -89,17 +89,17 @@ const GeraGrade = () => {
     const loading = loadingArr || (loadingSchedule && !courseSchedule.length) || (loadingDimension && !courseDimension[0]);
 
     // Auto-select completed subjects if user is logged in
-    const { user } = useAuth();
+    const { user, isExpired } = useAuth();
     const { data: completedSubjects = [] } = useQuery({
         queryKey: ['completedSubjects', user?.id],
         queryFn: () => loadCompletedSubjects(user.id),
-        enabled: !!user?.id,
+        enabled: !!user?.id && !isExpired, // Disable if expired
         staleTime: 1000 * 60 * 5,
     });
 
     // Populate state with completed subjects once arr (all subjects) is loaded
     useEffect(() => {
-        if (arr.length > 0 && completedSubjects.length > 0 && state.names.length === 0) {
+        if (!isExpired && arr.length > 0 && completedSubjects.length > 0 && state.names.length === 0) {
             const newNames: string[] = [];
             const newKeys: number[] = [];
             const newCrs: number[] = [];

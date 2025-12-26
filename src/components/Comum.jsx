@@ -35,7 +35,7 @@ const Comum = (props) => {
     const [previousGrade, setPreviousGrade] = useState(null);
 
     // Auth
-    const { user } = useAuth();
+    const { user, isExpired } = useAuth();
     const [saving, setSaving] = useState(false);
 
     // Dynamic Schedule Data
@@ -436,8 +436,9 @@ const Comum = (props) => {
                         {(g === "ª" && user) && (
                             <button
                                 onClick={handleSave}
-                                disabled={saving}
-                                className="group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-light text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={saving || isExpired}
+                                title={isExpired ? "Conta expirada. Renove para salvar." : "Salvar Grade"}
+                                className={`group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-light text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isExpired ? 'cursor-not-allowed opacity-50' : ''}`}
                             >
                                 {saving ? (
                                     <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
