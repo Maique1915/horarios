@@ -1,0 +1,64 @@
+import { NextResponse } from "next/server";
+import { Preference } from "mercadopago";
+import mpClient from "@/lib/mercado-pago";
+
+export async function POST(req) {
+    const { testeId, userEmail } = await req.json();
+
+    try {
+        const preference = new Preference(mpClient);
+
+        const createdPreference = await preference.create({
+            body: {
+                external_reference: testeId, // ID da compra/usuário no nosso sistema
+                metadata: {
+                    testeId,
+                    // userEmail: userEmail,
+                },
+                ...(userEmail && {
+                    payer: {
+                        email: userEmail,
+                    },
+                }),
+
+                items: [
+                    {
+                        id: "plano-premium",
+                        description: "Acesso total ao Gerador de Horários",
+                        title: "Assinatura Premium",
+                        quantity: 1,
+                        unit_price: 19.90, // Preço exemplo
+                        currency_id: "BRL",
+                        category_id: "services",
+                    },
+                ],
+                payment_methods: {
+                    excluded_payment_types: [
+                        {
+                            id: "ticket",
+                        }
+                    ],
+                    installments: 12,
+                },
+                auto_return: "approved",
+                back_urls: {
+                    success: `${req.headers.get("origin")}/?status=sucesso`,
+                    failure: `${req.headers.get("origin")}/?status=falha`,
+                    pending: `${req.headers.get("origin")}/api/mercado-pago/pending`,
+                },
+            },
+        });
+
+        if (!createdPreference.id) {
+            throw new Error("No preferenceID");
+        }
+
+        return NextResponse.json({
+            preferenceId: createdPreference.id,
+            initPoint: createdPreference.init_point,
+        });
+    } catch (err) {
+        console.error(err);
+        return NextResponse.error();
+    }
+}

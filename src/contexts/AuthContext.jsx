@@ -113,7 +113,8 @@ export const AuthProvider = ({ children }) => {
                         password_hash: hashedPassword, // Salva o hash
                         name: fullName,
                         role: 'user',
-                        active: true
+                        active: true,
+                        is_paid: false // Padrão: não pago
                     }
                 ])
                 .select('*, courses!users_course_id_fkey(code)')
