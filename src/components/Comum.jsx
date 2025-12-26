@@ -298,7 +298,7 @@ const Comum = (props) => {
             renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
-            <tr key={`row-${numLinha}`} className="group h-24 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+            <tr key={`row-${numLinha}`} className="group h-32 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
                 <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
                     <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-wide border border-slate-200 dark:border-slate-700">{labelHorario}</span>
                 </td>
@@ -354,11 +354,11 @@ const Comum = (props) => {
         }
         return (
             <div className="rounded-2xl border border-border-light dark:border-border-dark overflow-hidden bg-white dark:bg-slate-900 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                <div className="overflow-auto max-h-[70vh] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                     <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
                             <tr className="bg-slate-50 dark:bg-slate-800 border-b border-border-light dark:border-border-dark sticky top-0 z-30">
-                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-slate-800 border-r border-border-light dark:border-border-dark">
+                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-slate-800 border-r border-border-light dark:border-border-dark sticky left-0 z-50">
                                     Horário
                                 </th>
                                 {dias.map(dia => (
