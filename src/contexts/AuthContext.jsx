@@ -2,7 +2,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter, usePathname } from 'next/navigation';
-import bcrypt from 'bcryptjs';
 
 const AuthContext = createContext();
 
@@ -65,15 +64,19 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            // Busca usuário na tabela customizada 'users'
-            const { data: user, error } = await supabase
-                .from('users')
-                .select('*, courses!users_course_id_fkey(code)')
-                .eq('username', username)
-                .maybeSingle();
+            // Secure Login via RPC
+            const { data: user, error } = await supabase.rpc('login_user', {
+                username_in: username,
+                password_in: password
+            });
 
-            if (error || !user) {
-                return { success: false, error: 'Usuário não encontrado.' };
+            if (error) {
+                console.error("RPC login error:", error);
+                return { success: false, error: 'Erro no servidor durante login.' };
+            }
+
+            if (!user) {
+                return { success: false, error: 'Usuário ou senha incorretos.' };
             }
 
             // Normalize courses (Supabase might return array)
@@ -81,44 +84,11 @@ export const AuthProvider = ({ children }) => {
                 user.courses = user.courses[0] || null;
             }
 
-            // 1. Verificação de senha em texto plano (MIGRAÇÃO)
-            // Check both password_hash and legacy password column if exists
-            const dbPassword = user.password_hash || user.password;
+            // Login com sucesso
+            localStorage.setItem('app_user', JSON.stringify(user));
+            setUser(user);
+            return { success: true, user };
 
-            if (dbPassword === password) {
-                console.log("Migrando senha de texto plano para hash...");
-                const salt = await bcrypt.genSalt(10);
-                const hashedPassword = await bcrypt.hash(password, salt);
-
-                // Atualizar no banco
-                const { error: updateError } = await supabase
-                    .from('users')
-                    .update({ password_hash: hashedPassword })
-                    .eq('id', user.id);
-
-                if (updateError) {
-                    console.error("Falha ao migrar senha de usuário:", updateError);
-                    // We continue login even if migration fails, but log it.
-                }
-
-                // Atualizar objeto local (para não salvar texto plano no state/storage)
-                user.password_hash = hashedPassword;
-
-                // Login com sucesso
-                localStorage.setItem('app_user', JSON.stringify(user));
-                setUser(user);
-                return { success: true, user };
-            }
-
-            // 2. Verificação de Hash (Padrão e Seguro)
-            const isMatch = await bcrypt.compare(password, user.password_hash);
-            if (isMatch) {
-                localStorage.setItem('app_user', JSON.stringify(user));
-                setUser(user);
-                return { success: true, user };
-            }
-
-            return { success: false, error: 'Senha incorreta.' };
         } catch (error) {
             console.error('Erro no login:', error);
             return { success: false, error: error.message };
@@ -127,39 +97,21 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, password, fullName, courseId) => {
         try {
-            // Verificar se usuário já existe
-            const { data: existingUser } = await supabase
-                .from('users')
-                .select('id')
-                .eq('username', username)
-                .maybeSingle();
+            // Secure Register via RPC
+            const { data, error } = await supabase.rpc('register_user', {
+                username_in: username,
+                password_in: password,
+                name_in: fullName,
+                course_id_in: courseId
+            });
 
-            if (existingUser) {
-                return { success: false, error: 'Usuário já existe.' };
+            if (error) {
+                // Handle specific constraint errors if needed
+                if (error.message.includes('Usuário já existe')) {
+                    return { success: false, error: 'Usuário já existe.' };
+                }
+                throw error;
             }
-
-            // Criptografar senha
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-
-            // Criar usuário na tabela users
-            const { data, error } = await supabase
-                .from('users')
-                .insert([
-                    {
-                        username,
-                        password_hash: hashedPassword, // Salva o hash
-                        name: fullName,
-                        role: 'user',
-                        active: true,
-                        is_paid: false, // Padrão: não pago
-                        course_id: courseId
-                    }
-                ])
-                .select('*, courses!users_course_id_fkey(code)')
-                .single();
-
-            if (error) throw error;
 
             if (Array.isArray(data.courses)) {
                 data.courses = data.courses[0] || null;
@@ -188,27 +140,21 @@ export const AuthProvider = ({ children }) => {
 
     const updateUser = async (userId, updates) => {
         try {
-            // Prepare update object
-            const dataToUpdate = {};
-            if (updates.name) dataToUpdate.name = updates.name;
-            if (updates.username) dataToUpdate.username = updates.username;
+            // Secure Update via RPC
+            // updates includes: name, username, password, currentPassword
+            const { data, error } = await supabase.rpc('update_user', {
+                user_id_in: userId,
+                name_in: updates.name,
+                username_in: updates.username,
+                password_in: updates.password || null,
+                // If the UI doesn't provide currentPassword, this will fail if the RPC assumes it.
+                // We MUST update the UI to provide it.
+                current_password_in: updates.currentPassword
+            });
 
-            if (updates.password) {
-                const salt = await bcrypt.genSalt(10);
-                const hashedPassword = await bcrypt.hash(updates.password, salt);
-                dataToUpdate.password_hash = hashedPassword;
+            if (error) {
+                throw error;
             }
-
-            if (Object.keys(dataToUpdate).length === 0) return { success: true };
-
-            const { data, error } = await supabase
-                .from('users')
-                .update(dataToUpdate)
-                .eq('id', userId)
-                .select('*, courses!users_course_id_fkey(code)')
-                .single();
-
-            if (error) throw error;
 
             if (Array.isArray(data.courses)) {
                 data.courses = data.courses[0] || null;
@@ -221,16 +167,15 @@ export const AuthProvider = ({ children }) => {
             return { success: true, user: data };
         } catch (error) {
             console.error('Erro ao atualizar usuário:', error);
-            return { success: false, error: error.message };
+            // Improve error message
+            let msg = error.message;
+            if (msg.includes('Senha atual incorreta')) msg = 'Senha atual incorreta.';
+            if (msg.includes('Nome de usuário já existe')) msg = 'Nome de usuário já existe.';
+            return { success: false, error: msg };
         }
     };
 
     const value = React.useMemo(() => {
-        // Recalculate isExpired for the exposed value to ensure it's up to date
-        // Logic duplicated from useEffect for safety, but ideal would be a state.
-        // Let's use the hook state if we can, but useEffect handles redirection.
-        // Better: add isExpired to the state or derive it here.
-
         let isExpired = false;
         if (user && user.subscription_expires_at) {
             const expiresAt = new Date(user.subscription_expires_at);
@@ -238,10 +183,6 @@ export const AuthProvider = ({ children }) => {
                 isExpired = true;
             }
         }
-        // Force expired if not paid (simpler handling for components)
-        // Actually user request says "se o usuario estiver com a conta expirada".
-        // Let's stick to expiration date or generic "hasAccess" check.
-        // For now, exposing isExpired as strictly date-based + is_paid not check.
 
         return {
             user,

@@ -28,7 +28,10 @@ export async function POST(request) {
                         const expirationDate = new Date();
                         expirationDate.setMonth(expirationDate.getMonth() + 6); // Adiciona 6 meses
 
-                        const { error } = await supabase
+                        // Use supabaseAdmin to bypass RLS
+                        const { supabaseAdmin } = await import("@/lib/supabaseAdmin");
+
+                        const { error } = await supabaseAdmin
                             .from('users')
                             .update({
                                 is_paid: true,

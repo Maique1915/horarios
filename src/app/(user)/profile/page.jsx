@@ -32,7 +32,7 @@ const ProfilePage = () => {
 
     // Profile Edit State
     const [isEditingProfile, setIsEditingProfile] = useState(false);
-    const [editForm, setEditForm] = useState({ name: '', username: '', password: '' });
+    const [editForm, setEditForm] = useState({ name: '', username: '', password: '', currentPassword: '' });
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [updateError, setUpdateError] = useState('');
@@ -42,7 +42,8 @@ const ProfilePage = () => {
             setEditForm({
                 name: user.name || '',
                 username: user.username || '',
-                password: ''
+                password: '',
+                currentPassword: ''
             });
             setShowPassword(false);
             setConfirmPassword('');
@@ -615,6 +616,20 @@ const ProfilePage = () => {
                                         onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
                                         className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
                                         placeholder="seu.usuario"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5 pt-2 border-t border-border-light dark:border-border-dark mt-2">
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
+                                        Senha Atual (Obrigatório para alterações)
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={editForm.currentPassword}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                        className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
+                                        placeholder="Digite sua senha atual"
+                                        required
                                     />
                                 </div>
 
