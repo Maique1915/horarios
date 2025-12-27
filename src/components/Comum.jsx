@@ -251,10 +251,10 @@ const Comum = (props) => {
         const hasContent = conteudoNovo && conteudoNovo.trim() !== "";
 
         return (
-            <td key={key} className="relative p-1 align-middle h-14 min-w-[120px] border border-dashed border-border-light/40 dark:border-border-dark/40 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20">
+            <td key={key} className="relative p-1 align-middle h-auto min-w-[120px] border border-dashed border-border-light/40 dark:border-border-dark/40 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20">
                 {/* Empty State visual helper (optional) */}
                 {!hasContent && !conteudoAnterior && (
-                    <div className="w-full h-full rounded-md bg-transparent"></div>
+                    <div className="w-full min-h-[3.5rem] rounded-md bg-transparent"></div>
                 )}
 
                 {/* Conteúdo Antigo (Transition Out) */}
@@ -274,7 +274,7 @@ const Comum = (props) => {
                 {/* Conteúdo Novo (Transition In) */}
                 {hasContent && (
                     <div
-                        className={`absolute inset-1 px-1 py-1 rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col justify-center items-center text-center cursor-default group border border-black/5 dark:border-white/5 ${isTransitioning ? 'animate-fade-in' : ''}`}
+                        className={`relative w-full min-h-[3.5rem] px-1 py-1 rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col justify-center items-center text-center cursor-default group border border-black/5 dark:border-white/5 ${isTransitioning ? 'animate-fade-in' : ''}`}
                         style={{ backgroundColor: baseCorNova }}
                     >
                         {conteudoNovo.split('\n').map((line, i) => (
