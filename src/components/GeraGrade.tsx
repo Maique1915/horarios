@@ -13,17 +13,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { loadCompletedSubjects } from '../services/disciplinaService';
 
-interface Subject {
-    _re: string;
-    _di: string;
-    _ap: number;
-    _at: number;
-    _se: number;
-    _pr: string;
-    _el?: boolean;
-    // Add other properties as needed
-    [key: string]: any;
-}
+import { Subject } from '../types/Subject';
+
 
 interface GradeState {
     names: string[];
@@ -142,7 +133,7 @@ const GeraGrade = () => {
                 console.log('GeraGrade: Matérias após filtro (indo para Escolhe):', m);
                 console.log('GeraGrade: Matérias após filtro:', m.length);
 
-                const escolhe = new Escolhe(m, cur, courseDimension, courseSchedule);
+                const escolhe = new Escolhe(m, courseSchedule);
                 let gp = escolhe.exc();
                 console.log('GeraGrade: Grades geradas:', gp.length);
 
@@ -411,8 +402,11 @@ const GeraGrade = () => {
         if (i === 1) {
             const cr = state.crs.reduce((a, b) => a + b, 0);
             console.log('mudaTela(1): Créditos totais:', cr);
+            console.log('mudaTela(1): Matérias selecionadas:', state.names);
+            console.log(arr);
             const calculatedGr = new Grafos(arr, cr, state.names).matriz();
             setGradesResult(calculatedGr);
+            console.log(calculatedGr);
             setState(e => ({ ...e, estado: i }));
         } else if (i === 2) {
             setCalculating(true);

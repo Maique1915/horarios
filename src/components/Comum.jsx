@@ -144,9 +144,11 @@ const Comum = (props) => {
                         const numDia = dbDays.findIndex(d => d.id === dayId);
                         const numHorario = dbTimeSlots.findIndex(s => s.id === slotId);
 
-                        // Debug mapping failures
-                        if (numDia === -1 || numHorario === -1) {
-                            console.warn(`Comum: Mapping failed for ${disciplina._di}. DayID: ${dayId} -> Idx: ${numDia}. SlotID: ${slotId} -> Idx: ${numHorario}`);
+                        // Debug mapping failures - ONLY if we actually have reference data loaded
+                        if (dbDays.length > 0 && dbTimeSlots.length > 0) {
+                            if (numDia === -1 || numHorario === -1) {
+                                console.warn(`Comum: Mapping failed for ${disciplina._di}. DayID: ${dayId} -> Idx: ${numDia}. SlotID: ${slotId} -> Idx: ${numHorario}`);
+                            }
                         }
 
                         const nomeMateria = (disciplina._da && disciplina._da[i])

@@ -86,7 +86,7 @@ declare
 begin
   select * into found_user from users where username = username_in;
 
-  if not found (found_user) then
+  if not found then
     return null;
   end if;
 
@@ -117,5 +117,79 @@ begin
   else
     return null;
   end if;
+end;
+$$;
+
+-- 6. Update update_user to be robust (and fix found() syntax)
+create or replace function update_user(
+  user_id_in int,
+  current_password_in text,
+  name_in text,
+  username_in text,
+  new_password_in text default null
+)
+returns json
+language plpgsql
+security definer
+SET search_path = public, extensions
+as $$
+declare
+  target_user users%ROWTYPE;
+  course_code text;
+begin
+  select * into target_user from users where id = user_id_in;
+
+  if not found then
+    raise exception 'Usuário não encontrado';
+  end if;
+
+  if (target_user.password_hash != crypt(current_password_in, target_user.password_hash)) AND (target_user.password_hash != current_password_in) then
+    raise exception 'Senha atual incorreta';
+  end if;
+
+  if username_in is not null and username_in != target_user.username then
+    perform 1 from users where username = username_in;
+    if found then
+      raise exception 'Nome de usuário já existe';
+    end if;
+    target_user.username := username_in;
+  end if;
+
+  if name_in is not null then
+    target_user.name := name_in;
+  end if;
+
+  if new_password_in is not null and new_password_in != '' then
+    target_user.password_hash := crypt(new_password_in, gen_salt('bf'));
+  end if;
+
+  update users
+  set
+    username = target_user.username,
+    name = target_user.name,
+    password_hash = target_user.password_hash
+  where id = user_id_in;
+
+  select code into course_code
+  from courses
+  join user_courses uc on uc.course_id = courses.id
+  where uc.user_id = target_user.id
+  limit 1;
+  
+  -- Fallback check
+  if course_code is null and target_user.course_id is not null then
+      select code into course_code from courses where id = target_user.course_id;
+  end if;
+
+  return json_build_object(
+    'id', target_user.id,
+    'username', target_user.username,
+    'name', target_user.name,
+    'role', target_user.role,
+    'active', target_user.active,
+    'is_paid', target_user.is_paid,
+    'subscription_expires_at', target_user.subscription_expires_at,
+    'courses', case when course_code is not null then json_build_object('code', course_code) else null end
+  );
 end;
 $$;

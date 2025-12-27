@@ -6,6 +6,7 @@ import {
     loadCompletedSubjects,
     loadCurrentEnrollments,
     loadDbData,
+    loadClassesForGrid,
     toggleCompletedSubject,
     toggleMultipleSubjects
 } from '../../../services/disciplinaService';
@@ -14,6 +15,7 @@ import { getUserTotalHours } from '../../../services/complementaryService';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LoadingSpinner from '../../../components/LoadingSpinner';
+import Escolhe from '../../../model/util/Escolhe';
 
 const ProfilePage = () => {
     const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
@@ -266,6 +268,70 @@ const ProfilePage = () => {
         : sortedSemesters.filter(sem => sem === selectedSemester);
 
 
+    // 5. Graduation Prediction
+
+    const [estimatedDate, setEstimatedDate] = useState(null);
+
+    useEffect(() => {
+        if (scheduleMeta.days.length > 0) {
+            // Need to ensure allSubjects is populated. It might be empty if not in edit mode?
+            // ProfilePage loads `loadCompletedSubjects`. `allSubjects` is only loaded in Edit Mode.
+            // We need `allSubjects` for prediction regardless of edit mode.
+            // Let's load it if missing.
+            const calculatePrediction = async () => {
+                let subjectsToProcess = allSubjects;
+
+                if (subjectsToProcess.length === 0) {
+                    // Fetch if we don't have them
+                    // Fix: Use user's course code to avoid fetching all subjects from all courses
+                    const courseCode = user?.courses?.code || localStorage.getItem('last_active_course');
+
+                    if (courseCode) {
+                        try {
+                            // Fix: Use loadClassesForGrid to ensure we have the schedule data (_ho) 
+                            // required by Escolhe for collision detection/prediction
+                            subjectsToProcess = await loadClassesForGrid(courseCode);
+                        } catch (e) {
+                            console.error("Failed to load subjects for prediction", e);
+                            return;
+                        }
+                    } else {
+                        // If no course code found, we can't safely predict. 
+                        // Maybe try 'engcomp' as generic fallback or just abort?
+                        // Abort is safer to avoid pollution.
+                        console.warn("ProfilePage: No course code found for prediction.");
+                        return;
+                    }
+                }
+
+                if (subjectsToProcess.length > 0) {
+                    const remainingSemesters = Escolhe.predictCompletion(
+                        subjectsToProcess,
+                        completedSubjects,
+                        scheduleMeta
+                    );
+
+                    // Calculate date: Now + (Semesters * 6 months)
+                    const today = new Date();
+                    const currentMonth = today.getMonth(); // 0-11
+                    const currentYear = today.getFullYear();
+
+                    // Simple heuristic: 1 semester = 6 months
+                    // If current month is > 6 (Jul-Dec), next semester starts next year.
+                    // This is rough. Let's just add 6 months * remaining.
+
+                    const futureDate = new Date(today);
+                    futureDate.setMonth(futureDate.getMonth() + (remainingSemesters * 6));
+
+                    setEstimatedDate(futureDate);
+                }
+            };
+
+            calculatePrediction();
+        }
+    }, [allSubjects, completedSubjects, scheduleMeta]);
+
+
     // Log when key data changes to debug re-renders (can be removed later)
     useEffect(() => {
         console.log("ProfilePage data updated:", {
@@ -324,23 +390,44 @@ const ProfilePage = () => {
                     </div>
 
                     {/* Progress Stats - Minimalist */}
-                    <div className="bg-background-light dark:bg-background-dark rounded-xl p-4 min-w-[240px] border border-border-light dark:border-border-dark w-full md:w-auto">
-                        <div className="flex justify-between items-end mb-2 gap-4">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Progresso Total</span>
-                            <span className="text-xl font-bold text-primary">{progressPercentage}%</span>
+                    <div className="bg-background-light dark:bg-background-dark rounded-xl p-4 min-w-[280px] border border-border-light dark:border-border-dark w-full md:w-auto flex flex-col justify-between">
+                        <div className="mb-4">
+                            <div className="flex justify-between items-end mb-2 gap-4">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Progresso Total</span>
+                                <span className="text-xl font-bold text-primary">{progressPercentage}%</span>
+                            </div>
+                            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                <div
+                                    className="bg-primary h-2 rounded-full transition-all duration-1000 ease-out"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
                         </div>
-                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                            <div
-                                className="bg-primary h-2 rounded-full transition-all duration-1000 ease-out"
-                                style={{ width: `${progressPercentage}%` }}
-                            ></div>
+
+                        {/* Prediction in Header */}
+                        <div className="pt-4 border-t border-border-light dark:border-border-dark flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-teal-600 dark:text-teal-400">event_available</span>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Previsão</span>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-sm font-bold text-teal-600 dark:text-teal-400">
+                                    {estimatedDate ? (
+                                        <>
+                                            {estimatedDate.toLocaleString('default', { month: 'short' })}/{estimatedDate.getFullYear()}
+                                        </>
+                                    ) : (
+                                        <span className="text-xs text-slate-400 font-normal">Calculando...</span>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Detailed Progress Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
                 <CategoryProgress
                     title="Obrigatórias"
                     subjects={completedSubjects.filter(s => s._el)}
@@ -370,6 +457,8 @@ const ProfilePage = () => {
                     customTotalHours={complementaryHours}
                     onClick={() => router.push('/activities')}
                 />
+
+
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">

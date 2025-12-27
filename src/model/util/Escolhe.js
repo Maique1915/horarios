@@ -1,8 +1,7 @@
+import Grafos from './Grafos';
 export default class Escolhe {
 
-    constructor(genesis, cur, dimension, schedule) {
-        this.cur = cur
-        this.dimension = dimension || [0, 0]
+    constructor(genesis, schedule) {
         this.schedule = schedule || [[], []]
 
         // Normalize genesis subjects 
@@ -155,5 +154,92 @@ export default class Escolhe {
             }
         }
         return true;
+    }
+
+    /**
+     * Simulates future semesters to predict graduation.
+     * @param {Array} allSubjects - All available subjects in the course.
+     * @param {Array} completedSubjects - Subjects already completed by the user.
+     * @param {Object} scheduleMeta - { days: [], slots: [] } Metadata for schedule parsing.
+     * @returns {number} Estimated number of semesters remaining.
+     */
+    static predictCompletion(allSubjects, completedSubjects, scheduleMeta) {
+        if (!allSubjects || allSubjects.length === 0) return 0;
+
+        let currentCompleted = [...completedSubjects]; // Copy to avoid mutating original
+        let semesters = 0;
+        const MAX_SEMESTERS = 20; // Safety break
+
+        while (semesters < MAX_SEMESTERS) {
+            // 1. Find candidates (what can be taken now)
+            // Grafos expects (allSubjects, cr, names). 
+            // We pass -1 for CR to auto-calc based on completed.
+            const grafos = new Grafos(allSubjects, -1, currentCompleted);
+            const candidates = grafos.matriz();
+
+            // If no candidates left, we are done (or stuck, implying done for this simulation)
+            if (candidates.length === 0) break;
+
+            // 2. Select best schedule
+            // Use Deterministic chooser to avoid random results in prediction
+            const escolhe = new EscolheDeterministico(candidates, scheduleMeta);
+            const possibleSchedules = escolhe.exc();
+
+            if (possibleSchedules.length === 0) {
+                // Should not happen if candidates exist, unless huge conflict 
+                // or no slots. If so, we break (can't take more).
+                break;
+            }
+
+            // 3. Pick the "best" (most subjects/hours)
+            // exc() sorts by length descending, so index 0 is best.
+            const bestSchedule = possibleSchedules[0];
+
+            // 4. Update state
+            // Add these subjects to completed list
+            currentCompleted = [...currentCompleted, ...bestSchedule];
+            semesters++;
+        }
+
+        return semesters;
+    }
+}
+
+// Subclass to enforce deterministic reduction for prediction accuracy
+class EscolheDeterministico extends Escolhe {
+    reduz() {
+        while (this.genesis.length > 20) {
+            // Deterministic prune: Remove lowest priority (High semester, Elective)
+            // We want to KEEP: Mandatory, Low Semester.
+            // So we find the "worst" candidate to remove.
+            // Worst = Elective (true), High Semester.
+
+            let worstIdx = -1;
+            let worstScore = -1; // Score: Elective=1000, Semester=Value. High score = bad.
+
+            for (let i = 0; i < this.genesis.length; i++) {
+                const s = this.genesis[i];
+                // Heuristic score
+                let score = s._se; // Base: Semester
+                if (s._el) score += 1000; // Penalize electives
+
+                if (score > worstScore) {
+                    worstScore = score;
+                    worstIdx = i;
+                } else if (score === worstScore) {
+                    // Tie breaker: Random? Or ID? Use ID for stability
+                    if (s._id > this.genesis[worstIdx]._id) {
+                        worstIdx = i;
+                    }
+                }
+            }
+
+            if (worstIdx !== -1) {
+                this.genesis.splice(worstIdx, 1);
+            } else {
+                // Fallback
+                this.genesis.pop();
+            }
+        }
     }
 }
