@@ -298,7 +298,7 @@ const Comum = (props) => {
             renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
-            <tr key={`row-${numLinha}`} className="group h-32 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+            <tr key={`row-${numLinha}`} className="group min-h-[4rem] h-auto hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
                 <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
                     <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-wide border border-slate-200 dark:border-slate-700">{labelHorario}</span>
                 </td>
