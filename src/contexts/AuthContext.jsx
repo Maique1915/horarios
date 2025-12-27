@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, password, fullName, courseId) => {
         try {
+            console.log("AuthContext register called with:", { username, fullName, courseId, parsedCourseId: parseInt(courseId) });
             // Secure Register via RPC
             const { data, error } = await supabase.rpc('register_user', {
                 username_in: username,

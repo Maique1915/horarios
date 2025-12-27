@@ -174,15 +174,7 @@ const Home = () => {
                 )}
 
                 {/* Footer Actions */}
-                <div className="flex justify-center gap-4 mt-16">
-                    <button
-                        onClick={() => router.push('/edit')}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-light-secondary hover:text-primary hover:border-primary/30 shadow-sm"
-                    >
-                        <span className="material-symbols-outlined text-lg">settings</span>
-                        <span>Gerenciar Cursos</span>
-                    </button>
-                </div>
+
             </div>
         </div>
     );

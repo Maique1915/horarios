@@ -6,6 +6,9 @@ export async function POST(req) {
     const { testeId, userEmail } = await req.json();
 
     try {
+        console.log("Create Checkout API called with:", { testeId, userEmail });
+        console.log("MP Client initialized:", !!mpClient);
+
         const preference = new Preference(mpClient);
 
         const createdPreference = await preference.create({

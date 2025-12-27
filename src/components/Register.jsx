@@ -45,11 +45,13 @@ const Register = () => {
             }
 
             // 1. Criar conta no Supabase (status is_paid defaults to false)
+            console.log("Registering user:", { username, fullName, selectedCourse });
             const result = await register(username, password, fullName, selectedCourse);
 
             if (result.success && result.user) {
                 // 2. Redirecionar para Pagamento
-                console.log("Usuário criado, redirecionando para pagamento...", result.user.id);
+                console.log("Usuário criado com sucesso! Objeto retornado:", result); // FULL LOG
+                console.log("Redirecionando para pagamento...", result.user.id);
 
                 await createMercadoPagoCheckout({
                     testeId: result.user.id,
