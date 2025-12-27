@@ -147,9 +147,7 @@ export const AuthProvider = ({ children }) => {
                 user_id_in: userId,
                 name_in: updates.name,
                 username_in: updates.username,
-                password_in: updates.password || null,
-                // If the UI doesn't provide currentPassword, this will fail if the RPC assumes it.
-                // We MUST update the UI to provide it.
+                new_password_in: updates.password || null,
                 current_password_in: updates.currentPassword
             });
 
