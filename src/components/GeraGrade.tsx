@@ -618,7 +618,10 @@ const GeraGrade = () => {
             )
         }
 
-        const b = <button onClick={() => mudaTela(1)} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl h-10 px-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"><span className="material-symbols-outlined text-lg">arrow_back</span>Voltar</button>;
+        const b = <button onClick={() => mudaTela(1)}
+            className="group flex cursor-pointer items-center justify-center gap-2 rounded-xl h-10 px-5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="material-symbols-outlined text-lg">arrow_back</span>
+            Voltar</button>;
         return (
             <Comum
                 materias={possibleGrades}

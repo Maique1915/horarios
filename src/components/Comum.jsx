@@ -431,8 +431,7 @@ const Comum = (props) => {
                                     {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
                                 </h3>
                             </div>
-                            <div className={`flex flex-wrap items-center gap-2 md:gap-3 w-full md:w-auto ${isPrinting ? 'invisible' : ''}`}>
-                                {(_fun && g !== "ª") && _fun}
+                            <div className={`flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto ${isPrinting ? 'invisible' : ''}`}>
 
                                 {(g === "ª" && user && !isExpired) && (
                                     <button
@@ -459,6 +458,9 @@ const Comum = (props) => {
                                         Imprimir
                                     </button>
                                 )}
+
+                                {/* Render 'fun' (Custom Button/Component) at the end */}
+                                {_fun && _fun}
                             </div>
                         </div>
 
