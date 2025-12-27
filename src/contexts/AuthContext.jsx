@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
                 username_in: username,
                 password_in: password,
                 name_in: fullName,
-                course_id_in: courseId
+                course_id_in: parseInt(courseId) // Ensure integer type
             });
 
             if (error) {
