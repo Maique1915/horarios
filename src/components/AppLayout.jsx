@@ -30,7 +30,7 @@ const AppLayout = ({ children }) => {
         }
     }, [cur]);
 
-    // Get effective course (URL param > localStorage)
+    // Get effective course (URL param > localStorage > user preference)
     const [effectiveCur, setEffectiveCur] = useState(cur);
 
     useEffect(() => {
@@ -38,9 +38,15 @@ const AppLayout = ({ children }) => {
             setEffectiveCur(cur);
         } else {
             const stored = localStorage.getItem('last_active_course');
-            if (stored) setEffectiveCur(stored);
+            if (stored) {
+                setEffectiveCur(stored);
+            } else if (user?.courses?.code) {
+                // Fallback to user's registered course if available
+                setEffectiveCur(user.courses.code);
+                localStorage.setItem('last_active_course', user.courses.code);
+            }
         }
-    }, [cur]);
+    }, [cur, user]);
 
     const hasCourseSelected = !!effectiveCur;
 
