@@ -6,11 +6,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSearchParams } from 'next/navigation';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
+import PixPayment from '@/components/PixPayment';
+
 function PlansContent() {
-    const { createMercadoPagoCheckout } = useMercadoPago();
+    // const { createMercadoPagoCheckout } = useMercadoPago(); // Removed legacy
     const { user } = useAuth();
     const searchParams = useSearchParams();
     const alertType = searchParams.get('alert');
+    const [showPix, setShowPix] = React.useState(false);
+
+    if (showPix) {
+        return <PixPayment />;
+    }
 
     const handleSubscribe = () => {
         if (!user) {
@@ -18,10 +25,8 @@ function PlansContent() {
             return;
         }
 
-        createMercadoPagoCheckout({
-            testeId: user.id, // ID do usuário para o webhook
-            userEmail: user.username, // Assumindo username como email, se não for, ajustar
-        });
+        // Show Manual PIX UI instead of Mercado Pago
+        setShowPix(true);
     };
 
     return (
@@ -127,7 +132,7 @@ function PlansContent() {
                                     onClick={handleSubscribe}
                                     className="block w-full bg-indigo-600 border border-transparent rounded-md py-3 text-sm font-semibold text-white text-center hover:bg-indigo-700 shadow-md transition-all hover:scale-[1.02]"
                                 >
-                                    Assinar Agora
+                                    Pagar com PIX
                                 </button>
                             </div>
                         </div>
