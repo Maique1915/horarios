@@ -181,56 +181,109 @@ const ProfilePage = () => {
     const [allSubjects, setAllSubjects] = useState([]);
     const [saving, setSaving] = useState(false);
 
+    // NEW: Local state for selected items in Edit Mode
+    const [selectedIds, setSelectedIds] = useState(new Set());
+
     useEffect(() => {
         if (!authLoading && !isAuthenticated()) {
             router.push('/login?from=/profile');
         }
     }, [authLoading, isAuthenticated, router]);
 
+    // Initialize Edit Mode
     useEffect(() => {
-        if (isEditing && allSubjects.length === 0) {
-            const loadAll = async () => {
-                const courseCode = localStorage.getItem('last_active_course');
-                const data = await loadDbData(courseCode);
-                setAllSubjects(data);
-            };
-            loadAll();
-        }
-    }, [isEditing]);
+        if (isEditing) {
+            // Lazy load all subjects if needed
+            if (allSubjects.length === 0) {
+                const loadAll = async () => {
+                    const courseCode = localStorage.getItem('last_active_course');
+                    const data = await loadDbData(courseCode);
+                    setAllSubjects(data);
+                };
+                loadAll();
+            }
 
-    const handleToggleSubject = async (subjectId, currentStatus) => {
+            // Initialize selectedIds from currently completed subjects
+            const currentIds = new Set(completedSubjects.map(s => s._id));
+            setSelectedIds(currentIds);
+        }
+    }, [isEditing, completedSubjects]); // Depend on completedSubjects to sync initial state
+
+    const handleToggleSubject = (subjectId, currentStatus) => {
+        // Only update local state
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(subjectId)) {
+            newSelected.delete(subjectId);
+        } else {
+            newSelected.add(subjectId);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const handleTogglePeriod = (semester, isChecked) => {
+        // Only update local state
+        const subjectsInSemester = subjectsBySemester[semester];
+        const newSelected = new Set(selectedIds);
+
+        subjectsInSemester.forEach(s => {
+            if (isChecked) {
+                newSelected.add(s._id);
+            } else {
+                newSelected.delete(s._id);
+            }
+        });
+        setSelectedIds(newSelected);
+    };
+
+    const handleSave = async () => {
         try {
             setSaving(true);
-            const newStatus = !currentStatus;
-            await toggleCompletedSubject(user.id, subjectId, newStatus);
+            const originalIds = new Set(completedSubjects.map(s => s._id));
 
-            // Optimistic update or refetch? Refetch is safer for consistency
-            queryClient.invalidateQueries(['completedSubjects', user.id]);
+            // Find added and removed IDs
+            const addedIds = [];
+            const removedIds = [];
+
+            // Check for additions
+            for (const id of selectedIds) {
+                if (!originalIds.has(id)) {
+                    addedIds.push(id);
+                }
+            }
+
+            // Check for removals
+            for (const id of originalIds) {
+                if (!selectedIds.has(id)) {
+                    removedIds.push(id);
+                }
+            }
+
+            // Perform bulk updates
+            const promises = [];
+            if (addedIds.length > 0) promises.push(toggleMultipleSubjects(user.id, addedIds, true));
+            if (removedIds.length > 0) promises.push(toggleMultipleSubjects(user.id, removedIds, false));
+
+            await Promise.all(promises);
+
+            // Refresh data
+            await queryClient.invalidateQueries(['completedSubjects', user.id]);
+            setIsEditing(false);
+            alert("Alterações salvas com sucesso!");
+
         } catch (error) {
-            console.error("Error toggling subject:", error);
-            alert("Erro ao atualizar disciplina.");
+            console.error("Error saving subjects:", error);
+            alert("Erro ao salvar alterações.");
         } finally {
             setSaving(false);
         }
     };
 
-    const handleTogglePeriod = async (semester, isChecked) => {
-        try {
-            setSaving(true);
-            const subjectsInSemester = subjectsBySemester[semester];
-            const subjectIds = subjectsInSemester.map(s => s._id);
-
-            await toggleMultipleSubjects(user.id, subjectIds, isChecked);
-            queryClient.invalidateQueries(['completedSubjects', user.id]);
-        } catch (error) {
-            console.error("Error toggling period:", error);
-            alert("Erro ao atualizar período.");
-        } finally {
-            setSaving(false);
-        }
+    const handleCancel = () => {
+        setIsEditing(false);
+        // selectedIds will be reset by useEffect next time isEditing becomes true
     };
 
-    // Requirements Constants (TODO: Should come from database/course registry)
+    // ... existing constants ...
     const MANDATORY_REQ_HOURS = 3774;
     const ELECTIVE_REQ_HOURS = 360;
     const COMPLEMENTARY_REQ_HOURS = 210;
@@ -271,37 +324,23 @@ const ProfilePage = () => {
 
 
     // 5. Graduation Prediction
-
     const [estimatedDate, setEstimatedDate] = useState(null);
 
     useEffect(() => {
         if (scheduleMeta.days.length > 0) {
-            // Need to ensure allSubjects is populated. It might be empty if not in edit mode?
-            // ProfilePage loads `loadCompletedSubjects`. `allSubjects` is only loaded in Edit Mode.
-            // We need `allSubjects` for prediction regardless of edit mode.
-            // Let's load it if missing.
             const calculatePrediction = async () => {
                 let subjectsToProcess = allSubjects;
 
                 if (subjectsToProcess.length === 0) {
-                    // Fetch if we don't have them
-                    // Fix: Use user's course code to avoid fetching all subjects from all courses
                     const courseCode = user?.courses?.code || localStorage.getItem('last_active_course');
-
                     if (courseCode) {
                         try {
-                            // Fix: Use loadClassesForGrid to ensure we have the schedule data (_ho) 
-                            // required by Escolhe for collision detection/prediction
                             subjectsToProcess = await loadClassesForGrid(courseCode);
                         } catch (e) {
                             console.error("Failed to load subjects for prediction", e);
                             return;
                         }
                     } else {
-                        // If no course code found, we can't safely predict. 
-                        // Maybe try 'engcomp' as generic fallback or just abort?
-                        // Abort is safer to avoid pollution.
-                        console.warn("ProfilePage: No course code found for prediction.");
                         return;
                     }
                 }
@@ -313,22 +352,12 @@ const ProfilePage = () => {
                         scheduleMeta
                     );
 
-                    // Calculate date: Now + (Semesters * 6 months)
                     const today = new Date();
-                    const currentMonth = today.getMonth(); // 0-11
-                    const currentYear = today.getFullYear();
-
-                    // Simple heuristic: 1 semester = 6 months
-                    // If current month is > 6 (Jul-Dec), next semester starts next year.
-                    // This is rough. Let's just add 6 months * remaining.
-
                     const futureDate = new Date(today);
                     futureDate.setMonth(futureDate.getMonth() + (remainingSemesters * 6));
-
                     setEstimatedDate(futureDate);
                 }
             };
-
             calculatePrediction();
         }
     }, [allSubjects, completedSubjects, scheduleMeta]);
@@ -348,9 +377,6 @@ const ProfilePage = () => {
     }
 
     if (!user) return null;
-
-
-
 
     return (
         <div className="container mx-auto px-4 py-8 animate-fadeIn max-w-6xl">
@@ -553,18 +579,34 @@ const ProfilePage = () => {
                                     ))}
                                 </select>
                             )}
-                            <button
-                                onClick={() => setIsEditing(!isEditing)}
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isEditing
-                                    ? 'bg-primary text-white shadow-sm'
-                                    : 'bg-white dark:bg-slate-800 text-text-light-secondary hover:text-primary border border-border-light dark:border-border-dark'
-                                    }`}
-                                title={isEditing ? "Concluir Edição" : "Gerenciar Disciplinas"}
-                            >
-                                <span className="material-symbols-outlined text-lg">
-                                    {isEditing ? 'check' : 'edit'}
-                                </span>
-                            </button>
+
+                            {isEditing ? (
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleCancel}
+                                        disabled={saving}
+                                        className="px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={saving}
+                                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-1"
+                                    >
+                                        {saving ? 'Salvando...' : 'Salvar'}
+                                        {!saving && <span className="material-symbols-outlined text-[14px]">save</span>}
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-white dark:bg-slate-800 text-text-light-secondary hover:text-primary border border-border-light dark:border-border-dark"
+                                    title="Gerenciar Disciplinas"
+                                >
+                                    <span className="material-symbols-outlined text-lg">edit</span>
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -579,7 +621,8 @@ const ProfilePage = () => {
                                 ) : (
                                     filteredSemesters.map(sem => {
                                         const semesterSubjects = subjectsBySemester[sem];
-                                        const allCompleted = semesterSubjects.every(s => completedSubjects.some(cs => cs._id === s._id));
+                                        // Now checks local state `selectedIds` instead of props
+                                        const allCompleted = semesterSubjects.every(s => selectedIds.has(s._id));
 
                                         return (
                                             <div key={sem} className="animate-fadeIn">
@@ -602,7 +645,7 @@ const ProfilePage = () => {
                                                 </div>
                                                 <div className="space-y-1">
                                                     {subjectsBySemester[sem].map(subject => {
-                                                        const isCompleted = completedSubjects.some(cs => cs._id === subject._id);
+                                                        const isCompleted = selectedIds.has(subject._id);
                                                         return (
                                                             <label
                                                                 key={subject._id}

@@ -89,8 +89,8 @@ const Register = () => {
 
                     <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 mb-6 border border-border-light dark:border-border-dark overflow-hidden">
                         <p className="text-xs font-semibold uppercase text-slate-500 mb-2">Chave Pix (Copia e Cola)</p>
-                        <p className="text-sm font-mono font-bold text-primary select-all cursor-pointer break-all" onClick={() => navigator.clipboard.writeText('https://nubank.com.br/cobrar/b5da35/695028fd-22ab-425e-a383-1c8925d9e260')}>
-                            https://nubank.com.br/cobrar/b5da35/695028fd-22ab-425e-a383-1c8925d9e260
+                        <p className="text-sm font-mono font-bold text-primary select-all cursor-pointer break-all" onClick={() => navigator.clipboard.writeText('https://nubank.com.br/cobrar/b5da35/69502bf1-5053-4657-a79b-172095c747ed')}>
+                            https://nubank.com.br/cobrar/b5da35/69502bf1-5053-4657-a79b-172095c747ed
                         </p>
                         <p className="text-xs text-slate-400 mt-2">Clique para copiar</p>
                     </div>
