@@ -180,48 +180,14 @@ const splitPrerequisites = (prList) => {
     return { subjectAcronyms, minCredits };
 };
 
-// Refactored Helper for Category/Elective Logic
 const processCategoryAndElective = (item) => {
-    // CORRECTION (User Request & Data Analysis): 
-    // DB 'elective' = TRUE -> MANDATORY (Obrigatória)
-    // DB 'elective' = FALSE -> ELECTIVE (Optativa)
-
-    // 1. Initial guess based on DB elective column
-    let isDbMandatory = true;
-    if (item.elective !== undefined && item.elective !== null) {
-        isDbMandatory = item.elective === true;
-    } else if (item.category === 'MANDATORY') {
-        isDbMandatory = true;
-    } else if (item.category === 'ELECTIVE') {
-        isDbMandatory = false;
-    } else {
-        // Legacy Heuristic fallback
-        // Sem 1-10 -> Mandatory; Sem 0 -> Elective (Not Mandatory)
-        if (item.semester >= 1) isDbMandatory = true;
-        else if (item.semester === 0) isDbMandatory = false; // Elective
-    }
-
-    // 2. Identify Complementary (overrides everything)
-    const isComplementary = (item.category === 'COMPLEMENTARY') ||
-        (item.name && (item.name.toLowerCase().includes('complementar') || item.name.toLowerCase().includes('participação')));
-
-    // 3. Final Category Assignment
-    let finalCategory = 'MANDATORY';
-    if (isComplementary) {
-        finalCategory = 'COMPLEMENTARY';
-    } else if (!isDbMandatory) {
-        finalCategory = 'ELECTIVE';
-    } else {
-        finalCategory = 'MANDATORY';
-    }
-
-    // 4. Internal Frontend Flag (_el)
-    // true = Optativa (Elective)
-    const isOptativa = finalCategory === 'ELECTIVE';
+    // CORRECTION: Direct Mapping as explicitly requested.
+    // DB elective=true -> Elective
+    // DB elective=false -> Mandatory
 
     return {
-        _el: isOptativa,
-        _category: finalCategory
+        _el: !!item.elective,
+        _category: item.elective ? 'ELECTIVE' : 'MANDATORY'
     };
 };
 
@@ -273,8 +239,8 @@ export const addSubject = async (courseCode, subjectData) => {
     if (courseError || !courseData) throw new Error(`Curso ${courseCode} não encontrado.`);
     const courseId = courseData.id;
 
-    // Logic: _el=true (Optativa) -> DB: elective=false (Not Mandatory)
-    const dbElective = !_el;
+    // Logic: _el=true (Elective) -> DB: elective=true
+    const dbElective = !!_el;
 
     const { data: insertedData, error } = await supabase.from('subjects').insert({
         name: _di,
@@ -313,8 +279,8 @@ export const addSubject = async (courseCode, subjectData) => {
 export const updateSubject = async (courseCode, subjectId, subjectData) => {
     const { _di, _re, _se, _at, _ap, _el, _ag, _pr } = subjectData;
 
-    // Logic: _el=true (Optativa) -> DB: elective=false (Not Mandatory)
-    const dbElective = !_el;
+    // Logic: _el=true (Elective) -> DB: elective=true
+    const dbElective = !!_el;
 
     const { error } = await supabase.from('subjects').update({
         name: _di,

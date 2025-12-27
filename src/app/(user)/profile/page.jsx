@@ -240,8 +240,10 @@ const ProfilePage = () => {
     const mandatorySubjects = completedSubjects.filter(s => !s._el);
     const electiveSubjects = completedSubjects.filter(s => s._el);
 
-    const electiveTotalCredits = mandatorySubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const mandatoryTotalCredits = electiveSubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+
+
+    const mandatoryTotalCredits = mandatorySubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+    const electiveTotalCredits = electiveSubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
 
     const mandatoryHours = Math.min(MANDATORY_REQ_HOURS, mandatoryTotalCredits * 18);
     const electiveHours = Math.min(ELECTIVE_REQ_HOURS, electiveTotalCredits * 18);
@@ -430,7 +432,7 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
                 <CategoryProgress
                     title="Obrigatórias"
-                    subjects={completedSubjects.filter(s => s._el)}
+                    subjects={mandatorySubjects}
                     reqHours={3774}
                     reqCredits={198}
                     color="text-blue-600 dark:text-blue-400"
@@ -439,7 +441,7 @@ const ProfilePage = () => {
                 />
                 <CategoryProgress
                     title="Optativas"
-                    subjects={completedSubjects.filter(s => !s._el)}
+                    subjects={electiveSubjects}
                     reqHours={360}
                     reqCredits={20}
                     color="text-purple-600 dark:text-purple-400"
@@ -626,7 +628,7 @@ const ProfilePage = () => {
                                                                     </div>
                                                                     <div className="flex gap-2 text-xs opacity-70">
                                                                         <span>{subject._re}</span>
-                                                                        {subject._ap && <span>• {subject._ap}cr</span>}
+                                                                        <span>• {Number(subject._ap || 0) + Number(subject._at || 0)}cr</span>
                                                                     </div>
                                                                 </div>
                                                             </label>
