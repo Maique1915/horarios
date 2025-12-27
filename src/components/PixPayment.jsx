@@ -13,7 +13,8 @@ const PixPayment = () => {
                 </p>
 
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 mb-6 border border-border-light dark:border-border-dark overflow-hidden flex flex-col items-center">
-                    <p className="text-xs font-semibold uppercase text-slate-500 mb-4">Pagamento via PIX</p>
+                    <p className="text-xs font-semibold uppercase text-slate-500 mb-1">Pagamento via PIX</p>
+                    <p className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">Valor: R$ 3,00</p>
 
                     <div className="bg-white p-2 rounded-lg border border-slate-200 mb-4">
                         <img

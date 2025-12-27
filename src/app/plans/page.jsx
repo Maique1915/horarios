@@ -134,6 +134,9 @@ function PlansContent() {
                                 >
                                     Pagar com PIX
                                 </button>
+                                <p className="mt-2 text-xs text-center text-gray-500 font-medium">
+                                    Valor do PIX: R$ 3,00
+                                </p>
                             </div>
                         </div>
                     </div>
