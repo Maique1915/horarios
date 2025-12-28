@@ -290,10 +290,8 @@ const ProfilePage = () => {
     const TOTAL_REQ_HOURS = MANDATORY_REQ_HOURS + ELECTIVE_REQ_HOURS + COMPLEMENTARY_REQ_HOURS;
 
     // Calculate effective hours (capped at requirements)
-    const mandatorySubjects = completedSubjects.filter(s => !s._el);
-    const electiveSubjects = completedSubjects.filter(s => s._el);
-
-
+    const mandatorySubjects = completedSubjects.filter(s => s._el);
+    const electiveSubjects = completedSubjects.filter(s => !s._el);
 
     const mandatoryTotalCredits = mandatorySubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
     const electiveTotalCredits = electiveSubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);

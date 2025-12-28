@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { saveClassSchedule } from './classService.js';
-import staticDbData from '../model/db.json';
+
 
 let cachedData = {};
 let loadingPromises = {};
@@ -75,7 +75,6 @@ export const loadDbData = async (courseCode = null) => {
 
             if (subjectsError) throw subjectsError;
 
-            const staticDataMap = new Map(staticDbData.map(item => [item._di, item]));
             const subjectIds = subjectsData.map(s => s.id);
 
             console.time('fetch_dependencies');
@@ -119,11 +118,9 @@ export const loadDbData = async (courseCode = null) => {
                     ? item.courses[0]?.code
                     : item.courses?.code;
 
-                const staticItem = staticDataMap.get(item.name);
-
                 // MAPPING CORRECTION: 'has_practical' and 'has_theory' ARE the credit values (integers)
-                const practCreds = item.has_practical;
-                const theoryCreds = item.has_theory;
+                const practCreds = item.has_practical || 0;
+                const theoryCreds = item.has_theory || 0;
 
                 return {
                     _id: item.id,
@@ -181,12 +178,13 @@ const splitPrerequisites = (prList) => {
 };
 
 const processCategoryAndElective = (item) => {
-    // CORRECTION: Direct Mapping as explicitly requested.
-    // DB elective=true -> Elective
-    // DB elective=false -> Mandatory
+    // CORRECTION: Inverted Logic as requested to match GeraGrade expectations.
+    // _el now represents "Mandatory" (Obrigatória)
+    // DB elective=true -> _el=false
+    // DB elective=false -> _el=true
 
     return {
-        _el: !!item.elective,
+        _el: !item.elective,
         _category: item.elective ? 'ELECTIVE' : 'MANDATORY'
     };
 };
@@ -200,14 +198,13 @@ const processSubjectData = (item, requirementsMap, schedulesBySubjectId) => {
 
     const _cu = Array.isArray(item.courses) ? item.courses[0]?.code : item.courses?.code;
 
-    // Static fallback for credits
-    const staticItem = staticDbData.find(s => s._di === item.name);
+    // Static fallback for credits removed
     // User DB schema: has_pratical (typo) / has_theory are INTEGER columns storing credits
     const dbPractical = (item.has_pratical !== undefined && item.has_pratical !== null) ? Number(item.has_pratical) : ((item.has_practical !== undefined && item.has_practical !== null) ? Number(item.has_practical) : 0);
     const dbTheory = (item.has_theory !== undefined && item.has_theory !== null) ? Number(item.has_theory) : 0;
 
-    const practCreds = dbPractical > 0 ? dbPractical : (staticItem ? (staticItem._ap || 0) : 0);
-    const theoryCreds = dbTheory > 0 ? dbTheory : (staticItem ? (staticItem._at || 0) : 0);
+    const practCreds = dbPractical;
+    const theoryCreds = dbTheory;
 
     // Refactored logic
     const { _el, _category } = processCategoryAndElective(item);
@@ -239,8 +236,8 @@ export const addSubject = async (courseCode, subjectData) => {
     if (courseError || !courseData) throw new Error(`Curso ${courseCode} não encontrado.`);
     const courseId = courseData.id;
 
-    // Logic: _el=true (Elective) -> DB: elective=true
-    const dbElective = !!_el;
+    // Logic: _el=true (Mandatory) -> DB: elective=false
+    const dbElective = !_el;
 
     const { data: insertedData, error } = await supabase.from('subjects').insert({
         name: _di,
@@ -279,8 +276,8 @@ export const addSubject = async (courseCode, subjectData) => {
 export const updateSubject = async (courseCode, subjectId, subjectData) => {
     const { _di, _re, _se, _at, _ap, _el, _ag, _pr } = subjectData;
 
-    // Logic: _el=true (Elective) -> DB: elective=true
-    const dbElective = !!_el;
+    // Logic: _el=true (Mandatory) -> DB: elective=false
+    const dbElective = !_el;
 
     const { error } = await supabase.from('subjects').update({
         name: _di,

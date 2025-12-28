@@ -164,6 +164,12 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
     >
+      <defs>
+        <pattern id="dot-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" className="fill-slate-300 dark:fill-slate-700" />
+        </pattern>
+      </defs>
+      <rect x={viewBox.x} y={viewBox.y} width={viewBox.width} height={viewBox.height} fill="url(#dot-pattern)" className="pointer-events-none" />
       <g>
         {links.map((link, i) => (
           <MapaMentalLink

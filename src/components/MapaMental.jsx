@@ -9,13 +9,13 @@ import LoadingSpinner from './LoadingSpinner';
 // Remover import html2canvas from 'html2canvas';
 
 // Constantes para o layout
-const COLUMN_WIDTH = 400; // Reverter para o valor original
-const ROW_HEIGHT = 100; // Aumentado para evitar sobreposição
-const NODE_WIDTH = 100; // Reverter para o valor original
-const NODE_HEIGHT = 72; // Reverter para o valor original
-const TITLE_WIDTH = 240;
-const TITLE_HEIGHT = 50;
-const VERTICAL_PADDING = 30; // Manter se for usado em ROW_HEIGHT
+// Constants for layout - Visual Tuning
+const COLUMN_WIDTH = 380; // More horizontal spacing
+const ROW_HEIGHT = 110;   // More vertical spacing
+const NODE_WIDTH = 300;   // Wider cards for better text fit
+const NODE_HEIGHT = 80;   // Taller cards
+const TITLE_WIDTH = 300;
+const TITLE_HEIGHT = 40;
 
 const MapaMental = ({ subjectStatus, onVoltar }) => {
   const params = useParams();
@@ -24,23 +24,21 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   const [mindMapData, setMindMapData] = useState(null);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const svgRef = useRef(null);
-  // Remover const containerRef = useRef(null);
 
   const handleNodeClick = useCallback((nodeId) => {
     setSelectedNodeId(prevId => (prevId === nodeId ? null : nodeId));
   }, []);
 
-  // Remover handleDownloadImage e o useEffect de captura
-
-  const processarDadosParaMapa = useCallback((disciplinasDoCurso, currentSubjectStatus) => { // Remover downloadMode
-    // Remover currentLayout e usar as constantes diretamente
+  const processarDadosParaMapa = useCallback((disciplinasDoCurso, currentSubjectStatus) => {
     const disciplinasMap = new Map();
     disciplinasDoCurso.forEach(d => {
+      // Filter only active subjects
       if (d._ag && !disciplinasMap.has(d._re)) {
         disciplinasMap.set(d._re, { ...d, id: d._re, name: d._di });
       }
     });
 
+    // Group by semester/period
     const periodosMap = new Map();
     disciplinasDoCurso.forEach(d => {
       if (d._ag) {
@@ -54,23 +52,26 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
     });
 
     const nodes = [];
+    // Sort periods numerically
     const sortedPeriods = Array.from(periodosMap.keys()).sort((a, b) => a - b);
 
     sortedPeriods.forEach(periodo => {
       const disciplinasNoPeriodo = periodosMap.get(periodo);
-      const columnX = (periodo - 1) * COLUMN_WIDTH; // Usar COLUMN_WIDTH diretamente
+      const columnX = (periodo - 1) * COLUMN_WIDTH;
 
+      // Add Period Title Node
       nodes.push({
         id: `period-title-${periodo}`,
         name: `${periodo}º Período`,
         type: 'title',
-        x: columnX,
+        x: columnX + (NODE_WIDTH / 2), // Center title relative to column
         y: -100,
-        width: TITLE_WIDTH, // Usar TITLE_WIDTH diretamente
-        height: TITLE_HEIGHT, // Usar TITLE_HEIGHT diretamente
+        width: TITLE_WIDTH,
+        height: TITLE_HEIGHT,
         depth: periodo,
       });
 
+      // Add Subject Nodes
       disciplinasNoPeriodo.forEach((re, index) => {
         const disciplina = disciplinasMap.get(re);
         if (disciplina) {
@@ -86,9 +87,9 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
             type: 'subject',
             status: currentSubjectStatus ? status : 'normal',
             x: columnX,
-            y: index * ROW_HEIGHT, // Usar ROW_HEIGHT diretamente
-            width: NODE_WIDTH, // Usar NODE_WIDTH diretamente
-            height: NODE_HEIGHT, // Usar NODE_HEIGHT diretamente
+            y: index * ROW_HEIGHT,
+            width: NODE_WIDTH,
+            height: NODE_HEIGHT,
             depth: periodo,
           });
         }
@@ -111,15 +112,20 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
       }
     });
 
+    // Calculate bounds
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     nodes.forEach(node => {
+      // For calculation, assume node anchor is center to make bounds more predictable?
+      // Or top-left. Current implementation uses top-left logic in Node, but might need centering.
+      // Let's stick to Top-Left for x/y to be consistent with SVG rects usually.
+
       minX = Math.min(minX, node.x);
       minY = Math.min(minY, node.y);
       maxX = Math.max(maxX, node.x + node.width);
       maxY = Math.max(maxY, node.y + node.height);
     });
 
-    const padding = 200; // Reverter para o padding original
+    const padding = 300;
     const graphBounds = {
       minX: minX - padding,
       minY: minY - padding,
@@ -128,7 +134,7 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
     };
 
     return { nodes, links, graphBounds };
-  }, []); // Dependências vazias para useCallback
+  }, []);
 
   // React Query for Subjects Data
   const { data: dbData = [], isLoading } = useQuery({

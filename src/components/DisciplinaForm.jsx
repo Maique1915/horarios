@@ -236,7 +236,7 @@ const DisciplinaForm = ({
             <div className="col-span-12 md:col-span-6 flex flex-col justify-end pb-3">
               <br />
               <div className="flex gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800/50">
-                <Toggle label="Eletiva" id="_el" register={register} checked={watch('_el')} disabled={isReviewing} />
+                <Toggle label="Obrigatória" id="_el" register={register} checked={watch('_el')} disabled={isReviewing} />
                 <div className="w-px h-8 bg-slate-200 dark:bg-slate-700"></div>
                 <Toggle label="Ativa" id="_ag" register={register} checked={watch('_ag')} disabled={isReviewing} />
               </div>

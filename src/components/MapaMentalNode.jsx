@@ -1,65 +1,68 @@
-import React from 'react';
-
-const NODE_WIDTH = 360; // Metade do tamanho original (240 / 2)
-const NODE_HEIGHT = 72; // Metade do tamanho original (72 / 2)
-
-// Cores locais para garantir que funcionem sem depender de CSS externo
+// Cores para os períodos (bordas laterais)
 const periodColors = [
-  'rgba(255, 99, 132, 1)',   // Vermelho
-  'rgba(54, 162, 235, 1)',   // Azul
-  'rgba(255, 206, 86, 1)',   // Amarelo
-  'rgba(75, 192, 192, 1)',   // Verde água
-  'rgba(153, 102, 255, 1)',  // Roxo
-  'rgba(255, 159, 64, 1)',   // Laranja
-  'rgba(201, 203, 207, 1)',  // Cinza
-  'rgba(255, 99, 255, 1)',   // Rosa
-  'rgba(100, 255, 100, 1)',  // Verde claro
-  'rgba(0, 191, 255, 1)',    // Azul celeste
+  '#ef4444', // red-500
+  '#3b82f6', // blue-500
+  '#eab308', // yellow-500
+  '#14b8a6', // teal-500
+  '#a855f7', // purple-500
+  '#f97316', // orange-500
+  '#64748b', // slate-500
+  '#ec4899', // pink-500
+  '#22c55e', // green-500
+  '#0ea5e9', // sky-500
 ];
- 
-// Gera cores de fundo com opacidade
-const periodBackgroundColors = periodColors.map(c => c.replace(', 1)', ', 0.15)'));
 
 const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
-  const statusColors = {
-    feita: {
-      border: 'rgba(0, 128, 0, 1)', // Verde
-      background: 'rgba(0, 128, 0, 0.15)',
-    },
-    podeFazer: {
-      border: 'rgba(0, 0, 255, 1)', // Azul
-      background: 'rgba(0, 0, 255, 0.15)',
-    },
-    naoPodeFazer: {
-      border: 'rgba(128, 128, 128, 1)', // Cinza
-      background: 'rgba(128, 128, 128, 0.15)',
-    },
-    normal: { // Fallback para quando nenhum status é passado
-      border: periodColors[(node.depth - 1) % periodColors.length],
-      background: periodBackgroundColors[(node.depth - 1) % periodBackgroundColors.length],
+  const isSelected = node.id === selectedNodeId;
+
+  // Determine Visual State based on node status
+  // status can be: 'feita', 'podeFazer', 'naoPodeFazer', 'normal'
+
+  const getStatusStyles = () => {
+    if (isSelected) {
+      return "ring-2 ring-primary bg-primary/10 border-primary shadow-xl scale-105 z-10";
+    }
+
+    switch (node.status) {
+      case 'feita':
+        return "bg-green-100 dark:bg-green-900/30 border-green-500/50 text-green-900 dark:text-green-100 shadow-sm opacity-90 grayscale-0";
+      case 'podeFazer':
+        return "bg-blue-50 dark:bg-blue-900/20 border-blue-400 text-blue-900 dark:text-blue-100 shadow-md font-semibold ring-1 ring-blue-200 dark:ring-blue-800";
+      case 'naoPodeFazer':
+      default:
+        // Normal/Locked style - slightly muted
+        return "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 shadow-sm opacity-90";
     }
   };
 
-  const { border, background } = statusColors[node.status] || statusColors.normal;
-  const isSelected = node.id === selectedNodeId;
+  const periodColor = periodColors[(node.depth - 1) % periodColors.length];
 
   return (
-    <g 
-      transform={`translate(${node.x}, ${node.y})`} 
+    <g
+      transform={`translate(${node.x}, ${node.y})`}
       className="transition-all duration-300 ease-in-out cursor-pointer"
-      onClick={() => onNodeClick(node.id)}
+      onClick={(e) => { e.stopPropagation(); onNodeClick(node.id); }}
     >
-      <foreignObject x={-NODE_WIDTH / 2} y={-NODE_HEIGHT / 2} width={NODE_WIDTH} height={NODE_HEIGHT} className="group">
-        <div 
-          className="w-full h-full p-6 shadow-lg flex items-center justify-center text-center font-medium transition-all duration-200"
-          style={{ 
-            border: `2px solid ${border}`,
-            backgroundColor: background,
-            color: 'hsl(var(--foreground))',
-            borderRadius: '20px',
-          }}
+      <foreignObject x={0} y={0} width={node.width} height={node.height} className="overflow-visible">
+        <div
+          className={`
+            relative w-full h-full px-4 py-2 flex flex-col items-center justify-center text-center
+            rounded-xl border transition-all duration-200 select-none
+            ${getStatusStyles()}
+          `}
         >
-          <p className="line-clamp-2" style={{ textAlign: 'center', fontFamily: 'sans-serif' }}>{node.name} ({node.id})</p>
+          {/* Period Indicator strip on left */}
+          <div
+            className="absolute left-0 top-3 bottom-3 w-1.5 rounded-r-full opacity-80"
+            style={{ backgroundColor: periodColor }}
+          />
+
+          <p className="text-xs font-bold font-mono opacity-60 mb-0.5 leading-none">
+            {node.id}
+          </p>
+          <p className="text-sm font-medium leading-tight line-clamp-2 w-full px-2">
+            {node.name}
+          </p>
         </div>
       </foreignObject>
     </g>
@@ -69,11 +72,14 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
 const TitleNode = ({ node }) => {
   return (
     <g transform={`translate(${node.x}, ${node.y})`}>
-      <foreignObject x={-NODE_WIDTH / 2} y={-node.height / 2} width={NODE_WIDTH} height={node.height}>
+      {/* Center title horizontally around point x (which we adjusted in parent to be center of column) */}
+      <foreignObject x={-node.width / 2} y={0} width={node.width} height={node.height}>
         <div className="w-full h-full flex items-center justify-center">
-          <h2 className="text-xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>
-            {node.name}
-          </h2>
+          <div className="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+            <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+              {node.name}
+            </h2>
+          </div>
         </div>
       </foreignObject>
     </g>
