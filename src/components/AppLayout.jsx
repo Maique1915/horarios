@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { loadDbData } from '../services/disciplinaService';
+import LandingHeader from './LandingHeader';
+import LandingFooter from './LandingFooter';
 
 const AppLayout = ({ children }) => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -70,6 +72,18 @@ const AppLayout = ({ children }) => {
         }
         return pathname.startsWith(to);
     };
+
+    if (pathname === '/') {
+        return (
+            <div className="min-h-screen bg-background-light dark:bg-background-dark font-sans antialiased text-text-light dark:text-text-dark">
+                <LandingHeader />
+                <main>
+                    {children}
+                </main>
+                <LandingFooter />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background-light dark:bg-background-dark flex">

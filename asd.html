@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Horários CEFET - Gestão Acadêmica Inteligente</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563EB", // Royal Blue from screenshots
+                        "primary-hover": "#1d4ed8",
+                        "background-light": "#F8FAFC", // Very light slate/gray
+                        "background-dark": "#0F172A", // Slate 900
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E293B", // Slate 800
+                        "text-light": "#0F172A",
+                        "text-dark": "#F1F5F9",
+                        "border-light": "#E2E8F0",
+                        "border-dark": "#334155",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        xl: "1rem",
+                        "2xl": "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-sans antialiased transition-colors duration-200">
+    <nav
+        class="sticky top-0 z-50 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary rounded-lg p-1.5 flex items-center justify-center">
+                        <span class="material-icons text-white text-xl">school</span>
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Horários CEFET</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a class="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition"
+                        href="#funcionalidades">Funcionalidades</a>
+                    <a class="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition"
+                        href="#cursos">Cursos</a>
+                    <a class="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition"
+                        href="#depoimentos">Depoimentos</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button
+                        class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-400 transition-colors"
+                        id="theme-toggle">
+                        <span class="material-icons dark:hidden">dark_mode</span>
+                        <span class="material-icons hidden dark:block">light_mode</span>
+                    </button>
+                    <a class="hidden sm:inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all"
+                        href="#">
+                        Entrar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <section class="relative pt-20 pb-24 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div
+                class="inline-flex items-center rounded-full px-4 py-1.5 mb-8 border border-blue-100 bg-blue-50 text-primary dark:bg-slate-800 dark:border-slate-700 dark:text-blue-400">
+                <span class="text-xs font-semibold uppercase tracking-wide">Novo</span>
+                <span class="ml-2 text-sm font-medium">Gestão de atividades complementares disponível</span>
+            </div>
+            <h1
+                class="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-transparent pb-2">
+                Sua vida acadêmica,<br />finalmente organizada.
+            </h1>
+            <p class="mt-4 text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-10">
+                Monte sua grade horária de forma inteligente, acompanhe seu progresso e gerencie atividades
+                complementares em um só lugar.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+                    href="#">
+                    Começar Agora
+                    <span class="material-icons ml-2 text-lg">arrow_forward</span>
+                </a>
+                <a class="inline-flex items-center justify-center px-8 py-4 border border-border-light dark:border-border-dark text-base font-medium rounded-xl text-gray-700 dark:text-gray-200 bg-surface-light dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm transition-all duration-200"
+                    href="#funcionalidades">
+                    Saiba Mais
+                </a>
+            </div>
+            <div class="mt-16 relative mx-auto max-w-5xl">
+                <div
+                    class="rounded-2xl bg-surface-light dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark overflow-hidden p-2">
+                    <div
+                        class="rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-900 aspect-[16/9] flex items-center justify-center relative">
+                        <div class="absolute inset-0 grid grid-cols-4 gap-4 p-8 opacity-20 pointer-events-none">
+                            <div class="col-span-1 bg-primary/20 rounded-lg h-full"></div>
+                            <div class="col-span-3 grid grid-rows-3 gap-4">
+                                <div class="bg-gray-200 dark:bg-slate-700 rounded-lg h-full"></div>
+                                <div class="bg-gray-200 dark:bg-slate-700 rounded-lg h-full row-span-2"></div>
+                            </div>
+                        </div>
+                        <img alt="Estudantes universitários trabalhando juntos com laptop, representando o uso do sistema"
+                            class="object-cover w-full h-full opacity-60 mix-blend-overlay"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDszD8IyyOQJWa3cjrwyH42as-xaAPDX52FIc5agxlhOrz9DWr-vBZJaPQdlt75la65x-a0WtEtV_hrb5gV8c8SaAD5WdTKCqBa8nD4QqkxB_-KBkGpQuIf1NrF0ib3WdHcV8TnhKaaaUB8jKo3LXq23ph5Zdt_3LA-AvdYh3umqS1vcwqyKCi_NsOd962zSWAK2Y4UOHm35dVp9XxxghKgb93s0WOScxWN1a3BIY9t3LwWNmR58_I6MnWkwCWVh-Ltm0HJzTXTPCSc" />
+                        <div class="absolute z-10 text-center">
+                            <div
+                                class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary text-white shadow-lg mb-4">
+                                <span class="material-icons text-4xl">calendar_month</span>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Interface Intuitiva</h3>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="absolute -top-10 -right-10 w-40 h-40 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob">
+                </div>
+                <div
+                    class="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-white dark:bg-slate-900" id="funcionalidades">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-base font-semibold text-primary uppercase tracking-wide">Recursos</h2>
+                <p class="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                    Tudo o que você precisa para se formar
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-400 mx-auto">
+                    Ferramentas projetadas especificamente para simplificar a burocracia acadêmica.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div
+                    class="relative p-8 bg-background-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                    <div
+                        class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6 text-primary">
+                        <span class="material-icons">schedule</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Grade Inteligente</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Visualize e monte sua grade horária de forma visual. O sistema detecta conflitos automaticamente
+                        e sugere as melhores combinações.
+                    </p>
+                </div>
+                <div
+                    class="relative p-8 bg-background-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                    <div
+                        class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-6 text-purple-600 dark:text-purple-400">
+                        <span class="material-icons">auto_fix_high</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Seleção Otimizada</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Algoritmos que ajudam você a escolher as matérias certas para o próximo semestre, baseados no
+                        seu histórico e pré-requisitos.
+                    </p>
+                </div>
+                <div
+                    class="relative p-8 bg-background-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                    <div
+                        class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-6 text-green-600 dark:text-green-400">
+                        <span class="material-icons">trending_up</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Progresso Acadêmico</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Acompanhe visualmente o quanto falta para se formar. Gráficos de horas cursadas, pendentes e
+                        créditos acumulados.
+                    </p>
+                </div>
+                <div
+                    class="relative p-8 bg-background-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                    <div
+                        class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center mb-6 text-orange-600 dark:text-orange-400">
+                        <span class="material-icons">local_activity</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Atividades Complementares</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Gerencie suas horas de atividades extracurriculares. Cadastre certificados, monitore horas por
+                        categoria e nunca perca o controle.
+                    </p>
+                </div>
+                <div
+                    class="relative p-8 bg-background-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                    <div
+                        class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center mb-6 text-indigo-600 dark:text-indigo-400">
+                        <span class="material-icons">history_edu</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Histórico Organizado</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Tenha acesso rápido ao seu histórico de disciplinas cursadas, notas e médias, tudo apresentado
+                        de forma limpa e organizada.
+                    </p>
+                </div>
+                <div
+                    class="relative p-8 bg-background-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow">
+                    <div
+                        class="w-12 h-12 bg-pink-100 dark:bg-pink-900/30 rounded-xl flex items-center justify-center mb-6 text-pink-600 dark:text-pink-400">
+                        <span class="material-icons">dashboard</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Dashboard Pessoal</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Um painel centralizado com todas as informações importantes para o seu dia a dia acadêmico em
+                        uma única tela.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-background-light dark:bg-background-dark" id="cursos">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Cursos Disponíveis</h2>
+                    <p class="mt-2 text-lg text-gray-600 dark:text-gray-400">
+                        Atualmente suportamos os seguintes cursos de graduação.
+                    </p>
+                </div>
+                <a class="text-primary font-medium hover:text-primary-hover flex items-center gap-1" href="#">
+                    Ver todos os cursos <span class="material-icons text-sm">arrow_forward</span>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div
+                    class="group bg-white dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark hover:border-primary dark:hover:border-primary transition-all cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary">
+                            <span class="material-icons">computer</span>
+                        </div>
+                        <span
+                            class="text-xs font-semibold px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">Ativo</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Engenharia da Computação</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Campus Nova Friburgo</p>
+                    <div
+                        class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-sm">
+                        <span class="text-gray-600 dark:text-gray-400 flex items-center gap-1"><span
+                                class="material-icons text-base">book</span> 67 Disciplinas</span>
+                        <span class="text-gray-600 dark:text-gray-400 flex items-center gap-1"><span
+                                class="material-icons text-base">event</span> 10 Períodos</span>
+                    </div>
+                </div>
+                <div
+                    class="group bg-white dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark hover:border-primary dark:hover:border-primary transition-all cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary">
+                            <span class="material-icons">calculate</span>
+                        </div>
+                        <span
+                            class="text-xs font-semibold px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">Ativo</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Matemática</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Campus Maracanã</p>
+                    <div
+                        class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-sm">
+                        <span class="text-gray-600 dark:text-gray-400 flex items-center gap-1"><span
+                                class="material-icons text-base">book</span> 43 Disciplinas</span>
+                        <span class="text-gray-600 dark:text-gray-400 flex items-center gap-1"><span
+                                class="material-icons text-base">event</span> 8 Períodos</span>
+                    </div>
+                </div>
+                <div
+                    class="group bg-white dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark hover:border-primary dark:hover:border-primary transition-all cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary">
+                            <span class="material-icons">bolt</span>
+                        </div>
+                        <span
+                            class="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-full">Em
+                            Breve</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Engenharia Elétrica</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Campus Nova Friburgo</p>
+                    <div
+                        class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-sm">
+                        <span class="text-gray-600 dark:text-gray-400 flex items-center gap-1"><span
+                                class="material-icons text-base">book</span> -- Disciplinas</span>
+                        <span class="text-gray-600 dark:text-gray-400 flex items-center gap-1"><span
+                                class="material-icons text-base">event</span> 10 Períodos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-20 bg-white dark:bg-slate-900 border-t border-border-light dark:border-border-dark"
+        id="depoimentos">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-extrabold text-center text-gray-900 dark:text-white mb-16">
+                O que os alunos dizem
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="flex flex-col bg-background-light dark:bg-surface-dark p-8 rounded-2xl shadow-sm">
+                    <div class="flex items-center mb-4 text-yellow-400">
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 flex-grow italic mb-6">
+                        "O sistema de grade horária me salvou de vários conflitos que eu não tinha percebido. A
+                        visualização semanal é perfeita."
+                    </p>
+                    <div class="flex items-center">
+                        <div
+                            class="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+                            LC
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">Lucas Costa</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Eng. Computação</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col bg-background-light dark:bg-surface-dark p-8 rounded-2xl shadow-sm">
+                    <div class="flex items-center mb-4 text-yellow-400">
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star_half</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 flex-grow italic mb-6">
+                        "Finalmente consegui organizar minhas horas complementares. Antes era uma planilha bagunçada,
+                        agora sei exatamente quanto falta."
+                    </p>
+                    <div class="flex items-center">
+                        <div
+                            class="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 font-bold text-sm">
+                            MP
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">Mariana Pereira</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Sistemas de Informação</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col bg-background-light dark:bg-surface-dark p-8 rounded-2xl shadow-sm">
+                    <div class="flex items-center mb-4 text-yellow-400">
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                        <span class="material-icons text-lg">star</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 flex-grow italic mb-6">
+                        "A interface é muito limpa e rápida. Consigo ver meu progresso no curso em segundos. Recomendo
+                        para todos os calouros."
+                    </p>
+                    <div class="flex items-center">
+                        <div
+                            class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 font-bold text-sm">
+                            RA
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">Rafael Alves</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Matemática</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-primary rounded-3xl p-10 md:p-16 text-center shadow-xl relative overflow-hidden">
+                <div
+                    class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6 relative z-10">
+                    Pronto para organizar sua vida acadêmica?
+                </h2>
+                <p class="text-blue-100 text-lg mb-8 max-w-2xl mx-auto relative z-10">
+                    Junte-se a centenas de estudantes que já estão usando o Horários CEFET para otimizar seus estudos.
+                </p>
+                <div class="relative z-10">
+                    <a class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl text-primary bg-white hover:bg-gray-50 transition-colors shadow-lg"
+                        href="#">
+                        Criar Conta Gratuita
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer
+        class="bg-surface-light dark:bg-surface-dark border-t border-border-light dark:border-border-dark pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="bg-primary rounded-md p-1 flex items-center justify-center w-8 h-8">
+                            <span class="material-icons text-white text-sm">school</span>
+                        </div>
+                        <span class="font-bold text-lg tracking-tight text-gray-900 dark:text-white">Horários
+                            CEFET</span>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Simplificando a gestão acadêmica para estudantes universitários.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Produto</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li><a class="hover:text-primary transition" href="#">Funcionalidades</a></li>
+                        <li><a class="hover:text-primary transition" href="#">Cursos</a></li>
+                        <li><a class="hover:text-primary transition" href="#">Roadmap</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Recursos</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li><a class="hover:text-primary transition" href="#">Ajuda</a></li>
+                        <li><a class="hover:text-primary transition" href="#">Contato</a></li>
+                        <li><a class="hover:text-primary transition" href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li><a class="hover:text-primary transition" href="#">Privacidade</a></li>
+                        <li><a class="hover:text-primary transition" href="#">Termos de Uso</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div
+                class="border-t border-border-light dark:border-border-dark pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center md:text-left">
+                    © 2024 Horários CEFET. Todos os direitos reservados.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300" href="#">
+                        <span class="sr-only">GitHub</span>
+                        <svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path clip-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                fill-rule="evenodd"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // Dark mode toggle functionality
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        // Check local storage or system preference
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+        themeToggleBtn.addEventListener('click', function () {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

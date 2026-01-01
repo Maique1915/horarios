@@ -253,7 +253,7 @@ const Comum = (props) => {
         const hasContent = conteudoNovo && conteudoNovo.trim() !== "";
 
         return (
-            <td key={key} className="relative p-1 align-middle h-auto min-w-[120px] border border-dashed border-border-light/40 dark:border-border-dark/40 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20">
+            <td key={key} className="relative p-1 align-middle h-auto min-w-[120px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20">
                 {/* Empty State visual helper (optional) */}
                 {!hasContent && !conteudoAnterior && (
                     <div className="w-full min-h-[3.5rem] rounded-md bg-transparent"></div>
@@ -301,7 +301,7 @@ const Comum = (props) => {
         );
         return (
             <tr key={`row-${numLinha}`} className="group min-h-[4rem] h-auto hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
-                <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark border-r border-border-light dark:border-border-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
+                <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
                     <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-wide border border-slate-200 dark:border-slate-700">{labelHorario}</span>
                 </td>
                 {celulas}
@@ -359,8 +359,8 @@ const Comum = (props) => {
                 <div className="overflow-auto max-h-[70vh] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                     <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
-                            <tr className="bg-slate-50 dark:bg-slate-800 border-b border-border-light dark:border-border-dark sticky top-0 z-30">
-                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-slate-800 border-r border-border-light dark:border-border-dark sticky left-0 z-50">
+                            <tr className="bg-slate-50 dark:bg-slate-800 sticky top-0 z-30">
+                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-slate-800 sticky left-0 z-50">
                                     Horário
                                 </th>
                                 {dias.map(dia => (
@@ -370,7 +370,7 @@ const Comum = (props) => {
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border-light/30 dark:divide-border-dark/30 bg-background-light dark:bg-background-dark">
+                        <tbody className="bg-background-light dark:bg-background-dark">
                             {corpoTabela}
                         </tbody>
                     </table>

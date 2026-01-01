@@ -14,11 +14,23 @@
   --color-border-light: #E2E8F0;
   --color-border-dark: #334155;
 
+  --color-primary-hover: #1d4ed8;
+
+  --opacity-0: 0;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-60: 0.6;
+  --opacity-80: 0.8;
+  --opacity-100: 1;
+
   --font-display: Lexend, sans-serif;
 
   --radius: 0.25rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 }
 
@@ -40,6 +52,32 @@
   to {
     opacity: 0;
   }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
 }
 
 .animate-fade-in {

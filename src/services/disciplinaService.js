@@ -544,3 +544,39 @@ export const saveCurrentEnrollments = async (userId, enrollments, semester) => {
 
     if (insertError) throw insertError;
 };
+export const getCourseStats = async () => {
+    const { data: courses, error } = await supabase
+        .from('courses')
+        .select(`
+            id,
+            code,
+            name,
+            subjects (
+                id,
+                semester,
+                active,
+                classes (
+                    class
+                )
+            )
+        `);
+
+    if (error) throw error;
+
+    return courses.map(course => {
+        // Filter only active subjects
+        const activeSubjects = course.subjects ? course.subjects.filter(s => s.active) : [];
+
+        // Check if ANY active subject has registered classes
+        // The join with classes returns an array. If it has items, classes exist.
+        const hasClasses = activeSubjects.some(s => s.classes && s.classes.length > 0);
+
+        return {
+            code: course.code,
+            name: course.name,
+            disciplineCount: activeSubjects.length,
+            periods: new Set(activeSubjects.map(s => s.semester)).size,
+            status: hasClasses ? 'active' : 'upcoming'
+        };
+    });
+};

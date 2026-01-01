@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import Escolhe from '../../../model/util/Escolhe';
+import { getComments, addComment } from '../../../services/commentService';
 
 const ProfilePage = () => {
     const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
@@ -360,6 +361,47 @@ const ProfilePage = () => {
         }
     }, [allSubjects, completedSubjects, scheduleMeta]);
 
+    // 6. Comments Section Logic
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [newRating, setNewRating] = useState(5);
+    const [loadingComments, setLoadingComments] = useState(true);
+    const [submittingComment, setSubmittingComment] = useState(false);
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                const data = await getComments();
+                setComments(data);
+            } catch (error) {
+                console.error("Erro ao carregar comentários:", error);
+            } finally {
+                setLoadingComments(false);
+            }
+        };
+        fetchComments();
+    }, []);
+
+    const handlePostComment = async (e) => {
+        e.preventDefault();
+        if (!newComment.trim() || !user) return;
+
+        setSubmittingComment(true);
+        try {
+            await addComment(user.id, newComment, newRating);
+            setNewComment('');
+            setNewRating(5);
+            // Reload comments to show the new one
+            const data = await getComments();
+            setComments(data);
+        } catch (error) {
+            console.error("Erro ao enviar comentário:", error);
+            alert("Erro ao enviar comentário via SQL.");
+        } finally {
+            setSubmittingComment(false);
+        }
+    };
+
 
     // Log when key data changes to debug re-renders (can be removed later)
     useEffect(() => {
@@ -703,6 +745,108 @@ const ProfilePage = () => {
                         )
                         }
                     </div>
+                </div>
+            </div>
+
+            {/* Comments Section */}
+            <div className="mt-8 bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm">
+                <div className="mb-6">
+                    <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">forum</span>
+                        Comentários sobre o Projeto
+                    </h2>
+                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">
+                        Deixe seu feedback, sugestões ou apenas diga olá para a comunidade.
+                    </p>
+                </div>
+
+                <form onSubmit={handlePostComment} className="mb-8">
+                    <div className="relative">
+                        <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Escreva seu comentário..."
+                            className="w-full p-4 pb-14 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none h-28 text-sm text-text-light-primary dark:text-text-dark-primary"
+                            disabled={submittingComment}
+                        />
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => setNewRating(star)}
+                                    className="focus:outline-none transition-transform hover:scale-110 active:scale-90"
+                                    disabled={submittingComment}
+                                >
+                                    <span className={`material-symbols-outlined text-xl ${star <= newRating ? 'text-yellow-400 fill-current' : 'text-slate-300 dark:text-slate-600'
+                                        }`}>
+                                        star
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={!newComment.trim() || submittingComment}
+                            className={`absolute bottom-3 right-3 px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!newComment.trim() || submittingComment
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                : 'bg-primary text-white hover:bg-primary-dark shadow-sm'
+                                }`}
+                        >
+                            {submittingComment ? 'Enviando...' : 'Publicar'}
+                            <span className="material-symbols-outlined text-[14px]">send</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                    {loadingComments ? (
+                        <div className="py-8 text-center">
+                            <LoadingSpinner />
+                        </div>
+                    ) : comments.length === 0 ? (
+                        <div className="text-center py-8 text-slate-400">
+                            <span className="material-symbols-outlined text-3xl mb-2 opacity-50">chat_bubble_outline</span>
+                            <p className="text-sm">Seja o primeiro a comentar!</p>
+                        </div>
+                    ) : (
+                        comments.map((comment) => (
+                            <div key={comment.id} className="group p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/20 transition-all">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">
+                                            {comment.user?.name ? comment.user.name.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-text-light-primary dark:text-text-dark-primary leading-tight">
+                                                {comment.user?.name || 'Usuário Desconhecido'}
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary">
+                                                    @{comment.user?.username || 'anon'}
+                                                </p>
+                                                {comment.rating && (
+                                                    <div className="flex text-yellow-400">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <span key={i} className="material-symbols-outlined text-[10px] leading-none">
+                                                                {i < comment.rating ? 'star' : ''}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] text-slate-400">
+                                        {new Date(comment.created_at).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary leading-relaxed pl-10">
+                                    {comment.content}
+                                </p>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
