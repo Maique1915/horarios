@@ -71,7 +71,7 @@ export default function ActivitiesPage() {
                                 <div className="p-2 rounded-lg bg-white/20 text-white backdrop-blur-sm">
                                     <span className="material-symbols-outlined text-xl">emoji_events</span>
                                 </div>
-                                <span className="text-2xl font-bold">{groupProgress.reduce((acc, curr) => acc + curr.total, 0)}h</span>
+                                <span className="text-2xl font-bold">{groupProgress.reduce((acc, curr) => acc + curr.total, 0).toFixed(2)}h</span>
                             </div>
                             <div className="relative z-10">
                                 <h3 className="font-bold text-sm mb-1 truncate">
@@ -108,7 +108,7 @@ export default function ActivitiesPage() {
                                         <div className="p-2 rounded-lg bg-background-light dark:bg-background-dark text-text-light-secondary group-hover:text-primary transition-colors">
                                             <span className="material-symbols-outlined text-xl">{getGroupIcon(group.group)}</span>
                                         </div>
-                                        <span className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">{group.total}h</span>
+                                        <span className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">{group.total.toFixed(2)}h</span>
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-sm text-text-light-primary dark:text-text-dark-primary mb-1 truncate" title={group.description}>
