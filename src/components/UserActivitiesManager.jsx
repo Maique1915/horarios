@@ -6,6 +6,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserActivities, addUserActivity, updateUserActivity, deleteUserActivity, getComplementaryActivities, getActivityGroups } from '../services/complementaryService';
 import LoadingSpinner from './LoadingSpinner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+    useReactTable,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getFilteredRowModel,
+    flexRender,
+} from '@tanstack/react-table';
 
 const UserActivitiesManager = () => {
     const [userId, setUserId] = useState(null);
@@ -21,6 +28,14 @@ const UserActivitiesManager = () => {
     const [semester, setSemester] = useState('');
     const [documentLink, setDocumentLink] = useState('');
     const [description, setDescription] = useState('');
+
+    // Table State
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [columnFilters, setColumnFilters] = useState([]);
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 5,
+    });
 
     const { user } = useAuth();
 
@@ -182,11 +197,128 @@ const UserActivitiesManager = () => {
         return catalog[selectedGroup]?.find(c => c.id.toString() === selectedActivityId);
     }, [catalog, selectedGroup, selectedActivityId]);
 
+    const formatHours = (totalHours) => {
+        const h = Math.floor(totalHours);
+        const m = Math.round((totalHours - h) * 60);
+        if (h === 0) return `${m}m`;
+        if (m === 0) return `${h}h`;
+        return `${h}h e ${m}min`;
+    };
+
     if (loading) return <LoadingSpinner message="Carregando suas atividades..." />;
 
     if (!userId) return <div className="p-4 text-center">Faça login para gerenciar suas atividades.</div>;
 
     const totalHours = userActivities.reduce((sum, a) => sum + (a.hours || 0), 0);
+
+    // Columns Definition
+    const columns = React.useMemo(() => [
+        {
+            accessorFn: (row) => row.activity?.group,
+            id: 'group',
+            header: 'Grupo',
+            cell: info => (
+                <span className="py-1 px-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-700">
+                    {info.getValue() || '-'}
+                </span>
+            ),
+        },
+        {
+            accessorFn: (row) => row.activity?.code,
+            id: 'code',
+            header: 'Sub',
+            cell: info => (
+                <span className="font-mono text-xs text-primary bg-primary/5 px-1.5 py-0.5 rounded">
+                    {info.getValue() || '-'}
+                </span>
+            ),
+        },
+        {
+            accessorFn: (row) => row.description || row.activity?.description,
+            id: 'description',
+            header: 'Descrição',
+            cell: ({ row }) => {
+                const desc = row.original.description || row.original.activity?.description;
+                const link = row.original.document_link;
+                return (
+                    <div className="flex flex-col gap-1">
+                        <span className="line-clamp-2" title={desc}>
+                            {desc}
+                        </span>
+                        {link && (
+                            <a href={link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 w-fit px-2 py-0.5 rounded-full bg-primary/5 hover:bg-primary/10 transition-colors">
+                                <span className="material-symbols-outlined text-[10px]">link</span>
+                                Ver Comprovante
+                            </a>
+                        )}
+                    </div>
+                );
+            }
+        },
+        {
+            accessorKey: 'semester',
+            header: 'Semestre',
+            cell: info => (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
+                    {info.getValue()}
+                </span>
+            )
+        },
+        {
+            accessorKey: 'hours',
+            header: 'Horas',
+            cell: info => (
+                <span className="text-xs font-bold text-text-light-primary dark:text-text-dark-primary">
+                    {formatHours(info.getValue())}
+                </span>
+            )
+        },
+        {
+            id: 'actions',
+            header: 'Ações',
+            cell: ({ row }) => (
+                <div className="flex items-center justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={() => handleEdit(row.original)}
+                        className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-primary hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-border-light hover:shadow-sm"
+                        title="Editar"
+                    >
+                        <span className="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.original.id)}
+                        className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-red-100 dark:hover:border-red-900/30 hover:shadow-sm"
+                        title="Excluir"
+                    >
+                        <span className="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                </div>
+            )
+        }
+    ], [handleEdit, handleDelete]);
+
+    const table = useReactTable({
+        data: userActivities,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        state: {
+            globalFilter,
+            columnFilters,
+            pagination,
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        onColumnFiltersChange: setColumnFilters,
+        onPaginationChange: setPagination,
+        globalFilterFn: (row, columnId, filterValue) => {
+            const search = filterValue.toLowerCase();
+            const desc = (row.original.description || row.original.activity?.description || "").toLowerCase();
+            const code = (row.original.activity?.code || "").toLowerCase();
+            const group = (row.original.activity?.group || "").toLowerCase();
+            return desc.includes(search) || code.includes(search) || group.includes(search);
+        }
+    });
 
     return (
         <div className="space-y-8">
@@ -195,88 +327,96 @@ const UserActivitiesManager = () => {
 
                 {/* Left Column: Table List */}
                 <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
-                    <div className="bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-text-light-secondary dark:text-text-dark-secondary text-xs font-semibold uppercase tracking-wider">
-                                    <tr>
-                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark">Grupo</th>
-                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark">Sub</th>
-                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark w-1/3">Descrição</th>
-                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark">Semestre</th>
-                                        <th className="px-6 py-4 border-b border-border-light dark:border-border-dark text-right">Ações</th>
-                                    </tr>
+                    <div className="bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark overflow-hidden shadow-sm flex flex-col">
+
+                        {/* Filters */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-900/20">
+                            <div>
+                                <select
+                                    className="w-full p-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setColumnFilters(old => val ? [{ id: 'group', value: val }] : []);
+                                    }}
+                                    value={columnFilters.find(f => f.id === 'group')?.value || ''}
+                                >
+                                    <option value="">Todos os Grupos</option>
+                                    {Object.keys(catalog).sort().map(g => (
+                                        <option key={g} value={g}>Grupo {g}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-lg">search</span>
+                                <input
+                                    type="text"
+                                    placeholder="Pesquisar..."
+                                    className="w-full p-2.5 pl-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                    value={globalFilter}
+                                    onChange={e => setGlobalFilter(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="overflow-x-auto min-h-[300px]">
+                            <table className="w-full text-left border-collapse min-w-[600px]">
+                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-text-light-secondary dark:text-text-dark-secondary text-xs font-semibold uppercase tracking-wider sticky top-0 z-10">
+                                    {table.getHeaderGroups().map(headerGroup => (
+                                        <tr key={headerGroup.id}>
+                                            {headerGroup.headers.map(header => (
+                                                <th key={header.id} className="px-6 py-4 border-b border-border-light dark:border-border-dark whitespace-nowrap">
+                                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    ))}
                                 </thead>
                                 <tbody className="divide-y divide-border-light dark:divide-border-dark text-sm">
-                                    {userActivities.length === 0 ? (
+                                    {table.getRowModel().rows.length === 0 ? (
                                         <tr>
-                                            <td colSpan="5" className="p-10 text-center text-text-light-secondary">
+                                            <td colSpan={columns.length} className="p-10 text-center text-text-light-secondary">
                                                 <div className="bg-background-light dark:bg-background-dark w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                    <span className="material-symbols-outlined text-3xl text-slate-300">feed</span>
+                                                    <span className="material-symbols-outlined text-3xl text-slate-300">search_off</span>
                                                 </div>
-                                                <p>Nenhuma atividade registrada ainda.</p>
-                                                <p className="text-xs opacity-70 mt-1">Use o formulário ao lado para adicionar.</p>
+                                                <p>Nenhuma atividade encontrada.</p>
                                             </td>
                                         </tr>
                                     ) : (
-                                        userActivities.map((activity) => (
-                                            <tr key={activity.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-                                                <td className="px-6 py-4 text-text-light-primary dark:text-text-dark-primary font-medium">
-                                                    <span className="py-1 px-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-700">
-                                                        {activity.activity?.group || '-'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
-                                                    <span className="font-mono text-xs text-primary bg-primary/5 px-1.5 py-0.5 rounded">
-                                                        {activity.activity?.code || '-'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-text-light-primary dark:text-text-dark-primary">
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="line-clamp-2" title={activity.description || activity.activity?.description}>
-                                                            {activity.description || activity.activity?.description}
-                                                        </span>
-                                                        {activity.document_link && (
-                                                            <a href={activity.document_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 w-fit px-2 py-0.5 rounded-full bg-primary/5 hover:bg-primary/10 transition-colors">
-                                                                <span className="material-symbols-outlined text-[10px]">link</span>
-                                                                Ver Comprovante
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-text-light-secondary dark:text-text-dark-secondary">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
-                                                            {activity.semester}
-                                                        </span>
-                                                        <span className="text-xs font-bold text-text-light-primary dark:text-text-dark-primary">
-                                                            {activity.hours}h
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                                        <button
-                                                            onClick={() => handleEdit(activity)}
-                                                            className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-primary hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-border-light hover:shadow-sm"
-                                                            title="Editar"
-                                                        >
-                                                            <span className="material-symbols-outlined text-lg">edit</span>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(activity.id)}
-                                                            className="w-8 h-8 flex items-center justify-center text-text-light-secondary hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-all border border-transparent hover:border-red-100 dark:hover:border-red-900/30 hover:shadow-sm"
-                                                            title="Excluir"
-                                                        >
-                                                            <span className="material-symbols-outlined text-lg">delete</span>
-                                                        </button>
-                                                    </div>
-                                                </td>
+                                        table.getRowModel().rows.map(row => (
+                                            <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+                                                {row.getVisibleCells().map(cell => (
+                                                    <td key={cell.id} className="px-6 py-4">
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </td>
+                                                ))}
                                             </tr>
                                         ))
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex items-center justify-between px-6 py-4 border-t border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-900/20">
+                            <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary font-medium">
+                                Página <span className="text-text-light-primary dark:text-text-dark-primary font-bold">{table.getState().pagination.pageIndex + 1}</span> de <span className="text-text-light-primary dark:text-text-dark-primary font-bold">{table.getPageCount() || 1}</span>
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => table.previousPage()}
+                                    disabled={!table.getCanPreviousPage()}
+                                    className="p-1.5 px-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold text-text-light-secondary"
+                                >
+                                    Anterior
+                                </button>
+                                <button
+                                    onClick={() => table.nextPage()}
+                                    disabled={!table.getCanNextPage()}
+                                    className="p-1.5 px-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold text-text-light-secondary"
+                                >
+                                    Próxima
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
