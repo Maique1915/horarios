@@ -205,12 +205,6 @@ const UserActivitiesManager = () => {
         return `${h}h e ${m}min`;
     };
 
-    if (loading) return <LoadingSpinner message="Carregando suas atividades..." />;
-
-    if (!userId) return <div className="p-4 text-center">Faça login para gerenciar suas atividades.</div>;
-
-    const totalHours = userActivities.reduce((sum, a) => sum + (a.hours || 0), 0);
-
     // Columns Definition
     const columns = React.useMemo(() => [
         {
@@ -319,6 +313,12 @@ const UserActivitiesManager = () => {
             return desc.includes(search) || code.includes(search) || group.includes(search);
         }
     });
+
+    if (loading) return <LoadingSpinner message="Carregando suas atividades..." />;
+
+    if (!userId) return <div className="p-4 text-center">Faça login para gerenciar suas atividades.</div>;
+
+    const totalHours = userActivities.reduce((sum, a) => sum + (a.hours || 0), 0);
 
     return (
         <div className="space-y-8">
