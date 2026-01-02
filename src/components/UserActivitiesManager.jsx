@@ -17,6 +17,7 @@ const UserActivitiesManager = () => {
     const [selectedActivityId, setSelectedActivityId] = useState('');
     const [selectedGroup, setSelectedGroup] = useState('');
     const [hours, setHours] = useState('');
+    const [minutes, setMinutes] = useState('');
     const [semester, setSemester] = useState('');
     const [documentLink, setDocumentLink] = useState('');
     const [description, setDescription] = useState('');
@@ -109,6 +110,7 @@ const UserActivitiesManager = () => {
 
     const resetForm = () => {
         setHours('');
+        setMinutes('');
         setSemester('');
         setDocumentLink('');
         setDescription('');
@@ -126,7 +128,7 @@ const UserActivitiesManager = () => {
         const payload = {
             user_id: userId,
             activity_id: selectedActivityId,
-            hours: parseFloat(hours),
+            hours: parseFloat(hours || 0) + (parseFloat(minutes || 0) / 60),
             semester,
             document_link: documentLink,
             description,
@@ -157,7 +159,8 @@ const UserActivitiesManager = () => {
         setEditingId(activity.id);
         setSelectedGroup(activity.activity?.group || '');
         setSelectedActivityId(activity.activity_id?.toString() || '');
-        setHours(activity.hours || '');
+        setHours(Math.floor(activity.hours || 0).toString());
+        setMinutes(Math.round(((activity.hours || 0) - Math.floor(activity.hours || 0)) * 60).toString());
         setSemester(activity.semester || '');
         setDocumentLink(activity.document_link || '');
         setDescription(activity.description || '');
@@ -357,8 +360,8 @@ const UserActivitiesManager = () => {
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
+                            <div className="grid grid-cols-12 gap-4">
+                                <div className="col-span-12 sm:col-span-6 space-y-1.5">
                                     <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Semestre</label>
                                     <input
                                         required
@@ -370,20 +373,34 @@ const UserActivitiesManager = () => {
                                     />
                                 </div>
 
-                                <div className="space-y-1.5">
+                                <div className="col-span-6 sm:col-span-3 space-y-1.5">
                                     <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Horas</label>
                                     <div className="relative">
                                         <input
-                                            required
                                             type="number"
-                                            step="0.1"
-                                            min="0.1"
-                                            placeholder="0.0"
+                                            min="0"
+                                            placeholder="0"
                                             className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
                                             value={hours}
                                             onChange={(e) => setHours(e.target.value)}
                                         />
                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-light-secondary text-xs font-bold">h</span>
+                                    </div>
+                                </div>
+
+                                <div className="col-span-6 sm:col-span-3 space-y-1.5">
+                                    <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Minutos</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="59"
+                                            placeholder="0"
+                                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
+                                            value={minutes}
+                                            onChange={(e) => setMinutes(e.target.value)}
+                                        />
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-light-secondary text-xs font-bold">m</span>
                                     </div>
                                 </div>
                             </div>
