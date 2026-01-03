@@ -37,6 +37,14 @@ const LandingFooter = () => {
                             <li><a href="#funcionalidades" className="hover:text-primary transition">Perfil</a></li>
                         </ul>
                     </div>
+                    <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Links Úteis</h4>
+                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <li><a href="http://e-computacao.com.br/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">E-Computação</a></li>
+                            <li><a href="https://alunos.cefet-rj.br/aluno/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">Portal do Aluno</a></li>
+                            <li><a href="https://cefet-rj.br/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition">CEFET-RJ</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div className="border-t border-border-light dark:border-border-dark pt-8 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400 text-center md:text-left">

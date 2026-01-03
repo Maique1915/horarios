@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
+import ROUTES from '../routes';
 import useMercadoPago from '../hooks/useMercadoPago';
 import { supabase } from '../lib/supabaseClient';
 import LoadingSpinner from './LoadingSpinner';
@@ -210,7 +211,7 @@ const Register = () => {
                         <div className="text-center">
                             <button
                                 type="button"
-                                onClick={() => router.push('/login')}
+                                onClick={() => router.push(ROUTES.LOGIN)}
                                 className="text-xs text-slate-500 hover:text-primary font-medium transition-colors"
                             >
                                 Já tem uma conta? Faça login

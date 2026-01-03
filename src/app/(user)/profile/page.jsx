@@ -14,12 +14,13 @@ import { getDays, getTimeSlots } from '../../../services/scheduleService';
 import { getUserTotalHours } from '../../../services/complementaryService';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import ROUTES from '../../../routes';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import Escolhe from '../../../model/util/Escolhe';
 import { getComments, addComment } from '../../../services/commentService';
 
 const ProfilePage = () => {
-    const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
+    const { user, isAuthenticated, loading: authLoading, updateUser, isExpired } = useAuth();
     const router = useRouter();
     const queryClient = useQueryClient();
 
@@ -190,7 +191,7 @@ const ProfilePage = () => {
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated()) {
-            router.push('/login?from=/profile');
+            router.push(`${ROUTES.LOGIN}?from=${ROUTES.PROFILE}`);
         }
     }, [authLoading, isAuthenticated, router]);
 
@@ -360,10 +361,22 @@ const ProfilePage = () => {
                         limits
                     );
 
-                    const today = new Date();
-                    const futureDate = new Date(today);
-                    futureDate.setMonth(futureDate.getMonth() + (remainingSemesters.semestersCount * 6));
-                    setEstimatedDate(futureDate);
+                    const baseYear = 2026;
+                    const baseSemester = 1;
+                    const totalSemesters = remainingSemesters.semestersCount;
+
+                    // If 0 remaining semesters, we show current? No, predicted means how many MORE.
+                    // If prediction says 2 semesters: 
+                    // 1st sem = 2026.1
+                    // 2nd sem = 2026.2 (Last one)
+                    // So we want the date of the LAST predicted semester.
+
+                    const lastSemesterSeq = baseSemester + totalSemesters - 1;
+                    const finalYear = baseYear + Math.floor((lastSemesterSeq - 1) / 2);
+                    const finalSem = ((lastSemesterSeq - 1) % 2) + 1;
+
+                    // Construct date for visualization (Month 0 for Sem 1, Month 6 for Sem 2)
+                    setEstimatedDate(new Date(finalYear, finalSem === 1 ? 0 : 6, 1));
                 }
             };
             calculatePrediction();
@@ -481,29 +494,31 @@ const ProfilePage = () => {
                             </div>
                         </div>
 
-                        {/* Prediction in Header - Clickable */}
-                        <div
-                            className="pt-4 border-t border-border-light dark:border-border-dark flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg p-2 -mx-2 mt-2"
-                            onClick={() => router.push('/prediction')}
-                            title="Ver mapa de previsão"
-                        >
-                            <div className="flex items-center gap-2">
-                                <span className="material-symbols-outlined text-teal-600 dark:text-teal-400">event_available</span>
-                                <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Previsão</span>
+                        {/* Prediction in Header - Clickable (Only for Active Users) */}
+                        {!isExpired && user?.is_paid && (
+                            <div
+                                className="pt-4 border-t border-border-light dark:border-border-dark flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg p-2 -mx-2 mt-2"
+                                onClick={() => router.push(ROUTES.PREDICTION)}
+                                title="Ver mapa de previsão"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-teal-600 dark:text-teal-400">event_available</span>
+                                    <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Previsão</span>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1 justify-end">
+                                        {estimatedDate ? (
+                                            <>
+                                                {estimatedDate.getFullYear()}.{estimatedDate.getMonth() + 1 <= 6 ? 1 : 2}
+                                                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-xs text-slate-400 font-normal">Calculando...</span>
+                                        )}
+                                    </p>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-sm font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1 justify-end">
-                                    {estimatedDate ? (
-                                        <>
-                                            {estimatedDate.toLocaleString('default', { month: 'short' })}/{estimatedDate.getFullYear()}
-                                            <span className="material-symbols-outlined text-sm">open_in_new</span>
-                                        </>
-                                    ) : (
-                                        <span className="text-xs text-slate-400 font-normal">Calculando...</span>
-                                    )}
-                                </p>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -539,7 +554,7 @@ const ProfilePage = () => {
                     bgColor="bg-orange-600"
                     icon="extension"
                     customTotalHours={complementaryHours}
-                    onClick={() => router.push('/activities')}
+                    onClick={() => router.push(ROUTES.ACTIVITIES)}
                 />
 
 

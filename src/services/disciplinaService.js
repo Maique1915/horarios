@@ -54,10 +54,17 @@ export const loadDbData = async (courseCode = null) => {
 
             if (courseCode) {
                 console.time('fetch_course_id');
-                const result = await supabase.from('courses').select('id').eq('code', courseCode).single();
+                // Use limit(1) instead of single() to avoid error on 0 rows
+                const result = await supabase.from('courses').select('id').eq('code', courseCode).limit(1);
                 console.timeEnd('fetch_course_id');
                 if (result.error) throw result.error;
-                courseData = result.data;
+
+                // If course provided but not found, return empty or throw specific error
+                if (!result.data || result.data.length === 0) {
+                    console.warn(`Course code '${courseCode}' not found.`);
+                    return []; // Return empty data instead of crashing
+                }
+                courseData = result.data[0];
             }
 
             try {
@@ -150,7 +157,7 @@ export const loadDbData = async (courseCode = null) => {
             lastFetchTime = now;
             return mappedData;
         } catch (error) {
-            console.error('Erro ao carregar dados do Supabase:', error);
+            console.error('Erro ao carregar dados do Supabase:', JSON.stringify(error, null, 2), error);
             throw error;
         } finally {
             delete loadingPromises[cacheKey];

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
+import ROUTES from '../routes';
 import { loadDbData } from '../services/disciplinaService';
 import LandingHeader from './LandingHeader';
 import LandingFooter from './LandingFooter';
@@ -16,7 +17,7 @@ const AppLayout = ({ children }) => {
     const cur = params?.cur; // Handle potential undefined
     const router = useRouter();
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const { user, logout, isExpired } = useAuth();
 
     useEffect(() => {
         // Ensure this only runs on client and if needed
@@ -61,9 +62,10 @@ const AppLayout = ({ children }) => {
 
     const menuItems = [
         { to: `/${effectiveCur}`, icon: 'add_task', label: 'Gera Grade', exact: true },
-        { to: `/${effectiveCur}/grades`, icon: 'grid_on', label: 'Horários' },
-        { to: `/${effectiveCur}/cronograma`, icon: 'timeline', label: 'Cronograma' },
-        { to: `/prediction`, icon: 'neurology', label: 'Previsão', divider: true },
+        { to: ROUTES.GRADES(effectiveCur), icon: 'grid_on', label: 'Horários' },
+        { to: ROUTES.FLOW(effectiveCur), icon: 'timeline', label: 'Cronograma' },
+        // Show Prediction only if confirmed paid and not expired
+        ...((!isExpired && user?.is_paid) ? [{ to: ROUTES.PREDICTION, icon: 'neurology', label: 'Previsão', divider: true }] : []),
     ];
 
     const isActiveLink = (to, exact) => {
@@ -244,13 +246,12 @@ const AppLayout = ({ children }) => {
                             </h1>
                         </div>
 
-                        {/* Info adicional ou breadcrumbs podem ir aqui */}
 
                         <div className="flex items-center gap-4">
                             {user && (
                                 <div className="flex items-center gap-3">
                                     <Link
-                                        href="/profile"
+                                        href={ROUTES.PROFILE}
                                         className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors cursor-pointer group"
                                         title="Ver Perfil"
                                     >
@@ -290,7 +291,7 @@ const AppLayout = ({ children }) => {
                             {/* Login Link - Always visible if not logged in */}
                             {!user && (
                                 <Link
-                                    href="/login"
+                                    href={ROUTES.LOGIN}
                                     className="flex items-center gap-2 text-sm text-text-light-secondary dark:text-text-dark-secondary hover:text-primary transition-colors"
                                     title="Fazer login"
                                 >

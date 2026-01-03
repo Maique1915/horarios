@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
     loadCompletedSubjects,
@@ -42,8 +43,20 @@ const checkCollision = (subA, subB) => {
     return false;
 };
 
+
+
 const PredictionPage = () => {
-    const { user, isAuthenticated, loading: authLoading } = useAuth();
+    const { user, isAuthenticated, loading: authLoading, isExpired } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!authLoading) {
+            // Redirect if not logged in OR if subscription is invalid
+            if (!user || isExpired || !user.is_paid) {
+                router.push('/');
+            }
+        }
+    }, [authLoading, user, isExpired, router]);
 
     // --- Data State ---
     const [allSubjects, setAllSubjects] = useState([]);

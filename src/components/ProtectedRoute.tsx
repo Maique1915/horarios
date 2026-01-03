@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
+import ROUTES from '../routes';
 import LoadingSpinner from './LoadingSpinner';
 
 interface ProtectedRouteProps {
@@ -21,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     useEffect(() => {
         if (!loading) {
             if (!user) {
-                router.push(`/login?from=${encodeURIComponent(pathname)}`);
+                router.push(`${ROUTES.LOGIN}?from=${encodeURIComponent(pathname)}`);
             } else if (requiredRole) {
                 // Check if user has one of the required roles
                 const hasAllowedRole = Array.isArray(requiredRole)
@@ -32,7 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
                 const isImplicitlyAllowed = requiredRole === 'admin' && user.role === 'curso';
 
                 if (!hasAllowedRole && !isImplicitlyAllowed) {
-                    router.push('/');
+                    router.push(ROUTES.HOME);
                     return;
                 }
 
@@ -43,7 +44,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
                         return; // Allowed
                     }
                     // If mismatch or accessing generic admin route without matching context
-                    router.push('/');
+                    router.push(ROUTES.HOME);
                     return;
                 }
             }
