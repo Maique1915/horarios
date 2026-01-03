@@ -17,11 +17,16 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import Escolhe from '../../../model/util/Escolhe';
 import { getComments, addComment } from '../../../services/commentService';
+import PredictionMap from '../../../components/PredictionMap';
 
 const ProfilePage = () => {
     const { user, isAuthenticated, loading: authLoading, updateUser } = useAuth();
     const router = useRouter();
     const queryClient = useQueryClient();
+
+    // Map logic
+    const [showPredictionMap, setShowPredictionMap] = useState(false);
+    const [predictionData, setPredictionData] = useState(null);
 
     useEffect(() => {
         console.log("ProfilePage mounted");
@@ -353,8 +358,9 @@ const ProfilePage = () => {
 
                     const today = new Date();
                     const futureDate = new Date(today);
-                    futureDate.setMonth(futureDate.getMonth() + (remainingSemesters * 6));
+                    futureDate.setMonth(futureDate.getMonth() + (remainingSemesters.semestersCount * 6));
                     setEstimatedDate(futureDate);
+                    setPredictionData(remainingSemesters);
                 }
             };
             calculatePrediction();
@@ -472,17 +478,22 @@ const ProfilePage = () => {
                             </div>
                         </div>
 
-                        {/* Prediction in Header */}
-                        <div className="pt-4 border-t border-border-light dark:border-border-dark flex items-center justify-between gap-4">
+                        {/* Prediction in Header - Clickable */}
+                        <div
+                            className="pt-4 border-t border-border-light dark:border-border-dark flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg p-2 -mx-2 mt-2"
+                            onClick={() => predictionData && setShowPredictionMap(true)}
+                            title="Ver mapa de previsão"
+                        >
                             <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined text-teal-600 dark:text-teal-400">event_available</span>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">Previsão</span>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm font-bold text-teal-600 dark:text-teal-400">
+                                <p className="text-sm font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1 justify-end">
                                     {estimatedDate ? (
                                         <>
                                             {estimatedDate.toLocaleString('default', { month: 'short' })}/{estimatedDate.getFullYear()}
+                                            <span className="material-symbols-outlined text-sm">open_in_new</span>
                                         </>
                                     ) : (
                                         <span className="text-xs text-slate-400 font-normal">Calculando...</span>
@@ -493,6 +504,14 @@ const ProfilePage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Prediction Modal */}
+            {showPredictionMap && predictionData && (
+                <PredictionMap
+                    semesterGrids={predictionData.semesterGrids}
+                    onClose={() => setShowPredictionMap(false)}
+                />
+            )}
 
             {/* Detailed Progress Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">

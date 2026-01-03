@@ -168,6 +168,7 @@ export default class Escolhe {
 
         let currentCompleted = [...completedSubjects]; // Copy to avoid mutating original
         let semesters = 0;
+        const semesterGrids = []; // Store the subjects chosen for each predicted semester
         const MAX_SEMESTERS = 20; // Safety break
 
         while (semesters < MAX_SEMESTERS) {
@@ -198,10 +199,11 @@ export default class Escolhe {
             // 4. Update state
             // Add these subjects to completed list
             currentCompleted = [...currentCompleted, ...bestSchedule];
+            semesterGrids.push(bestSchedule);
             semesters++;
         }
 
-        return semesters;
+        return { semestersCount: semesters, semesterGrids };
     }
 }
 
