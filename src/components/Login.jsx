@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import ROUTES from '../routes';
 import LoadingSpinner from './LoadingSpinner';
+import Image from 'next/image';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -20,19 +21,30 @@ const Login = () => {
 
     const from = searchParams.get('from') || ROUTES.HOME;
 
+
+
     const slides = [
         {
             icon: 'cloud_sync',
+            image: '/mapa.png',
             title: 'Seus dados sempre salvos',
             description: 'Não perca mais seu progresso. Com uma conta, suas grades, horários e cronogramas ficam salvos na nuvem para acessar de qualquer lugar.'
         },
         {
-            icon: 'diamond',
-            title: 'Recursos Premium',
-            description: 'Desbloqueie ferramentas exclusivas como a Previsão de Formatura com IA e a Gestão Completa de Atividades Complementares.'
+            icon: 'neurology',
+            image: '/predition.png',
+            title: 'Previsão com IA',
+            description: 'Simule seus próximos semestres e receba sugestões otimizadas para se formar no menor tempo possível.'
+        },
+        {
+            icon: 'workspace_premium',
+            image: '/atividades.png',
+            title: 'Gestão de Atividades',
+            description: 'Controle suas horas complementares, gerencie certificados e acompanhe o progresso exato para completar a carga horária.'
         },
         {
             icon: 'dashboard',
+            image: '/horarios.png',
             title: 'Organização Total',
             description: 'Sua vida acadêmica centralizada em um único lugar. Acompanhe seu desempenho e planeje seu futuro semestre a semestre.'
         }
@@ -86,43 +98,52 @@ const Login = () => {
     return (
         <div className="min-h-screen bg-background-light dark:bg-background-dark flex">
             {/* Left Side - Carousel (Desktop Only) */}
-            <div className="hidden lg:flex w-1/2 bg-primary relative overflow-hidden items-center justify-center p-12 text-white">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-dark/50 to-transparent"></div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
-                <div className="relative z-10 max-w-lg text-center">
-                    <div className="mb-12 relative h-64 flex items-center justify-center">
-                        {slides.map((slide, index) => (
-                            <div
-                                key={index}
-                                className={`absolute inset-0 transition-all duration-700 transform flex flex-col items-center justify-center ${index === currentSlide
-                                        ? 'opacity-100 translate-x-0 scale-100'
-                                        : index < currentSlide
-                                            ? 'opacity-0 -translate-x-full scale-95'
-                                            : 'opacity-0 translate-x-full scale-95'
-                                    }`}
-                            >
-                                <div className="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm">
-                                    <span className="material-symbols-outlined text-5xl">{slide.icon}</span>
-                                </div>
-                                <h2 className="text-3xl font-bold mb-4">{slide.title}</h2>
-                                <p className="text-lg text-blue-100 leading-relaxed">{slide.description}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="flex justify-center gap-3">
-                        {slides.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentSlide(index)}
-                                className={`h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                                    }`}
-                                aria-label={`Go to slide ${index + 1}`}
+            <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-slate-900">
+                {slides.map((slide, index) => (
+                    <div
+                        key={index}
+                        className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    >
+                        {/* Background Image with Blur */}
+                        <div className="absolute inset-0">
+                            <Image
+                                src={slide.image}
+                                alt={slide.title}
+                                fill
+                                className="object-cover blur-[3px] scale-105 transform" // Scale to avoid white edges from blur
+                                priority={index === 0}
                             />
-                        ))}
+                            {/* Overlays for readability */}
+                            <div className="absolute inset-0 bg-primary/70 mix-blend-multiply" />
+                            <div className="absolute inset-0 bg-black/40" />
+                        </div>
+
+                        {/* Content Overlay */}
+                        <div className="relative h-full flex flex-col items-center justify-center p-16 text-center text-white">
+                            <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center mb-8 backdrop-blur-md border border-white/20 shadow-2xl">
+                                <span className="material-symbols-outlined text-5xl text-white">{slide.icon}</span>
+                            </div>
+                            <h2 className="text-4xl font-bold mb-6 tracking-tight drop-shadow-lg">{slide.title}</h2>
+                            <p className="text-lg text-blue-50 leading-relaxed max-w-lg font-medium drop-shadow-md">
+                                {slide.description}
+                            </p>
+                        </div>
                     </div>
+                ))}
+
+                {/* Dots Navigation */}
+                <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center gap-3">
+                    {slides.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCurrentSlide(index)}
+                            className={`h-2.5 rounded-full transition-all duration-300 backdrop-blur-sm ${index === currentSlide
+                                ? 'w-10 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]'
+                                : 'w-2.5 bg-white/40 hover:bg-white/60'
+                                }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
                 </div>
             </div>
 
