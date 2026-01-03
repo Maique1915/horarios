@@ -29,14 +29,37 @@ const PredictionMap = ({ semesterGrids, onClose }) => {
         const allPredictedSubjects = semesterGrids.flat();
         const subjectsMap = new Map(allPredictedSubjects.map(s => [s._re, s]));
 
+        // Helper to calculate semester labels
+        const getCurrentSemesterLabel = (offsetIndex) => {
+            const now = new Date();
+            let year = now.getFullYear();
+            // Month is 0-indexed. Jan(0)-Jun(5) -> Sem 1. Jul(6)-Dec(11) -> Sem 2.
+            let builtInSem = now.getMonth() <= 5 ? 1 : 2;
+
+            // Add offset
+            // Total semesters from "start of time" (which is year.sem)
+            // Current 'absolute' semester index = (year * 2) + builtInSem
+            // But easier:
+            // totalSemesters = builtInSem + offsetIndex
+            // extraYears = floor((totalSemesters - 1) / 2)
+            // finalSem = ((totalSemesters - 1) % 2) + 1
+
+            let currentTotal = builtInSem + offsetIndex;
+            let addedYears = Math.floor((currentTotal - 1) / 2);
+            let finalSem = ((currentTotal - 1) % 2) + 1;
+
+            return `${year + addedYears}.${finalSem}`;
+        };
+
         semesterGrids.forEach((subjects, index) => {
             const semesterNum = index + 1;
             const columnX = (semesterNum - 1) * COLUMN_WIDTH;
+            const semesterLabel = getCurrentSemesterLabel(index);
 
             // Title Node
             nodes.push({
                 id: `period-title-${semesterNum}`,
-                name: `${semesterNum}º Semestre Previsto`,
+                name: semesterLabel,
                 type: 'title',
                 x: columnX + (NODE_WIDTH / 2),
                 y: -100,
