@@ -30,8 +30,8 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
         return "bg-blue-50 dark:bg-blue-900/20 border-blue-400 text-blue-900 dark:text-blue-100 shadow-md font-semibold ring-1 ring-blue-200 dark:ring-blue-800";
       case 'naoPodeFazer':
       default:
-        // Normal/Locked style - slightly muted
-        return "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 shadow-sm opacity-90";
+        // Normal/Locked style - improved visibility for dark mode
+        return "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-200 shadow-sm opacity-90";
     }
   };
 

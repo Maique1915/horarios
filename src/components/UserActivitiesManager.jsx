@@ -360,7 +360,7 @@ const UserActivitiesManager = () => {
 
                         <div className="overflow-x-auto min-h-[300px]">
                             <table className="w-full text-left border-collapse min-w-[600px]">
-                                <thead className="bg-slate-50 dark:bg-slate-800/50 text-text-light-secondary dark:text-text-dark-secondary text-xs font-semibold uppercase tracking-wider sticky top-0 z-10">
+                                <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider sticky top-0 z-10">
                                     {table.getHeaderGroups().map(headerGroup => (
                                         <tr key={headerGroup.id}>
                                             {headerGroup.headers.map(header => (
@@ -447,7 +447,7 @@ const UserActivitiesManager = () => {
                                 <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Grupo</label>
                                 <div className="relative">
                                     <select
-                                        className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all cursor-pointer hover:border-primary/50"
+                                        className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all cursor-pointer hover:border-primary/50"
                                         value={selectedGroup}
                                         onChange={(e) => {
                                             setSelectedGroup(e.target.value);
@@ -471,7 +471,7 @@ const UserActivitiesManager = () => {
                                     <select
                                         required
                                         disabled={!selectedGroup}
-                                        className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:border-primary/50"
+                                        className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:border-primary/50"
                                         value={selectedActivityId}
                                         onChange={(e) => setSelectedActivityId(e.target.value)}
                                     >
@@ -507,7 +507,7 @@ const UserActivitiesManager = () => {
                                         required
                                         type="text"
                                         placeholder="ex: 2024.1"
-                                        className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                         value={semester}
                                         onChange={(e) => setSemester(e.target.value)}
                                     />
@@ -520,7 +520,7 @@ const UserActivitiesManager = () => {
                                             type="number"
                                             min="0"
                                             placeholder="0"
-                                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
+                                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
                                             value={hours}
                                             onChange={(e) => setHours(e.target.value)}
                                         />
@@ -536,7 +536,7 @@ const UserActivitiesManager = () => {
                                             min="0"
                                             max="59"
                                             placeholder="0"
-                                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
+                                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
                                             value={minutes}
                                             onChange={(e) => setMinutes(e.target.value)}
                                         />
@@ -548,7 +548,7 @@ const UserActivitiesManager = () => {
                             <div className="space-y-1.5">
                                 <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Descrição</label>
                                 <textarea
-                                    className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
+                                    className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     placeholder="Detalhes adicionais da atividade..."
@@ -564,7 +564,7 @@ const UserActivitiesManager = () => {
                                     </div>
                                     <input
                                         type="url"
-                                        className="w-full p-3 pl-10 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                        className="w-full p-3 pl-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                         value={documentLink}
                                         onChange={(e) => setDocumentLink(e.target.value)}
                                         placeholder="https://drive.google.com/..."

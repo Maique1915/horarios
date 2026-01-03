@@ -6,16 +6,16 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Cores mais suaves e modernas para o design system
 const cores = [
-    "#E2E8F0", // slate-200
-    "#F1F5F9", // slate-100
-    "#DBEAFE", // blue-100
-    "#E0E7FF", // indigo-100
-    "#FAE8FF", // fuchsia-100
-    "#F3E8FF", // purple-100
-    "#FFE4E6", // rose-100
-    "#FEF3C7", // amber-100
-    "#D1FAE5", // emerald-100
-    "#CCFBF1", // teal-100
+    "#FFADAD", // Pastel Red
+    "#FFD6A5", // Pastel Orange
+    "#FDFFB6", // Pastel Yellow
+    "#CAFFBF", // Pastel Green
+    "#9BF6FF", // Pastel Cyan
+    "#A0C4FF", // Pastel Blue
+    "#BDB2FF", // Pastel Indigo
+    "#FFC6FF", // Pastel Violet
+    "#E6C9A8", // Pastel Brown
+    "#DCDCDC", // Pastel Gray
 ];
 const rand = Math.floor(Math.random() * cores.length);
 
