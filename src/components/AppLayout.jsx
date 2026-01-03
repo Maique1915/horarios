@@ -63,6 +63,7 @@ const AppLayout = ({ children }) => {
         { to: `/${effectiveCur}`, icon: 'add_task', label: 'Gera Grade', exact: true },
         { to: `/${effectiveCur}/grades`, icon: 'grid_on', label: 'Horários' },
         { to: `/${effectiveCur}/cronograma`, icon: 'timeline', label: 'Cronograma' },
+        { to: `/prediction`, icon: 'neurology', label: 'Previsão', divider: true },
     ];
 
     const isActiveLink = (to, exact) => {

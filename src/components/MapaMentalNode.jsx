@@ -69,15 +69,16 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
   );
 };
 
-const TitleNode = ({ node }) => {
+const TitleNode = ({ node, onClick }) => {
   return (
-    <g transform={`translate(${node.x}, ${node.y})`}>
+    <g transform={`translate(${node.x}, ${node.y})`} onClick={(e) => { e.stopPropagation(); onClick && onClick(node.id); }} className={onClick ? "cursor-pointer hover:opacity-80" : ""}>
       {/* Center title horizontally around point x (which we adjusted in parent to be center of column) */}
       <foreignObject x={-node.width / 2} y={0} width={node.width} height={node.height}>
         <div className="w-full h-full flex items-center justify-center">
           <div className="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
-            <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">
+            <h2 className="text-sm font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap flex items-center gap-2">
               {node.name}
+              {onClick && <span className="material-symbols-outlined text-xs text-slate-400">edit</span>}
             </h2>
           </div>
         </div>
@@ -87,9 +88,9 @@ const TitleNode = ({ node }) => {
 };
 
 
-const MapaMentalNode = ({ node, onNodeClick, selectedNodeId }) => {
+const MapaMentalNode = ({ node, onNodeClick, selectedNodeId, onTitleClick }) => {
   if (node.type === 'title') {
-    return <TitleNode node={node} />;
+    return <TitleNode node={node} onClick={onTitleClick} />;
   }
   return <SubjectNode node={node} onNodeClick={onNodeClick} selectedNodeId={selectedNodeId} />;
 };

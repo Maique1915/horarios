@@ -163,7 +163,7 @@ export default class Escolhe {
      * @param {Object} scheduleMeta - { days: [], slots: [] } Metadata for schedule parsing.
      * @returns {number} Estimated number of semesters remaining.
      */
-    static predictCompletion(allSubjects, completedSubjects, scheduleMeta) {
+    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { electiveHours: Infinity, mandatoryHours: Infinity }) {
         if (!allSubjects || allSubjects.length === 0) return 0;
 
         let currentCompleted = [...completedSubjects]; // Copy to avoid mutating original
@@ -172,11 +172,26 @@ export default class Escolhe {
         const MAX_SEMESTERS = 20; // Safety break
 
         while (semesters < MAX_SEMESTERS) {
+            // 0. Calculate current accumulated hours
+            const currentMandatoryHours = currentCompleted.filter(s => s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
+            const currentElectiveHours = currentCompleted.filter(s => !s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
+
             // 1. Find candidates (what can be taken now)
             // Grafos expects (allSubjects, cr, names). 
             // We pass -1 for CR to auto-calc based on completed.
             const grafos = new Grafos(allSubjects, -1, currentCompleted);
-            const candidates = grafos.matriz();
+            let candidates = grafos.matriz();
+
+            // 1.1 FILTER CANDIDATES BASED ON LIMITS
+            candidates = candidates.filter(subject => {
+                if (subject._el) {
+                    // Mandatory: Always allowed
+                    return true;
+                } else {
+                    // Elective: Check if limit reached
+                    return currentElectiveHours < limits.electiveHours;
+                }
+            });
 
             // If no candidates left, we are done (or stuck, implying done for this simulation)
             if (candidates.length === 0) break;

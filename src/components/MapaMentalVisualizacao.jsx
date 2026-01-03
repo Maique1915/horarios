@@ -184,6 +184,7 @@ const MapaMentalVisualizacao = ({ nodes, links, selectedNodeId, onNodeClick, gra
             key={node.id}
             node={node}
             onNodeClick={onNodeClick}
+            onTitleClick={node.onEdit}
           />
         ))}
       </g>
