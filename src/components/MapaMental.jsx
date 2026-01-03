@@ -164,7 +164,7 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
   return (
     <div className="flex flex-col p-4 mx-auto">
       <div className="flex w-full lg:flex-row sm:flex-col  lg:justify-between sm:justify-center sm:align-center sm:gap-3 lg:gap-4">
-        <h1 className="text-2xl font-bold">Mapa de Pré-requisitos - {cur}</h1>
+        <h1 className="text-2xl dark:text-text-dark-primary font-bold">Mapa de Pré-requisitos - {cur}</h1>
         <div className="flex flex-wrap gap-2 justify-right sm:justify-center lg:justify-end items-center">
           {onVoltar && (
             <button
