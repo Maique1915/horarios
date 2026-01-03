@@ -236,7 +236,7 @@ const UserActivitiesManager = () => {
                 const link = row.original.document_link;
                 return (
                     <div className="flex flex-col gap-1">
-                        <span className="line-clamp-2" title={desc}>
+                        <span className="line-clamp-2 text-slate-700 dark:text-slate-200" title={desc}>
                             {desc}
                         </span>
                         {link && (
@@ -253,7 +253,7 @@ const UserActivitiesManager = () => {
             accessorKey: 'semester',
             header: 'Semestre',
             cell: info => (
-                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark">
+                <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-background-light dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-border-light dark:border-border-dark">
                     {info.getValue()}
                 </span>
             )
@@ -262,7 +262,7 @@ const UserActivitiesManager = () => {
             accessorKey: 'hours',
             header: 'Horas',
             cell: info => (
-                <span className="text-xs font-bold text-text-light-primary dark:text-text-dark-primary">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-100">
                     {formatHours(info.getValue())}
                 </span>
             )

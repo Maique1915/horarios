@@ -74,6 +74,7 @@ const LandingHeader = () => {
                             ) : (
                                 <span className="material-symbols-outlined">dark_mode</span>
                             )}
+
                         </button>
                         {!user && (
                             <Link

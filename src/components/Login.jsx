@@ -65,10 +65,10 @@ const Login = () => {
                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
                             <span className="material-symbols-outlined text-4xl">lock</span>
                         </div>
-                        <h1 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2 tracking-tight">
+                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">
                             Login
                         </h1>
-                        <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
                             Acesse sua conta para continuar
                         </p>
                     </div>
@@ -83,7 +83,7 @@ const Login = () => {
                         )}
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
+                            <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-300 tracking-wider">
                                 Usuário
                             </label>
                             <div className="relative">
@@ -103,7 +103,7 @@ const Login = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
+                            <label className="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-300 tracking-wider">
                                 Senha
                             </label>
                             <div className="relative">
