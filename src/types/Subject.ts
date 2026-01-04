@@ -22,7 +22,7 @@ export interface Subject {
 
     // Scheduling (The user specifically asked for this)
     _ho?: number[][];      // Schedule slots: [[day, timeSlot], ...] 
-    _da?: string | number[]; // Dimension info or similar? Often unused or legacy, keeping for compatibility
+    _da?: number[]; // Dimension info or similar? Often unused or legacy, keeping for compatibility
     class_name?: string;   // Class name (e.g., 'A', 'B') if specific class selected
 
     // Allow flexibility for other props

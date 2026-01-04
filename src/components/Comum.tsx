@@ -1,8 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { getDays, getTimeSlots } from '../services/scheduleService';
 // Services
-import { loadClassesForGrid, saveCurrentEnrollments } from '../services/disciplinaService';
+import { loadClassesForGrid, saveCurrentEnrollments, saveCompletedSubjects } from '../services/disciplinaService';
 import { useAuth } from '../contexts/AuthContext';
+import { toPng } from 'html-to-image';
+import { Subject } from '../types/Subject';
+
+interface Day {
+    id: number;
+    name: string;
+}
+
+interface TimeSlot {
+    id: number;
+    start_time: string;
+    end_time: string;
+}
+
+interface ComumProps {
+    materias?: Subject[] | Subject[][];
+    // tela 2 means "Generation Mode" (multiple grades), others mean "View Mode" (single list)
+    tela: number;
+    cur?: string;
+    hideSave?: boolean;
+    fun?: React.ReactNode;
+    g?: string;
+    f?: string;
+    separa?: boolean;
+    feitas?: string[]; // Array of acronyms
+    onSaveAction?: () => Promise<void>;
+    completedSubjectsList?: string[];
+    // These might be passed from parent to avoid re-fetching, though Comum fetches its own if missing?
+    // Looking at code, it fetches only if props.materias is missing. 
+    courseSchedule?: any;
+    courseDimension?: any;
+}
+
+interface ComumState {
+    id: number;
+    pageBlockStart: number;
+    materias: Subject[] | Subject[][];
+    feitas: string[];
+}
+
+interface PreviousGradeState {
+    grade: string[][];
+    cores: string[][];
+}
 
 // Cores mais suaves e modernas para o design system
 const cores = [
@@ -24,35 +68,36 @@ const mesAtual = dataAtual.getMonth() + 1;
 const anoAtual = dataAtual.getFullYear();
 const periodoAtual = `${anoAtual}.${mesAtual > 6 ? "2" : "1"}`;
 
-const Comum = (props) => {
-    const [state, setState] = useState({
+const Comum: React.FC<ComumProps> = (props) => {
+    const [state, setState] = useState<ComumState>({
         id: 0,
         pageBlockStart: 0,
-        materias: props.materias || []
+        materias: props.materias || [],
+        feitas: props.feitas || [],
     });
     const [isPrinting, setIsPrinting] = useState(false);
-    const [transitioningTo, setTransitioningTo] = useState(null);
-    const [previousGrade, setPreviousGrade] = useState(null);
+    const [transitioningTo, setTransitioningTo] = useState<number | null>(null);
+    const [previousGrade, setPreviousGrade] = useState<PreviousGradeState | null>(null);
 
     // Auth
     const { user, isExpired } = useAuth();
     const [saving, setSaving] = useState(false);
 
     // Dynamic Schedule Data
-    const [dbDays, setDbDays] = useState([]);
-    const [dbTimeSlots, setDbTimeSlots] = useState([]);
+    const [dbDays, setDbDays] = useState<Day[]>([]);
+    const [dbTimeSlots, setDbTimeSlots] = useState<TimeSlot[]>([]);
     const [scheduleLoading, setScheduleLoading] = useState(true);
 
     // Desestruturando a prop 'separa' para fácil acesso
     let { cur: _cur, fun: _fun, separa: _separa, g, f } = props;
-    _cur = _cur || window.location.href.split("/")[3] || "engcomp";
+    _cur = _cur || (typeof window !== 'undefined' ? window.location.href.split("/")[3] : "engcomp") || "engcomp";
 
     // Sincroniza state.materias quando props.materias muda
     useEffect(() => {
         if (props.materias && props.materias.length > 0) {
             setState(prevState => ({
                 ...prevState,
-                materias: props.materias,
+                materias: props.materias!,
                 id: 0,
                 pageBlockStart: 0
             }));
@@ -68,7 +113,7 @@ const Comum = (props) => {
 
                 // Se não houver matérias via props, carrega do Serviço
                 if (!props.materias || props.materias.length === 0) {
-                    const gridData = await loadClassesForGrid(_cur);
+                    const gridData: Subject[] = await loadClassesForGrid(_cur);
                     console.log("Comum: Loaded grid data from service", gridData.length);
 
                     const filteredData = gridData.filter(item => item._ag === true && item._cu === _cur);
@@ -88,7 +133,7 @@ const Comum = (props) => {
             }
         };
         fetchScheduleData();
-    }, [_cur]);
+    }, [_cur, props.materias]); // Added props.materias dependency to avoid stale closure or race conditions
 
     // Determina se está carregando 
     const loading = scheduleLoading;
@@ -99,27 +144,39 @@ const Comum = (props) => {
     // Usando nomes dos dias do banco
     const dias = dbDays.map(d => d.name);
 
-    function separarPorSemestre(arr) {
-        const aux = [];
-        const aux2 = arr;
-        for (const i of aux2) {
-            while (aux.length < i._se) {
-                aux.push([]);
-            }
-            if (aux[i._se - 1]) {
+    function separarPorSemestre(arr: Subject[]): Subject[][] {
+        // Find max semester
+        let maxSem = 0;
+        arr.forEach(s => { if (s._se > maxSem) maxSem = s._se; });
+
+        const aux: Subject[][] = Array.from({ length: maxSem }, () => []);
+
+        for (const i of arr) {
+            if (i._se > 0 && i._se <= maxSem) {
                 aux[i._se - 1].push(i);
             }
         }
         return aux.filter(e => e && e.length > 0);
     }
 
-    let bd;
+    let bd: Subject[][];
     if (props.tela === 2) {
-        bd = state.materias;
+        // In mode 2, materias is passed as Subject[][] (Array of possible schedules)
+        bd = state.materias as Subject[][];
     } else if (_separa) {
-        bd = separarPorSemestre(state.materias);
+        // In view mode with separation, materias is Subject[] (List of enrollments)
+        bd = separarPorSemestre(state.materias as Subject[]);
     } else {
-        bd = [state.materias];
+        // In view mode single list, wrap in array [Subject[]]
+        // Explicit check to safely cast
+        const mats = (Array.isArray(state.materias) && state.materias.length > 0 && Array.isArray(state.materias[0]))
+            ? state.materias as Subject[][]  // Handled edge case where it might be mixed, but generally single list here
+            : [state.materias as Subject[]];
+
+        // Actually, logic above for tela=2 covers nested array. 
+        // If we are here, state.materias SHOULD be Subject[]
+        // But let's be safe.
+        bd = Array.isArray(state.materias[0]) ? state.materias as Subject[][] : [state.materias as Subject[]];
     }
 
     function criarGrade() {
@@ -128,9 +185,10 @@ const Comum = (props) => {
             console.log("Comum: Schedule Refs - Days:", dbDays, "Slots:", dbTimeSlots);
         }
 
-        const grades = [];
-        const coresGrade = [];
+        const grades: string[][][] = [];
+        const coresGrade: string[][][] = [];
 
+        // bd is Subject[][] - each item is a "Semester" or a "Schedule Option"
         for (const semestre of bd) {
             const gradeVazia = Array.from({ length: th }, () => Array(td).fill(""));
             const coresVazias = Array.from({ length: th }, () => Array(td).fill(""));
@@ -151,8 +209,11 @@ const Comum = (props) => {
                             }
                         }
 
-                        const nomeMateria = (disciplina._da && disciplina._da[i])
-                            ? `${disciplina._di}\n${disciplina._da[i]}`
+                        // Cast _da to string array safely if it exists
+                        const daArray = (Array.isArray(disciplina._da) ? disciplina._da : []) as number[];
+
+                        const nomeMateria = (daArray && daArray[i])
+                            ? `${disciplina._di}\n${daArray[i]}`
                             : disciplina._di;
 
                         if (numHorario >= 0 && numHorario < th && numDia >= 0 && numDia < td) {
@@ -176,7 +237,7 @@ const Comum = (props) => {
 
     const { grades, coresGrade } = criarGrade();
 
-    const handlePageChange = (newId) => {
+    const handlePageChange = (newId: number) => {
         if (newId !== state.id && transitioningTo === null) {
             setTransitioningTo(newId);
             setPreviousGrade({ grade: grades[state.id], cores: coresGrade[state.id] });
@@ -196,18 +257,56 @@ const Comum = (props) => {
         setState(s => ({ ...s, pageBlockStart: s.pageBlockStart - 10 }));
     };
 
-    const handlePrint = () => {
+    // Função de exportação para imagem
+    const handleExportImage = async () => {
         setIsPrinting(true);
-        setTimeout(() => {
+        // Timeout to allow UI updates
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const element = document.getElementById('schedule-card');
+        if (!element) {
             setIsPrinting(false);
-        }, 7000);
+            return;
+        }
+
+        try {
+            const dataUrl = await toPng(element, {
+                cacheBust: true,
+                backgroundColor: '#ffffff',
+                width: element.scrollWidth,
+                height: element.scrollHeight,
+                style: {
+                    margin: '0',
+                },
+                filter: (node) => {
+                    return !node.classList || !node.classList.contains('export-ignore');
+                }
+            });
+
+            // Create link and download
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `grade_horaria_${new Date().getTime()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+        } catch (error) {
+            console.error("Erro ao exportar imagem:", error);
+            alert("Erro ao salvar imagem. Tente novamente.");
+        } finally {
+            setIsPrinting(false);
+        }
     };
+
+
+
 
     const handleSave = async () => {
         if (!user) return;
         setSaving(true);
 
-        let materiasParaSalvar;
+        let materiasParaSalvar: Subject[] | Subject[][];
 
         // Se tiver mais de uma grade (modo de geração), salva a grade ATUAL (state.id)
         if (grades.length > 1 && bd[state.id]) {
@@ -222,13 +321,25 @@ const Comum = (props) => {
 
         try {
             // Flatten if needed (separa por semestre return array of arrays)
-            if (Array.isArray(materiasParaSalvar) && Array.isArray(materiasParaSalvar[0])) {
-                materiasParaSalvar = materiasParaSalvar.flat();
+            let flatMaterias: Subject[] = [];
+
+            if (Array.isArray(materiasParaSalvar)) {
+                if (materiasParaSalvar.length > 0 && Array.isArray(materiasParaSalvar[0])) {
+                    // It is Subject[][]
+                    flatMaterias = (materiasParaSalvar as Subject[][]).flat();
+                } else {
+                    // It is Subject[]
+                    flatMaterias = materiasParaSalvar as Subject[];
+                }
             }
 
-            console.log("Saving enrollments:", materiasParaSalvar);
-            await saveCurrentEnrollments(user.id, materiasParaSalvar, periodoAtual);
-            alert("Grade salva com sucesso em 'Grade Salva' no seu perfil!");
+            console.log("Saving enrollments:", flatMaterias);
+
+            await saveCurrentEnrollments(user.id, flatMaterias, periodoAtual);
+            if (props.feitas) {
+                await saveCompletedSubjects(user.id, props.feitas);
+            }
+            alert("Grade salva com sucesso!");
         } catch (error) {
             console.error("Erro ao salvar grade:", error);
             alert("Erro ao salvar grade. Tente novamente.");
@@ -237,7 +348,7 @@ const Comum = (props) => {
         }
     };
 
-    function renderCelula(numLinha, numCelula, key) {
+    function renderCelula(numLinha: number, numCelula: number, key: string) {
         const isTransitioning = transitioningTo !== null;
         const newGradeId = transitioningTo !== null ? transitioningTo : state.id;
 
@@ -290,7 +401,7 @@ const Comum = (props) => {
         );
     }
 
-    function renderLinha(numLinha) {
+    function renderLinha(numLinha: number) {
         if (!grades || !grades[state.id]) return null;
 
         const slot = dbTimeSlots[numLinha];
@@ -309,7 +420,7 @@ const Comum = (props) => {
         );
     }
 
-    function renderIntervalo(key) {
+    function renderIntervalo(key: string) {
         return (
             <tr key={key}>
                 <td colSpan={td + 1} className="py-2 px-0 bg-transparent">
@@ -356,7 +467,7 @@ const Comum = (props) => {
         }
         return (
             <div className="rounded-2xl border border-border-light dark:border-border-dark overflow-hidden bg-white dark:bg-slate-900 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
-                <div className="overflow-auto max-h-[70vh] scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                <div className={`${isPrinting ? 'overflow-visible' : 'overflow-auto max-h-[70vh]'} scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent`}>
                     <table className="w-full border-collapse table-fixed min-w-[1000px]">
                         <thead>
                             <tr className="bg-slate-50 dark:bg-slate-800 sticky top-0 z-30">
@@ -380,14 +491,14 @@ const Comum = (props) => {
     }
 
     return (
-        <div className="w-full h-[calc(100vh-64px)] relative">
+        <div id="schedule-grid" className="w-full h-[calc(100vh-64px)] relative">
             <div className="absolute inset-0 overflow-y-auto p-6 flex flex-col items-center scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                 <div className="w-full max-w-[1400px]">
                     {(grades && grades.length > 1) && (
                         <div className={`flex justify-center items-center gap-1 mb-6 ${isPrinting ? 'invisible' : ''}`}>
                             {(!_separa && grades.length > 10) && (
                                 <button
-                                    className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={() => setState(s => ({ ...s, pageBlockStart: Math.max(0, s.pageBlockStart - 10) }))}
                                     disabled={state.pageBlockStart === 0}
                                 >
@@ -414,7 +525,7 @@ const Comum = (props) => {
                             </div>
                             {(!_separa && grades.length > 10) && (
                                 <button
-                                    className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 text-text-light-secondary dark:text-text-dark-secondary font-bold p-2.5 rounded-xl border border-border-light dark:border-border-dark shadow-sm transition-all hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
                                     onClick={() => setState(s => ({ ...s, pageBlockStart: s.pageBlockStart + 10 }))}
                                     disabled={state.pageBlockStart + 10 >= grades.length}
                                 >
@@ -424,7 +535,7 @@ const Comum = (props) => {
                         </div>
                     )}
 
-                    <div className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
+                    <div id="schedule-card" className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
 
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark gap-4 md:gap-0">
                             <div className="flex flex-col">
@@ -433,9 +544,9 @@ const Comum = (props) => {
                                     {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
                                 </h3>
                             </div>
-                            <div className={`flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto ${isPrinting ? 'invisible' : ''}`}>
+                            <div className={`flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto export-ignore ${isPrinting ? 'invisible' : ''}`}>
 
-                                {(g === "ª" && user && !isExpired) && (
+                                {(g === "ª" && user && !isExpired && !props.hideSave) && (
                                     <button
                                         onClick={handleSave}
                                         disabled={saving || isExpired}
@@ -453,11 +564,11 @@ const Comum = (props) => {
 
                                 {g !== "ª" ? "" : (
                                     <button
-                                        onClick={handlePrint}
+                                        onClick={handleExportImage}
                                         className="group hidden md:flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
                                     >
-                                        <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">print</span>
-                                        Imprimir
+                                        <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">image</span>
+                                        Salvar Imagem
                                     </button>
                                 )}
 

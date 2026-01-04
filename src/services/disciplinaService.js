@@ -512,15 +512,29 @@ export const toggleCompletedSubject = async (userId, subjectId, isCompleted) => 
 };
 
 export const toggleMultipleSubjects = async (userId, subjectIds, isCompleted) => {
-    if (!subjectIds || subjectIds.length === 0) return;
+    console.log("toggleMultipleSubjects called:", { userId, count: subjectIds?.length, isCompleted });
+    if (!subjectIds || subjectIds.length === 0) {
+        console.log("No subjectIds provided, returning.");
+        return;
+    }
 
     if (isCompleted) {
         const rows = subjectIds.map(id => ({ user_id: userId, subject_id: id }));
-        const { error } = await supabase.from('completed_subjects').upsert(rows, { onConflict: 'user_id, subject_id' });
-        if (error) throw error;
+        console.log("Upserting completed subjects:", rows.length);
+        const { error } = await supabase.from('completed_subjects').upsert(rows, {
+            onConflict: 'user_id, subject_id'
+        });
+        if (error) {
+            console.error("Error upserting subjects:", error);
+            throw error;
+        }
     } else {
+        console.log("Deleting completed subjects:", subjectIds.length);
         const { error } = await supabase.from('completed_subjects').delete().eq('user_id', userId).in('subject_id', subjectIds);
-        if (error) throw error;
+        if (error) {
+            console.error("Error deleting subjects:", error);
+            throw error;
+        }
     }
 };
 
@@ -586,4 +600,36 @@ export const getCourseStats = async () => {
             status: hasClasses ? 'active' : 'upcoming'
         };
     });
+};
+
+export const saveCompletedSubjects = async (userId, acronyms) => {
+    if (!acronyms || acronyms.length === 0) return;
+
+    try {
+        const { data: subjects, error: searchError } = await supabase
+            .from('subjects')
+            .select('id, acronym')
+            .in('acronym', acronyms);
+
+        if (searchError) throw searchError;
+        if (!subjects || subjects.length === 0) return;
+
+        const rows = subjects.map(s => ({
+            user_id: userId,
+            subject_id: s.id
+        }));
+
+        const { error: insertError } = await supabase
+            .from('completed_subjects')
+            .upsert(rows, {
+                onConflict: 'user_id, subject_id',
+                ignoreDuplicates: true
+            });
+
+        if (insertError) throw insertError;
+        console.log(`Saved ${rows.length} completed subjects.`);
+    } catch (error) {
+        console.error("Error in saveCompletedSubjects:", error);
+        throw error;
+    }
 };

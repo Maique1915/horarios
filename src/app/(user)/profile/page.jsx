@@ -18,6 +18,7 @@ import ROUTES from '../../../routes';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import Escolhe from '../../../model/util/Escolhe';
 import { getComments, addComment } from '../../../services/commentService';
+import Comum from '../../../components/Comum';
 
 const ProfilePage = () => {
     const { user, isAuthenticated, loading: authLoading, updateUser, isExpired } = useAuth();
@@ -43,6 +44,10 @@ const ProfilePage = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [updateError, setUpdateError] = useState('');
+
+    // Visual Schedule View State
+    const [showScheduleView, setShowScheduleView] = useState(false);
+
 
     useEffect(() => {
         if (user) {
@@ -169,6 +174,21 @@ const ProfilePage = () => {
         enabled: !!user?.id,
         staleTime: 1000 * 60 * 5,
     });
+
+    // Prepare data for Comum grid view - Moved here to ensure currentEnrollments is defined
+    const formattedEnrollmentsForGrid = React.useMemo(() => {
+        if (!currentEnrollments || currentEnrollments.length === 0) return [];
+        return currentEnrollments.map(s => ({
+            _id: s.id,
+            _di: s.class_name || s.name,
+            _re: s.acronym,
+            _ho: s.schedule_data,
+            _se: s.semester,
+            _el: !s.elective,
+            _ca: s.credits,
+            _da: s.schedule_day_time
+        }));
+    }, [currentEnrollments]);
 
     // 4. Complementary Hours
     const { data: complementaryHours = 0, isLoading: loadingHours } = useQuery({
@@ -323,7 +343,9 @@ const ProfilePage = () => {
     // Filter semesters based on selection
     const filteredSemesters = selectedSemester === 'all'
         ? sortedSemesters
-        : sortedSemesters.filter(sem => sem === selectedSemester);
+        : selectedSemester === 'optativas'
+            ? sortedSemesters // We will filter subjects inside the map loop for this case, effectively iterating all meaningful semesters but checking type
+            : sortedSemesters.filter(sem => sem === selectedSemester);
 
 
     // 5. Graduation Prediction
@@ -525,487 +547,532 @@ const ProfilePage = () => {
 
 
 
-            {/* Detailed Progress Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
-                <CategoryProgress
-                    title="Obrigatórias"
-                    subjects={mandatorySubjects}
-                    reqHours={3774}
-                    reqCredits={198}
-                    color="text-blue-600 dark:text-blue-400"
-                    bgColor="bg-blue-600"
-                    icon="school"
-                />
-                <CategoryProgress
-                    title="Optativas"
-                    subjects={electiveSubjects}
-                    reqHours={360}
-                    reqCredits={20}
-                    color="text-purple-600 dark:text-purple-400"
-                    bgColor="bg-purple-600"
-                    icon="star"
-                />
-                <CategoryProgress
-                    title="Atividades Comp."
-                    subjects={[]}
-                    reqHours={210}
-                    reqCredits={0}
-                    color="text-orange-600 dark:text-orange-400"
-                    bgColor="bg-orange-600"
-                    icon="extension"
-                    customTotalHours={complementaryHours}
-                    onClick={() => router.push(ROUTES.ACTIVITIES)}
-                />
+            {/* Dashboard Content vs Schedule View */}
+            {showScheduleView ? (
+                <div className="animate-fadeIn">
+                    <Comum
+                        materias={[formattedEnrollmentsForGrid]}
+                        tela={2}
+                        cur={user.courses?.code || 'engcomp'}
+                        hideSave={true}
+                        fun={
+                            <button
+                                onClick={() => setShowScheduleView(false)}
+                                className="group flex cursor-pointer items-center justify-center gap-2 rounded-xl h-10 px-5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm"
+                            >
+                                <span className="material-symbols-outlined text-lg">arrow_back</span>
+                                Voltar
+                            </button>
+                        }
+                        g="ª"
+                        f="Grade Atual"
+                        separa={false}
+                    />
+                </div>
+            ) : (
+                <>
+                    {/* Detailed Progress Breakdown */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
+                        <CategoryProgress
+                            title="Obrigatórias"
+                            subjects={mandatorySubjects}
+                            reqHours={3774}
+                            reqCredits={198}
+                            color="text-blue-600 dark:text-blue-400"
+                            bgColor="bg-blue-600"
+                            icon="school"
+                        />
+                        <CategoryProgress
+                            title="Optativas"
+                            subjects={electiveSubjects}
+                            reqHours={360}
+                            reqCredits={20}
+                            color="text-purple-600 dark:text-purple-400"
+                            bgColor="bg-purple-600"
+                            icon="star"
+                        />
+                        <CategoryProgress
+                            title="Atividades Comp."
+                            subjects={[]}
+                            reqHours={210}
+                            reqCredits={0}
+                            color="text-orange-600 dark:text-orange-400"
+                            bgColor="bg-orange-600"
+                            icon="extension"
+                            customTotalHours={complementaryHours}
+                            onClick={() => router.push(ROUTES.ACTIVITIES)}
+                        />
 
 
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Turmas Atuais */}
-                <div className="bg-surface-light dark:bg-surface-dark lg:col-span-3 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
-                    <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
-                        <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">calendar_today</span>
-                            Grade Atual (Em Curso)
-                        </h2>
                     </div>
-                    <div className="p-6">
-                        {currentEnrollments.length === 0 ? (
-                            <div className="text-center py-8">
-                                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_busy</span>
-                                <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
-                                    Nenhuma disciplina em curso no momento.
-                                </p>
-                            </div>
-                        ) : (
-                            <ul className="space-y-3">
-                                {currentEnrollments.map((subject) => {
-                                    const scheduleGroups = getFormattedSchedule(subject.schedule_data);
 
-                                    return (
-                                        <li key={subject.id} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
-                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-base leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
-                                                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                                            {subject.acronym || "N/A"}
-                                                        </span>
-                                                        {(subject.course_name || subject.semester) && (
-                                                            <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
-                                                                <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
-                                                                {subject.course_name || subject.semester}
-                                                            </span>
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                        {/* Turmas Atuais */}
+                        <div className="bg-surface-light dark:bg-surface-dark lg:col-span-3 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
+                            <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
+                                <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-primary">calendar_today</span>
+                                    Grade Atual (Em Curso)
+                                </h2>
+                                {currentEnrollments.length > 0 && (
+                                    <button
+                                        onClick={() => setShowScheduleView(true)}
+                                        className="text-xs font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider flex items-center gap-1"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">grid_view</span>
+                                        Visualizar Grade
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="p-6">
+                                {currentEnrollments.length === 0 ? (
+                                    <div className="text-center py-8">
+                                        <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_busy</span>
+                                        <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                                            Nenhuma disciplina em curso no momento.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <ul className="space-y-3">
+                                        {currentEnrollments.map((subject) => {
+                                            const scheduleGroups = getFormattedSchedule(subject.schedule_data);
+
+                                            return (
+                                                <li key={subject.id} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
+                                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-base leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
+                                                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                                                    {subject.acronym || "N/A"}
+                                                                </span>
+                                                                {(subject.course_name || subject.semester) && (
+                                                                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
+                                                                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                                                                        {subject.course_name || subject.semester}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Schedule Display */}
+                                                        {scheduleGroups.length > 0 && (
+                                                            <div className="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                                                                {scheduleGroups.map((group, idx) => (
+                                                                    <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800/80 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                                        <span className="text-xs font-bold text-primary dark:text-blue-400 uppercase tracking-wide min-w-[24px]">
+                                                                            {group.day}
+                                                                        </span>
+                                                                        <div className="h-3 w-px bg-slate-200 dark:bg-slate-700"></div>
+                                                                        <div className="flex flex-wrap gap-x-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                                                                            {group.times.map((time, tIdx) => (
+                                                                                <span key={tIdx} className={tIdx > 0 ? "before:content-[','] before:mr-1 before:text-slate-300 dark:before:text-slate-600" : ""}>
+                                                                                    {time}
+                                                                                </span>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                )}
+                            </div>
+
+                        </div>
+
+                        {/* Disciplinas Concluídas */}
+                        <div className="bg-surface-light dark:bg-surface-dark lg:col-span-2 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
+                            <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex flex-wrap justify-between items-center gap-4">
+                                <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-green-600">check_circle</span>
+                                    Concluídas <span className="text-sm font-normal text-slate-500 ml-1">({completedSubjects.length})</span>
+                                </h2>
+
+                                <div className="flex items-center gap-2">
+                                    {isEditing && (
+                                        <select
+                                            value={selectedSemester}
+                                            onChange={(e) => setSelectedSemester(e.target.value)}
+                                            className="px-2 py-1.5 rounded-lg text-xs border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-1 focus:ring-primary outline-none"
+                                        >
+                                            <option value="all">Todos</option>
+                                            <option value="optativas">Optativas</option>
+                                            {sortedSemesters.map(sem => (
+                                                <option key={sem} value={sem}>{sem}º Per</option>
+                                            ))}
+                                        </select>
+                                    )}
+
+                                    {isEditing ? (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={handleCancel}
+                                                disabled={saving}
+                                                className="px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                onClick={handleSave}
+                                                disabled={saving}
+                                                className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-1"
+                                            >
+                                                {saving ? 'Salvando...' : 'Salvar'}
+                                                {!saving && <span className="material-symbols-outlined text-[14px]">save</span>}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-white dark:bg-slate-800 text-text-light-secondary hover:text-primary border border-border-light dark:border-border-dark"
+                                            title="Gerenciar Disciplinas"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">edit</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="p-0">
+                                {isEditing ? (
+                                    // Edit Mode: Checklist
+                                    <div className="max-h-[500px] overflow-y-auto p-4 space-y-6 custom-scrollbar">
+                                        {allSubjects.length === 0 ? (
+                                            <div className="py-8">
+                                                <LoadingSpinner />
+                                            </div>
+                                        ) : (
+                                            filteredSemesters.map(sem => {
+                                                let semesterSubjects = subjectsBySemester[sem];
+
+                                                if (selectedSemester === 'optativas') {
+                                                    // Filter for electives with period != 0
+                                                    semesterSubjects = semesterSubjects.filter(s => s._category === 'ELECTIVE' && Number(s._se) !== 0);
+                                                    if (semesterSubjects.length === 0) return null;
+                                                }
+
+                                                // Now checks local state `selectedIds` instead of props
+                                                const allCompleted = semesterSubjects.every(s => selectedIds.has(s._id));
+
+                                                return (
+                                                    <div key={sem} className="animate-fadeIn">
+                                                        <div className="flex items-center justify-between mb-2 sticky top-0 bg-surface-light dark:bg-surface-dark pb-2 z-10">
+                                                            <h3 className="text-xs font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider">
+                                                                {sem}º Período
+                                                            </h3>
+                                                            <label className="flex items-center gap-2 cursor-pointer group hover:bg-slate-50 dark:hover:bg-slate-800 px-2 rounded transition-colors">
+                                                                <span className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary group-hover:text-primary transition-colors uppercase font-bold tracking-wide">
+                                                                    Todos
+                                                                </span>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-primary focus:ring-primary"
+                                                                    checked={allCompleted}
+                                                                    onChange={(e) => handleTogglePeriod(sem, e.target.checked)}
+                                                                    disabled={saving}
+                                                                />
+                                                            </label>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            {semesterSubjects.map(subject => {
+                                                                const isCompleted = selectedIds.has(subject._id);
+                                                                return (
+                                                                    <label
+                                                                        key={subject._id}
+                                                                        className={`flex items-start gap-3 p-2.5 rounded-lg border transition-all cursor-pointer select-none ${isCompleted
+                                                                            ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30'
+                                                                            : 'bg-white dark:bg-slate-800/50 border-border-light dark:border-border-dark hover:border-primary/30'
+                                                                            }`}
+                                                                    >
+                                                                        <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${isCompleted ? 'bg-green-500 border-green-500' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
+                                                                            }`}>
+                                                                            {isCompleted && <span className="material-symbols-outlined text-white text-[10px] font-bold">check</span>}
+                                                                        </div>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            className="hidden"
+                                                                            checked={isCompleted}
+                                                                            disabled={saving}
+                                                                            onChange={() => handleToggleSubject(subject._id, isCompleted)}
+                                                                        />
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className={`text-sm font-medium leading-tight mb-0.5 ${isCompleted ? 'text-green-900 dark:text-green-100' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                                                                                {subject._di}
+                                                                            </div>
+                                                                            <div className="flex gap-2 text-xs opacity-70">
+                                                                                <span>{subject._re}</span>
+                                                                                <span>• {Number(subject._ap || 0) + Number(subject._at || 0)}cr</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })
+                                        )}
+                                    </div>
+                                ) : (
+                                    // View Mode: Empty State / Summary
+                                    <div className="text-center py-10 px-6">
+                                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 mb-3">
+                                            <span className="material-symbols-outlined text-2xl text-green-600 dark:text-green-400">task_alt</span>
+                                        </div>
+                                        <h3 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary mb-1">
+                                            Progresso Registrado
+                                        </h3>
+                                        <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mb-4 max-w-[200px] mx-auto">
+                                            Você já concluiu {completedSubjects.length} disciplinas. Mantenha seu histórico atualizado.
+                                        </p>
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="px-4 py-2 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark rounded-lg text-sm font-medium text-text-light-secondary hover:text-primary hover:border-primary/30 transition-all shadow-sm"
+                                        >
+                                            Gerenciar Histórico
+                                        </button>
+                                    </div>
+                                )
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Comments Section */}
+                    <div className="mt-8 bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm">
+                        <div className="mb-6">
+                            <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
+                                <span className="material-symbols-outlined text-primary">forum</span>
+                                Comentários sobre o Projeto
+                            </h2>
+                            <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">
+                                Deixe seu feedback, sugestões ou apenas diga olá para a comunidade.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handlePostComment} className="mb-8">
+                            <div className="relative">
+                                <textarea
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    placeholder="Escreva seu comentário..."
+                                    className="w-full p-4 pb-14 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none h-28 text-sm text-text-light-primary dark:text-text-dark-primary"
+                                    disabled={submittingComment}
+                                />
+                                <div className="absolute bottom-3 left-3 flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setNewRating(star)}
+                                            className="focus:outline-none transition-transform hover:scale-110 active:scale-90"
+                                            disabled={submittingComment}
+                                        >
+                                            <span className={`material-symbols-outlined text-xl ${star <= newRating ? 'text-yellow-400 fill-current' : 'text-slate-300 dark:text-slate-600'
+                                                }`}>
+                                                star
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={!newComment.trim() || submittingComment}
+                                    className={`absolute bottom-3 right-3 px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!newComment.trim() || submittingComment
+                                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                        : 'bg-primary text-white hover:bg-primary-dark shadow-sm'
+                                        }`}
+                                >
+                                    {submittingComment ? 'Enviando...' : 'Publicar'}
+                                    <span className="material-symbols-outlined text-[14px]">send</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                            {loadingComments ? (
+                                <div className="py-8 text-center">
+                                    <LoadingSpinner />
+                                </div>
+                            ) : comments.length === 0 ? (
+                                <div className="text-center py-8 text-slate-400">
+                                    <span className="material-symbols-outlined text-3xl mb-2 opacity-50">chat_bubble_outline</span>
+                                    <p className="text-sm">Seja o primeiro a comentar!</p>
+                                </div>
+                            ) : (
+                                comments.map((comment) => (
+                                    <div key={comment.id} className="group p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/20 transition-all">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">
+                                                    {comment.user?.name ? comment.user.name.charAt(0).toUpperCase() : '?'}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-text-light-primary dark:text-text-dark-primary leading-tight">
+                                                        {comment.user?.name || 'Usuário Desconhecido'}
+                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary">
+                                                            @{comment.user?.username || 'anon'}
+                                                        </p>
+                                                        {comment.rating && (
+                                                            <div className="flex text-yellow-400">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <span key={i} className="material-symbols-outlined text-[10px] leading-none">
+                                                                        {i < comment.rating ? 'star' : ''}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
-
-                                                {/* Schedule Display */}
-                                                {scheduleGroups.length > 0 && (
-                                                    <div className="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
-                                                        {scheduleGroups.map((group, idx) => (
-                                                            <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800/80 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                                <span className="text-xs font-bold text-primary dark:text-blue-400 uppercase tracking-wide min-w-[24px]">
-                                                                    {group.day}
-                                                                </span>
-                                                                <div className="h-3 w-px bg-slate-200 dark:bg-slate-700"></div>
-                                                                <div className="flex flex-wrap gap-x-2 text-xs font-medium text-slate-600 dark:text-slate-300">
-                                                                    {group.times.map((time, tIdx) => (
-                                                                        <span key={tIdx} className={tIdx > 0 ? "before:content-[','] before:mr-1 before:text-slate-300 dark:before:text-slate-600" : ""}>
-                                                                            {time}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
                                             </div>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        )}
-                    </div>
-                </div>
-
-                {/* Disciplinas Concluídas */}
-                <div className="bg-surface-light dark:bg-surface-dark lg:col-span-2 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
-                    <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex flex-wrap justify-between items-center gap-4">
-                        <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
-                            <span className="material-symbols-outlined text-green-600">check_circle</span>
-                            Concluídas <span className="text-sm font-normal text-slate-500 ml-1">({completedSubjects.length})</span>
-                        </h2>
-
-                        <div className="flex items-center gap-2">
-                            {isEditing && (
-                                <select
-                                    value={selectedSemester}
-                                    onChange={(e) => setSelectedSemester(e.target.value)}
-                                    className="px-2 py-1.5 rounded-lg text-xs border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-text-light-primary dark:text-text-dark-primary focus:ring-1 focus:ring-primary outline-none"
-                                >
-                                    <option value="all">Todos</option>
-                                    {sortedSemesters.map(sem => (
-                                        <option key={sem} value={sem}>{sem}º Per</option>
-                                    ))}
-                                </select>
-                            )}
-
-                            {isEditing ? (
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleCancel}
-                                        disabled={saving}
-                                        className="px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        onClick={handleSave}
-                                        disabled={saving}
-                                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-1"
-                                    >
-                                        {saving ? 'Salvando...' : 'Salvar'}
-                                        {!saving && <span className="material-symbols-outlined text-[14px]">save</span>}
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-white dark:bg-slate-800 text-text-light-secondary hover:text-primary border border-border-light dark:border-border-dark"
-                                    title="Gerenciar Disciplinas"
-                                >
-                                    <span className="material-symbols-outlined text-lg">edit</span>
-                                </button>
+                                            <span className="text-[10px] text-slate-400">
+                                                {new Date(comment.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary leading-relaxed pl-10">
+                                            {comment.content}
+                                        </p>
+                                    </div>
+                                ))
                             )}
                         </div>
                     </div>
 
-                    <div className="p-0">
-                        {isEditing ? (
-                            // Edit Mode: Checklist
-                            <div className="max-h-[500px] overflow-y-auto p-4 space-y-6 custom-scrollbar">
-                                {allSubjects.length === 0 ? (
-                                    <div className="py-8">
-                                        <LoadingSpinner />
-                                    </div>
-                                ) : (
-                                    filteredSemesters.map(sem => {
-                                        const semesterSubjects = subjectsBySemester[sem];
-                                        // Now checks local state `selectedIds` instead of props
-                                        const allCompleted = semesterSubjects.every(s => selectedIds.has(s._id));
-
-                                        return (
-                                            <div key={sem} className="animate-fadeIn">
-                                                <div className="flex items-center justify-between mb-2 sticky top-0 bg-surface-light dark:bg-surface-dark pb-2 z-10">
-                                                    <h3 className="text-xs font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider">
-                                                        {sem}º Período
-                                                    </h3>
-                                                    <label className="flex items-center gap-2 cursor-pointer group hover:bg-slate-50 dark:hover:bg-slate-800 px-2 rounded transition-colors">
-                                                        <span className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary group-hover:text-primary transition-colors uppercase font-bold tracking-wide">
-                                                            Todos
-                                                        </span>
-                                                        <input
-                                                            type="checkbox"
-                                                            className="w-3.5 h-3.5 rounded border-slate-300 text-primary focus:ring-primary"
-                                                            checked={allCompleted}
-                                                            onChange={(e) => handleTogglePeriod(sem, e.target.checked)}
-                                                            disabled={saving}
-                                                        />
-                                                    </label>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    {subjectsBySemester[sem].map(subject => {
-                                                        const isCompleted = selectedIds.has(subject._id);
-                                                        return (
-                                                            <label
-                                                                key={subject._id}
-                                                                className={`flex items-start gap-3 p-2.5 rounded-lg border transition-all cursor-pointer select-none ${isCompleted
-                                                                    ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-900/30'
-                                                                    : 'bg-white dark:bg-slate-800/50 border-border-light dark:border-border-dark hover:border-primary/30'
-                                                                    }`}
-                                                            >
-                                                                <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0 ${isCompleted ? 'bg-green-500 border-green-500' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
-                                                                    }`}>
-                                                                    {isCompleted && <span className="material-symbols-outlined text-white text-[10px] font-bold">check</span>}
-                                                                </div>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="hidden"
-                                                                    checked={isCompleted}
-                                                                    disabled={saving}
-                                                                    onChange={() => handleToggleSubject(subject._id, isCompleted)}
-                                                                />
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className={`text-sm font-medium leading-tight mb-0.5 ${isCompleted ? 'text-green-900 dark:text-green-100' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
-                                                                        {subject._di}
-                                                                    </div>
-                                                                    <div className="flex gap-2 text-xs opacity-70">
-                                                                        <span>{subject._re}</span>
-                                                                        <span>• {Number(subject._ap || 0) + Number(subject._at || 0)}cr</span>
-                                                                    </div>
-                                                                </div>
-                                                            </label>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )
-                                    })
-                                )}
-                            </div>
-                        ) : (
-                            // View Mode: Empty State / Summary
-                            <div className="text-center py-10 px-6">
-                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 mb-3">
-                                    <span className="material-symbols-outlined text-2xl text-green-600 dark:text-green-400">task_alt</span>
-                                </div>
-                                <h3 className="text-base font-semibold text-text-light-primary dark:text-text-dark-primary mb-1">
-                                    Progresso Registrado
-                                </h3>
-                                <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mb-4 max-w-[200px] mx-auto">
-                                    Você já concluiu {completedSubjects.length} disciplinas. Mantenha seu histórico atualizado.
-                                </p>
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="px-4 py-2 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark rounded-lg text-sm font-medium text-text-light-secondary hover:text-primary hover:border-primary/30 transition-all shadow-sm"
-                                >
-                                    Gerenciar Histórico
-                                </button>
-                            </div>
-                        )
-                        }
-                    </div>
-                </div>
-            </div>
-
-            {/* Comments Section */}
-            <div className="mt-8 bg-surface-light dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm">
-                <div className="mb-6">
-                    <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">forum</span>
-                        Comentários sobre o Projeto
-                    </h2>
-                    <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary mt-1">
-                        Deixe seu feedback, sugestões ou apenas diga olá para a comunidade.
-                    </p>
-                </div>
-
-                <form onSubmit={handlePostComment} className="mb-8">
-                    <div className="relative">
-                        <textarea
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Escreva seu comentário..."
-                            className="w-full p-4 pb-14 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none h-28 text-sm text-text-light-primary dark:text-text-dark-primary"
-                            disabled={submittingComment}
-                        />
-                        <div className="absolute bottom-3 left-3 flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    onClick={() => setNewRating(star)}
-                                    className="focus:outline-none transition-transform hover:scale-110 active:scale-90"
-                                    disabled={submittingComment}
-                                >
-                                    <span className={`material-symbols-outlined text-xl ${star <= newRating ? 'text-yellow-400 fill-current' : 'text-slate-300 dark:text-slate-600'
-                                        }`}>
-                                        star
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={!newComment.trim() || submittingComment}
-                            className={`absolute bottom-3 right-3 px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!newComment.trim() || submittingComment
-                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                                : 'bg-primary text-white hover:bg-primary-dark shadow-sm'
-                                }`}
-                        >
-                            {submittingComment ? 'Enviando...' : 'Publicar'}
-                            <span className="material-symbols-outlined text-[14px]">send</span>
-                        </button>
-                    </div>
-                </form>
-
-                <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                    {loadingComments ? (
-                        <div className="py-8 text-center">
-                            <LoadingSpinner />
-                        </div>
-                    ) : comments.length === 0 ? (
-                        <div className="text-center py-8 text-slate-400">
-                            <span className="material-symbols-outlined text-3xl mb-2 opacity-50">chat_bubble_outline</span>
-                            <p className="text-sm">Seja o primeiro a comentar!</p>
-                        </div>
-                    ) : (
-                        comments.map((comment) => (
-                            <div key={comment.id} className="group p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/20 transition-all">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300">
-                                            {comment.user?.name ? comment.user.name.charAt(0).toUpperCase() : '?'}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-text-light-primary dark:text-text-dark-primary leading-tight">
-                                                {comment.user?.name || 'Usuário Desconhecido'}
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary">
-                                                    @{comment.user?.username || 'anon'}
-                                                </p>
-                                                {comment.rating && (
-                                                    <div className="flex text-yellow-400">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <span key={i} className="material-symbols-outlined text-[10px] leading-none">
-                                                                {i < comment.rating ? 'star' : ''}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span className="text-[10px] text-slate-400">
-                                        {new Date(comment.created_at).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary leading-relaxed pl-10">
-                                    {comment.content}
-                                </p>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-
-            {/* Edit Profile Modal */}
-            {
-                isEditingProfile && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-                        <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-border-light dark:border-border-dark scale-100 transform transition-transform">
-                            <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
-                                <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Editar Perfil</h2>
-                                <button onClick={() => setIsEditingProfile(false)} className="text-text-light-secondary hover:text-primary">
-                                    <span className="material-symbols-outlined">close</span>
-                                </button>
-                            </div>
-                            <form onSubmit={handleUpdateProfile} className="p-6 space-y-4">
-                                {updateError && (
-                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm flex gap-2 items-center">
-                                        <span className="material-symbols-outlined text-lg">error</span>
-                                        {updateError}
-                                    </div>
-                                )}
-
-                                <div className="space-y-1.5">
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
-                                        Nome Completo
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editForm.name}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                                        className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
-                                        placeholder="Seu nome"
-                                    />
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
-                                        Usuário
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editForm.username}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                                        className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
-                                        placeholder="seu.usuario"
-                                    />
-                                </div>
-
-                                <div className="space-y-1.5 pt-2 border-t border-border-light dark:border-border-dark mt-2">
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
-                                        Senha Atual (Obrigatório para alterações)
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={editForm.currentPassword}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-                                        className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
-                                        placeholder="Digite sua senha atual"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="pt-2">
-                                    <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary mb-1.5">
-                                        Segurança
-                                    </label>
-                                    {!showPassword ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(true)}
-                                            className="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10 w-full justify-center"
-                                        >
-                                            <span className="material-symbols-outlined text-lg">lock_reset</span>
-                                            Alterar senha
+                    {/* Edit Profile Modal */}
+                    {
+                        isEditingProfile && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+                                <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-border-light dark:border-border-dark scale-100 transform transition-transform">
+                                    <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
+                                        <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">Editar Perfil</h2>
+                                        <button onClick={() => setIsEditingProfile(false)} className="text-text-light-secondary hover:text-primary">
+                                            <span className="material-symbols-outlined">close</span>
                                         </button>
-                                    ) : (
-                                        <div className="space-y-3 animate-fadeIn bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-border-light dark:border-border-dark">
+                                    </div>
+                                    <form onSubmit={handleUpdateProfile} className="p-6 space-y-4">
+                                        {updateError && (
+                                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm flex gap-2 items-center">
+                                                <span className="material-symbols-outlined text-lg">error</span>
+                                                {updateError}
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-1.5">
+                                            <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
+                                                Nome Completo
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.name}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                                className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
+                                                placeholder="Seu nome"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
+                                                Usuário
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editForm.username}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                                                className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
+                                                placeholder="seu.usuario"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1.5 pt-2 border-t border-border-light dark:border-border-dark mt-2">
+                                            <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary">
+                                                Senha Atual (Obrigatório para alterações)
+                                            </label>
                                             <input
                                                 type="password"
-                                                value={editForm.password}
-                                                onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))}
-                                                className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
-                                                placeholder="Nova senha"
+                                                value={editForm.currentPassword}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                                className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
+                                                placeholder="Digite sua senha atual"
+                                                required
                                             />
-                                            <input
-                                                type="password"
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
-                                                placeholder="Confirmar nova senha"
-                                            />
-                                            <div className="flex justify-end">
+                                        </div>
+
+                                        <div className="pt-2">
+                                            <label className="block text-xs font-semibold uppercase tracking-wider text-text-light-secondary dark:text-text-dark-secondary mb-1.5">
+                                                Segurança
+                                            </label>
+                                            {!showPassword ? (
                                                 <button
                                                     type="button"
-                                                    onClick={() => {
-                                                        setShowPassword(false);
-                                                        setEditForm(prev => ({ ...prev, password: '' }));
-                                                        setConfirmPassword('');
-                                                    }}
-                                                    className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                                    onClick={() => setShowPassword(true)}
+                                                    className="text-sm text-primary hover:text-primary-dark font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10 w-full justify-center"
                                                 >
-                                                    Cancelar
+                                                    <span className="material-symbols-outlined text-lg">lock_reset</span>
+                                                    Alterar senha
                                                 </button>
-                                            </div>
+                                            ) : (
+                                                <div className="space-y-3 animate-fadeIn bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-border-light dark:border-border-dark">
+                                                    <input
+                                                        type="password"
+                                                        value={editForm.password}
+                                                        onChange={(e) => setEditForm(prev => ({ ...prev, password: e.target.value }))}
+                                                        className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
+                                                        placeholder="Nova senha"
+                                                    />
+                                                    <input
+                                                        type="password"
+                                                        value={confirmPassword}
+                                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                                        className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-light-primary dark:text-text-dark-primary text-sm"
+                                                        placeholder="Confirmar nova senha"
+                                                    />
+                                                    <div className="flex justify-end">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setShowPassword(false);
+                                                                setEditForm(prev => ({ ...prev, password: '' }));
+                                                                setConfirmPassword('');
+                                                            }}
+                                                            className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                                        >
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
 
-                                <div className="flex gap-3 pt-4 border-t border-border-light dark:border-border-dark">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsEditingProfile(false)}
-                                        className="flex-1 px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium text-sm"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors font-medium text-sm shadow-sm"
-                                    >
-                                        Salvar
-                                    </button>
+                                        <div className="flex gap-3 pt-4 border-t border-border-light dark:border-border-dark">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsEditingProfile(false)}
+                                                className="flex-1 px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium text-sm"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors font-medium text-sm shadow-sm"
+                                            >
+                                                Salvar
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                            </form>
-                        </div>
-                    </div>
-                )
-            }
+                            </div>
+                        )
+                    }
+                </>
+            )}
         </div >
     );
 };

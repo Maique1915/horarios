@@ -10,8 +10,8 @@ import { ativas, horarios, dimencao } from '../model/Filtro.jsx';
 import MapaMental from './MapaMental'; // Importar o MapaMental
 import LoadingSpinner from './LoadingSpinner';
 import { useAuth } from '../contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { loadCompletedSubjects } from '../services/disciplinaService';
+import { loadCompletedSubjects, toggleMultipleSubjects } from '../services/disciplinaService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Subject } from '../types/Subject';
 
@@ -24,9 +24,117 @@ interface GradeState {
     crs: number[];
 }
 
+const SubjectItem = ({ itemData, isChecked, value, handleCheck }: { itemData: Subject, isChecked: boolean, value: any, handleCheck: any }) => {
+    return (
+        <label key={itemData._re} className="flex items-start gap-3 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" onClick={(e) => e.stopPropagation()}>
+            <div className="relative flex items-center mt-1">
+                <input
+                    type="checkbox"
+                    name={String(itemData._ap + itemData._at)}
+                    checked={isChecked}
+                    className="subject-checkbox h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
+                    id={itemData._re}
+                    value={value}
+                    onChange={handleCheck}
+                />
+                <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
+                    <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                </span>
+            </div>
+            <div className="flex flex-col flex-1 min-w-0">
+                <p className={`text-sm font-medium leading-snug transition-colors ${isChecked ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                    {itemData._di}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                        {itemData._re}
+                    </span>
+                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                        {itemData._ap + itemData._at} Créditos
+                    </span>
+                </div>
+            </div>
+        </label>
+    );
+};
+
+const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriodKey, state, arr, handleCheck }: { periodKey: string, subjectsData: Subject[], openPeriodKey: string | null, setOpenPeriodKey: (k: string | null) => void, state: GradeState, arr: Subject[], handleCheck: any }) => {
+    const allSubjectIdsInPeriod = subjectsData.map(s => s._re);
+    const selectedSubjects = (state.estado === 0) ? state.names : state.x;
+    const areAllSelected = allSubjectIdsInPeriod.length > 0 &&
+        allSubjectIdsInPeriod.every(id => selectedSubjects.includes(id));
+
+    const selectedCount = subjectsData.filter(subject =>
+        selectedSubjects.includes(subject._re)
+    ).length;
+
+    const isOpen = openPeriodKey === periodKey;
+
+    const handleSummaryClick = (e: React.MouseEvent) => {
+        if (isOpen) {
+            setOpenPeriodKey(null); // Close if already open
+        } else {
+            setOpenPeriodKey(periodKey); // Open this one
+        }
+    };
+
+    return (
+        <details className="flex flex-col rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm overflow-hidden group transition-all duration-300" open={isOpen}>
+            <summary className="flex cursor-pointer items-center justify-between gap-4 py-4 px-5 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors select-none" onClick={handleSummaryClick}>
+                <div className="flex items-center gap-4">
+                    <div className="relative flex items-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                            type="checkbox"
+                            className="period-toggle h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
+                            checked={areAllSelected}
+                            onChange={handleCheck}
+                            value={periodKey}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
+                            <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                        </span>
+                    </div>
+                    <div>
+                        <p className="text-text-light-primary dark:text-text-dark-primary text-base font-bold leading-none">
+                            {periodKey}º Período
+                        </p>
+                        <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mt-1 font-medium">
+                            {selectedCount} de {subjectsData.length} selecionadas
+                        </p>
+                    </div>
+                </div>
+                <div className={`p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                    <span className="material-symbols-outlined text-xl">expand_more</span>
+                </div>
+            </summary>
+            <div className="border-t border-border-light dark:border-border-dark animate-slideDown">
+                <div id={periodKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 p-4 bg-background-light dark:bg-background-dark/50">
+                    {subjectsData.map(item => {
+                        const originalIndex = arr.findIndex(i => i._re === item._re);
+                        const key = (state.estado === 0) ? originalIndex : item._re;
+                        const isChecked = (state.estado === 0)
+                            ? state.names.includes(item._re)
+                            : state.x.includes(item._re);
+                        return (
+                            <SubjectItem
+                                key={item._re}
+                                itemData={item}
+                                isChecked={isChecked}
+                                value={key}
+                                handleCheck={handleCheck}
+                            />
+                        );
+                    })}
+                </div>
+            </div>
+        </details>
+    );
+}
+
 const GeraGrade = () => {
     const params = useParams();
-    const cur = params?.cur || 'engcomp';
+    const rawCur = params?.cur;
+    const cur = (Array.isArray(rawCur) ? rawCur[0] : rawCur) || 'engcomp';
     // const navigate = useNavigate(); // Não é mais necessário para o mapa
     const [state, setState] = useState<GradeState>({
         names: [],
@@ -87,6 +195,61 @@ const GeraGrade = () => {
         enabled: !!user?.id && !isExpired, // Disable if expired
         staleTime: 1000 * 60 * 5,
     });
+    const queryClient = useQueryClient();
+
+    const handleSyncCompletedSubjects = async () => {
+        if (!user || !arr.length) return;
+
+        console.log("Syncing completed subjects...");
+        // 1. Get current DB IDs - Ensure string
+        const currentDbIds = new Set<string>((completedSubjects as any[]).map((s: any) => s._id));
+
+        // 2. Identify currently selected subjects (state.names has acronyms)
+        const selectedAcronyms = new Set(state.names);
+        const selectedIds = new Set<string>();
+
+        arr.forEach((item: any) => {
+            if (selectedAcronyms.has(item._re)) {
+                selectedIds.add(item._id);
+            }
+        });
+
+        // 3. Find Diffs
+        const toAdd: string[] = [];
+        const toRemove: string[] = [];
+
+        // Add: In selected but not in DB
+        selectedIds.forEach(id => {
+            if (!currentDbIds.has(id)) toAdd.push(id);
+        });
+
+        // Remove: In DB but not in selected
+        currentDbIds.forEach((id: string) => {
+            if (!selectedIds.has(id)) {
+                // Verify if this subject exists in current 'arr' to be safe?
+                const existsInCurrentScope = arr.some((s: any) => String(s._id) === id);
+                if (existsInCurrentScope) {
+                    toRemove.push(id);
+                }
+            }
+        });
+
+        console.log(`Syncing: Adding ${toAdd.length}, Removing ${toRemove.length}`);
+        console.log("ToAdd IDs:", toAdd);
+        console.log("ToRemove IDs:", toRemove);
+
+        const promises = [];
+        if (toAdd.length > 0) promises.push(toggleMultipleSubjects(user.id, toAdd, true));
+        if (toRemove.length > 0) promises.push(toggleMultipleSubjects(user.id, toRemove, false));
+
+        if (promises.length > 0) {
+            await Promise.all(promises);
+            await queryClient.invalidateQueries({ queryKey: ['completedSubjects', user.id] });
+            console.log("Subjects synced successfully");
+        } else {
+            console.log("No changes to sync.");
+        }
+    };
 
     // Populate state with completed subjects once arr (all subjects) is loaded
     useEffect(() => {
@@ -298,105 +461,7 @@ const GeraGrade = () => {
         return aux;
     }
 
-    function renderSubjectItem(key: any, itemData: Subject) {
-        const isChecked = (state.estado === 0)
-            ? state.names.includes(itemData._re)
-            : state.x.includes(itemData._re);
 
-        return (
-            <label key={itemData._re} className="flex items-start gap-3 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" onClick={(e) => e.stopPropagation()}>
-                <div className="relative flex items-center mt-1">
-                    <input
-                        type="checkbox"
-                        name={String(itemData._ap + itemData._at)}
-                        checked={isChecked}
-                        className="subject-checkbox h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
-                        id={itemData._re}
-                        value={key}
-                        onChange={handleCheck}
-                    />
-                    <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
-                        <span className="material-symbols-outlined text-[16px] font-bold">check</span>
-                    </span>
-                </div>
-                <div className="flex flex-col flex-1 min-w-0">
-                    <p className={`text-sm font-medium leading-snug transition-colors ${isChecked ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
-                        {itemData._di}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                            {itemData._re}
-                        </span>
-                        <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                            {itemData._ap + itemData._at} Créditos
-                        </span>
-                    </div>
-                </div>
-            </label>
-        );
-    }
-
-    function PeriodAccordion({ periodKey, subjectsData, openPeriodKey, setOpenPeriodKey }: { periodKey: string, subjectsData: Subject[], openPeriodKey: string | null, setOpenPeriodKey: (k: string | null) => void }) {
-        const allSubjectIdsInPeriod = subjectsData.map(s => s._re);
-        const selectedSubjects = (state.estado === 0) ? state.names : state.x;
-        const areAllSelected = allSubjectIdsInPeriod.length > 0 &&
-            allSubjectIdsInPeriod.every(id => selectedSubjects.includes(id));
-
-        const selectedCount = subjectsData.filter(subject =>
-            selectedSubjects.includes(subject._re)
-        ).length;
-
-        const isOpen = openPeriodKey === periodKey;
-
-        const handleSummaryClick = (e: React.MouseEvent) => {
-            if (isOpen) {
-                setOpenPeriodKey(null); // Close if already open
-            } else {
-                setOpenPeriodKey(periodKey); // Open this one
-            }
-        };
-
-        return (
-            <details className="flex flex-col rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm overflow-hidden group transition-all duration-300" open={isOpen}>
-                <summary className="flex cursor-pointer items-center justify-between gap-4 py-4 px-5 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors select-none" onClick={handleSummaryClick}>
-                    <div className="flex items-center gap-4">
-                        <div className="relative flex items-center" onClick={(e) => e.stopPropagation()}>
-                            <input
-                                type="checkbox"
-                                className="period-toggle h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
-                                checked={areAllSelected}
-                                onChange={handleCheck}
-                                value={periodKey}
-                            />
-                            <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
-                                <span className="material-symbols-outlined text-[16px] font-bold">check</span>
-                            </span>
-                        </div>
-                        <div>
-                            <p className="text-text-light-primary dark:text-text-dark-primary text-base font-bold leading-none">
-                                {periodKey}º Período
-                            </p>
-                            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mt-1 font-medium">
-                                {selectedCount} de {subjectsData.length} selecionadas
-                            </p>
-                        </div>
-                    </div>
-                    <div className={`p-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-                        <span className="material-symbols-outlined text-xl">expand_more</span>
-                    </div>
-                </summary>
-                <div className="border-t border-border-light dark:border-border-dark animate-slideDown">
-                    <div id={periodKey} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 p-4 bg-background-light dark:bg-background-dark/50">
-                        {subjectsData.map(item => {
-                            const originalIndex = arr.findIndex(i => i._re === item._re);
-                            const key = (state.estado === 0) ? originalIndex : item._re;
-                            return renderSubjectItem(key, item);
-                        })}
-                    </div>
-                </div>
-            </details>
-        );
-    }
 
     function mudaTela(i: number) {
         if (i === 1) {
@@ -492,6 +557,9 @@ const GeraGrade = () => {
                             subjectsData={pe[key]}
                             openPeriodKey={openPeriodKey}
                             setOpenPeriodKey={setOpenPeriodKey}
+                            state={state}
+                            arr={arr}
+                            handleCheck={handleCheck}
                         />
                     ))}
                 </div>
@@ -533,6 +601,9 @@ const GeraGrade = () => {
                             subjectsData={pe[key]}
                             openPeriodKey={openPeriodKey}
                             setOpenPeriodKey={setOpenPeriodKey}
+                            state={state}
+                            arr={arr}
+                            handleCheck={handleCheck}
                         />
                     ))}
                 </div>
@@ -603,7 +674,7 @@ const GeraGrade = () => {
                     </p>
                     <button
                         onClick={() => mudaTela(1)}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5"
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary-dark transition-all shadow-lg shadow-primary/25 hover:shadow-xl"
                     >
                         <span className="material-symbols-outlined">arrow_back</span>
                         Voltar e ajustar
@@ -619,9 +690,11 @@ const GeraGrade = () => {
         return (
             <Comum
                 materias={possibleGrades}
+                feitas={state.names}
                 tela={2}
                 fun={b}
                 cur={cur}
+                onSaveAction={handleSyncCompletedSubjects}
                 separa={false}
                 g={"ª"}
                 f={" Grade Possível"}

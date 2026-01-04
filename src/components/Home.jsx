@@ -73,7 +73,7 @@ const Home = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                     <Link
-                        href={ROUTES.REGISTER}
+                        href={user ? `/${user.courses?.code || 'bcc'}` : ROUTES.REGISTER}
                         className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
                     >
                         Começar Agora
