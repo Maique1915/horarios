@@ -166,7 +166,9 @@ export const usePredictionController = () => {
 
         const availableSubjects = allSubjects.filter(s => s._id !== undefined && !blacklistedIds.has(s._id) && s._ag);
 
-        let simulatedCompleted = [...completedSubjects, ...currentEnrollments];
+        // Only consider completed subjects for prediction, NOT current enrollments
+        // This allows subjects being taken now to appear in future semester predictions
+        let simulatedCompleted = [...completedSubjects];
         const finalGrid: Subject[][] = [];
 
         fixedSemesters.forEach(semesterSubjects => {
@@ -196,7 +198,9 @@ export const usePredictionController = () => {
     const suggestions = useMemo(() => {
         if (selectedSemesterIndex === null) return [];
 
-        let previousCompleted = [...completedSubjects, ...currentEnrollments];
+        // Only consider completed subjects, NOT current enrollments
+        // This ensures credit prerequisites are checked against credits BEFORE the semester starts
+        let previousCompleted = [...completedSubjects];
         for (let i = 0; i < selectedSemesterIndex; i++) {
             previousCompleted = [...previousCompleted, ...fixedSemesters[i]];
         }
@@ -385,8 +389,14 @@ export const usePredictionController = () => {
             }
 
             newSet.add(subjectId);
+
+            // Remove the blacklisted subject from all fixed semesters
+            const newFixed = fixedSemesters.map(semester =>
+                semester.filter(subject => subject._id !== subjectId)
+            );
+
             setBlacklistedIds(newSet);
-            pushToHistory(fixedSemesters, newSet);
+            pushToHistory(newFixed, newSet);
         }
     };
 

@@ -25,41 +25,6 @@ export default class Grafos {
     }
 
     matriz(): Subject[] {
-        // The following code snippet appears to be a React component definition
-        // and a sorting logic that is syntactically incorrect when placed directly
-        // inside this `matriz` method.
-        //
-        // Given the instruction "Fix potential undefined or mixed types for _re and _di in multiple files.
-        // Ensure academic fields are handled safely in sort functions.",
-        // it seems the user intended to apply a sorting logic like:
-        // `(a._di || '').localeCompare(b._di || '')`
-        // in a context where `Subject` objects are being sorted,
-        // and potentially in a React component.
-        //
-        // However, inserting the provided snippet verbatim would break the syntax
-        // of this TypeScript class.
-        //
-        // To maintain syntactic correctness of this file, I will *not* insert
-        // the React component definition here.
-        //
-        // If the intention was to sort the `materias` array within this class,
-        // or to sort the `resultado` array, that would be a different change.
-        //
-        // The original line `const jaFeita = materia._re ? this.re.includes(materia._re) : false;`
-        // is also partially included in the provided change, which further indicates
-        // a misunderstanding of the insertion point.
-        //
-        // I am returning the original `matriz` method without the problematic insertion
-        // to ensure the file remains syntactically valid.
-        //
-        // If the user intended to add a sort to the `resultado` array,
-        // it would look something like:
-        // `return resultado.sort((a, b) => (a._di || '').localeCompare(b._di || ''));`
-        // at the end of the method.
-        //
-        // Please clarify if the sorting logic should be applied to the `resultado`
-        // array or if the React component was meant for a different file.
-
         const resultado = this.materias.filter(
             materia => {
                 const jaFeita = materia._re ? this.re.includes(materia._re) : false;
@@ -76,21 +41,17 @@ export default class Grafos {
                 }
 
                 if (!temReq) {
-                    //console.log(`  ❌ ${materia._re} (${materia._di}) - NÃO pode fazer. Pré-req: ${JSON.stringify(materia._pr)}`);
                     return false;
                 }
 
                 if (!temCreditos) {
-                    //console.log(`  ❌ ${materia._re} (${materia._di}) - NÃO pode fazer. Mínimo créditos: ${minCreditos}, Atual: ${this.cr}`);
                     return false;
                 }
 
-                //console.log(`  ✅ ${materia._re} (${materia._di}) - PODE fazer. Pré-req: ${JSON.stringify(materia._pr)}. Créditos ok.`);
                 return true;
             }
         );
 
-        //console.log('Grafos.matriz(): Resultado:', resultado.length, 'matérias podem ser feitas');
         return resultado;
     }
 

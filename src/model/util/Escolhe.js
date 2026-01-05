@@ -8,8 +8,6 @@ export default class Escolhe {
         // Normalize genesis subjects 
         this.genesis = genesis.map(subject => this.normalize(subject))
 
-        this.reduz()
-
         // Initialize NxN collision matrix with -1
         this.n = this.genesis.length;
         this.matrix = Array(this.n).fill(null).map(() => Array(this.n).fill(-1));
@@ -51,14 +49,6 @@ export default class Escolhe {
             });
         }
         return { ...subject, _grid: activeSlots };
-    }
-
-    reduz() {
-        while (this.genesis.length > 20) {
-            const max = this.genesis.length
-            const a = Math.floor(Math.random() * (max))
-            this.genesis.splice(a, 1)
-        }
     }
 
     count(str) {
@@ -189,6 +179,7 @@ export default class Escolhe {
         const MAX_SEMESTERS = 20; // Safety break
 
         while (semesters < MAX_SEMESTERS) {
+
             // 0. Calculate current accumulated hours
             const currentMandatoryHours = currentCompleted.filter(s => s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
             const currentElectiveHours = currentCompleted.filter(s => !s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
@@ -211,7 +202,9 @@ export default class Escolhe {
             });
 
             // If no candidates left, we are done (or stuck, implying done for this simulation)
-            if (candidates.length === 0) break;
+            if (candidates.length === 0) {
+                break;
+            }
 
             // 2. Select best schedule
             // Calculate heights for current pool of subjects
@@ -222,14 +215,13 @@ export default class Escolhe {
             const possibleSchedules = escolhe.exc();
 
             if (possibleSchedules.length === 0) {
-                // Should not happen if candidates exist, unless huge conflict 
-                // or no slots. If so, we break (can't take more).
                 break;
             }
 
             // 3. Pick the "best" (most subjects/hours)
             // exc() sorts by length descending, so index 0 is best.
             const bestSchedule = possibleSchedules[0];
+            console.log(`✨ Selected ${bestSchedule.length} subjects for this semester:`, bestSchedule.map(s => s._re).join(', '));
 
             // 4. Update state
             // Add these subjects to completed list
@@ -238,6 +230,7 @@ export default class Escolhe {
             semesters++;
         }
 
+        console.log(`\n🎉 Prediction finished: ${semesters} semesters total\n`);
         return { semestersCount: semesters, semesterGrids };
     }
 }
@@ -245,43 +238,43 @@ export default class Escolhe {
 // Subclass to enforce deterministic reduction for prediction accuracy
 class EscolheDeterministico extends Escolhe {
     reduz() {
-        while (this.genesis.length > 20) {
-            // Deterministic prune: Remove lowest priority (High semester, Elective)
-            // We want to KEEP: Mandatory, Low Semester.
-            // So we find the "worst" candidate to remove.
-            // Worst = Elective (true), High Semester.
+        const originalCount = this.genesis.length;
+        console.log(`🔧 Reduz: Starting with ${originalCount} candidates`);
 
-            let worstIdx = -1;
-            let worstScore = -1; // Score: Elective=1000, Semester=Value. High score = bad.
+        // Separate mandatory and elective subjects
+        // _el=true means MANDATORY, _el=false means ELECTIVE
+        const mandatory = this.genesis.filter(s => s._el);
+        const electives = this.genesis.filter(s => !s._el);
 
-            for (let i = 0; i < this.genesis.length; i++) {
-                const s = this.genesis[i];
-                const criticality = this.weights.get(s._re) || 0;
+        // Keep all mandatory subjects - they should ALWAYS be considered
+        this.genesis = [...mandatory];
 
-                // Heuristic score (lower is worse)
-                // We want to remove subjects with LOW criticality first
-                let score = -criticality * 10; // High criticality = low score (less likely to be worst)
+        // Add electives up to the limit
+        const MAX_SUBJECTS = 20;
+        const remainingSlots = Math.max(0, MAX_SUBJECTS - mandatory.length);
 
-                score += s._se; // Penalize higher semesters (remove them first if criticality is same)
-                if (s._el) score += 1000; // Penalize electives (remove them first)
+        if (electives.length > remainingSlots) {
+            // Need to reduce electives
+            console.log(`  🔧 Reducing ${electives.length} electives to ${remainingSlots}`);
 
-                if (score > worstScore) {
-                    worstScore = score;
-                    worstIdx = i;
-                } else if (score === worstScore) {
-                    // Tie breaker: Use ID for stability
-                    if (s._id > this.genesis[worstIdx]._id) {
-                        worstIdx = i;
-                    }
-                }
-            }
+            // Sort electives by priority (criticality first, then lower semester)
+            electives.sort((a, b) => {
+                const critA = this.weights.get(a._re) || 0;
+                const critB = this.weights.get(b._re) || 0;
+                if (critA !== critB) return critB - critA; // Higher criticality first
+                return a._se - b._se; // Lower semester first
+            });
 
-            if (worstIdx !== -1) {
-                this.genesis.splice(worstIdx, 1);
-            } else {
-                // Fallback
-                this.genesis.pop();
-            }
+            const kept = electives.slice(0, remainingSlots);
+            this.genesis.push(...kept);
+        } else {
+            this.genesis.push(...electives);
+        }
+
+        console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatory.length} mandatory + ${this.genesis.length - mandatory.length} electives)`);
+
+        if (mandatory.length > MAX_SUBJECTS) {
+            console.warn(`⚠️ Warning: ${mandatory.length} mandatory subjects exceed the ${MAX_SUBJECTS} limit. All will be kept.`);
         }
     }
 }
