@@ -41,7 +41,7 @@ export interface Enrollment extends Subject {
     // _id is in Subject as optional
 }
 
-interface CompletedSubject extends Subject {
+export interface CompletedSubject extends Subject {
     completed_at: string;
     course_name?: string;
 }

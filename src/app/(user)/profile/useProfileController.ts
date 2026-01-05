@@ -2,12 +2,15 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Subject } from '@/types/Subject';
 import {
     loadCompletedSubjects,
     loadCurrentEnrollments,
     loadDbData,
     loadClassesForGrid,
-    toggleMultipleSubjects
+    toggleMultipleSubjects,
+    Enrollment,
+    CompletedSubject
 } from '../../../services/disciplinaService';
 import { getDays, getTimeSlots } from '../../../services/scheduleService';
 import { getUserTotalHours } from '../../../services/complementaryService';
@@ -17,33 +20,6 @@ import ROUTES from '../../../routes';
 import Escolhe from '../../../model/util/Escolhe';
 
 // --- Types ---
-export interface Subject {
-    id?: string;
-    _id: string; // Internal ID often used in logic
-    name?: string;
-    description?: string; // Sometimes _di maps to description
-    _di: string; // Discipline Name
-    _re?: string; // Real ID/Code
-    acronym?: string;
-    _ag?: boolean; // Active
-    _el?: boolean; // Elective
-    elective?: boolean;
-    _ap?: number;
-    credits?: number;
-    _at?: number;
-    _se?: string; // Semester
-    semester?: string;
-    _ca?: number;
-    _ho?: any;
-    schedule_data?: any;
-    schedule_day_time?: any;
-    coursename?: string;
-    class_name?: string;
-    _category?: string;
-    course_name?: string;
-    _pr?: string | string[];
-    [key: string]: any;
-}
 
 export interface UserComment {
     id: number | string;
@@ -191,7 +167,7 @@ export const useProfileController = () => {
                 };
                 loadAll();
             }
-            const currentIds = new Set(completedSubjects.map(s => s._id));
+            const currentIds = new Set(completedSubjects.map(s => String(s._id)));
             setSelectedSubjectIds(currentIds);
         }
     }, [isEditingSubjects, completedSubjects]);
@@ -281,11 +257,11 @@ export const useProfileController = () => {
     };
 
     const handleTogglePeriod = (semester: string, isChecked: boolean) => {
-        const subjectsInSemester = allSubjects.filter(s => s._se === semester);
+        const subjectsInSemester = allSubjects.filter(s => String(s._se) === semester);
         const newSelected = new Set(selectedSubjectIds);
         subjectsInSemester.forEach(s => {
-            if (isChecked) newSelected.add(s._id);
-            else newSelected.delete(s._id);
+            if (isChecked) newSelected.add(String(s._id));
+            else newSelected.delete(String(s._id));
         });
         setSelectedSubjectIds(newSelected);
     };
@@ -294,9 +270,9 @@ export const useProfileController = () => {
         if (!user) return;
         try {
             setSavingSubjects(true);
-            const originalIds = new Set(completedSubjects.map(s => s._id));
-            const addedIds: string[] = [];
-            const removedIds: string[] = [];
+            const originalIds = new Set(completedSubjects.map(s => String(s._id)));
+            const addedIds: (string | number)[] = [];
+            const removedIds: (string | number)[] = [];
 
             for (const id of selectedSubjectIds) {
                 if (!originalIds.has(id)) addedIds.push(id);
@@ -306,9 +282,7 @@ export const useProfileController = () => {
             }
 
             const promises = [];
-            // @ts-ignore
             if (addedIds.length > 0) promises.push(toggleMultipleSubjects(user.id, addedIds, true));
-            // @ts-ignore
             if (removedIds.length > 0) promises.push(toggleMultipleSubjects(user.id, removedIds, false));
 
             await Promise.all(promises);
@@ -349,12 +323,12 @@ export const useProfileController = () => {
     const getFormattedSchedule = (scheduleData: any) => {
         if (!scheduleData || !Array.isArray(scheduleData) || scheduleMeta.days.length === 0) return [];
 
-        const enriched = scheduleData.map(item => {
+        const enriched = scheduleData.map((item: any) => {
             const dayId = Array.isArray(item) ? item[0] : null;
             const slotId = Array.isArray(item) ? item[1] : null;
-            const day = scheduleMeta.days.find(d => d.id === dayId);
-            const slot = scheduleMeta.slots.find(s => s.id === slotId);
-            const slotIndex = scheduleMeta.slots.findIndex(s => s.id === slotId);
+            const day = scheduleMeta.days.find((d: any) => d.id === dayId);
+            const slot = scheduleMeta.slots.find((s: any) => s.id === slotId);
+            const slotIndex = scheduleMeta.slots.findIndex((s: any) => s.id === slotId);
             return { day, slot, slotIndex };
         }).filter((x: any) => x.day && x.slot);
 
@@ -411,8 +385,8 @@ export const useProfileController = () => {
     const mandatorySubjects = completedSubjects.filter(s => s._el);
     const electiveSubjects = completedSubjects.filter(s => !s._el);
 
-    const mandatoryTotalCredits = mandatorySubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const electiveTotalCredits = electiveSubjects.reduce((sum, s) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+    const mandatoryTotalCredits = mandatorySubjects.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+    const electiveTotalCredits = electiveSubjects.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
     const mandatoryEffective = Math.min(MANDATORY_REQ_HOURS, mandatoryTotalCredits * 18);
     const electiveEffective = Math.min(ELECTIVE_REQ_HOURS, electiveTotalCredits * 18);
     const compEffective = Math.min(COMPLEMENTARY_REQ_HOURS, complementaryHours || 0);
