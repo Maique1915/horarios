@@ -9,7 +9,7 @@ export interface DbProfile {
 }
 
 // Profiles
-export const fetchProfile = async (userId: string) => {
+export const fetchProfile = async (userId: number) => {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (error) return null;
     return data as DbProfile;
@@ -22,7 +22,7 @@ export interface DbUserCourse {
     courses?: any;
 }
 
-export const fetchUserCourses = async (userId: string) => {
+export const fetchUserCourses = async (userId: number) => {
     const { data, error } = await supabase.from('user_courses').select('*, courses(*)').eq('user_id', userId);
     if (error) throw error;
     return data as DbUserCourse[];
@@ -41,7 +41,7 @@ export interface DbUserComplementaryActivity {
     created_at: string;
 }
 
-export const fetchUserComplementaryActivities = async (userId: string) => {
+export const fetchUserComplementaryActivities = async (userId: number) => {
     const { data, error } = await supabase.from('user_complementary_activities').select('*').eq('user_id', userId);
     if (error) throw error;
     return data as DbUserComplementaryActivity[];
@@ -56,7 +56,7 @@ export interface DbUserComplementaryActivityWithDetails extends DbUserComplement
     };
 }
 
-export const fetchUserComplementaryActivitiesWithDetails = async (userId: string) => {
+export const fetchUserComplementaryActivitiesWithDetails = async (userId: number) => {
     const { data, error } = await supabase
         .from('user_complementary_activities')
         .select(`
@@ -70,7 +70,7 @@ export const fetchUserComplementaryActivitiesWithDetails = async (userId: string
     return data as DbUserComplementaryActivityWithDetails[];
 };
 
-export const fetchUserActivitiesGroups = async (userId: string) => {
+export const fetchUserActivitiesGroups = async (userId: number) => {
     const { data, error } = await supabase
         .from('user_complementary_activities')
         .select(`
@@ -89,7 +89,7 @@ export const fetchUserActivitiesGroups = async (userId: string) => {
 // CRUD Operations
 
 // Profile
-export const updateProfile = async (userId: string, profileData: Partial<DbProfile>) => {
+export const updateProfile = async (userId: number, profileData: Partial<DbProfile>) => {
     const { data, error } = await supabase.from('profiles').update(profileData).eq('id', userId).select().single();
     if (error) throw error;
     return data as DbProfile;

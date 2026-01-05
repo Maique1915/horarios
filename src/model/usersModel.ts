@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { DbCourse } from './coursesModel';
 
 export interface DbUser {
     id: number;
@@ -9,6 +10,7 @@ export interface DbUser {
     active: boolean;
     created_at: string;
     course_id: number;
+    courses: DbCourse;
     is_paid: boolean;
     subscription_expires_at: string;
     // extended properties from joins or other logic
@@ -16,7 +18,7 @@ export interface DbUser {
     course_name?: string;
 }
 
-export const fetchStudentData = async (userId: string) => {
+export const fetchStudentData = async (userId: number) => {
     const { data, error } = await supabase
         .from('users')
         .select('name, registration, course_name') // Note: registration and course_name might not be direct columns based on screenshot, checking if they are aliases or joined

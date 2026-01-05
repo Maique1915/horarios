@@ -57,7 +57,7 @@ const useHomeController = () => {
             return ROUTES.LOGIN;
         }
 
-        const courseCode = user.courses?.code || 'bcc';
+        const courseCode = user.courses.code;
 
         switch (type) {
             case 'gera_grade': return ROUTES.COURSE(courseCode);
@@ -81,7 +81,7 @@ const useHomeController = () => {
 
 // --- View Components ---
 
-const BannerSection = ({ user, ROUTES }: { user: DbUser, ROUTES: any }) => {
+const BannerSection = ({ user, ROUTES }: { user: DbUser | null, ROUTES: any }) => {
     return (
         <section className="relative pt-20 pb-24 overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
@@ -98,7 +98,7 @@ const BannerSection = ({ user, ROUTES }: { user: DbUser, ROUTES: any }) => {
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                     <Link
-                        href={user ? `/${user.course_id || 'bcc'}` : ROUTES.REGISTER}
+                        href={user ? `/${user.courses.code || 'engcomp'}` : ROUTES.REGISTER}
                         className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
                     >
                         Começar Agora

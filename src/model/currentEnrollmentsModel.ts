@@ -12,7 +12,7 @@ export interface DbCurrentEnrollment {
     [key: string]: any;
 }
 
-export const fetchCurrentEnrollments = async (userId: string) => {
+export const fetchCurrentEnrollments = async (userId: number) => {
     const { data, error } = await supabase
         .from('current_enrollments')
         .select(`
@@ -35,7 +35,7 @@ export const fetchCurrentEnrollments = async (userId: string) => {
     return data;
 };
 
-export const deleteCurrentEnrollments = async (userId: string, semester: number) => {
+export const deleteCurrentEnrollments = async (userId: number, semester: number) => {
     const { error } = await supabase
         .from('current_enrollments')
         .delete()

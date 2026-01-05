@@ -9,7 +9,7 @@ export interface DbCompletedSubject {
     [key: string]: any;
 }
 
-export const fetchCompletedSubjects = async (userId: string) => {
+export const fetchCompletedSubjects = async (userId: number) => {
     const { data, error } = await supabase
         .from('completed_subjects')
         .select(`
@@ -32,12 +32,12 @@ export const upsertCompletedSubjects = async (rows: any[]) => {
     if (error) throw error;
 };
 
-export const deleteCompletedSubject = async (userId: string, subjectId: number | string) => {
+export const deleteCompletedSubject = async (userId: number, subjectId: number | string) => {
     const { error } = await supabase.from('completed_subjects').delete().eq('user_id', userId).eq('subject_id', subjectId);
     if (error) throw error;
 };
 
-export const deleteCompletedSubjects = async (userId: string, subjectIds: (number | string)[]) => {
+export const deleteCompletedSubjects = async (userId: number, subjectIds: (number | string)[]) => {
     const { error } = await supabase.from('completed_subjects').delete().eq('user_id', userId).in('subject_id', subjectIds);
     if (error) throw error;
 };

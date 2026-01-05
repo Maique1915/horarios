@@ -238,7 +238,11 @@ export const useProfileController = () => {
             }
         }
 
-        const submissionData = { ...editForm, password: showPassword ? editForm.password : '' };
+        const submissionData = {
+            ...editForm,
+            password: showPassword ? editForm.password : '',
+            currentPassword: editForm.currentPassword || ''
+        };
 
         const { success, error } = await updateUser(user.id, submissionData);
         if (success) {

@@ -52,7 +52,7 @@ export const deleteComplementaryActivity = async (id: number) => {
 
 // --- User Activities Management ---
 
-export const getUserActivities = async (userId: string) => {
+export const getUserActivities = async (userId: number) => {
     try {
         return await fetchUserComplementaryActivitiesWithDetails(userId);
     } catch (err) {
@@ -74,7 +74,7 @@ export const deleteUserActivity = async (id: number) => {
     return true;
 };
 
-export const getUserTotalHours = async (userId: string): Promise<number> => {
+export const getUserTotalHours = async (userId: number): Promise<number> => {
     try {
         const activities = await fetchUserActivitiesGroups(userId);
         const totalHours = activities.reduce((sum, activity) => sum + (activity.hours || 0), 0);
@@ -93,7 +93,7 @@ interface GroupProgress {
     total: number;
 }
 
-export const getUserGroupProgress = async (userId: string): Promise<GroupProgress[]> => {
+export const getUserGroupProgress = async (userId: number): Promise<GroupProgress[]> => {
     // 1. Fetch user activities with their related catalog info
     const userActivities = await fetchUserActivitiesGroups(userId);
 

@@ -71,7 +71,7 @@ const useGeraGradeController = () => {
 
     const { data: completedSubjects = [] } = useQuery({
         queryKey: ['completedSubjects', user?.id],
-        queryFn: () => loadCompletedSubjects(user.id),
+        queryFn: () => user ? loadCompletedSubjects(user.id) : Promise.resolve([]),
         enabled: !!user?.id && !isExpired,
         staleTime: 1000 * 60 * 5,
     });

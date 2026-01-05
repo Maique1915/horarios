@@ -420,11 +420,11 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
     }
 };
 
-export const getStudentData = async (userId: string): Promise<any> => {
+export const getStudentData = async (userId: number): Promise<any> => {
     return usersModel.fetchStudentData(userId);
 };
 
-export const loadCompletedSubjects = async (userId: string): Promise<CompletedSubject[]> => {
+export const loadCompletedSubjects = async (userId: number): Promise<CompletedSubject[]> => {
     // Handling legacy error fallback in Service layer?
     // Model just fetches. Let's keep catch block here if needed, but model is simpler now.
     try {
@@ -444,7 +444,7 @@ export const loadCompletedSubjects = async (userId: string): Promise<CompletedSu
     }
 };
 
-export const loadCurrentEnrollments = async (userId: string): Promise<Enrollment[]> => {
+export const loadCurrentEnrollments = async (userId: number): Promise<Enrollment[]> => {
     const data = await currentEnrollmentsModel.fetchCurrentEnrollments(userId);
     return (data as DbCurrentEnrollment[]).map(item => {
         const processedSubject = processSubjectData(item.subjects, null, null);
@@ -466,7 +466,7 @@ export const getCourseTotalSubjects = async (courseCode: string): Promise<number
     return subjectsModel.getCourseTotalSubjectsCount(courseData.id);
 };
 
-export const toggleCompletedSubject = async (userId: string, subjectId: number | string, isCompleted: boolean): Promise<void> => {
+export const toggleCompletedSubject = async (userId: number, subjectId: number | string, isCompleted: boolean): Promise<void> => {
     if (isCompleted) {
         await completedSubjectsModel.upsertCompletedSubjects([{ user_id: userId, subject_id: subjectId }]);
     } else {
@@ -474,7 +474,7 @@ export const toggleCompletedSubject = async (userId: string, subjectId: number |
     }
 };
 
-export const toggleMultipleSubjects = async (userId: string, subjectIds: (number | string)[], isCompleted: boolean): Promise<void> => {
+export const toggleMultipleSubjects = async (userId: number, subjectIds: (number | string)[], isCompleted: boolean): Promise<void> => {
     console.log("toggleMultipleSubjects called:", { userId, count: subjectIds?.length, isCompleted });
     if (!subjectIds || subjectIds.length === 0) return;
 
@@ -486,7 +486,7 @@ export const toggleMultipleSubjects = async (userId: string, subjectIds: (number
     }
 };
 
-export const saveCurrentEnrollments = async (userId: string, enrollments: Subject[], semester: number | string): Promise<void> => {
+export const saveCurrentEnrollments = async (userId: number, enrollments: Subject[], semester: number | string): Promise<void> => {
     const sem = Number(semester);
     await currentEnrollmentsModel.deleteCurrentEnrollments(userId, sem);
 
@@ -520,7 +520,7 @@ export const getCourseStats = async (): Promise<any[]> => {
     });
 };
 
-export const saveCompletedSubjects = async (userId: string, acronyms: string[]): Promise<void> => {
+export const saveCompletedSubjects = async (userId: number, acronyms: string[]): Promise<void> => {
     if (!acronyms || acronyms.length === 0) return;
 
     const subjects = await subjectsModel.fetchSubjectsByAcronymsList(acronyms);
