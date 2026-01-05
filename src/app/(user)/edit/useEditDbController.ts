@@ -53,7 +53,7 @@ export const useEditDbController = () => {
 
     // Handlers
     const handleEditDisciplinaInteraction = (disciplinaToEdit: Subject) => {
-        setEditingDisciplineId(disciplinaToEdit._re);
+        setEditingDisciplineId(disciplinaToEdit._re ?? null);
         setEditingDisciplina({ ...disciplinaToEdit });
         setShowForm(true);
     };
@@ -119,7 +119,10 @@ export const useEditDbController = () => {
 
     // Filter Logic
     const opcoesPeriodo = useMemo(() =>
-        [...new Set(disciplinas.map((d: Subject) => d._se))].sort((a: number, b: number) => a - b).map(se => ({ value: se, label: `${se}º Período` })),
+        [...new Set(disciplinas.map((d: Subject) => d._se))]
+            .filter((se): se is string | number => se !== undefined && se !== null)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(se => ({ value: se, label: `${se}º Período` })),
         [disciplinas]
     );
 
