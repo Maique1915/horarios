@@ -1,39 +1,49 @@
 'use client';
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useRouter, usePathname } from 'next/navigation';
 import ROUTES from '../routes';
+import { DbUser } from '../model/usersModel';
 
-const AuthContext = createContext();
+interface AuthContextType {
+    user: DbUser | null;
+    loading: boolean;
+    isExpired: boolean;
+    login: (username: string, password: string) => Promise<{ success: boolean; user?: DbUser; error?: string }>;
+    register: (username: string, password: string, fullName: string, courseId: string) => Promise<{ success: boolean; user?: DbUser; error?: string }>;
+    updateUser: (userId: number, updates: { name: string; username: string; password?: string; currentPassword: string }) => Promise<{ success: boolean; user?: DbUser; error?: string }>;
+    logout: () => Promise<void>;
+    isAuthenticated: () => boolean;
+}
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [user, setUser] = useState<DbUser | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-
     const pathname = usePathname();
 
     useEffect(() => {
-        // Obter sessão atual do localStorage (simulação de sessão)
         const storedUser = localStorage.getItem('app_user');
         if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            // Normalize courses if array (Legacy fix)
-            if (Array.isArray(parsedUser.courses)) {
-                parsedUser.courses = parsedUser.courses[0] || null;
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                if (Array.isArray(parsedUser.courses)) {
+                    parsedUser.courses = parsedUser.courses[0] || null;
+                }
+                setUser(parsedUser);
+            } catch (e) {
+                console.error("Error parsing stored user", e);
+                localStorage.removeItem('app_user');
             }
-            setUser(parsedUser);
         }
         setLoading(false);
     }, []);
 
-    // [NEW] Enforce Payment
     useEffect(() => {
         if (!loading && user) {
-            // 1. Checar se pagou
             const isPaid = user.is_paid;
-
-            // 2. Checar validade (se tiver data)
             let isExpired = false;
             if (user.subscription_expires_at) {
                 const expiresAt = new Date(user.subscription_expires_at);
@@ -42,15 +52,10 @@ export const AuthProvider = ({ children }) => {
                 }
             }
 
-            // Se não pagou OU expirou
             if (!isPaid || isExpired) {
-                // Allow access to plans page, login, api routes, and root
                 const allowedPaths = [ROUTES.PLANS, ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.HOME];
-                const isStaticAllowed = allowedPaths.includes(pathname) || pathname?.startsWith('/api');
-
-                // Allow /[cur], /[cur]/cronograma, /[cur]/grades
-                // But block /profile, /activities, /edit (which matches /[cur] pattern)
-                const isCoursePublicRoute = /^\/[^\/]+(\/(cronograma|grades))?$/.test(pathname);
+                const isStaticAllowed = allowedPaths.includes(pathname || '') || pathname?.startsWith('/api');
+                const isCoursePublicRoute = pathname ? /^\/[^\/]+(\/(cronograma|grades))?$/.test(pathname) : false;
                 const isProtectedUserRoute = [ROUTES.PROFILE, ROUTES.ACTIVITIES, '/edit', '/admin'].some(path => pathname?.startsWith(path));
 
                 const isAllowed = isStaticAllowed || (isCoursePublicRoute && !isProtectedUserRoute);
@@ -63,12 +68,11 @@ export const AuthProvider = ({ children }) => {
         }
     }, [user, loading, pathname, router]);
 
-    const login = async (username, password) => {
+    const login = async (username_in: string, password_in: string) => {
         try {
-            // Secure Login via RPC
-            const { data: user, error } = await supabase.rpc('login_user', {
-                username_in: username,
-                password_in: password
+            const { data, error } = await supabase.rpc('login_user', {
+                username_in,
+                password_in
             });
 
             if (error) {
@@ -76,55 +80,50 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, error: 'Erro no servidor durante login.' };
             }
 
-            if (!user) {
+            if (!data) {
                 return { success: false, error: 'Usuário ou senha incorretos.' };
             }
 
-            // Normalize courses (Supabase might return array)
-            if (Array.isArray(user.courses)) {
-                user.courses = user.courses[0] || null;
+            const userData = data as any;
+            if (Array.isArray(userData.courses)) {
+                userData.courses = userData.courses[0] || null;
             }
 
-            // Login com sucesso
-            localStorage.setItem('app_user', JSON.stringify(user));
-            setUser(user);
-            return { success: true, user };
+            localStorage.setItem('app_user', JSON.stringify(userData));
+            setUser(userData as DbUser);
+            return { success: true, user: userData as DbUser };
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Erro no login:', error);
             return { success: false, error: error.message };
         }
     };
 
-    const register = async (username, password, fullName, courseId) => {
+    const register = async (username_in: string, password_in: string, name_in: string, courseId: string) => {
         try {
-            console.log("AuthContext register called with:", { username, fullName, courseId, parsedCourseId: parseInt(courseId) });
-            // Secure Register via RPC
             const { data, error } = await supabase.rpc('register_user', {
-                username_in: username,
-                password_in: password,
-                name_in: fullName,
-                course_id_in: parseInt(courseId) // Ensure integer type
+                username_in,
+                password_in,
+                name_in,
+                course_id_in: parseInt(courseId)
             });
 
             if (error) {
-                // Handle specific constraint errors if needed
                 if (error.message.includes('Usuário já existe')) {
                     return { success: false, error: 'Usuário já existe.' };
                 }
                 throw error;
             }
 
-            if (Array.isArray(data.courses)) {
-                data.courses = data.courses[0] || null;
+            const userData = data as any;
+            if (Array.isArray(userData.courses)) {
+                userData.courses = userData.courses[0] || null;
             }
 
-            // Login automático
-            localStorage.setItem('app_user', JSON.stringify(data));
-            setUser(data);
-
-            return { success: true, user: data };
-        } catch (error) {
+            localStorage.setItem('app_user', JSON.stringify(userData));
+            setUser(userData as DbUser);
+            return { success: true, user: userData as DbUser };
+        } catch (error: any) {
             console.error('Erro no cadastro:', error);
             return { success: false, error: error.message };
         }
@@ -140,10 +139,8 @@ export const AuthProvider = ({ children }) => {
         return !!user;
     };
 
-    const updateUser = async (userId, updates) => {
+    const updateUser = async (userId: number, updates: { name: string; username: string; password?: string; currentPassword: string }) => {
         try {
-            // Secure Update via RPC
-            // updates includes: name, username, password, currentPassword
             const { data, error } = await supabase.rpc('update_user', {
                 user_id_in: userId,
                 name_in: updates.name,
@@ -156,18 +153,16 @@ export const AuthProvider = ({ children }) => {
                 throw error;
             }
 
-            if (Array.isArray(data.courses)) {
-                data.courses = data.courses[0] || null;
+            const userData = data as any;
+            if (Array.isArray(userData.courses)) {
+                userData.courses = userData.courses[0] || null;
             }
 
-            // Update local state and storage
-            localStorage.setItem('app_user', JSON.stringify(data));
-            setUser(data);
-
-            return { success: true, user: data };
-        } catch (error) {
+            localStorage.setItem('app_user', JSON.stringify(userData));
+            setUser(userData as DbUser);
+            return { success: true, user: userData as DbUser };
+        } catch (error: any) {
             console.error('Erro ao atualizar usuário:', error);
-            // Improve error message
             let msg = error.message;
             if (msg.includes('Senha atual incorreta')) msg = 'Senha atual incorreta.';
             if (msg.includes('Nome de usuário já existe')) msg = 'Nome de usuário já existe.';
@@ -187,7 +182,7 @@ export const AuthProvider = ({ children }) => {
         return {
             user,
             loading,
-            isExpired, // Exposed property
+            isExpired,
             login,
             register,
             updateUser,
@@ -196,7 +191,11 @@ export const AuthProvider = ({ children }) => {
         };
     }, [user, loading]);
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
 export const useAuth = () => {
