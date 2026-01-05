@@ -6,7 +6,7 @@ export const userService = {
      * @param {string} userId
      * @returns {Promise<DbProfile | null>}
      */
-    async getProfile(userId: string): Promise<DbProfile | null> {
+    async getProfile(userId: number): Promise<DbProfile | null> {
         return await fetchProfile(userId);
     },
 
@@ -16,7 +16,7 @@ export const userService = {
      * @param {object} updates
      * @returns {Promise<DbProfile>}
      */
-    async updateProfile(userId: string, updates: Partial<DbProfile>): Promise<DbProfile> {
+    async updateProfile(userId: number, updates: Partial<DbProfile>): Promise<DbProfile> {
         return await updateProfile(userId, updates);
     },
 
@@ -26,7 +26,7 @@ export const userService = {
      * @param {string} role
      * @returns {Promise<boolean>}
      */
-    async hasRole(userId: string, role: string): Promise<boolean> {
+    async hasRole(userId: number, role: string): Promise<boolean> {
         const data = await this.getProfile(userId);
         if (!data) return false;
         return data.role === role;
