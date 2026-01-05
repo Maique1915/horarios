@@ -41,6 +41,7 @@ export interface Subject {
     class_name?: string;
     _category?: string;
     course_name?: string;
+    _pr?: string | string[];
     [key: string]: any;
 }
 
@@ -207,20 +208,23 @@ export const useProfileController = () => {
                     if (courseCode) {
                         try {
                             // @ts-ignore
-                            subjectsToProcess = await loadClassesForGrid(courseCode);
+                            subjectsToProcess = await loadDbData(courseCode);
                         } catch (e) { return; }
                     } else { return; }
                 }
 
                 if (subjectsToProcess.length > 0) {
                     const limits = {
-                        electiveHours: 360, // Fixed constants for now
-                        mandatoryHours: 3774
+                        electiveHours: 360,
+                        mandatoryHours: Infinity
                     };
 
+                    const totalCompleted = [...completedSubjects, ...currentEnrollments];
+                    const activeSubjects = subjectsToProcess.filter(s => s._ag);
+
                     const remainingSemesters = Escolhe.predictCompletion(
-                        subjectsToProcess,
-                        completedSubjects,
+                        activeSubjects,
+                        totalCompleted,
                         scheduleMeta,
                         limits
                     );
@@ -228,11 +232,15 @@ export const useProfileController = () => {
                     const baseYear = 2026;
                     const baseSemester = 1;
                     const totalSemesters = remainingSemesters.semestersCount;
-                    const lastSemesterSeq = baseSemester + totalSemesters - 1;
-                    const finalYear = baseYear + Math.floor((lastSemesterSeq - 1) / 2);
-                    const finalSem = ((lastSemesterSeq - 1) % 2) + 1;
+                    if (totalSemesters === 0) {
+                        setEstimatedDate(new Date()); // Already finished
+                    } else {
+                        const lastSemesterSeq = baseSemester + totalSemesters - 1;
+                        const finalYear = baseYear + Math.floor((lastSemesterSeq - 1) / 2);
+                        const finalSem = ((lastSemesterSeq - 1) % 2) + 1;
 
-                    setEstimatedDate(new Date(finalYear, finalSem === 1 ? 0 : 6, 1));
+                        setEstimatedDate(new Date(finalYear, finalSem === 1 ? 0 : 6, 1));
+                    }
                 }
             };
             calculatePrediction();

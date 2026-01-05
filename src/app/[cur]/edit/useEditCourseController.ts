@@ -48,36 +48,48 @@ export const useEditCourseController = () => {
 
     // Handlers
     const handleEditDisciplinaInteraction = (disciplinaToEdit: Subject) => {
-        setEditingDisciplineId(disciplinaToEdit._re);
+        console.log('Controller: Requested edit for:', disciplinaToEdit._re);
+        setEditingDisciplineId(disciplinaToEdit._re || null);
         setEditingDisciplina({ ...disciplinaToEdit });
         setShowForm(true);
     };
 
     const handleSaveDisciplinaInteraction = async (updatedDataFromForm: Subject) => {
+        console.log('Controller: Initiating update for subject:', editingDisciplina?._re);
+        console.log('Controller: Updated data from form:', updatedDataFromForm);
         const result = await updateDisciplina(editingDisciplina?._re, updatedDataFromForm);
+        console.log('Controller: Update result:', result);
         if (result.success) {
             setEditingDisciplina(null);
             setEditingDisciplineId(null);
             setShowForm(false);
             alert('✅ Disciplina atualizada com sucesso!');
         } else {
-            alert('❌ Erro ao atualizar disciplina: ' + ((result.error as Error)?.message || result.error));
+            const errorMessage = (result.error as Error)?.message || JSON.stringify(result.error);
+            console.error('Controller: Update failed:', errorMessage);
+            alert('❌ Erro ao atualizar disciplina: ' + errorMessage);
         }
     };
 
     const handleCancelFormInteraction = () => {
+        console.log('Controller: Form cancelled');
         setEditingDisciplina(null);
+        setEditingDisciplineId(null);
         setNewDisciplina({ ...defaultNewDisciplina });
         setShowForm(false);
     };
 
-    const handleAddDisciplinaInteraction = async (newDisciplineData: Subject) => {
-        const result = await addDisciplina(newDisciplineData);
+    const handleAddDisciplinaInteraction = async (newDisciplinaData: Subject) => {
+        console.log('Controller: Initiating add for new subject:', newDisciplinaData._re);
+        const result = await addDisciplina(newDisciplinaData);
+        console.log('Controller: Add result:', result);
         if (result.success) {
-            handleCancelFormInteraction();
+            setShowForm(false);
             alert('✅ Disciplina adicionada com sucesso!');
         } else {
-            alert('❌ Erro ao adicionar disciplina: ' + ((result.error as Error)?.message || result.error));
+            const errorMessage = (result.error as Error)?.message || JSON.stringify(result.error);
+            console.error('Controller: Add failed:', errorMessage);
+            alert('❌ Erro ao adicionar disciplina: ' + errorMessage);
         }
     };
 
@@ -102,7 +114,7 @@ export const useEditCourseController = () => {
 
     // Filter Logic
     const opcoesPeriodo = useMemo(() =>
-        [...new Set(disciplinas.map((d: Subject) => d._se))].sort((a: number, b: number) => a - b).map(se => ({ value: se, label: `${se}º Período` })),
+        [...new Set(disciplinas.map((d: Subject) => d._se))].filter(se => se !== undefined).sort((a: any, b: any) => Number(a) - Number(b)).map(se => ({ value: se, label: `${se}º Período` })),
         [disciplinas]
     );
 

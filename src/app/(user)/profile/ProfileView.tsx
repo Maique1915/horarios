@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import ROUTES from '../../../routes';
 import Comum from '../../../components/Comum';
 import { useProfileController } from './useProfileController';
+import { Subject } from '@/types/Subject';
 
 // --- View Components ---
 
@@ -239,7 +240,7 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
                 <div className="animate-fadeIn">
                     <Comum
                         materias={ctrl.formattedEnrollmentsForGrid as any}
-                        tela={2}
+                        tela={1}
                         cur={ctrl.user.courses?.code || 'engcomp'}
                         hideSave={true}
                         fun={
@@ -317,7 +318,7 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
                                     </div>
                                 ) : (
                                     <ul className="space-y-3">
-                                        {ctrl.currentEnrollments.map((subject: any) => {
+                                        {ctrl.currentEnrollments.map((subject: Subject) => {
                                             const scheduleGroups = ctrl.getFormattedSchedule(subject.schedule_data);
                                             return (
                                                 <li key={subject._id} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
@@ -325,7 +326,7 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
                                                         <div className="flex-1 min-w-0">
                                                             <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-base leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
                                                             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{subject.acronym || "N/A"}</span>
+                                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{subject._re || "N/A"}</span>
                                                                 {(subject.course_name || subject.semester) && (
                                                                     <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
                                                                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
@@ -374,20 +375,29 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
                                         >
                                             <option value="all">Todos</option>
                                             <option value="optativas">Optativas</option>
-                                            {Array.from(new Set(ctrl.allSubjects.map(s => s._se).filter(s => s && Number(s) > 0))).sort((a, b) => Number(a) - Number(b)).map(sem => (
+                                            {Array.from(new Set(ctrl.allSubjects.map(s => s._se).filter(s => s && Number(s) > 0))).sort((a, b) => Number(a) - Number(b)).map((sem: any) => (
                                                 <option key={sem} value={sem}>{sem}º Per</option>
                                             ))}
                                         </select>
                                     )}
                                     {ctrl.isEditingSubjects ? (
-                                        <button
-                                            onClick={ctrl.handleSaveSubjects}
-                                            disabled={ctrl.savingSubjects}
-                                            className="text-xs font-bold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm disabled:opacity-50"
-                                        >
-                                            {ctrl.savingSubjects ? <span className="material-symbols-outlined text-sm animate-spin">sync</span> : <span className="material-symbols-outlined text-sm">save</span>}
-                                            Salvar
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => ctrl.setIsEditingSubjects(false)}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                                title="Cancelar"
+                                            >
+                                                <span className="material-symbols-outlined text-lg">close</span>
+                                            </button>
+                                            <button
+                                                onClick={ctrl.handleSaveSubjects}
+                                                disabled={ctrl.savingSubjects}
+                                                className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm disabled:opacity-50"
+                                                title="Salvar"
+                                            >
+                                                {ctrl.savingSubjects ? <span className="material-symbols-outlined text-lg animate-spin">sync</span> : <span className="material-symbols-outlined text-lg">save</span>}
+                                            </button>
+                                        </div>
                                     ) : (
                                         <button
                                             onClick={() => ctrl.setIsEditingSubjects(true)}

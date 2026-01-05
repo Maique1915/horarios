@@ -1,15 +1,15 @@
 export interface Subject {
     // Core Identifiers
     _id?: string | number; // Optional because sometimes it's just raw JSON
-    _re: string;           // Acronym (e.g., 'C104')
-    _di: string;           // Name (e.g., 'Cálculo 1')
+    _re?: string;           // Acronym (e.g., 'C104')
+    _di?: string;          // Name (e.g., 'Cálculo 1')
     _cu?: string;          // Course code (e.g., 'EC')
 
     // Academic Data
-    _ap: number;           // Practical credits/hours
-    _at: number;           // Theory credits/hours
-    _se: number;           // Semester (e.g., 1, 2, ... 10)
-    _pr: string | string[]; // Prerequisites (usually string array of acronyms)
+    _ap?: number;          // Practical credits/hours
+    _at?: number;          // Theory credits/hours
+    _se?: number | string; // Semester (e.g., 1, 2, ... 10)
+    _pr?: (string | number)[]; // Prerequisites (acronyms or min credits)
 
     // Status/Category
     _el?: boolean;         // true if Elective (Optativa)

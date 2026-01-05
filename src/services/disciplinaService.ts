@@ -83,7 +83,9 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
     const _pr = subjectRequirements.filter((r) => r.type === 'SUBJECT' && r.prerequisite_subject?.acronym).map((r) => r.prerequisite_subject.acronym);
     const creditsReq = subjectRequirements.find((r) => r.type === 'CREDITS');
 
-    const _cu = item.course?.code;
+    // Supabase might return 'courses' (plural) depending on relationship name
+    const _cu = (item as any).courses?.code || (item as any).course?.code;
+    if (!_cu) console.warn(`Service: Missing course code for subject ${item.acronym}`, item);
 
     // Static fallback for credits removed
     const dbPractical = (item.has_practical !== undefined && item.has_practical !== null) ? Number(item.has_practical) : 0;
@@ -251,7 +253,7 @@ export const addSubject = async (courseCode: string, subjectData: Subject): Prom
 
     const subjectId = insertedData.id;
 
-    const { subjectAcronyms, minCredits } = splitPrerequisites(_pr);
+    const { subjectAcronyms, minCredits } = splitPrerequisites(_pr || []);
 
     if (subjectAcronyms.length > 0) {
         const prereqSubjects = await subjectsModel.fetchSubjectsByAcronymsList(subjectAcronyms);
@@ -275,41 +277,65 @@ export const addSubject = async (courseCode: string, subjectData: Subject): Prom
 };
 
 export const updateSubject = async (courseCode: string, subjectId: number | string, subjectData: Subject): Promise<{ id: number | string }> => {
+    console.log('Service: updateSubject called with ID:', subjectId, 'and data:', subjectData);
     const { _di, _re, _se, _at, _ap, _el, _ag, _pr } = subjectData;
-
-    // Logic: _el=true (Mandatory) -> DB: elective=false
+    const sId = Number(subjectId);
     const dbElective = !_el;
 
-    await subjectsModel.updateSubjectDb(subjectId, {
+    console.log('Service: Sanitized data for DB:', {
         name: _di,
         acronym: _re,
-        semester: _se,
-        has_theory: _at,
-        has_practical: _ap,
+        semester: Number(_se),
+        has_theory: Number(_at),
+        has_practical: Number(_ap),
         elective: dbElective,
         active: _ag
     });
 
-    // Update requirements
-    await requirementsModel.deleteRequirements(subjectId);
+    try {
+        await subjectsModel.updateSubjectDb(sId, {
+            name: _di,
+            acronym: _re,
+            semester: Number(_se),
+            has_theory: Number(_at),
+            has_practical: Number(_ap),
+            elective: dbElective,
+            active: _ag
+        });
+        console.log('Service: Subject updated in DB successfully');
+    } catch (err) {
+        console.error('Service: Error updating subject in DB:', err);
+        throw err;
+    }
 
-    const { subjectAcronyms, minCredits } = splitPrerequisites(_pr);
+    // Update requirements
+    await requirementsModel.deleteRequirements(sId);
+
+    const { subjectAcronyms, minCredits } = splitPrerequisites(_pr || []);
 
     if (subjectAcronyms.length > 0) {
         const prereqSubjects = await subjectsModel.fetchSubjectsByAcronymsList(subjectAcronyms);
-        if (prereqSubjects) {
-            const newRequirements = prereqSubjects.map((ps: any) => ({ subject_id: subjectId, prerequisite_subject_id: ps.id, type: 'SUBJECT' }));
+        if (prereqSubjects && prereqSubjects.length > 0) {
+            const newRequirements = prereqSubjects.map((ps: any) => ({
+                subject_id: sId,
+                prerequisite_subject_id: ps.id,
+                type: 'SUBJECT'
+            }));
             await requirementsModel.insertRequirements(newRequirements);
+            console.log(`Updated ${newRequirements.length} subject requirements for ${sId}`);
+        } else {
+            console.warn(`No subjects found for acronyms: ${subjectAcronyms.join(', ')}`);
         }
     }
     if (minCredits > 0) {
         await requirementsModel.insertRequirements([{
-            subject_id: subjectId,
+            subject_id: sId,
             type: 'CREDITS',
             min_credits: minCredits
         }]);
+        console.log(`Updated credit requirement (${minCredits}) for ${sId}`);
     }
-    return { id: subjectId };
+    return { id: sId };
 };
 
 export const deleteSubject = async (subjectId: number | string): Promise<void> => {
@@ -382,7 +408,12 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                 });
             }
         });
-        return gridData.filter(item => item._se > 0 && item._ag === true).sort((a, b) => a._se - b._se);
+        // Ensure _se is present and is a number for filtering/sorting
+        return gridData.filter(item =>
+            item._se !== undefined &&
+            Number(item._se) > 0 &&
+            item._ag === true
+        ).sort((a, b) => Number(a._se || 0) - Number(b._se || 0));
     } catch (error) {
         console.error("Service CRITICAL ERROR in loadClassesForGrid:", error);
         throw error;

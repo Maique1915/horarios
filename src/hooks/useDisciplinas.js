@@ -64,7 +64,7 @@ export const useDisciplinas = (courseCode) => {
 
     // Helper to invalidate
     const invalidate = useCallback(() => {
-        return queryClient.invalidateQueries(['disciplinas', courseCode]);
+        return queryClient.invalidateQueries({ queryKey: ['disciplinas', courseCode] });
     }, [queryClient, courseCode]);
 
     const addDisciplina = useCallback(async (newDisciplineData) => {
@@ -91,34 +91,50 @@ export const useDisciplinas = (courseCode) => {
         }
     }, [courseCode, invalidate]);
 
-    const updateDisciplina = useCallback(async (originalAcronym, updatedData) => {
+    const updateSubjectCallback = useCallback(async (originalAcronym, updatedData) => {
         setSyncing(true);
+        console.log('Hook: updateDisciplina triggered for original acronym:', originalAcronym);
         try {
-            // Need ID for update. If not in updatedData, try to find in current list
-            let subjectId = updatedData._id;
+            let sId = updatedData._id;
 
-            // Wait, we are calling this with updatedData which might be from form.
-            if (!subjectId) {
-                // Try finding by original acronym in current list
+            if (!sId) {
+                console.log('Hook: _id not in updatedData, searching in local state by acronym:', originalAcronym);
                 const existing = disciplinas.find(d => d._re === originalAcronym);
-                if (existing) subjectId = existing._id;
+                if (existing) {
+                    sId = existing._id;
+                    console.log('Hook: Found existing subject ID:', sId);
+                }
             }
 
-            if (!subjectId) {
+            if (!sId) {
+                console.error('Hook: FATAL - No subjectId found for update!');
                 throw new Error("ID da disciplina não encontrado para atualização.");
             }
 
-            await updateSubject(courseCode, subjectId, updatedData);
+            const sanitizedData = {
+                ...updatedData,
+                _se: Number(updatedData._se),
+                _at: Number(updatedData._at),
+                _ap: Number(updatedData._ap),
+            };
+
+            console.log('Hook: Sanitized data for service:', sanitizedData);
+
+            await updateSubject(courseCode, Number(sId), sanitizedData);
+            console.log('Hook: Update successful');
+
             clearCache();
             await invalidate();
             return { success: true };
         } catch (err) {
-            console.error(err);
+            console.error('Hook: Update failed:', err);
             return { success: false, error: err };
         } finally {
             setSyncing(false);
         }
     }, [courseCode, disciplinas, invalidate]);
+
+    const updateDisciplina = updateSubjectCallback;
 
     const removeDisciplina = useCallback(async (disciplinaToRemove) => {
         setSyncing(true);
@@ -164,9 +180,9 @@ export const useDisciplinas = (courseCode) => {
 
     const refresh = useCallback(async () => {
         clearCache();
-        await queryClient.invalidateQueries(['disciplinas', courseCode]);
-        await queryClient.invalidateQueries(['horarios', courseCode]);
-        await queryClient.invalidateQueries(['dimensao', courseCode]);
+        await queryClient.invalidateQueries({ queryKey: ['disciplinas', courseCode] });
+        await queryClient.invalidateQueries({ queryKey: ['horarios', courseCode] });
+        await queryClient.invalidateQueries({ queryKey: ['dimensao', courseCode] });
     }, [courseCode, queryClient]);
 
     return {

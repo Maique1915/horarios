@@ -49,8 +49,13 @@ export const insertSubject = async (subjectData: any) => {
 };
 
 export const updateSubjectDb = async (id: number | string, subjectData: any) => {
-    const { error } = await supabase.from('subjects').update(subjectData).eq('id', id);
-    if (error) throw error;
+    console.log(`Model: updateSubjectDb called for ID: ${id}`, subjectData);
+    const { data, error } = await supabase.from('subjects').update(subjectData).eq('id', id).select();
+    if (error) {
+        console.error(`Model: Error updating subject ${id}:`, error);
+        throw error;
+    }
+    console.log(`Model: Subject ${id} update result:`, data);
 };
 
 export const deleteSubjectDb = async (id: number | string) => {

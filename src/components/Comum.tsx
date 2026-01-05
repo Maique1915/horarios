@@ -147,13 +147,13 @@ const Comum: React.FC<ComumProps> = (props) => {
     const separarPorSemestre = (arr: Subject[]): Subject[][] => {
         // Find max semester
         let maxSem = 0;
-        arr.forEach(s => { if (s._se > maxSem) maxSem = s._se; });
+        arr.forEach(s => { if (s._se !== undefined && Number(s._se) > maxSem) maxSem = Number(s._se); });
 
         const aux: Subject[][] = Array.from({ length: maxSem }, () => []);
 
         for (const i of arr) {
-            if (i._se > 0 && i._se <= maxSem) {
-                aux[i._se - 1].push(i);
+            if (i._se !== undefined && Number(i._se) > 0 && Number(i._se) <= maxSem) {
+                aux[Number(i._se) - 1].push(i);
             }
         }
         return aux.filter(e => e && e.length > 0);
@@ -549,7 +549,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                                         className="group hidden md:flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
                                     >
                                         <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">image</span>
-                                        Salvar Imagem
+                                        Printar
                                     </button>
                                 )}
 

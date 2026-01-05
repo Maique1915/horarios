@@ -223,7 +223,7 @@ export const usePredictionController = () => {
 
         return candidates.sort((a, b) => {
             if (a._el !== b._el) return a._el ? -1 : 1;
-            return a._di.localeCompare(b._di);
+            return (a._di || '').localeCompare(b._di || '');
         });
 
     }, [selectedSemesterIndex, fixedSemesters, allSubjects, completedSubjects, currentEnrollments, blacklistedIds]);

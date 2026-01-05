@@ -102,6 +102,7 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
 };
 
 export default function EditCourseView({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController> }) {
+    console.log('EditCourseView rendering. syncing:', ctrl.syncing, 'editingId:', ctrl.editingDisciplineId);
     if (ctrl.loading) return <LoadingView />;
     if (ctrl.error) return <ErrorView error={ctrl.error} />;
 

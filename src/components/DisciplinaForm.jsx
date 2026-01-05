@@ -119,26 +119,48 @@ const DisciplinaForm = ({
       reset({
         ...disciplina,
         _pr: stringPrerequisites,
+        _cu: disciplina._cu || cur,
         _pr_creditos_input: disciplina._pr_creditos_input !== undefined
           ? disciplina._pr_creditos_input
           : (numericPrerequisites.length > 0 ? numericPrerequisites[0] : 0),
       });
 
     } else {
-      reset(blankForm);
+      reset({ ...blankForm, _cu: cur });
     }
   }, [disciplina, reset, cur]);
 
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('Form: [WATCH] Validation errors changed:', errors);
+      window.alert('Form: [WATCH] Erros de validação detectados: ' + Object.keys(errors).join(', '));
+    }
+  }, [errors]);
+
 
   const onSubmitHandler = (data) => {
+    window.alert('Form: onSubmitHandler triggered! Verificando dados...');
+    console.log('Form: onSubmitHandler triggered WITH DATA:', data);
+    if (!onSubmit) {
+      console.error('Form: onSubmit prop is MISSING!');
+      window.alert('ERRO: onSubmit prop is MISSING!');
+      return;
+    }
     const finalPrerequisites = [...data._pr];
     if (data._pr_creditos_input > 0) {
       finalPrerequisites.push(data._pr_creditos_input);
     }
     const finalData = { ...data, _pr: finalPrerequisites };
+    console.log('Form: Final data prepared for submission:', finalData);
     onSubmit(finalData);
   };
 
+  const onValidationError = (errors) => {
+    console.error('Form: Validation errors blocked submission:', errors);
+    window.alert('❌ ERRO DE VALIDAÇÃO: ' + JSON.stringify(errors));
+  };
+
+  console.log('Form: Rendering. Values:', getValues(), 'Errors:', errors);
   const isEditing = !!disciplina?._id || !!disciplina?._re;
 
   // Custom styles for react-select to match the design system
@@ -156,7 +178,10 @@ const DisciplinaForm = ({
   return (
     <div className="w-full">
       <div className="rounded-2xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-xl shadow-slate-200/50 dark:shadow-black/20 p-6 lg:p-8">
-        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmitHandler)}>
+        <form className="flex flex-col gap-6" onSubmit={(e) => {
+          console.log('Form: [EVENT] form onSubmit triggered');
+          handleSubmit(onSubmitHandler, onValidationError)(e);
+        }}>
           <div className="flex items-center justify-between border-b border-border-light dark:border-border-dark pb-4 mb-2">
             <h3 className="text-xl font-bold font-display text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <span className={`material-symbols-outlined rounded-lg p-1.5 ${isEditing ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-primary/10 text-primary'}`}>
@@ -345,6 +370,7 @@ const DisciplinaForm = ({
                 <button
                   className="flex-[2] min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl h-11 px-6 bg-primary text-white text-sm font-bold shadow-md hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                   type="submit"
+                  onClick={() => console.log('Form: [CLICK] Submit button clicked')}
                 >
                   <span className="material-symbols-outlined text-[20px]">{isEditing ? 'save_as' : 'add_circle'}</span>
                   <span className="truncate">{isEditing ? 'Atualizar Disciplina' : 'Adicionar Disciplina'}</span>

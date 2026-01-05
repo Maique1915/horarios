@@ -10,7 +10,7 @@ const LoadingView = () => <LoadingSpinner message="Inicializando simulador..." /
 const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController> }) => {
     // Group electives for sidebar
     const electives = useMemo(() =>
-        ctrl.allSubjects.filter(s => !s._el && s._ag).sort((a, b) => a._di.localeCompare(b._di)),
+        ctrl.allSubjects.filter(s => !s._el && s._ag).sort((a, b) => (a._di || '').localeCompare(b._di || '')),
         [ctrl.allSubjects]);
 
     return (
