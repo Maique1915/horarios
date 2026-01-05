@@ -3,7 +3,7 @@ import { fetchProfile, updateProfile, DbProfile } from '../model/userProfileMode
 export const userService = {
     /**
      * Get user profile by User ID
-     * @param {string} userId
+     * @param {number} userId
      * @returns {Promise<DbProfile | null>}
      */
     async getProfile(userId: number): Promise<DbProfile | null> {
@@ -12,7 +12,7 @@ export const userService = {
 
     /**
      * Update user profile
-     * @param {string} userId
+     * @param {number} userId
      * @param {object} updates
      * @returns {Promise<DbProfile>}
      */
@@ -22,7 +22,7 @@ export const userService = {
 
     /**
      * Check if user has a specific role
-     * @param {string} userId
+     * @param {number} userId
      * @param {string} role
      * @returns {Promise<boolean>}
      */
