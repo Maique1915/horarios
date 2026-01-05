@@ -144,7 +144,7 @@ const Comum: React.FC<ComumProps> = (props) => {
     // Usando nomes dos dias do banco
     const dias = dbDays.map(d => d.name);
 
-    function separarPorSemestre(arr: Subject[]): Subject[][] {
+    const separarPorSemestre = (arr: Subject[]): Subject[][] => {
         // Find max semester
         let maxSem = 0;
         arr.forEach(s => { if (s._se > maxSem) maxSem = s._se; });
@@ -157,36 +157,27 @@ const Comum: React.FC<ComumProps> = (props) => {
             }
         }
         return aux.filter(e => e && e.length > 0);
-    }
+    };
 
-    let bd: Subject[][];
-    if (props.tela === 2) {
-        // In mode 2, materias is passed as Subject[][] (Array of possible schedules)
-        bd = state.materias as Subject[][];
-    } else if (_separa) {
-        // In view mode with separation, materias is Subject[] (List of enrollments)
-        bd = separarPorSemestre(state.materias as Subject[]);
-    } else {
-        // In view mode single list, wrap in array [Subject[]]
-        // Explicit check to safely cast
-        const mats = (Array.isArray(state.materias) && state.materias.length > 0 && Array.isArray(state.materias[0]))
-            ? state.materias as Subject[][]  // Handled edge case where it might be mixed, but generally single list here
-            : [state.materias as Subject[]];
+    const bd = React.useMemo(() => {
+        if (props.tela === 2) {
+            return state.materias as Subject[][];
+        } else if (props.separa) {
+            return separarPorSemestre(state.materias as Subject[]);
+        } else {
+            return Array.isArray(state.materias[0])
+                ? state.materias as Subject[][]
+                : [state.materias as Subject[]];
+        }
+    }, [state.materias, props.tela, props.separa]);
 
-        // Actually, logic above for tela=2 covers nested array. 
-        // If we are here, state.materias SHOULD be Subject[]
-        // But let's be safe.
-        bd = Array.isArray(state.materias[0]) ? state.materias as Subject[][] : [state.materias as Subject[]];
-    }
-
-    function criarGrade() {
+    const { grades, coresGrade } = React.useMemo(() => {
         if (state.materias.length > 0) {
             console.log("Comum: Starting grade creation with", state.materias.length, "disciplines");
-            console.log("Comum: Schedule Refs - Days:", dbDays, "Slots:", dbTimeSlots);
         }
 
-        const grades: string[][][] = [];
-        const coresGrade: string[][][] = [];
+        const gradesOut: string[][][] = [];
+        const coresGradeOut: string[][][] = [];
 
         // bd is Subject[][] - each item is a "Semester" or a "Schedule Option"
         for (const semestre of bd) {
@@ -198,16 +189,9 @@ const Comum: React.FC<ComumProps> = (props) => {
 
                 if (Array.isArray(disciplina._ho)) {
                     disciplina._ho.forEach(([dayId, slotId], i) => {
-                        // ROBUST MAPPING: Find index by ID instead of assuming direct index mapping
+                        // ROBUST MAPPING: Find index by ID
                         const numDia = dbDays.findIndex(d => d.id === dayId);
                         const numHorario = dbTimeSlots.findIndex(s => s.id === slotId);
-
-                        // Debug mapping failures - ONLY if we actually have reference data loaded
-                        if (dbDays.length > 0 && dbTimeSlots.length > 0) {
-                            if (numDia === -1 || numHorario === -1) {
-                                console.warn(`Comum: Mapping failed for ${disciplina._di}. DayID: ${dayId} -> Idx: ${numDia}. SlotID: ${slotId} -> Idx: ${numHorario}`);
-                            }
-                        }
 
                         // Cast _da to string array safely if it exists
                         const daArray = (Array.isArray(disciplina._da) ? disciplina._da : []) as number[];
@@ -225,17 +209,13 @@ const Comum: React.FC<ComumProps> = (props) => {
                             coresVazias[numHorario][numDia] = cores[(index + rand) % cores.length];
                         }
                     });
-                } else {
-                    console.warn(`Comum: Disciplina ${disciplina._di} has invalid _ho:`, disciplina._ho);
                 }
             });
-            grades.push(gradeVazia);
-            coresGrade.push(coresVazias);
+            gradesOut.push(gradeVazia);
+            coresGradeOut.push(coresVazias);
         }
-        return { grades, coresGrade };
-    }
-
-    const { grades, coresGrade } = criarGrade();
+        return { grades: gradesOut, coresGrade: coresGradeOut };
+    }, [bd, dbDays, dbTimeSlots, th, td]);
 
     const handlePageChange = (newId: number) => {
         if (newId !== state.id && transitioningTo === null) {
@@ -245,7 +225,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                 setState(s => ({ ...s, id: newId }));
                 setTransitioningTo(null);
                 setPreviousGrade(null);
-            }, 500);
+            }, 200);
         }
     };
 
@@ -509,11 +489,12 @@ const Comum: React.FC<ComumProps> = (props) => {
                                 {
                                     grades.slice(state.pageBlockStart, state.pageBlockStart + 10).map((_, i) => {
                                         const idx = state.pageBlockStart + i;
+                                        const isActive = (transitioningTo !== null ? transitioningTo : state.id) === idx;
                                         return (
                                             <button
                                                 key={idx}
                                                 onClick={() => handlePageChange(idx)}
-                                                className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200 ${state.id === idx
+                                                className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200 ${isActive
                                                     ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
                                                     : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'}`}
                                             >

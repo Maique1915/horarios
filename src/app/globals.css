@@ -54,6 +54,14 @@
   }
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.2s ease-out forwards;
+}
+
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);

@@ -1,7 +1,6 @@
-import { Suspense } from 'react';
-import Quadro from '../../../components/Quadro';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+
 import { loadCoursesRegistry } from '../../../services/disciplinaService';
+import GradesClient from './GradesClient';
 
 export async function generateStaticParams() {
     try {
@@ -16,9 +15,5 @@ export async function generateStaticParams() {
 }
 
 export default function GradesPage() {
-    return (
-        <Suspense fallback={<LoadingSpinner message="Carregando..." />}>
-            <Quadro />
-        </Suspense>
-    );
+    return <GradesClient />;
 }

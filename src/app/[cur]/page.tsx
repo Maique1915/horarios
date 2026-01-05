@@ -1,7 +1,6 @@
-import { Suspense } from 'react';
-import GeraGrade from '../../components/GeraGrade';
-import LoadingSpinner from '../../components/LoadingSpinner';
+
 import { loadCoursesRegistry } from '../../services/disciplinaService';
+import GeraGradeClient from './GeraGradeClient';
 
 export async function generateStaticParams() {
     try {
@@ -16,9 +15,5 @@ export async function generateStaticParams() {
 }
 
 export default function CoursePage() {
-    return (
-        <Suspense fallback={<LoadingSpinner message="Carregando..." />}>
-            <GeraGrade />
-        </Suspense>
-    );
+    return <GeraGradeClient />;
 }

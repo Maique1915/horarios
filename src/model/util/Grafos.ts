@@ -88,4 +88,42 @@ export default class Grafos {
     getHorarios(materia: Subject): number[][] {
         return Array.isArray(materia._ho) ? materia._ho : [];
     }
+
+    /**
+     * Calculates the "Height" or "Criticality" of each subject.
+     * Height = length of the longest prerequisite chain that depends on this subject.
+     */
+    calculateHeights(): Map<string, number> {
+        const heights = new Map<string, number>();
+        const successors = new Map<string, string[]>();
+
+        // Build successor map
+        this.materias.forEach(m => {
+            const prList = Array.isArray(m._pr) ? m._pr : (m._pr ? [m._pr] : []);
+            prList.forEach(pr => {
+                if (typeof pr === 'string') {
+                    if (!successors.has(pr)) successors.set(pr, []);
+                    successors.get(pr)!.push(m._re);
+                }
+            });
+        });
+
+        const getSubjectHeight = (acronym: string): number => {
+            if (heights.has(acronym)) return heights.get(acronym)!;
+
+            const mySuccessors = successors.get(acronym) || [];
+            if (mySuccessors.length === 0) {
+                heights.set(acronym, 0);
+                return 0;
+            }
+
+            const maxSuccessorHeight = Math.max(...mySuccessors.map(s => getSubjectHeight(s)));
+            const height = 1 + maxSuccessorHeight;
+            heights.set(acronym, height);
+            return height;
+        };
+
+        this.materias.forEach(m => getSubjectHeight(m._re));
+        return heights;
+    }
 }

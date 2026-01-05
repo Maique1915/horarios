@@ -1,7 +1,8 @@
 import Grafos from './Grafos';
 export default class Escolhe {
 
-    constructor(genesis, schedule) {
+    constructor(genesis, schedule, weights = new Map()) {
+        this.weights = weights;
         this.schedule = schedule || [[], []]
 
         // Normalize genesis subjects 
@@ -18,27 +19,38 @@ export default class Escolhe {
         // Active slots as sparse list of strings "dayIndex:timeIndex"
         let activeSlots = [];
 
-        if (subject._ho && Array.isArray(subject._ho)) {
-            let dbDays = [], dbTimeSlots = [];
-            if (Array.isArray(this.schedule) && this.schedule.length >= 2) {
-                [dbDays, dbTimeSlots] = this.schedule;
-            }
-
-            if (dbDays && dbTimeSlots) {
-                subject._ho.forEach(slot => {
-                    if (Array.isArray(slot) && slot.length === 2) {
-                        const [dayId, timeId] = slot
-                        const dayIndex = dbDays.findIndex(d => d.id === dayId)
-                        const timeIndex = dbTimeSlots.findIndex(t => t.id === timeId)
-
-                        if (dayIndex !== -1 && timeIndex !== -1) {
-                            activeSlots.push(`${dayIndex}:${timeIndex}`)
-                        }
-                    }
-                })
-            }
+        // Support both array [days, slots] and object { days, slots }
+        let dbDays = [], dbTimeSlots = [];
+        if (Array.isArray(this.schedule) && this.schedule.length >= 2) {
+            [dbDays, dbTimeSlots] = this.schedule;
+        } else if (this.schedule && typeof this.schedule === 'object') {
+            dbDays = this.schedule.days || [];
+            dbTimeSlots = this.schedule.slots || [];
         }
-        return { ...subject, _grid: activeSlots }
+
+        // 1. Check direct _ho (legacy/simple)
+        let rawHo = subject._ho;
+
+        // 2. Fallback to _classSchedules if _ho is missing
+        if ((!rawHo || rawHo.length === 0) && subject._classSchedules && subject._classSchedules.length > 0) {
+            // Pick the first class as the "representative" for prediction/simulation
+            rawHo = subject._classSchedules[0].ho;
+        }
+
+        if (rawHo && Array.isArray(rawHo) && dbDays.length > 0 && dbTimeSlots.length > 0) {
+            rawHo.forEach(slot => {
+                if (Array.isArray(slot) && slot.length === 2) {
+                    const [dayId, timeId] = slot;
+                    const dayIndex = dbDays.findIndex(d => d.id === dayId);
+                    const timeIndex = dbTimeSlots.findIndex(t => t.id === timeId);
+
+                    if (dayIndex !== -1 && timeIndex !== -1) {
+                        activeSlots.push(`${dayIndex}:${timeIndex}`);
+                    }
+                }
+            });
+        }
+        return { ...subject, _grid: activeSlots };
     }
 
     reduz() {
@@ -128,11 +140,16 @@ export default class Escolhe {
             }
         }
 
-        return aux.sort(this.compare)
+        return aux.sort(this.compare.bind(this))
     }
 
     compare(a, b) {
-        return b.length - a.length
+        // First priority: Number of subjects (more is better)
+        if (a.length !== b.length) return b.length - a.length;
+
+        // Second priority: Maximum criticality (unlocking longest chains)
+        const getSumWeight = (arr) => arr.reduce((acc, s) => acc + (this.weights.get(s._re) || 0), 0);
+        return getSumWeight(b) - getSumWeight(a);
     }
 
     existe(c, a) {
@@ -161,7 +178,7 @@ export default class Escolhe {
      * @param {Array} allSubjects - All available subjects in the course.
      * @param {Array} completedSubjects - Subjects already completed by the user.
      * @param {Object} scheduleMeta - { days: [], slots: [] } Metadata for schedule parsing.
-     * @returns {number} Estimated number of semesters remaining.
+     * @returns {{ semestersCount: number, semesterGrids: Array<Array<Object>> }} Prediction result containing count and grids.
      */
     static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { electiveHours: Infinity, mandatoryHours: Infinity }) {
         if (!allSubjects || allSubjects.length === 0) return 0;
@@ -197,8 +214,11 @@ export default class Escolhe {
             if (candidates.length === 0) break;
 
             // 2. Select best schedule
+            // Calculate heights for current pool of subjects
+            const heights = grafos.calculateHeights();
+
             // Use Deterministic chooser to avoid random results in prediction
-            const escolhe = new EscolheDeterministico(candidates, scheduleMeta);
+            const escolhe = new EscolheDeterministico(candidates, scheduleMeta, heights);
             const possibleSchedules = escolhe.exc();
 
             if (possibleSchedules.length === 0) {
@@ -236,15 +256,20 @@ class EscolheDeterministico extends Escolhe {
 
             for (let i = 0; i < this.genesis.length; i++) {
                 const s = this.genesis[i];
-                // Heuristic score
-                let score = s._se; // Base: Semester
-                if (s._el) score += 1000; // Penalize electives
+                const criticality = this.weights.get(s._re) || 0;
+
+                // Heuristic score (lower is worse)
+                // We want to remove subjects with LOW criticality first
+                let score = -criticality * 10; // High criticality = low score (less likely to be worst)
+
+                score += s._se; // Penalize higher semesters (remove them first if criticality is same)
+                if (s._el) score += 1000; // Penalize electives (remove them first)
 
                 if (score > worstScore) {
                     worstScore = score;
                     worstIdx = i;
                 } else if (score === worstScore) {
-                    // Tie breaker: Random? Or ID? Use ID for stability
+                    // Tie breaker: Use ID for stability
                     if (s._id > this.genesis[worstIdx]._id) {
                         worstIdx = i;
                     }

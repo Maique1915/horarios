@@ -7,9 +7,10 @@ import {
     updateSubject,
     deleteSubject,
     deleteSubjectByAcronym,
-    toggleSubjectStatus
+    toggleSubjectStatus,
+    getCourseSchedule,
+    getCourseDimension
 } from '../services/disciplinaService';
-import { horarios, dimencao } from '../model/Filtro';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const useDisciplinas = (courseCode) => {
@@ -35,7 +36,7 @@ export const useDisciplinas = (courseCode) => {
         isLoading: loadingSch
     } = useQuery({
         queryKey: ['horarios', courseCode],
-        queryFn: () => horarios(courseCode),
+        queryFn: () => getCourseSchedule(courseCode),
         staleTime: Infinity,
         enabled: !!courseCode,
     });
@@ -45,7 +46,7 @@ export const useDisciplinas = (courseCode) => {
         isLoading: loadingDim
     } = useQuery({
         queryKey: ['dimensao', courseCode],
-        queryFn: () => dimencao(courseCode),
+        queryFn: () => getCourseDimension(courseCode),
         staleTime: Infinity,
         enabled: !!courseCode,
     });

@@ -3,20 +3,19 @@
 import React, { Suspense } from 'react';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import LoadingSpinner from '../../../components/LoadingSpinner';
-import { useEditCourseController } from './useEditCourseController';
-import EditCourseView from './EditCourseView';
+import { useClassManagerController } from './useClassManagerController';
+import ClassManagerView from './ClassManagerView';
 
-// Main Component
-const AdminCoursePageContent = () => {
-    const ctrl = useEditCourseController();
-    return <EditCourseView ctrl={ctrl} />;
+const ClassManagerPageContent = () => {
+    const ctrl = useClassManagerController();
+    return <ClassManagerView ctrl={ctrl} />;
 }
 
-export default function AdminCoursePage() {
+export default function ClassManagerPage() {
     return (
         <Suspense fallback={<LoadingSpinner message="Carregando..." />}>
             <ProtectedRoute>
-                <AdminCoursePageContent />
+                <ClassManagerPageContent />
             </ProtectedRoute>
         </Suspense>
     );
