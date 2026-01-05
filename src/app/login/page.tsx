@@ -68,7 +68,7 @@ const useLoginController = () => {
         try {
             const result = await login(username, password);
 
-            if (result.success) {
+            if (result.success && result.user) {
                 // Check if user is expired
                 let isExpired = false;
                 if (result.user.subscription_expires_at) {
@@ -84,7 +84,7 @@ const useLoginController = () => {
                     router.push(from);
                 }
             } else {
-                setError(result.error);
+                setError(result.error || 'Erro ao realizar login. Tente novamente.');
                 setLoading(false); // Only stop loading on error, on success we redirect
             }
         } catch (err) {
