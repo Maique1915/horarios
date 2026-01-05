@@ -416,18 +416,18 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
                                             .filter(s => {
                                                 if (ctrl.selectedSemesterFilter === 'all') return true;
                                                 if (ctrl.selectedSemesterFilter === 'optativas') return !s._el;
-                                                return s._se == ctrl.selectedSemesterFilter;
+                                                return s._se == Number(ctrl.selectedSemesterFilter);
                                             })
                                             .sort((a, b) => {
                                                 if (a._el !== b._el) return a._el ? -1 : 1;
                                                 return (a._di || "").localeCompare(b._di || "");
                                             })
                                             .map((subject) => {
-                                                const isSelected = ctrl.selectedSubjectIds.has(subject._id);
+                                                const isSelected = ctrl.selectedSubjectIds.has(String(subject._id));
                                                 return (
                                                     <div
                                                         key={subject._id}
-                                                        onClick={() => ctrl.handleToggleSubject(subject._id)}
+                                                        onClick={() => ctrl.handleToggleSubject(String(subject._id))}
                                                         className={`px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${isSelected ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}
                                                     >
                                                         <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-green-500 border-green-500' : 'border-slate-300 dark:border-slate-600'}`}>

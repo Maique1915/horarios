@@ -109,7 +109,7 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
         _workload: (practCreds + theoryCreds) * 18,
         _ag: item.active,
         _pr: _pr,
-        _pr_creditos_input: creditsReq ? creditsReq.min_credits : 0,
+        _pr_creditos_input: creditsReq?.min_credits ?? 0,
         _classSchedules: schedulesBySubjectId ? (schedulesBySubjectId.get(item.id) || []) : [],
     };
 };
