@@ -52,7 +52,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
 
-            if (!isPaid || isExpired) {
+            // Allow access if paid OR if trial is not expired
+            if (!isPaid && isExpired) {
                 const allowedPaths = [ROUTES.PLANS, ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.HOME];
                 const isStaticAllowed = allowedPaths.includes(pathname || '') || pathname?.startsWith('/api');
                 const isCoursePublicRoute = pathname ? /^\/[^\/]+(\/(cronograma|grades))?$/.test(pathname) : false;
@@ -61,7 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const isAllowed = isStaticAllowed || (isCoursePublicRoute && !isProtectedUserRoute);
 
                 if (!isAllowed) {
-                    console.log("Acesso negado (Não pago ou Expirado), redirecionando para /plans");
+                    console.log("Acesso negado (Não pago e Expirado), redirecionando para /plans");
                     router.push(ROUTES.PLANS);
                 }
             }

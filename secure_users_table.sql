@@ -68,14 +68,15 @@ begin
     raise exception 'Usuário já existe';
   end if;
 
-  insert into users (username, password_hash, name, role, active, is_paid)
+  insert into users (username, password_hash, name, role, active, is_paid, subscription_expires_at)
   values (
     username_in,
     crypt(password_in, gen_salt('bf')),
     name_in,
     'user',
     true,
-    false
+    false,
+    NOW() + interval '10 days'
   )
   returning * into new_user;
   
@@ -92,6 +93,7 @@ begin
     'role', new_user.role,
     'active', new_user.active,
     'is_paid', new_user.is_paid,
+    'subscription_expires_at', new_user.subscription_expires_at,
     'courses', case when course_code is not null then json_build_object('code', course_code) else null end
   );
 end;
