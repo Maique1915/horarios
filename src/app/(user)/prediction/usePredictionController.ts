@@ -88,13 +88,14 @@ export const usePredictionController = () => {
     // History State
     const [history, setHistory] = useState<HistoryState[]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const canInteract = user?.is_paid || false;
 
     // --- Effects ---
 
     // Auth Check
     useEffect(() => {
         if (!authLoading) {
-            if (!user || isExpired || !user.is_paid) {
+            if (!user || isExpired) {
                 router.push('/');
             }
         }
@@ -263,7 +264,7 @@ export const usePredictionController = () => {
                 height: TITLE_HEIGHT,
                 depth: semesterNum,
                 isFixed: index < fixedSemesters.length,
-                onEdit: () => handleEditSemester(index)
+                onEdit: canInteract ? () => handleEditSemester(index) : null
             };
             nodes.push(titleNode);
 
@@ -453,6 +454,9 @@ export const usePredictionController = () => {
         toggleBlacklist,
         handleEditSemester,
         handleAddSubjectToSemester,
-        handleRemoveSubjectFromSemester
+        handleRemoveSubjectFromSemester,
+
+        // Trial Status
+        canInteract
     };
 };

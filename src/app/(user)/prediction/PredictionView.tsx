@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import MapaMentalVisualizacao from '../../../components/prediction/MapaMentalVisualizacao';
+import { useRouter } from 'next/navigation';
+import ROUTES from '../../../routes';
 import { usePredictionController, Subject, COLUMN_WIDTH, ROW_HEIGHT, NODE_WIDTH, NODE_HEIGHT, TITLE_WIDTH, TITLE_HEIGHT } from './usePredictionController';
 
 // --- Views ---
@@ -38,7 +40,7 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                 onClick={() => ctrl.setSelectedSemesterIndex(null)}
                                 className="w-full py-1.5 text-xs font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
                             >
-                                Concluir Edição
+                                Sair da Edição
                             </button>
                         </div>
 
@@ -58,13 +60,15 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                                 {(subject._ap || 0) + (subject._at || 0)} cr • {subject._workload}h
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => subject._id !== undefined && ctrl.handleRemoveSubjectFromSemester(subject._id, ctrl.selectedSemesterIndex)}
-                                            className="w-6 h-6 rounded flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                            title="Remover do semestre"
-                                        >
-                                            <span className="material-symbols-outlined text-base">remove_circle</span>
-                                        </button>
+                                        {ctrl.canInteract && (
+                                            <button
+                                                onClick={() => subject._id !== undefined && ctrl.handleRemoveSubjectFromSemester(subject._id, ctrl.selectedSemesterIndex)}
+                                                className="w-8 h-8 rounded flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                title="Remover do semestre"
+                                            >
+                                                <span className="material-symbols-outlined text-base">remove_circle</span>
+                                            </button>
+                                        )}
                                     </div>
                                 ))}
                                 {(ctrl.fixedSemesters[ctrl.selectedSemesterIndex] || []).length === 0 && (
@@ -90,13 +94,15 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                             {(subject._ap || 0) + (subject._at || 0)} cr • {subject._workload}h
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => ctrl.handleAddSubjectToSemester(subject, ctrl.selectedSemesterIndex)}
-                                        className="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors"
-                                        title="Adicionar"
-                                    >
-                                        <span className="material-symbols-outlined text-base">add_circle</span>
-                                    </button>
+                                    {ctrl.canInteract && (
+                                        <button
+                                            onClick={() => ctrl.handleAddSubjectToSemester(subject, ctrl.selectedSemesterIndex)}
+                                            className="w-8 h-8 rounded flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors"
+                                            title="Adicionar"
+                                        >
+                                            <span className="material-symbols-outlined text-base">add_circle</span>
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                             {ctrl.suggestions.length === 0 && (
@@ -126,21 +132,23 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                     return (
                                         <div key={subject._id} className="flex items-center justify-between group p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-state-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
                                             <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!isBlacklisted}
-                                                    onChange={() => subject._id !== undefined && ctrl.toggleBlacklist(subject._id)}
-                                                    className="rounded border-slate-300 text-primary focus:ring-primary"
-                                                    title={isBlacklisted ? "Incluir na simulação" : "Remover da simulação"}
-                                                />
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="truncate text-sm text-slate-700 dark:text-slate-300" title={subject._di}>
+                                                    <div className={`truncate text-sm ${isBlacklisted ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300'}`} title={subject._di}>
                                                         {subject._di}
                                                     </div>
                                                     <div className="text-[10px] text-slate-400 dark:text-slate-500">
                                                         {(subject._ap || 0) + (subject._at || 0)} cr • {subject._workload}h
                                                     </div>
                                                 </div>
+                                                {ctrl.canInteract && (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!isBlacklisted}
+                                                        onChange={() => subject._id !== undefined && ctrl.toggleBlacklist(subject._id)}
+                                                        className="rounded border-slate-300 text-primary focus:ring-primary"
+                                                        title={isBlacklisted ? "Incluir na simulação" : "Remover da simulação"}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -201,12 +209,29 @@ const CanvasView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController>
 };
 
 export default function PredictionView({ ctrl }: { ctrl: ReturnType<typeof usePredictionController> }) {
+    const router = useRouter();
     if (ctrl.loading) return <LoadingView />;
 
     return (
-        <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-background-light dark:bg-background-dark">
-            <SidebarView ctrl={ctrl} />
-            <CanvasView ctrl={ctrl} />
+        <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-background-light dark:bg-background-dark">
+            {!ctrl.canInteract && (
+                <div className="bg-amber-100 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center justify-center gap-3 animate-slideDown">
+                    <span className="material-symbols-outlined text-amber-600 dark:text-amber-400">info</span>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                        Você está no modo de visualização (Trial). Adquira um plano para personalizar sua predição.
+                    </p>
+                    <button
+                        onClick={() => router.push(ROUTES.PLANS)}
+                        className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300 hover:underline"
+                    >
+                        Ver Planos
+                    </button>
+                </div>
+            )}
+            <div className="flex flex-1 overflow-hidden">
+                <SidebarView ctrl={ctrl} />
+                <CanvasView ctrl={ctrl} />
+            </div>
         </div>
     );
 }
