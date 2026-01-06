@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getDays, getTimeSlots } from '../services/scheduleService';
+import { getDays, getTimeSlots } from '../../services/scheduleService';
 // Services
-import { loadClassesForGrid, saveCurrentEnrollments, saveCompletedSubjects } from '../services/disciplinaService';
-import { useAuth } from '../contexts/AuthContext';
+import { loadClassesForGrid, saveCurrentEnrollments, saveCompletedSubjects } from '../../services/disciplinaService';
+import { useAuth } from '../../contexts/AuthContext';
 import { toPng } from 'html-to-image';
-import { Subject } from '../types/Subject';
+import { Subject } from '../../types/Subject';
 
 interface Day {
     id: number;

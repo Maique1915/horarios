@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import { useProfileController } from './useProfileController';
 import ProfileView from './ProfileView';
 

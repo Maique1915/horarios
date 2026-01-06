@@ -1,8 +1,8 @@
 'use client';
 
 import React, { Suspense } from 'react';
-import ProtectedRoute from '../../../components/ProtectedRoute';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import ProtectedRoute from '../../../components/shared/ProtectedRoute';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import { useClassManagerController } from './useClassManagerController';
 import ClassManagerView from './ClassManagerView';
 

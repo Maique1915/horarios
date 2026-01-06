@@ -1,6 +1,6 @@
 import React from 'react';
 import { AuthProvider } from '../contexts/AuthContext';
-import AppLayout from '../components/AppLayout';
+import AppLayout from '../components/layout/AppLayout';
 import './globals.css';
 import { Lexend } from 'next/font/google';
 
@@ -15,7 +15,7 @@ export const metadata = {
     description: 'Sistema de Grade Horária e Planejamento',
 };
 
-import QueryProvider from '@/components/QueryProvider';
+import QueryProvider from '@/components/layout/QueryProvider';
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
 

@@ -4,8 +4,8 @@ import React, { Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
-import Comum from '../../../components/Comum';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import Comum from '../../../components/shared/Comum';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import { loadClassesForGrid, getCourseSchedule, getCourseDimension } from '../../../services/disciplinaService';
 import { Subject } from '../../../types/Subject';
 

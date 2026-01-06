@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import LoadingSpinner from './LoadingSpinner';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
+import LoadingSpinner from '../shared/LoadingSpinner';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserManagementModal = ({ onClose }) => {
     const { user: currentUser } = useAuth();

@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import ROUTES from '../../routes';
 import { supabase } from '../../lib/supabaseClient';
-import LoadingSpinner from '../../components/LoadingSpinner';
-import PixPayment from '../../components/PixPayment';
+import LoadingSpinner from '../../components/shared/LoadingSpinner';
+import PixPayment from '../../components/plans/PixPayment';
 
 // --- Types ---
 interface Course {

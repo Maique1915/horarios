@@ -1,9 +1,9 @@
 import React from 'react';
 import Select from 'react-select';
-import DisciplinaForm from '../../../components/DisciplinaForm';
-import DisciplinaTable from '../../../components/DisciplinaTable';
-import LoadingSpinner, { SavingSpinner } from '../../../components/LoadingSpinner';
-import UserManagementModal from '../../../components/UserManagementModal';
+import DisciplinaForm from '../../../components/admin/DisciplinaForm';
+import DisciplinaTable from '../../../components/admin/DisciplinaTable';
+import LoadingSpinner, { SavingSpinner } from '../../../components/shared/LoadingSpinner';
+import UserManagementModal from '../../../components/admin/UserManagementModal';
 import { useEditDbController } from './useEditDbController';
 
 // --- Views ---

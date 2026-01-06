@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 import ROUTES from '../../routes';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
 // --- Constants ---
 const SLIDES = [

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import ROUTES from '../../../routes';
-import Comum from '../../../components/Comum';
+import Comum from '../../../components/shared/Comum';
 import { useProfileController } from './useProfileController';
 import { CompletedSubjectsSection } from './CompletedSubjectsSection';
 import { Subject } from '@/types/Subject';

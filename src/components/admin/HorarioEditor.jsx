@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/HorarioEditor.css';
-import LoadingSpinner from './LoadingSpinner';
-import { getDays, getTimeSlots } from '../services/scheduleService';
+import LoadingSpinner from '../shared/LoadingSpinner';
+import { getDays, getTimeSlots } from '../../services/scheduleService';
 
 
 const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCancel, isReviewing }) => {

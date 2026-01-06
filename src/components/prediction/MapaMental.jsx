@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { loadDbData } from '../services/disciplinaService';
+import { loadDbData } from '../../services/disciplinaService';
 import { useQuery } from '@tanstack/react-query';
 import MapaMentalVisualizacao from './MapaMentalVisualizacao';
-import LoadingSpinner from './LoadingSpinner';
+import LoadingSpinner from '../shared/LoadingSpinner';
 // Remover import html2canvas from 'html2canvas';
 
 // Constantes para o layout

@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
-import MapaMentalVisualizacao from '../../../components/MapaMentalVisualizacao';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import MapaMentalVisualizacao from '../../../components/prediction/MapaMentalVisualizacao';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import { loadDbData } from '../../../services/disciplinaService';
 import { Subject } from '../../../types/Subject';
 

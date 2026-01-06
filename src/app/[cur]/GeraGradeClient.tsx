@@ -5,12 +5,12 @@ import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Relative imports adjusted for src/app/[cur]/page.tsx
-import Comum from '../../components/Comum';
+import Comum from '../../components/shared/Comum';
 import Grafos from '../../model/util/Grafos';
 import Escolhe from '../../model/util/Escolhe';
 // import { ativas, horarios, dimencao } from '../../model/util/Filtro.jsx/index.js'; // REMOVED
-import MapaMental from '../../components/MapaMental';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import MapaMental from '../../components/prediction/MapaMental';
+import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { useAuth } from '../../contexts/AuthContext';
 import { loadCompletedSubjects, toggleMultipleSubjects, loadClassesForGrid, getCourseSchedule, getCourseDimension } from '../../services/disciplinaService';
 import { Subject } from '../../types/Subject';

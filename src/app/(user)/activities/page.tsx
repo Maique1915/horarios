@@ -21,7 +21,7 @@ import {
     getComplementaryActivities,
     getUserGroupProgress
 } from '../../../services/complementaryService';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 
 // --- Types ---
 // --- Types ---

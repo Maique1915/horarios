@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import LoadingSpinner from '../../../components/LoadingSpinner';
-import MapaMentalVisualizacao from '../../../components/MapaMentalVisualizacao';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import MapaMentalVisualizacao from '../../../components/prediction/MapaMentalVisualizacao';
 import { usePredictionController, Subject, COLUMN_WIDTH, ROW_HEIGHT, NODE_WIDTH, NODE_HEIGHT, TITLE_WIDTH, TITLE_HEIGHT } from './usePredictionController';
 
 // --- Views ---

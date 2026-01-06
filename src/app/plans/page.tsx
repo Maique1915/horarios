@@ -3,8 +3,8 @@
 import React, { Suspense, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearchParams } from 'next/navigation';
-import LoadingSpinner from '@/components/LoadingSpinner';
-import PixPayment from '@/components/PixPayment';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import PixPayment from '@/components/plans/PixPayment';
 
 // --- Controller ---
 

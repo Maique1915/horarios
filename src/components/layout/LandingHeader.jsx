@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../contexts/AuthContext';
-import ROUTES from '../routes';
+import { useAuth } from '../../contexts/AuthContext';
+import ROUTES from '../../routes';
 
 const LandingHeader = () => {
     const { user, logout } = useAuth();

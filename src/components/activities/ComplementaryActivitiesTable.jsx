@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getComplementaryActivities, addComplementaryActivity, deleteComplementaryActivity } from '../services/complementaryService';
-import LoadingSpinner from './LoadingSpinner';
+import { getComplementaryActivities, addComplementaryActivity, deleteComplementaryActivity } from '../../services/complementaryService';
+import LoadingSpinner from '../shared/LoadingSpinner';
 
 const ComplementaryActivitiesTable = () => {
     const [activities, setActivities] = useState([]);

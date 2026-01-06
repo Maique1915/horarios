@@ -1,6 +1,6 @@
 import React from 'react';
 import Select from 'react-select';
-import LoadingSpinner from '../../../components/LoadingSpinner';
+import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import { useClassManagerController } from './useClassManagerController';
 
 // --- Views ---

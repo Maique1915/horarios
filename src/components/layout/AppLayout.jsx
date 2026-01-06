@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '../contexts/AuthContext';
-import ROUTES from '../routes';
-import { loadDbData } from '../services/disciplinaService';
+import { useAuth } from '../../contexts/AuthContext';
+import ROUTES from '../../routes';
+import { loadDbData } from '../../services/disciplinaService';
 import LandingHeader from './LandingHeader';
 import LandingFooter from './LandingFooter';
 
