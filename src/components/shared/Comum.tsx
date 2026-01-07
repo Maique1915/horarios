@@ -3,6 +3,7 @@ import { getDays, getTimeSlots } from '../../services/scheduleService';
 // Services
 import { loadClassesForGrid, saveCurrentEnrollments, saveCompletedSubjects } from '../../services/disciplinaService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { toPng } from 'html-to-image';
 import { Subject } from '../../types/Subject';
 
@@ -76,7 +77,7 @@ const Comum: React.FC<ComumProps> = (props) => {
         feitas: props.feitas || [],
     });
 
-    console.log("Comum: Rendered. Received feitas prop:", props.feitas);
+    const queryClient = useQueryClient();
     const [isPrinting, setIsPrinting] = useState(false);
     const [transitioningTo, setTransitioningTo] = useState<number | null>(null);
     const [previousGrade, setPreviousGrade] = useState<PreviousGradeState | null>(null);
@@ -285,8 +286,6 @@ const Comum: React.FC<ComumProps> = (props) => {
 
 
     const handleSave = async () => {
-        console.log("handleSave called");
-        console.log("User status:", { user: !!user, isExpired });
         if (!user) return;
 
         setSaving(true);
@@ -318,13 +317,30 @@ const Comum: React.FC<ComumProps> = (props) => {
                 }
             }
 
-            console.log("Saving enrollments:", flatMaterias);
+            // Deduplicate flatMaterias by _id
+            const uniqueMaterias = Array.from(new Map(flatMaterias.map(item => [item._id, item])).values());
+            console.log("Saving enrollments (deduplicated):", uniqueMaterias);
 
-            await saveCurrentEnrollments(user.id, flatMaterias, periodoAtual);
+            await saveCurrentEnrollments(user.id, uniqueMaterias, periodoAtual);
+
             if (props.feitas) {
-                console.log("IDs das matérias já feitas:", props.feitas);
-                await saveCompletedSubjects(user.id, props.feitas);
+                // Deduplicate feitas IDs
+                const uniqueFeitas = Array.from(new Set(props.feitas));
+                console.log("IDs das matérias já feitas (deduplicated):", uniqueFeitas);
+                await saveCompletedSubjects(user.id, uniqueFeitas);
             }
+
+            // Invalidate Caches to update system-wide state
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['currentEnrollments', user.id] }),
+                queryClient.invalidateQueries({ queryKey: ['completedSubjects', user.id] }),
+                queryClient.invalidateQueries({ queryKey: ['userTotalHours', user.id] })
+            ]);
+
+            if (props.onSaveAction) {
+                await props.onSaveAction();
+            }
+
             alert("Grade salva com sucesso!");
         } catch (error) {
             console.error("Erro ao salvar grade:", error);

@@ -487,20 +487,42 @@ export const toggleMultipleSubjects = async (userId: number, subjectIds: (number
 };
 
 export const saveCurrentEnrollments = async (userId: number, enrollments: Subject[], semester: number | string): Promise<void> => {
-    const sem = Number(semester);
-    await currentEnrollmentsModel.deleteCurrentEnrollments(userId, sem);
+    // 1. Fetch existing enrollments for this user
+    // Note: We fetch all and filter by semester in code or query by semester.
+    // Given the model, let's fetch all (cheap) and filter.
+    const allEnrollments = await currentEnrollmentsModel.fetchCurrentEnrollments(userId);
+    // Ensure we match semester type (string vs number) logic
+    const existingInSemester = (allEnrollments || []).filter((e: any) => String(e.semester) === String(semester));
 
-    if (!enrollments || enrollments.length === 0) return;
+    // 2. Identify incoming unique IDs
+    const uniqueIncoming = Array.from(new Map(enrollments.map(item => [item._id, item])).values());
+    const incomingIds = new Set(uniqueIncoming.map(i => i._id));
 
-    const rows = enrollments.map(item => ({
-        user_id: userId,
-        subject_id: item._id,
-        class_name: item.class_name || null,
-        semester: sem,
-        schedule_data: item._ho || []
-    }));
+    // 3. Identify existing IDs
+    const existingIds = new Set(existingInSemester.map((e: any) => e.subjects?.id || e.subject_id));
 
-    await currentEnrollmentsModel.insertCurrentEnrollments(rows);
+    // 4. Calculate diff
+    const toDelete = Array.from(existingIds).filter(id => !incomingIds.has(id));
+    const toInsert = uniqueIncoming.filter(item => !existingIds.has(item._id));
+
+    // 5. Perform updates
+    if (toDelete.length > 0) {
+        // We need to cast back to (number | string)[]
+        await currentEnrollmentsModel.deleteCurrentEnrollmentsList(userId, semester, toDelete);
+    }
+
+    if (toInsert.length > 0) {
+        const rows = toInsert.map(item => ({
+            user_id: userId,
+            subject_id: item._id,
+            class_name: item.class_name || null,
+            semester: semester,
+            schedule_data: item._ho || []
+        }));
+        await currentEnrollmentsModel.insertCurrentEnrollments(rows);
+    }
+
+    console.log(`Smart Update: Deleted ${toDelete.length}, Inserted ${toInsert.length}`);
 };
 
 export const getCourseStats = async (): Promise<any[]> => {

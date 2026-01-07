@@ -35,12 +35,22 @@ export const fetchCurrentEnrollments = async (userId: number) => {
     return data;
 };
 
-export const deleteCurrentEnrollments = async (userId: number, semester: number) => {
+export const deleteCurrentEnrollments = async (userId: number, semester: string | number) => {
     const { error } = await supabase
         .from('current_enrollments')
         .delete()
         .eq('user_id', userId)
         .eq('semester', semester);
+    if (error) throw error;
+};
+
+export const deleteCurrentEnrollmentsList = async (userId: number, semester: string | number, subjectIds: (number | string)[]) => {
+    const { error } = await supabase
+        .from('current_enrollments')
+        .delete()
+        .eq('user_id', userId)
+        .eq('semester', semester)
+        .in('subject_id', subjectIds);
     if (error) throw error;
 };
 

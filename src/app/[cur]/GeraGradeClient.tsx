@@ -171,7 +171,11 @@ const useGeraGradeController = () => {
 
         if (promises.length > 0) {
             await Promise.all(promises);
-            await queryClient.invalidateQueries({ queryKey: ['completedSubjects', user.id] });
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['completedSubjects', user.id] }),
+                queryClient.invalidateQueries({ queryKey: ['currentEnrollments', user.id] }),
+                queryClient.invalidateQueries({ queryKey: ['userTotalHours', user.id] }),
+            ]);
             console.log("Subjects synced successfully");
         }
     };
@@ -241,14 +245,23 @@ const useGeraGradeController = () => {
         const aux = [];
         const e = new Set();
         for (const i of m) {
-            if (!e.has(i._re)) {
-                e.add(i._re);
-                if (i._di.includes(" - A") || i._di.includes(" - B")) {
-                    i._di = i._di.substring(0, i._di.length - 4);
-                } else if (!i._el && !i._di.includes(" - OPT")) {
-                    i._di += " - OPT";
+            // Trim acronym to handle whitespace issues
+            const key = i._re ? i._re.trim() : i._re;
+
+            if (!e.has(key)) {
+                e.add(key);
+
+                // Clone to avoid side effects
+                const newItem = { ...i };
+
+                if (newItem._di.includes(" - A") || newItem._di.includes(" - B")) {
+                    newItem._di = newItem._di.substring(0, newItem._di.length - 4);
+                } else if (!newItem._el && !newItem._di.includes(" - OPT")) {
+                    newItem._di += " - OPT";
                 }
-                aux.push(i);
+                aux.push(newItem);
+            } else {
+                console.warn("GeraGradeClient: Duplicate acronym detected and filtered:", key, i._di);
             }
         }
         return aux;
@@ -714,8 +727,6 @@ const GeraGradeView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
             const subject = ctrl.arr.find((s) => s._re === name);
             return subject ? subject._id : null;
         }).filter((id): id is number => id !== null);
-
-        console.log("GeraGradeClient: Passing feitasIds to Comum:", feitasIds);
 
         return (
             <Comum
