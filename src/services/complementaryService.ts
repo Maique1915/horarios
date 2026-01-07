@@ -124,20 +124,33 @@ export const getUserTotalHours = async (userId: number, courseId?: number): Prom
     }
 };
 
+interface SubgroupProgress {
+    id: number;
+    code: string;
+    description: string;
+    limit: number;
+    formula?: string;
+    total: number;
+    capped_total: number;
+}
+
 interface GroupProgress {
     group: string;
     label: string;
     description: string;
     limit: number;
+    min_limit?: number;
     total: number;
     capped_total: number;
+    subgroups: SubgroupProgress[];
 }
 
 export const getUserGroupProgress = async (userId: number, courseId?: number): Promise<GroupProgress[]> => {
-    // 1. Fetch user activities and group definitions
-    const [userActivities, dbGroups] = await Promise.all([
+    // 1. Fetch user activities, group definitions and ALL catalog activities
+    const [userActivities, dbGroups, catalogActivities] = await Promise.all([
         fetchUserActivitiesGroups(userId),
-        fetchActivityGroups(courseId)
+        fetchActivityGroups(courseId),
+        getComplementaryActivities(courseId)
     ]);
 
     // 1.1 Filter user activities by course
@@ -145,44 +158,48 @@ export const getUserGroupProgress = async (userId: number, courseId?: number): P
         ? userActivities.filter(a => a.activity?.course_id === courseId)
         : userActivities;
 
-    // 2. Aggregate hours by activity type (to cap them individually first)
-    const activityTypeTotals: Record<number, { group: string, total: number, limit: number }> = {};
+    // 2. Aggregate hours by activity type
+    const activityTypeTotals: Record<number, { total: number }> = {};
     filteredActivities.forEach(item => {
         const aid = item.activity_id;
-        if (!activityTypeTotals[aid]) {
-            activityTypeTotals[aid] = {
-                group: item.activity?.group || 'OUTROS',
-                total: 0,
-                limit: item.activity?.limit_hours || Infinity
-            };
-        }
+        if (!activityTypeTotals[aid]) activityTypeTotals[aid] = { total: 0 };
         activityTypeTotals[aid].total += (item.hours || 0);
     });
 
-    // 3. Aggregate totals per group (raw and capped)
-    const rawGroupTotals: Record<string, number> = {};
-    const cappedGroupTotals: Record<string, number> = {};
-
-    Object.values(activityTypeTotals).forEach(item => {
-        if (!rawGroupTotals[item.group]) rawGroupTotals[item.group] = 0;
-        if (!cappedGroupTotals[item.group]) cappedGroupTotals[item.group] = 0;
-
-        rawGroupTotals[item.group] += item.total;
-        cappedGroupTotals[item.group] += Math.min(item.total, item.limit);
-    });
-
-    // 4. Format result using DB limits
+    // 3. Format result using DB limits and Catalog details
     const result = dbGroups.map(group => {
-        const rawTotal = rawGroupTotals[group.id] || 0;
-        const cappedTotal = cappedGroupTotals[group.id] || 0;
+        const groupActivities = catalogActivities.filter(a => a.group === group.id);
+
+        let rawGroupTotal = 0;
+        let cappedGroupTotal = 0;
+
+        const subgroups: SubgroupProgress[] = groupActivities.map(activity => {
+            const rawTotal = activityTypeTotals[activity.id]?.total || 0;
+            const cappedTotal = Math.min(rawTotal, activity.limit_hours || Infinity);
+
+            rawGroupTotal += rawTotal;
+            cappedGroupTotal += cappedTotal;
+
+            return {
+                id: activity.id,
+                code: activity.code,
+                description: activity.description,
+                limit: activity.limit_hours,
+                formula: activity.workload_formula,
+                total: rawTotal,
+                capped_total: cappedTotal
+            };
+        });
 
         return {
             group: group.id,
             label: `Grupo ${group.id}`,
             description: group.description,
             limit: group.max_hours,
-            total: rawTotal,
-            capped_total: Math.min(cappedTotal, group.max_hours)
+            min_limit: group.min_hours,
+            total: rawGroupTotal,
+            capped_total: Math.min(cappedGroupTotal, group.max_hours),
+            subgroups
         };
     });
 

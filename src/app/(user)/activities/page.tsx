@@ -22,45 +22,14 @@ import {
     getUserGroupProgress
 } from '../../../services/complementaryService';
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
+import ComplementaryActivityForm from '../../../components/activities/ComplementaryActivityForm';
+import {
+    Activity,
+    GroupProgress,
+    Catalog
+} from '../../../types/complementary';
 
-// --- Types ---
-// --- Types ---
-interface Activity {
-    id: number;
-    activity_id: number;
-    hours: number;
-    semester: string;
-    document_link?: string;
-    description?: string;
-    activity?: {
-        group: string;
-        code: string;
-        description: string;
-        limit_hours?: number;
-    };
-    [key: string]: any;
-}
-
-interface GroupProgress {
-    group: string;
-    label: string;
-    description: string;
-    limit: number;
-    total: number;
-    capped_total: number;
-}
-
-interface CatalogItem {
-    id: number;
-    group: string;
-    code: string;
-    description: string;
-    limit_hours: number;
-}
-
-interface Catalog {
-    [key: string]: CatalogItem[];
-}
+// Types are now in src/types/complementary.ts
 
 // --- Controller ---
 const useActivitiesController = () => {
@@ -69,16 +38,8 @@ const useActivitiesController = () => {
     const userId = user?.id;
 
     // --- State ---
-    // Section: Form State
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedActivityId, setSelectedActivityId] = useState('');
-    const [selectedGroup, setSelectedGroup] = useState('');
-    const [hours, setHours] = useState('');
-    const [minutes, setMinutes] = useState('');
-    const [semester, setSemester] = useState('');
-    const [documentLink, setDocumentLink] = useState('');
-    const [description, setDescription] = useState('');
 
     // Section: Table State
     const [globalFilter, setGlobalFilter] = useState('');
@@ -87,6 +48,8 @@ const useActivitiesController = () => {
         pageIndex: 0,
         pageSize: 5,
     });
+
+    const [selectedGroupDetails, setSelectedGroupDetails] = useState<GroupProgress | null>(null);
 
     // --- Data Fetching ---
 
@@ -130,34 +93,6 @@ const useActivitiesController = () => {
     const loading = loadingProgress || loadingActivities || loadingCatalog;
 
     // --- Mutations ---
-    const addActivityMutation = useMutation({
-        mutationFn: addUserActivity,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['userActivities', userId] });
-            queryClient.invalidateQueries({ queryKey: ['userGroupProgress', userId] });
-            queryClient.invalidateQueries({ queryKey: ['userTotalHours', userId] });
-            resetForm();
-        },
-        onError: (error) => {
-            console.error("Error adding activity:", error);
-            alert("Erro ao registrar atividade.");
-        }
-    });
-
-    const updateActivityMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number, data: any }) => updateUserActivity(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['userActivities', userId] });
-            queryClient.invalidateQueries({ queryKey: ['userGroupProgress', userId] });
-            queryClient.invalidateQueries({ queryKey: ['userTotalHours', userId] });
-            resetForm();
-        },
-        onError: (error) => {
-            console.error("Error updating activity:", error);
-            alert("Erro ao atualizar atividade.");
-        }
-    });
-
     const deleteActivityMutation = useMutation({
         mutationFn: deleteUserActivity,
         onSuccess: () => {
@@ -173,67 +108,25 @@ const useActivitiesController = () => {
 
     // --- Handlers ---
 
-    const resetForm = () => {
-        setHours('');
-        setMinutes('');
-        setSemester('');
-        setDocumentLink('');
-        setDescription('');
-        setSelectedActivityId('');
-        // Keep selectedGroup if desired
-        // setSelectedGroup(''); 
-        setEditingId(null);
-        setIsFormOpen(false);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!userId) return;
-
-        const payload = {
-            user_id: userId,
-            activity_id: parseInt(selectedActivityId), // Convert to number for DB
-            hours: parseFloat(hours || '0') + (parseFloat(minutes || '0') / 60),
-            semester,
-            document_link: documentLink,
-            description,
-            status: 'PENDING'
-        };
-
-        if (editingId) {
-            updateActivityMutation.mutate({ id: editingId, data: payload }, {
-                onSuccess: () => setIsFormOpen(false)
-            });
-        } else {
-            addActivityMutation.mutate(payload, {
-                onSuccess: () => setIsFormOpen(false)
-            });
-        }
-    };
-
     const handleDelete = (id: number) => {
         if (!confirm('Excluir esta atividade?')) return;
         deleteActivityMutation.mutate(id);
     };
 
     const handleEdit = (activity: Activity) => {
-        setEditingId(activity.id);
-        setSelectedGroup(activity.activity?.group || '');
-        setSelectedActivityId(activity.activity_id?.toString() || '');
-        setHours(Math.floor(activity.hours || 0).toString());
-        setMinutes(Math.round(((activity.hours || 0) - Math.floor(activity.hours || 0)) * 60).toString());
-        setSemester(activity.semester || '');
-        setDocumentLink(activity.document_link || '');
-        setDescription(activity.description || '');
+        setEditingActivity(activity);
         setIsFormOpen(true);
     };
 
     const handleNewActivity = () => {
-        resetForm();
+        setEditingActivity(null);
         setIsFormOpen(true);
     };
 
-    const handleCancelEdit = () => resetForm();
+    const handleCloseForm = () => {
+        setEditingActivity(null);
+        setIsFormOpen(false);
+    };
 
     // --- Helpers ---
     const getGroupIcon = (groupName: string) => {
@@ -259,11 +152,6 @@ const useActivitiesController = () => {
         if (m === 0) return `${h}h`;
         return `${h}h e ${m}min`;
     };
-
-    const selectedCatalogItem = useMemo(() => {
-        if (!selectedGroup || !selectedActivityId) return null;
-        return catalog[selectedGroup]?.find(c => c.id.toString() === selectedActivityId);
-    }, [catalog, selectedGroup, selectedActivityId]);
 
     // --- Table React Table Defs ---
     const columns = useMemo<ColumnDef<Activity>[]>(() => [
@@ -381,20 +269,16 @@ const useActivitiesController = () => {
         loading,
         catalog,
         isFormOpen,
-        editingId,
-        selectedGroup, selectedActivityId,
-        hours, minutes, semester, documentLink, description,
-        selectedCatalogItem,
+        editingActivity,
         table,
         globalFilter, setGlobalFilter,
         columnFilters, setColumnFilters,
+        selectedGroupDetails, setSelectedGroupDetails,
 
         // Actions
-        handleSubmit,
         handleNewActivity,
-        handleCancelEdit,
-        setSelectedGroup, setSelectedActivityId,
-        setHours, setMinutes, setSemester, setDocumentLink, setDescription,
+        handleCloseForm,
+        handleEdit,
         getGroupIcon
     };
 };
@@ -460,9 +344,20 @@ const ProgressSummaryView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesCo
             </div>
 
             {ctrl.groupProgress.map((group) => {
-                const percent = Math.min(100, (group.total / group.limit) * 100);
+                const percent = Math.min(100, (group.capped_total / group.limit) * 100);
+                const isFinished = group.capped_total >= (group.min_limit || group.limit);
+
                 return (
-                    <div key={group.group} className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex flex-col justify-between hover:shadow-md hover:border-primary/40 transition-all group">
+                    <div
+                        key={group.group}
+                        onClick={() => ctrl.setSelectedGroupDetails(group)}
+                        className="bg-surface-light dark:bg-surface-dark p-5 rounded-xl border border-border-light dark:border-border-dark shadow-sm flex flex-col justify-between hover:shadow-md hover:border-primary/40 transition-all group cursor-pointer relative overflow-hidden"
+                    >
+                        {isFinished && (
+                            <div className="absolute top-0 right-0 p-1">
+                                <span className="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+                            </div>
+                        )}
                         <div className="flex justify-between items-start mb-4">
                             <div className="p-2 rounded-lg bg-background-light dark:bg-background-dark text-text-light-secondary group-hover:text-primary transition-colors">
                                 <span className="material-symbols-outlined text-xl">{ctrl.getGroupIcon(group.group)}</span>
@@ -480,18 +375,94 @@ const ProgressSummaryView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesCo
                             </h3>
                             <div className="w-full h-1.5 bg-background-light dark:bg-background-dark rounded-full overflow-hidden mb-2">
                                 <div
-                                    className="h-full bg-primary transition-all duration-1000 ease-out rounded-full"
-                                    style={{ width: `${Math.min(100, (group.capped_total / group.limit) * 100)}%` }}
+                                    className={`h-full transition-all duration-1000 ease-out rounded-full ${isFinished ? 'bg-green-500' : 'bg-primary'}`}
+                                    style={{ width: `${percent}%` }}
                                 />
                             </div>
                             <div className="flex justify-between text-[10px] text-text-light-secondary uppercase font-bold tracking-wider">
                                 <span>{Math.round(percent)}%</span>
-                                <span>Meta: {group.limit}h</span>
+                                <span>META: {group.min_limit ? `${group.min_limit}-${group.limit}` : group.limit}H</span>
                             </div>
                         </div>
                     </div>
                 );
             })}
+
+            {ctrl.selectedGroupDetails && (
+                <GroupDetailsModal group={ctrl.selectedGroupDetails} onClose={() => ctrl.setSelectedGroupDetails(null)} />
+            )}
+        </div>
+    );
+};
+
+const GroupDetailsModal = ({ group, onClose }: { group: GroupProgress, onClose: () => void }) => {
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
+            <div className="bg-surface-light dark:bg-surface-dark w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-border-light dark:border-border-dark animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                <div className="p-6 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
+                    <div>
+                        <h2 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">{group.label}</h2>
+                        <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mt-1">{group.description}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-background-light dark:hover:bg-background-dark rounded-full transition-colors">
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div className="p-6 max-h-[70vh] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className="bg-background-light dark:bg-background-dark p-4 rounded-xl border border-border-light dark:border-border-dark">
+                            <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-1">Mínimo Requerido</span>
+                            <span className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">{group.min_limit || group.limit}h</span>
+                        </div>
+                        <div className="bg-background-light dark:bg-background-dark p-4 rounded-xl border border-border-light dark:border-border-dark">
+                            <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-1">Limite Máximo</span>
+                            <span className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">{group.limit}h</span>
+                        </div>
+                    </div>
+
+                    <h3 className="font-bold text-sm uppercase tracking-wider text-text-light-secondary mb-4">Subgrupos / Tipos de Atividade</h3>
+
+                    <div className="space-y-3">
+                        {group.subgroups.map(sub => {
+                            const subPercent = sub.limit ? Math.min(100, (sub.capped_total / sub.limit) * 100) : 0;
+                            return (
+                                <div key={sub.id} className="p-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-slate-900/20">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-mono font-bold text-xs text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                                    {sub.code}
+                                                </span>
+                                                <h4 className="font-bold text-sm text-text-light-primary dark:text-text-dark-primary">{sub.description}</h4>
+                                            </div>
+                                            {sub.formula && <p className="text-[10px] text-text-light-secondary italic">{sub.formula}</p>}
+                                        </div>
+                                        <div className="text-right ml-4">
+                                            <span className="font-bold text-sm">{sub.capped_total.toFixed(2)}h</span>
+                                            {sub.limit && <span className="text-[10px] text-text-light-secondary block">/ {sub.limit}h</span>}
+                                        </div>
+                                    </div>
+                                    {sub.limit && (
+                                        <div className="w-full h-1.5 bg-background-light dark:bg-background-dark rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-primary/60 rounded-full transition-all duration-700"
+                                                style={{ width: `${subPercent}%` }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-slate-900/40 border-t border-border-light dark:border-border-dark text-center">
+                    <p className="text-[10px] text-text-light-secondary">
+                        * O total do grupo é limitado a {group.limit}h, mesmo que a soma dos subgrupos seja maior.
+                    </p>
+                </div>
+            </div>
         </div>
     );
 };
@@ -592,170 +563,9 @@ const ActivitiesTableView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesCo
     );
 };
 
-const ActivityFormView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesController> }) => {
-    return (
-        <div className={`lg:col-span-1 order-1 lg:order-2 ${ctrl.isFormOpen ? 'fixed inset-0 z-50 overflow-y-auto bg-background-light dark:bg-background-dark p-4 animate-in fade-in slide-in-from-bottom-10 lg:static lg:p-0 lg:overflow-visible lg:bg-transparent lg:animate-none' : 'hidden lg:block'}`}>
-            <div className="bg-surface-light dark:bg-surface-dark p-6 rounded-xl border border-border-light dark:border-border-dark shadow-sm sticky top-6 h-full lg:h-auto overflow-y-auto lg:overflow-visible">
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-border-light dark:border-border-dark">
-                    <h3 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">
-                            {ctrl.editingId ? 'edit_note' : 'post_add'}
-                        </span>
-                        {ctrl.editingId ? 'Editar Atividade' : 'Nova Atividade'}
-                    </h3>
-                    {(ctrl.editingId || ctrl.isFormOpen) && (
-                        <button
-                            onClick={ctrl.handleCancelEdit}
-                            className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded bg-red-50 dark:bg-red-900/10 hover:bg-red-100 transition-colors"
-                        >
-                            Cancelar
-                        </button>
-                    )}
-                </div>
+// --- Moved Confetti to separate component ---
 
-                <form onSubmit={ctrl.handleSubmit} className="space-y-5">
-                    {/* Group Selection */}
-                    <div className="space-y-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Grupo</label>
-                        <div className="relative">
-                            <select
-                                className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all cursor-pointer hover:border-primary/50"
-                                value={ctrl.selectedGroup}
-                                onChange={(e) => {
-                                    ctrl.setSelectedGroup(e.target.value);
-                                    ctrl.setSelectedActivityId('');
-                                }}
-                            >
-                                <option value="">Selecione um grupo...</option>
-                                {Object.keys(ctrl.catalog).sort().map(g => (
-                                    <option key={g} value={g}>Grupo {g}</option>
-                                ))}
-                            </select>
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-light-secondary">
-                                <span className="material-symbols-outlined text-lg">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Atividade</label>
-                        <div className="relative">
-                            <select
-                                required
-                                disabled={!ctrl.selectedGroup}
-                                className="w-full p-3 pl-4 pr-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none appearance-none transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:border-primary/50"
-                                value={ctrl.selectedActivityId}
-                                onChange={(e) => ctrl.setSelectedActivityId(e.target.value)}
-                            >
-                                <option value="">Selecione a atividade...</option>
-                                {ctrl.selectedGroup && ctrl.catalog[ctrl.selectedGroup] && ctrl.catalog[ctrl.selectedGroup].map(c => (
-                                    <option key={c.id} value={c.id}>{c.code} - {c.description.substring(0, 30)}...</option>
-                                ))}
-                            </select>
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-light-secondary">
-                                <span className="material-symbols-outlined text-lg">expand_more</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {ctrl.selectedCatalogItem && (
-                        <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-800 text-xs animate-fadeIn">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="font-mono font-bold text-primary bg-white dark:bg-black/20 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
-                                    {ctrl.selectedCatalogItem.code}
-                                </span>
-                                <span className="text-text-light-secondary">Limite: <span className="font-bold">{ctrl.selectedCatalogItem.limit_hours}h</span></span>
-                            </div>
-                            <p className="text-text-light-primary dark:text-text-dark-primary leading-relaxed opacity-90">
-                                {ctrl.selectedCatalogItem.description}
-                            </p>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-12 sm:col-span-6 space-y-1.5">
-                            <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Semestre</label>
-                            <input
-                                required
-                                type="text"
-                                placeholder="ex: 2024.1"
-                                className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                value={ctrl.semester}
-                                onChange={(e) => ctrl.setSemester(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3 space-y-1.5">
-                            <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Horas</label>
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    placeholder="0"
-                                    className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
-                                    value={ctrl.hours}
-                                    onChange={(e) => ctrl.setHours(e.target.value)}
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-light-secondary text-xs font-bold">h</span>
-                            </div>
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3 space-y-1.5">
-                            <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Minutos</label>
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="59"
-                                    placeholder="0"
-                                    className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all pl-3"
-                                    value={ctrl.minutes}
-                                    onChange={(e) => ctrl.setMinutes(e.target.value)}
-                                />
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-light-secondary text-xs font-bold">m</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Descrição</label>
-                        <textarea
-                            className="w-full p-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
-                            value={ctrl.description}
-                            onChange={(e) => ctrl.setDescription(e.target.value)}
-                            placeholder="Detalhes adicionais da atividade..."
-                            rows={3}
-                        />
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wide text-text-light-secondary dark:text-text-dark-secondary">Link do Comprovante</label>
-                        <div className="relative">
-                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary pointer-events-none">
-                                <span className="material-symbols-outlined text-lg">link</span>
-                            </div>
-                            <input
-                                type="url"
-                                className="w-full p-3 pl-10 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                value={ctrl.documentLink}
-                                onChange={(e) => ctrl.setDocumentLink(e.target.value)}
-                                placeholder="https://drive.google.com/..."
-                            />
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="w-full py-3.5 bg-primary text-white rounded-lg hover:bg-primary-dark font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2"
-                    >
-                        <span className="material-symbols-outlined text-xl">{ctrl.editingId ? 'save' : 'add_circle'}</span>
-                        {ctrl.editingId ? 'Salvar Alterações' : 'Adicionar Atividade'}
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
-};
+// --- Moved ActivityFormView to separate component ---
 
 const ActivitiesView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesController> }) => {
     if (ctrl.loading) return <LoadingView />;
@@ -792,7 +602,15 @@ const ActivitiesView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesControl
                         </div>
 
                         {/* Right Column: Form */}
-                        <ActivityFormView ctrl={ctrl} />
+                        <ComplementaryActivityForm
+                            userId={ctrl.userId!}
+                            catalog={ctrl.catalog}
+                            groupProgress={ctrl.groupProgress}
+                            editingActivity={ctrl.editingActivity}
+                            isFormOpen={ctrl.isFormOpen}
+                            onClose={ctrl.handleCloseForm}
+                            onSuccess={ctrl.handleCloseForm}
+                        />
                     </div>
 
                     {/* Mobile Floating Action Button */}
