@@ -503,7 +503,7 @@ const PricingSection = ({ ROUTES, getLinkHref, user }: { ROUTES: any, getLinkHre
                                 </button>
                             ) : (
                                 <Link
-                                    href={user ? ROUTES.PLANS : ROUTES.REGISTER}
+                                    href={ROUTES.PLANS}
                                     className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover md:py-4 md:text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                                 >
                                     Assinar Agora

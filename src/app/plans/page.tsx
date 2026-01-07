@@ -15,10 +15,6 @@ const usePlansController = () => {
     const [showPix, setShowPix] = useState(false);
 
     const handleSubscribe = () => {
-        if (!user) {
-            alert("Você precisa estar logado para assinar.");
-            return;
-        }
         setShowPix(true);
     };
 
