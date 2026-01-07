@@ -27,7 +27,7 @@ interface ComumProps {
     g?: string;
     f?: string;
     separa?: boolean;
-    feitas?: string[]; // Array of acronyms
+    feitas?: (string | number)[]; // Array of IDs
     onSaveAction?: () => Promise<void>;
     completedSubjectsList?: string[];
     // These might be passed from parent to avoid re-fetching, though Comum fetches its own if missing?
@@ -40,7 +40,7 @@ interface ComumState {
     id: number;
     pageBlockStart: number;
     materias: Subject[] | Subject[][];
-    feitas: string[];
+    feitas: (string | number)[];
 }
 
 interface PreviousGradeState {
@@ -75,6 +75,8 @@ const Comum: React.FC<ComumProps> = (props) => {
         materias: props.materias || [],
         feitas: props.feitas || [],
     });
+
+    console.log("Comum: Rendered. Received feitas prop:", props.feitas);
     const [isPrinting, setIsPrinting] = useState(false);
     const [transitioningTo, setTransitioningTo] = useState<number | null>(null);
     const [previousGrade, setPreviousGrade] = useState<PreviousGradeState | null>(null);
@@ -283,7 +285,10 @@ const Comum: React.FC<ComumProps> = (props) => {
 
 
     const handleSave = async () => {
+        console.log("handleSave called");
+        console.log("User status:", { user: !!user, isExpired });
         if (!user) return;
+
         setSaving(true);
 
         let materiasParaSalvar: Subject[] | Subject[][];
@@ -317,6 +322,7 @@ const Comum: React.FC<ComumProps> = (props) => {
 
             await saveCurrentEnrollments(user.id, flatMaterias, periodoAtual);
             if (props.feitas) {
+                console.log("IDs das matérias já feitas:", props.feitas);
                 await saveCompletedSubjects(user.id, props.feitas);
             }
             alert("Grade salva com sucesso!");

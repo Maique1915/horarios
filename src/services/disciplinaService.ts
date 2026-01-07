@@ -520,15 +520,12 @@ export const getCourseStats = async (): Promise<any[]> => {
     });
 };
 
-export const saveCompletedSubjects = async (userId: number, acronyms: string[]): Promise<void> => {
-    if (!acronyms || acronyms.length === 0) return;
+export const saveCompletedSubjects = async (userId: number, subjectIds: (number | string)[]): Promise<void> => {
+    if (!subjectIds || subjectIds.length === 0) return;
 
-    const subjects = await subjectsModel.fetchSubjectsByAcronymsList(acronyms);
-    if (!subjects || subjects.length === 0) return;
-
-    const rows = subjects.map((s: any) => ({
+    const rows = subjectIds.map((id) => ({
         user_id: userId,
-        subject_id: s.id
+        subject_id: id
     }));
 
     await completedSubjectsModel.upsertCompletedSubjects(rows);

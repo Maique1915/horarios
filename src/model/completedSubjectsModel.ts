@@ -27,7 +27,8 @@ export const fetchCompletedSubjects = async (userId: number) => {
 
 export const upsertCompletedSubjects = async (rows: any[]) => {
     const { error } = await supabase.from('completed_subjects').upsert(rows, {
-        onConflict: 'user_id, subject_id'
+        onConflict: 'user_id, subject_id',
+        ignoreDuplicates: true
     });
     if (error) throw error;
 };

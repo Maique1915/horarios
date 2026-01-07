@@ -710,10 +710,17 @@ const GeraGradeView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
             </button>
         );
 
+        const feitasIds = ctrl.state.names.map(name => {
+            const subject = ctrl.arr.find((s) => s._re === name);
+            return subject ? subject._id : null;
+        }).filter((id): id is number => id !== null);
+
+        console.log("GeraGradeClient: Passing feitasIds to Comum:", feitasIds);
+
         return (
             <Comum
                 materias={ctrl.possibleGrades}
-                feitas={ctrl.state.names}
+                feitas={feitasIds}
                 tela={2}
                 fun={b}
                 cur={String(ctrl.cur)}
