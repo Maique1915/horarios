@@ -406,7 +406,7 @@ const TestimonialsSection = ({ comments }: { comments: CommentWithUser[] }) => {
     );
 };
 
-const PricingSection = ({ ROUTES, getLinkHref }: { ROUTES: any, getLinkHref: (key: string) => string }) => {
+const PricingSection = ({ ROUTES, getLinkHref, user }: { ROUTES: any, getLinkHref: (key: string) => string, user: any }) => {
     return (
         <section className="py-20 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark" id="precos">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -492,12 +492,23 @@ const PricingSection = ({ ROUTES, getLinkHref }: { ROUTES: any, getLinkHref: (ke
                                     </li>
                                 ))}
                             </ul>
-                            <Link
-                                href={ROUTES.REGISTER}
-                                className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover md:py-4 md:text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                            >
-                                Assinar Agora
-                            </Link>
+
+                            {user?.is_paid ? (
+                                <button
+                                    disabled
+                                    className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 cursor-not-allowed md:py-4 md:text-lg transition-all"
+                                >
+                                    <span className="material-symbols-outlined mr-2">check_circle</span>
+                                    Plano Ativo
+                                </button>
+                            ) : (
+                                <Link
+                                    href={user ? ROUTES.PLANS : ROUTES.REGISTER}
+                                    className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover md:py-4 md:text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                                >
+                                    Assinar Agora
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -515,7 +526,7 @@ export default function HomePage() {
             <FeaturesSection getLinkHref={ctrl.getLinkHref} />
             <CoursesSection courses={ctrl.courses} loading={ctrl.loading} />
             <TestimonialsSection comments={ctrl.comments} />
-            <PricingSection ROUTES={ROUTES} getLinkHref={ctrl.getLinkHref} />
+            <PricingSection ROUTES={ROUTES} getLinkHref={ctrl.getLinkHref} user={ctrl.user} />
         </>
     );
 }
