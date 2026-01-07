@@ -47,6 +47,7 @@ interface GroupProgress {
     description: string;
     limit: number;
     total: number;
+    capped_total: number;
 }
 
 interface CatalogItem {
@@ -91,8 +92,8 @@ const useActivitiesController = () => {
 
     // 1. Group Progress (Summary)
     const { data: groupProgress = [], isLoading: loadingProgress } = useQuery<GroupProgress[]>({
-        queryKey: ['userGroupProgress', userId],
-        queryFn: () => getUserGroupProgress(userId!),
+        queryKey: ['userGroupProgress', userId, user?.course_id],
+        queryFn: () => getUserGroupProgress(userId!, user?.course_id),
         enabled: !!userId,
         staleTime: Infinity, // Query invalidated by mutations
     });
@@ -112,9 +113,9 @@ const useActivitiesController = () => {
         data: catalog = {} as Catalog,
         isLoading: loadingCatalog
     } = useQuery<Catalog>({
-        queryKey: ['complementaryCatalog'],
+        queryKey: ['complementaryCatalog', user?.course_id],
         queryFn: async () => {
-            const data = await getComplementaryActivities();
+            const data = await getComplementaryActivities(user?.course_id);
             const grouped = data.reduce((acc: any, item: any) => {
                 const key = item.group;
                 if (!acc[key]) acc[key] = [];
@@ -429,15 +430,15 @@ const ProgressSummaryView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesCo
                     <div className="p-2 rounded-lg bg-white/20 text-white backdrop-blur-sm">
                         <span className="material-symbols-outlined text-xl">emoji_events</span>
                     </div>
-                    <span className="text-2xl font-bold">{ctrl.groupProgress.reduce((acc, curr) => acc + curr.total, 0).toFixed(2)}h</span>
+                    <span className="text-2xl font-bold">{ctrl.groupProgress.reduce((acc, curr) => acc + curr.capped_total, 0).toFixed(2)}h</span>
                 </div>
                 <div className="relative z-10">
                     <h3 className="font-bold text-sm mb-1 truncate">
-                        Total Acumulado
+                        Horas Integralizadas
                     </h3>
 
                     {(() => {
-                        const total = ctrl.groupProgress.reduce((acc, curr) => acc + curr.total, 0);
+                        const total = ctrl.groupProgress.reduce((acc, curr) => acc + curr.capped_total, 0);
                         const limit = 210;
                         const percent = Math.min(100, (total / limit) * 100);
                         return (
@@ -466,19 +467,21 @@ const ProgressSummaryView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesCo
                             <div className="p-2 rounded-lg bg-background-light dark:bg-background-dark text-text-light-secondary group-hover:text-primary transition-colors">
                                 <span className="material-symbols-outlined text-xl">{ctrl.getGroupIcon(group.group)}</span>
                             </div>
-                            <span className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">{group.total.toFixed(2)}h</span>
+                            <div className="flex flex-col items-end">
+                                <span className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary">{group.capped_total.toFixed(2)}h</span>
+                                {group.total > group.capped_total && (
+                                    <span className="text-[10px] text-orange-500 font-bold">-{(group.total - group.capped_total).toFixed(1)}h excedente</span>
+                                )}
+                            </div>
                         </div>
                         <div>
-                            <h3 className="font-bold text-sm text-text-light-primary dark:text-text-dark-primary mb-1 truncate" title={group.description}>
+                            <h3 className="font-bold text-sm text-text-light-primary dark:text-text-dark-primary mb-1 truncate text-wrap line-clamp-2 min-h-[2.5rem]" title={group.description}>
                                 {group.label}
                             </h3>
-                            <p className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary mb-3 truncate font-medium">
-                                {group.description}
-                            </p>
                             <div className="w-full h-1.5 bg-background-light dark:bg-background-dark rounded-full overflow-hidden mb-2">
                                 <div
                                     className="h-full bg-primary transition-all duration-1000 ease-out rounded-full"
-                                    style={{ width: `${percent}%` }}
+                                    style={{ width: `${Math.min(100, (group.capped_total / group.limit) * 100)}%` }}
                                 />
                             </div>
                             <div className="flex justify-between text-[10px] text-text-light-secondary uppercase font-bold tracking-wider">

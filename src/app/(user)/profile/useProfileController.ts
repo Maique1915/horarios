@@ -132,8 +132,8 @@ export const useProfileController = () => {
     });
 
     const { data: complementaryHours = 0, isLoading: loadingHours } = useQuery<number>({
-        queryKey: ['userTotalHours', user?.id],
-        queryFn: () => getUserTotalHours(user!.id),
+        queryKey: ['userTotalHours', user?.id, user?.course_id],
+        queryFn: () => getUserTotalHours(user!.id, user?.course_id),
         enabled: !!user?.id,
         staleTime: 1000 * 60 * 5,
     });

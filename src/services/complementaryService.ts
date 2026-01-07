@@ -3,7 +3,8 @@ import {
     insertComplementaryActivity,
     updateComplementaryActivity as updateActivityDb,
     deleteComplementaryActivity as deleteActivityDb,
-    DbComplementaryActivity
+    DbComplementaryActivity,
+    fetchActivityGroups
 } from '../model/complementaryActivitiesModel';
 
 import {
@@ -15,9 +16,9 @@ import {
     DbUserComplementaryActivity
 } from '../model/userProfileModel';
 
-export const getComplementaryActivities = async (): Promise<DbComplementaryActivity[]> => {
+export const getComplementaryActivities = async (courseId?: number): Promise<DbComplementaryActivity[]> => {
     try {
-        const data = await fetchAllComplementaryActivities();
+        const data = await fetchAllComplementaryActivities(courseId);
         return data;
     } catch (err) {
         console.error("Unexpected error in getComplementaryActivities:", err);
@@ -25,9 +26,9 @@ export const getComplementaryActivities = async (): Promise<DbComplementaryActiv
     }
 };
 
-export const getActivityGroups = async (): Promise<string[]> => {
+export const getActivityGroups = async (courseId?: number): Promise<string[]> => {
     try {
-        const data = await fetchAllComplementaryActivities();
+        const data = await fetchAllComplementaryActivities(courseId);
         // Return unique groups
         const uniqueGroups = [...new Set(data.map(item => item.group))];
         return uniqueGroups;
@@ -74,11 +75,49 @@ export const deleteUserActivity = async (id: number) => {
     return true;
 };
 
-export const getUserTotalHours = async (userId: number): Promise<number> => {
+export const getUserTotalHours = async (userId: number, courseId?: number): Promise<number> => {
     try {
-        const activities = await fetchUserActivitiesGroups(userId);
-        const totalHours = activities.reduce((sum, activity) => sum + (activity.hours || 0), 0);
-        return totalHours;
+        // 1. Fetch user activities and group definitions
+        const [userActivities, dbGroups] = await Promise.all([
+            fetchUserActivitiesGroups(userId),
+            fetchActivityGroups(courseId)
+        ]);
+
+        // 1.1 Filter user activities by course if provided
+        const filteredActivities = courseId
+            ? userActivities.filter(a => a.activity?.course_id === courseId)
+            : userActivities;
+
+        // 2. Cap hours per activity type first
+        const activityTypeTotals: Record<number, { group: string, total: number, limit: number }> = {};
+        filteredActivities.forEach(item => {
+            const aid = item.activity_id;
+            if (!activityTypeTotals[aid]) {
+                activityTypeTotals[aid] = {
+                    group: item.activity?.group || 'OUTROS',
+                    total: 0,
+                    limit: item.activity?.limit_hours || Infinity
+                };
+            }
+            activityTypeTotals[aid].total += (item.hours || 0);
+        });
+
+        // 3. Sum capped activity totals per group
+        const groupCappedTotals: Record<string, number> = {};
+        Object.values(activityTypeTotals).forEach(item => {
+            const cappedHours = Math.min(item.total, item.limit);
+            if (!groupCappedTotals[item.group]) groupCappedTotals[item.group] = 0;
+            groupCappedTotals[item.group] += cappedHours;
+        });
+
+        // 4. Cap group totals by group max_hours
+        let finalTotal = 0;
+        dbGroups.forEach(group => {
+            const groupSum = groupCappedTotals[group.id] || 0;
+            finalTotal += Math.min(groupSum, group.max_hours);
+        });
+
+        return finalTotal;
     } catch (err) {
         console.error('Unexpected error in getUserTotalHours:', err);
         throw err;
@@ -91,50 +130,61 @@ interface GroupProgress {
     description: string;
     limit: number;
     total: number;
+    capped_total: number;
 }
 
-export const getUserGroupProgress = async (userId: number): Promise<GroupProgress[]> => {
-    // 1. Fetch user activities with their related catalog info
-    const userActivities = await fetchUserActivitiesGroups(userId);
+export const getUserGroupProgress = async (userId: number, courseId?: number): Promise<GroupProgress[]> => {
+    // 1. Fetch user activities and group definitions
+    const [userActivities, dbGroups] = await Promise.all([
+        fetchUserActivitiesGroups(userId),
+        fetchActivityGroups(courseId)
+    ]);
 
-    // 2. Aggregate hours by group
-    const groupTotals = userActivities.reduce((acc: Record<string, number>, curr) => {
-        // Handle cases where group might be 'ENSINO' (legacy) or 'A' (new)
-        let group = curr.activity?.group?.toUpperCase() || 'OUTROS';
+    // 1.1 Filter user activities by course
+    const filteredActivities = courseId
+        ? userActivities.filter(a => a.activity?.course_id === courseId)
+        : userActivities;
 
-        // Simple mapping if inconsistent data exists (optional safety)
-        if (group === 'ENSINO') group = 'A';
-        if (group === 'PESQUISA') group = 'A';
-        if (group === 'EXTENSÃO') group = 'C';
-
-        if (!acc[group]) {
-            acc[group] = 0;
+    // 2. Aggregate hours by activity type (to cap them individually first)
+    const activityTypeTotals: Record<number, { group: string, total: number, limit: number }> = {};
+    filteredActivities.forEach(item => {
+        const aid = item.activity_id;
+        if (!activityTypeTotals[aid]) {
+            activityTypeTotals[aid] = {
+                group: item.activity?.group || 'OUTROS',
+                total: 0,
+                limit: item.activity?.limit_hours || Infinity
+            };
         }
-        acc[group] += (curr.hours || 0);
-        return acc;
-    }, {});
+        activityTypeTotals[aid].total += (item.hours || 0);
+    });
 
-    // 3. Define the 10 Groups (A-J) with assumed limits
-    const definedGroups = [
-        { group: 'A', label: 'Grupo A', limit: 80, desc: 'Ensino/Pesquisa/Extensão' },
-        { group: 'B', label: 'Grupo B', limit: 40, desc: 'Eventos' },
-        { group: 'C', label: 'Grupo C', limit: 40, desc: 'Extensão' },
-        { group: 'D', label: 'Grupo D', limit: 40, desc: 'Produção Técnica/Científica' },
-        { group: 'E', label: 'Grupo E', limit: 40, desc: 'Vivência Profissional' },
-        { group: 'F', label: 'Grupo F', limit: 40, desc: 'Formação Social/Humana' },
-        { group: 'G', label: 'Grupo G', limit: 40, desc: 'Semana Acadêmica' },
-        { group: 'H', label: 'Grupo H', limit: 40, desc: 'Atividades Especiais' },
-        { group: 'I', label: 'Grupo I', limit: 40, desc: 'Outros' }
-    ];
+    // 3. Aggregate totals per group (raw and capped)
+    const rawGroupTotals: Record<string, number> = {};
+    const cappedGroupTotals: Record<string, number> = {};
 
-    // 4. Format result
-    const result = definedGroups.map(def => ({
-        group: def.group,
-        label: def.label,
-        description: def.desc,
-        limit: def.limit,
-        total: groupTotals[def.group] || 0
-    }));
+    Object.values(activityTypeTotals).forEach(item => {
+        if (!rawGroupTotals[item.group]) rawGroupTotals[item.group] = 0;
+        if (!cappedGroupTotals[item.group]) cappedGroupTotals[item.group] = 0;
+
+        rawGroupTotals[item.group] += item.total;
+        cappedGroupTotals[item.group] += Math.min(item.total, item.limit);
+    });
+
+    // 4. Format result using DB limits
+    const result = dbGroups.map(group => {
+        const rawTotal = rawGroupTotals[group.id] || 0;
+        const cappedTotal = cappedGroupTotals[group.id] || 0;
+
+        return {
+            group: group.id,
+            label: `Grupo ${group.id}`,
+            description: group.description,
+            limit: group.max_hours,
+            total: rawTotal,
+            capped_total: Math.min(cappedTotal, group.max_hours)
+        };
+    });
 
     return result;
 };

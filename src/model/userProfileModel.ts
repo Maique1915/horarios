@@ -75,15 +75,21 @@ export const fetchUserActivitiesGroups = async (userId: number) => {
         .from('user_complementary_activities')
         .select(`
             hours,
+            activity_id,
             activity:complementary_activities!fk_activity (
-                group
+                group,
+                limit_hours,
+                course_id
             )
         `)
         .eq('user_id', userId);
 
     if (error) throw error;
-    // Cast to unknown first to avoid "not overlap" error, as Supabase types can be tricky with joins
-    return data as unknown as { hours: number; activity: { group: string } }[];
+    return data as unknown as {
+        hours: number;
+        activity_id: number;
+        activity: { group: string; limit_hours: number; course_id: number }
+    }[];
 };
 
 // CRUD Operations
