@@ -32,10 +32,10 @@ export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionPro
                     </div>
                 ) : (
                     <ul className="space-y-3">
-                        {ctrl.currentEnrollments.map((subject: Subject) => {
+                        {ctrl.currentEnrollments.map((subject: Subject, index: number) => {
                             const scheduleGroups = ctrl.getFormattedSchedule(subject.schedule_data);
                             return (
-                                <li key={subject._id} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
+                                <li key={`${subject._id}-${index}`} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
                                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-base leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
