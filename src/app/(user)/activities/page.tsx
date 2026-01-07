@@ -380,8 +380,8 @@ const ProgressSummaryView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesCo
                                 />
                             </div>
                             <div className="flex justify-between text-[10px] text-text-light-secondary uppercase font-bold tracking-wider">
-                                <span>{Math.round(percent)}%</span>
-                                <span>META: {group.min_limit ? `${group.min_limit}-${group.limit}` : group.limit}H</span>
+                                <span>{Math.round(percent)}% concluído</span>
+                                <span>META: {group.min_limit && group.min_limit !== group.limit ? `${group.min_limit}-${group.limit}` : group.limit}H</span>
                             </div>
                         </div>
                     </div>
@@ -410,16 +410,30 @@ const GroupDetailsModal = ({ group, onClose }: { group: GroupProgress, onClose: 
                 </div>
 
                 <div className="p-6 max-h-[70vh] overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                        <div className="bg-background-light dark:bg-background-dark p-4 rounded-xl border border-border-light dark:border-border-dark">
-                            <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-1">Mínimo Requerido</span>
-                            <span className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">{group.min_limit || group.limit}h</span>
+                    {group.min_limit && group.min_limit !== group.limit ? (
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="bg-background-light dark:bg-background-dark p-4 rounded-xl border border-border-light dark:border-border-dark">
+                                <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-1">Mínimo Requerido</span>
+                                <span className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">{group.min_limit}h</span>
+                            </div>
+                            <div className="bg-background-light dark:bg-background-dark p-4 rounded-xl border border-border-light dark:border-border-dark">
+                                <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-1">Limite Máximo</span>
+                                <span className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">{group.limit}h</span>
+                            </div>
                         </div>
-                        <div className="bg-background-light dark:bg-background-dark p-4 rounded-xl border border-border-light dark:border-border-dark">
-                            <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-1">Limite Máximo</span>
-                            <span className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary">{group.limit}h</span>
+                    ) : (
+                        <div className="bg-background-light dark:bg-background-dark p-6 rounded-xl border border-border-light dark:border-border-dark mb-8 text-center bg-slate-50/50 dark:bg-slate-900/10">
+                            <span className="text-[10px] uppercase font-bold text-text-light-secondary block mb-2 tracking-widest">Requisito do Grupo</span>
+                            <div className="flex items-center justify-center gap-3">
+                                <span className="text-3xl font-black text-primary">{group.limit}h</span>
+                                <div className="h-8 w-px bg-border-light dark:border-border-dark hidden sm:block"></div>
+                                <div className="text-left hidden sm:block">
+                                    <p className="text-xs font-bold text-text-light-primary dark:text-text-dark-primary">Total Obrigatório</p>
+                                    <p className="text-[10px] text-text-light-secondary">Limite máximo contabilizável</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <h3 className="font-bold text-sm uppercase tracking-wider text-text-light-secondary mb-4">Subgrupos / Tipos de Atividade</h3>
 

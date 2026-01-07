@@ -176,7 +176,6 @@ const ComplementaryActivityForm: React.FC<ComplementaryActivityFormProps> = ({
         }
     }, [currentSubgroupProgress?.isLimitReached]);
 
-    if (!isFormOpen && !editingActivity) return null;
 
     return (
         <div className={`lg:col-span-1 order-1 lg:order-2 ${isFormOpen ? 'fixed inset-0 z-50 overflow-y-auto bg-background-light dark:bg-background-dark p-4 animate-in fade-in slide-in-from-bottom-10 lg:static lg:p-0 lg:overflow-visible lg:bg-transparent lg:animate-none' : 'hidden lg:block'}`}>
