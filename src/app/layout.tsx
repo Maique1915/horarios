@@ -1,4 +1,5 @@
 import React from 'react';
+import Script from 'next/script';
 import { AuthProvider } from '../contexts/AuthContext';
 import AppLayout from '../components/layout/AppLayout';
 import './globals.css';
@@ -24,6 +25,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="pt-BR" className={lexend.variable}>
             <head>
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap&v=2" crossOrigin="anonymous" />
+                <meta name="google-adsense-account" content="ca-pub-6346152303245774" />
+                <Script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6346152303245774"
+                    crossOrigin="anonymous"
+                    strategy="afterInteractive"
+                />
             </head>
             <body className={lexend.className}>
                 <QueryProvider>
