@@ -50,7 +50,7 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
                     styles={customSelectStyles}
                 />
             </div>
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-3">
                 <Select
                     placeholder="Tipo"
                     options={ctrl.opcoesEl}
@@ -67,7 +67,7 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
                     styles={customSelectStyles}
                 />
             </div>
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-2">
                 <Select
                     placeholder="Status"
                     options={ctrl.opcoesStatus}

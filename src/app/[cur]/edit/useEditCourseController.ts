@@ -10,9 +10,9 @@ export interface SelectOption {
 }
 
 // --- Controller ---
-export const useEditCourseController = () => {
+export const useEditCourseController = (props?: { courseCode?: string }) => {
     const params = useParams();
-    const cur = params?.cur as string | undefined;
+    const cur = props?.courseCode || (params?.cur as string | undefined);
 
     // Use the Controller Hook
     const {

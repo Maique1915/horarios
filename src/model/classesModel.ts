@@ -57,7 +57,7 @@ export const deleteClassScheduleBySubjectAndName = async (subjectId: number | st
 export const fetchFullClassesBySubjectId = async (subjectId: number | string) => {
     const { data, error } = await supabase
         .from('classes')
-        .select('subject_id, class, day_id, time_slot_id, start_real_time, end_real_time, professor, sala')
+        .select('subject_id, class, day_id, time_slot_id')
         .eq('subject_id', subjectId);
 
     if (error) throw error;

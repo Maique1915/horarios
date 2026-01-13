@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../styles/HorarioEditor.css';
+import '../../styles/HorarioEditor.css';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import { getDays, getTimeSlots } from '../../services/scheduleService';
 
