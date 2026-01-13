@@ -47,9 +47,14 @@ export default function CoursesManager() {
         setLoading(false);
     };
 
-    const handleSave = async (courseData: Omit<Course, 'id'>) => {
+    const handleSave = async (formData: { code: string; name: string; shift?: string | null }) => {
         setLoading(true);
         try {
+            const courseData: Omit<Course, 'id'> = {
+                ...formData,
+                shift: formData.shift ?? null
+            };
+
             if (editingCourse) {
                 // Update
                 const { error } = await supabase
