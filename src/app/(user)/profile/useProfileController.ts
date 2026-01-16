@@ -109,7 +109,7 @@ export const useProfileController = () => {
     }, []);
 
     // Queries
-    const { data: completedSubjects = [], isLoading: loadingCompleted } = useQuery<Subject[]>({
+    const { data: completedSubjectsRaw, isLoading: loadingCompleted } = useQuery<Subject[]>({
         queryKey: ['completedSubjects', user?.id],
         queryFn: async () => {
             const data = await loadCompletedSubjects(user!.id);
@@ -119,9 +119,9 @@ export const useProfileController = () => {
         staleTime: 1000 * 60 * 5,
     });
 
+    const completedSubjects = useMemo(() => completedSubjectsRaw || [], [completedSubjectsRaw]);
 
-
-    const { data: currentEnrollments = [], isLoading: loadingEnrollments } = useQuery<Subject[]>({
+    const { data: currentEnrollmentsRaw, isLoading: loadingEnrollments } = useQuery<Subject[]>({
         queryKey: ['currentEnrollments', user?.id],
         queryFn: async () => {
             const data = await loadCurrentEnrollments(user!.id);
@@ -130,6 +130,8 @@ export const useProfileController = () => {
         enabled: !!user?.id,
         staleTime: 1000 * 60 * 5,
     });
+
+    const currentEnrollments = useMemo(() => currentEnrollmentsRaw || [], [currentEnrollmentsRaw]);
 
     const { data: complementaryHours = 0, isLoading: loadingHours } = useQuery<number>({
         queryKey: ['userTotalHours', user?.id, user?.course_id],
@@ -169,7 +171,14 @@ export const useProfileController = () => {
                 loadAll();
             }
             const currentIds = new Set(completedSubjects.map(s => String(s._id)));
-            setSelectedSubjectIds(currentIds);
+            // Only update if the content actually changed to avoid unnecessary re-renders
+            setSelectedSubjectIds(prev => {
+                if (prev.size !== currentIds.size) return currentIds;
+                for (const id of currentIds) {
+                    if (!prev.has(id)) return currentIds;
+                }
+                return prev;
+            });
         }
     }, [isEditingSubjects, completedSubjects]);
 
@@ -388,15 +397,36 @@ export const useProfileController = () => {
     const ELECTIVE_REQ_HOURS = 360;
     const COMPLEMENTARY_REQ_HOURS = 210;
     const TOTAL_REQ_HOURS = MANDATORY_REQ_HOURS + ELECTIVE_REQ_HOURS + COMPLEMENTARY_REQ_HOURS;
-    const mandatorySubjects = completedSubjects.filter(s => s._el);
-    const electiveSubjects = completedSubjects.filter(s => !s._el);
 
-    const mandatoryTotalCredits = mandatorySubjects.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const electiveTotalCredits = electiveSubjects.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const mandatoryEffective = Math.min(MANDATORY_REQ_HOURS, mandatoryTotalCredits * 18);
-    const electiveEffective = Math.min(ELECTIVE_REQ_HOURS, electiveTotalCredits * 18);
-    const compEffective = Math.min(COMPLEMENTARY_REQ_HOURS, complementaryHours || 0);
-    const progressPercentage = Math.round(((mandatoryEffective + electiveEffective + compEffective) / TOTAL_REQ_HOURS) * 100);
+    const {
+        mandatorySubjects,
+        electiveSubjects,
+        mandatoryEffective,
+        electiveEffective,
+        compEffective,
+        progressPercentage
+    } = useMemo(() => {
+        const mSubs = completedSubjects.filter(s => s._el);
+        const eSubs = completedSubjects.filter(s => !s._el);
+
+        const mCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+        const eCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+
+        const mEff = Math.min(MANDATORY_REQ_HOURS, mCredits * 18);
+        const eEff = Math.min(ELECTIVE_REQ_HOURS, eCredits * 18);
+        const cEff = Math.min(COMPLEMENTARY_REQ_HOURS, complementaryHours || 0);
+
+        const percent = Math.round(((mEff + eEff + cEff) / TOTAL_REQ_HOURS) * 100);
+
+        return {
+            mandatorySubjects: mSubs,
+            electiveSubjects: eSubs,
+            mandatoryEffective: mEff,
+            electiveEffective: eEff,
+            compEffective: cEff,
+            progressPercentage: percent
+        };
+    }, [completedSubjects, complementaryHours, TOTAL_REQ_HOURS]);
 
     return {
         user, authLoading, loadingData, isExpired,
