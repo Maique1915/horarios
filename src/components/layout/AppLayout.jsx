@@ -19,6 +19,7 @@ const AppLayout = ({ children }) => {
     const pathname = usePathname();
     const { user, logout, isExpired } = useAuth();
 
+
     useEffect(() => {
         // Ensure this only runs on client and if needed
         if (typeof window !== 'undefined') {
