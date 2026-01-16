@@ -41,9 +41,9 @@ const AppLayout = ({ children }) => {
             setEffectiveCur(cur);
         } else {
             const stored = localStorage.getItem('last_active_course');
-            if (stored) {
+            if (stored && stored !== 'admin') {
                 setEffectiveCur(stored);
-            } else if (user?.courses?.code) {
+            } else if (user?.courses?.code && user.courses.code !== 'admin') {
                 // Fallback to user's registered course if available
                 setEffectiveCur(user.courses.code);
                 localStorage.setItem('last_active_course', user.courses.code);

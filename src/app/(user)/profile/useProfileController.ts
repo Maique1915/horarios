@@ -160,7 +160,8 @@ export const useProfileController = () => {
         if (isEditingSubjects) {
             if (allSubjects.length === 0) {
                 const loadAll = async () => {
-                    const courseCode = localStorage.getItem('last_active_course');
+                    let courseCode = localStorage.getItem('last_active_course');
+                    if (courseCode === 'admin') courseCode = null;
                     // @ts-ignore
                     const data = await loadDbData(courseCode);
                     setAllSubjects(data as any);
@@ -180,7 +181,8 @@ export const useProfileController = () => {
                 let subjectsToProcess = allSubjects;
                 // If not loaded yet (e.g. didn't open edit mode), load them
                 if (subjectsToProcess.length === 0) {
-                    const courseCode = user.courses?.code || localStorage.getItem('last_active_course');
+                    let courseCode = user.courses?.code || localStorage.getItem('last_active_course');
+                    if (courseCode === 'admin') courseCode = null;
                     if (courseCode) {
                         try {
                             // @ts-ignore
