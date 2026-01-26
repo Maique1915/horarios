@@ -37,12 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         </AppLayout>
                     </AuthProvider>
                 </QueryProvider>
-                <Script
+                <script
                     async
                     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6346152303245774"
                     crossOrigin="anonymous"
-                    strategy="afterInteractive"
-                />
+                ></script>
             </body>
         </html>
     );
