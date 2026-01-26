@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const login = async (username_in: string, password_in: string) => {
         try {
             const { data, error } = await supabase.rpc('login_user', {
-                username_in,
+                username_in: username_in.toLowerCase(),
                 password_in
             });
 
@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const register = async (username_in: string, password_in: string, name_in: string, courseId: string) => {
         try {
             const { data, error } = await supabase.rpc('register_user', {
-                username_in,
+                username_in: username_in.toLowerCase(),
                 password_in,
                 name_in,
                 course_id_in: parseInt(courseId)
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const { data, error } = await supabase.rpc('update_user', {
                 user_id_in: userId,
                 name_in: updates.name,
-                username_in: updates.username,
+                username_in: updates.username.toLowerCase(),
                 new_password_in: updates.password || null,
                 current_password_in: updates.currentPassword
             });
