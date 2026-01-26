@@ -26,6 +26,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <span className="font-bold text-sm text-gray-500 uppercase tracking-wider mr-2 hidden md:block whitespace-nowrap">
                         Gerenciar Tabelas
                     </span>
+                    <Link
+                        href="/admin"
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition whitespace-nowrap ${pathname === '/admin'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-100 dark:hover:bg-slate-700'
+                            }`}
+                    >
+                        Dashboard
+                    </Link>
+                    <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1" />
+
                     {Object.values(tableConfigs).map(config => {
                         const isActive = pathname === `/admin/${config.tableName}`;
                         return (
@@ -33,8 +44,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 key={config.tableName}
                                 href={`/admin/${config.tableName}`}
                                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition whitespace-nowrap ${isActive
-                                        ? 'bg-primary text-white shadow-sm'
-                                        : 'text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-100 dark:hover:bg-slate-700'
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'text-text-light-secondary dark:text-text-dark-secondary hover:bg-slate-100 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 {config.displayName}
