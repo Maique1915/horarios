@@ -439,6 +439,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                                                     onMouseLeave={() => setActiveTooltip(null)}
                                                     className="relative focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 rounded-full transition-all p-0.5"
                                                     aria-label={`Horário real: ${time}`}
+                                                    id={tooltipId}
                                                 >
                                                     <span
                                                         className="material-symbols-outlined text-[14px] text-amber-600 dark:text-amber-400 cursor-pointer hover:text-amber-700 dark:hover:text-amber-300 transition-colors animate-pulse-subtle"
@@ -447,15 +448,32 @@ const Comum: React.FC<ComumProps> = (props) => {
                                                         schedule
                                                     </span>
                                                 </button>
-                                                <div
-                                                    className={`absolute left-full top-1/2 -translate-y-1/2 ml-2 ${isActive ? 'block' : 'hidden'} bg-slate-900 dark:bg-slate-800 text-white text-[11px] font-bold py-2 px-3 rounded-lg shadow-xl z-[100] whitespace-nowrap border border-amber-500/20 animate-fade-in`}
-                                                >
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="material-symbols-outlined text-[14px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
-                                                        <span>Horário Real: {time}</span>
+                                                {isActive && (
+                                                    <div
+                                                        className="fixed bg-slate-900 dark:bg-slate-800 text-white text-[11px] font-bold py-2 px-3 rounded-lg shadow-xl z-[9999] whitespace-nowrap border border-amber-500/20 animate-fade-in pointer-events-none"
+                                                        style={{
+                                                            left: `${(() => {
+                                                                const btn = document.getElementById(tooltipId);
+                                                                if (!btn) return '0px';
+                                                                const rect = btn.getBoundingClientRect();
+                                                                return `${rect.right + 8}px`;
+                                                            })()}`,
+                                                            top: `${(() => {
+                                                                const btn = document.getElementById(tooltipId);
+                                                                if (!btn) return '0px';
+                                                                const rect = btn.getBoundingClientRect();
+                                                                return `${rect.top + rect.height / 2}px`;
+                                                            })()}`,
+                                                            transform: 'translateY(-50%)'
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="material-symbols-outlined text-[14px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+                                                            <span>Horário Real: {time}</span>
+                                                        </div>
+                                                        <div className="absolute right-full top-1/2 -translate-y-1/2 mr-[-4px] border-4 border-transparent border-r-slate-900 dark:border-r-slate-800"></div>
                                                     </div>
-                                                    <div className="absolute right-full top-1/2 -translate-y-1/2 mr-[-4px] border-4 border-transparent border-r-slate-900 dark:border-r-slate-800"></div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     );

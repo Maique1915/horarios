@@ -147,7 +147,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 name_in: updates.name,
                 username_in: updates.username.toLowerCase(),
                 new_password_in: updates.password || null,
-                current_password_in: updates.currentPassword
+                current_password_in: updates.currentPassword || null
             });
 
             if (error) {

@@ -242,17 +242,22 @@ export const useProfileController = () => {
         setUpdateError('');
         if (!user) return;
 
-        if (showPassword) {
+        // Só validar senhas se o usuário quiser alterar a senha
+        if (showPassword && editForm.password) {
             if (editForm.password !== confirmPassword) {
                 setUpdateError("As senhas não coincidem.");
+                return;
+            }
+            if (!editForm.currentPassword) {
+                setUpdateError("Por favor, informe a senha atual para alterar a senha.");
                 return;
             }
         }
 
         const submissionData = {
             ...editForm,
-            password: showPassword ? editForm.password : '',
-            currentPassword: editForm.currentPassword || ''
+            password: (showPassword && editForm.password) ? editForm.password : '',
+            currentPassword: (showPassword && editForm.password) ? (editForm.currentPassword || '') : ''
         };
 
         const { success, error } = await updateUser(user.id, submissionData);
