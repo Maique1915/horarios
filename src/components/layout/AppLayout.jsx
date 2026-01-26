@@ -103,14 +103,9 @@ const AppLayout = ({ children }) => {
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3 w-full"
                             title="Voltar para página inicial"
                         >
-                            <Image
-                                src="/logo.png"
-                                alt="Logo"
-                                width={32}
-                                height={32}
-                                className="rounded-lg flex-shrink-0"
-                                unoptimized
-                            />
+                            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <span className="material-symbols-outlined text-white text-xl">school</span>
+                            </div>
                             {/* Label que só aparece quando o menu está expandido */}
                             <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 font-semibold text-text-light-primary dark:text-text-dark-primary ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden md:block'}`}>
                                 Horários CEFET
@@ -184,14 +179,9 @@ const AppLayout = ({ children }) => {
                             onClick={() => router.push('/')}
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
                         >
-                            <Image
-                                src="/logo.png"
-                                alt="Logo"
-                                width={32}
-                                height={32}
-                                className="rounded-lg flex-shrink-0"
-                                unoptimized
-                            />
+                            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <span className="material-symbols-outlined text-white text-xl">school</span>
+                            </div>
                             <span className="font-semibold text-text-light-primary dark:text-text-dark-primary ml-2">
                                 Horários CEFET
                             </span>
