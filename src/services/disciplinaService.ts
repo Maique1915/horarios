@@ -80,7 +80,8 @@ const splitPrerequisites = (prList: string | (string | number)[]) => {
 
 const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequirement[]> | null, schedulesBySubjectId: Map<number, ClassSchedule[]> | null): Subject => {
     const subjectRequirements = requirementsMap ? (requirementsMap.get(item.id) || []) : [];
-    const _pr = subjectRequirements.filter((r) => r.type === 'SUBJECT' && r.prerequisite_subject?.acronym).map((r) => r.prerequisite_subject.acronym);
+    const _prRaw = subjectRequirements.filter((r) => r.type === 'SUBJECT' && r.prerequisite_subject?.acronym).map((r) => r.prerequisite_subject.acronym);
+    const _pr = [...new Set(_prRaw)];
     const creditsReq = subjectRequirements.find((r) => r.type === 'CREDITS');
 
     // Supabase might return 'courses' (plural) depending on relationship name

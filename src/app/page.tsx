@@ -517,6 +517,82 @@ const PricingSection = ({ ROUTES, getLinkHref, user }: { ROUTES: any, getLinkHre
     );
 };
 
+const WhatsAppFloatingButton = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    // TODO: Troque pelo seu número (formato: 55 + DDD + Numero, ex: 5521999999999)
+    const phoneNumber = '5521988567387';
+
+    const handleSend = () => {
+        if (!message.trim()) return;
+        const text = encodeURIComponent(message);
+        // Uses WhatsApp API
+        window.open(`https://wa.me/${phoneNumber}?text=${text}`, '_blank');
+        setIsOpen(false);
+        setMessage('');
+    };
+
+    return (
+        <>
+            <button
+                onClick={() => setIsOpen(true)}
+                className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#128C7E] text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 active:scale-95 flex items-center justify-center group"
+                title="Fale conosco no WhatsApp"
+            >
+                <span className="material-symbols-outlined text-3xl">chat</span>
+                <span className="absolute right-full mr-3 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    Fale conosco
+                </span>
+            </button>
+
+            {isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 sm:p-0">
+                    <div
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+                        onClick={() => setIsOpen(false)}
+                    />
+
+                    <div className="bg-white dark:bg-slate-800 sm:rounded-2xl rounded-t-2xl shadow-2xl max-w-sm w-full p-6 relative z-10 animate-slideUp sm:animate-scaleIn border border-gray-100 dark:border-gray-700">
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-[#25D366]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#25D366]">
+                                <span className="material-symbols-outlined text-3xl">whatsapp</span>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Fale com o Suporte</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                Envie sua mensagem, dúvida ou sugestão diretamente para nosso WhatsApp.
+                            </p>
+                        </div>
+
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Olá, gostaria de saber mais sobre..."
+                            className="w-full h-32 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#25D366] focus:border-transparent outline-none resize-none mb-4 transition-all text-sm"
+                            autoFocus
+                        />
+
+                        <button
+                            onClick={handleSend}
+                            disabled={!message.trim()}
+                            className="w-full bg-[#25D366] hover:bg-[#128C7E] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+                        >
+                            <span>Enviar Mensagem</span>
+                            <span className="material-symbols-outlined text-sm">send</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
 export default function HomePage() {
     const ctrl = useHomeController();
 
@@ -527,6 +603,7 @@ export default function HomePage() {
             <CoursesSection courses={ctrl.courses} loading={ctrl.loading} />
             <TestimonialsSection comments={ctrl.comments} />
             <PricingSection ROUTES={ROUTES} getLinkHref={ctrl.getLinkHref} user={ctrl.user} />
+            <WhatsAppFloatingButton />
         </>
     );
 }
