@@ -1,5 +1,7 @@
 -- Fix update_user function to only require current password when changing password
 -- This should be run in Supabase SQL Editor
+-- Drop the old function first (required when changing parameter order)
+DROP FUNCTION IF EXISTS public.update_user(INT, TEXT, TEXT, TEXT, TEXT);
 CREATE OR REPLACE FUNCTION public.update_user(
         user_id_in INT,
         name_in TEXT,
