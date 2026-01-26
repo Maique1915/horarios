@@ -567,7 +567,12 @@ const Comum: React.FC<ComumProps> = (props) => {
 
                                 {g !== "ª" ? "" : (
                                     <button
-                                        onClick={handleExportImage}
+                                        onClick={() => {
+                                            if (!user || isExpired) {
+                                                window.open('https://vain-phrase.com/b.3ZVF0yPD3_p-vvbLmQVnJ/ZBDo0r2HN/zEUv3HNNzaANz/LxT/Y/3sN/TOcY3/MRDvQh', '_blank');
+                                            }
+                                            handleExportImage();
+                                        }}
                                         className="group hidden md:flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
                                     >
                                         <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">image</span>

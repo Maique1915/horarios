@@ -482,7 +482,8 @@ const PricingSection = ({ ROUTES, getLinkHref, user }: { ROUTES: any, getLinkHre
                                     'Salvo na Nuvem (Acesse de qualquer lugar)',
                                     'Previsão de Conclusão de Curso',
                                     'Gestão de Atividades Complementares',
-                                    'Suporte Prioritário'
+                                    'Suporte Prioritário',
+                                    'Sem Anúncios'
                                 ].map((feature, index) => (
                                     <li key={index} className="flex items-start">
                                         <div className="flex-shrink-0">

@@ -43,22 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6346152303245774"
                     crossOrigin="anonymous"
                 ></script>
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: `
-(function(tunyl){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = tunyl || {};
-s.src = "\\/\\/unusualproject.com\\/bDX.VDsZdgGylE0TYgWLcA\\/MeSm\\/9BujZLU\\/lOkHPLTpYC3_NCTKcX2jOjT\\/citKNkjxcS1gNkzKYG5KOdA-";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-                        `
-                    }}
-                />
+
             </body>
         </html>
     );

@@ -317,6 +317,8 @@ const useGeraGradeController = () => {
         handleSyncCompletedSubjects,
         periodo, // Helpers needed for View
         remove,  // Helpers needed for View
+        user,    // Authentication state
+        isExpired // Subscription state
     };
 };
 
@@ -651,14 +653,24 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
                                 {ctrl.state.estado === 1 && (
                                     <>
                                         <button
-                                            onClick={ctrl.handleOpenMapaMental}
+                                            onClick={() => {
+                                                if (!ctrl.user || ctrl.isExpired) {
+                                                    window.open('https://vain-phrase.com/b.3ZVF0yPD3_p-vvbLmQVnJ/ZBDo0r2HN/zEUv3HNNzaANz/LxT/Y/3sN/TOcY3/MRDvQh', '_blank');
+                                                }
+                                                ctrl.handleOpenMapaMental();
+                                            }}
                                             className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
                                             title="Ver Cronograma"
                                         >
                                             <span className="material-symbols-outlined text-lg">account_tree</span>
                                         </button>
                                         <button
-                                            onClick={() => ctrl.mudaTela(2)}
+                                            onClick={() => {
+                                                if (!ctrl.user || ctrl.isExpired) {
+                                                    window.open('https://vain-phrase.com/b.3ZVF0yPD3_p-vvbLmQVnJ/ZBDo0r2HN/zEUv3HNNzaANz/LxT/Y/3sN/TOcY3/MRDvQh', '_blank');
+                                                }
+                                                ctrl.mudaTela(2);
+                                            }}
                                             className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all bg-primary text-white hover:bg-primary-dark shadow-md hover:shadow-lg hover:-translate-y-0.5"
                                         >
                                             <span className="material-symbols-outlined text-lg">auto_awesome</span>
