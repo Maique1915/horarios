@@ -29,6 +29,7 @@ export interface Subject {
 
     // Scheduling
     _ho?: number[][];      // Schedule slots
+    _rt?: ({ start: string, end: string } | null)[]; // Real time info corresponding to slots
     _da?: number[]; // Dimension info
     class_name?: string;   // Class name
     schedule_data?: any;

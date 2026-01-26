@@ -13,7 +13,7 @@ export interface DbClass {
 export const fetchClassesBySubjectIds = async (subjectIds: number[]) => {
     const { data, error } = await supabase
         .from('classes')
-        .select('subject_id, class, day_id, time_slot_id')
+        .select('subject_id, class, day_id, time_slot_id, start_real_time, end_real_time')
         .in('subject_id', subjectIds);
 
     if (error) throw error;
@@ -57,7 +57,7 @@ export const deleteClassScheduleBySubjectAndName = async (subjectId: number | st
 export const fetchFullClassesBySubjectId = async (subjectId: number | string) => {
     const { data, error } = await supabase
         .from('classes')
-        .select('subject_id, class, day_id, time_slot_id')
+        .select('subject_id, class, day_id, time_slot_id, start_real_time, end_real_time')
         .eq('subject_id', subjectId);
 
     if (error) throw error;

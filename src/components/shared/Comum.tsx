@@ -81,6 +81,7 @@ const Comum: React.FC<ComumProps> = (props) => {
     const [isPrinting, setIsPrinting] = useState(false);
     const [transitioningTo, setTransitioningTo] = useState<number | null>(null);
     const [previousGrade, setPreviousGrade] = useState<PreviousGradeState | null>(null);
+    const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
     // Auth
     const { user, isExpired } = useAuth();
@@ -137,6 +138,18 @@ const Comum: React.FC<ComumProps> = (props) => {
         };
         fetchScheduleData();
     }, [_cur, props.materias]); // Added props.materias dependency to avoid stale closure or race conditions
+
+    // Close tooltip when clicking outside
+    useEffect(() => {
+        const handleClickOutside = () => {
+            if (activeTooltip) {
+                setActiveTooltip(null);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [activeTooltip]);
 
     // Determina se está carregando 
     const loading = scheduleLoading;
@@ -199,9 +212,16 @@ const Comum: React.FC<ComumProps> = (props) => {
                         // Cast _da to string array safely if it exists
                         const daArray = (Array.isArray(disciplina._da) ? disciplina._da : []) as number[];
 
-                        const nomeMateria = (daArray && daArray[i])
+                        const rtArray = disciplina._rt;
+                        const realTime = rtArray && rtArray[i] ? rtArray[i] : null;
+
+                        let nomeMateria = (daArray && daArray[i])
                             ? `${disciplina._di}\n${daArray[i]}`
                             : disciplina._di;
+
+                        if (realTime) {
+                            nomeMateria += `\n{{RT:${realTime.start.slice(0, 5)} - ${realTime.end.slice(0, 5)}}}`;
+                        }
 
                         if (numHorario >= 0 && numHorario < th && numDia >= 0 && numDia < td) {
                             if (gradeVazia[numHorario][numDia] === "") {
@@ -389,14 +409,65 @@ const Comum: React.FC<ComumProps> = (props) => {
                 {/* Conteúdo Novo (Transition In) */}
                 {hasContent && (
                     <div
-                        className={`relative w-full min-h-[3.5rem] px-1 py-1 rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col justify-center items-center text-center cursor-default group border border-black/5 dark:border-white/5 ${isTransitioning ? 'animate-fade-in' : ''}`}
+                        className={`relative w-full min-h-[3.5rem] px-1 py-1 rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-center items-center text-center cursor-default group border border-black/5 dark:border-white/5 ${isTransitioning ? 'animate-fade-in' : ''}`}
                         style={{ backgroundColor: baseCorNova }}
                     >
-                        {conteudoNovo.split('\n').map((line, i) => (
-                            <div key={i} className={`text-[10px] text-slate-800 break-words w-full leading-tight ${i === 0 ? 'font-bold text-[11px] mb-0.5 uppercase tracking-tight' : 'font-medium text-slate-600'}`}>
-                                {line}
-                            </div>
-                        ))}
+                        {(() => {
+                            const lines = conteudoNovo.split('\n');
+                            const rtLine = lines.find(line => line.startsWith('{{RT:'));
+                            const contentLines = lines.filter(line => !line.startsWith('{{RT:'));
+
+                            return contentLines.map((line, i) => {
+                                // Se é a primeira linha (nome da matéria) e tem horário real, adiciona o ícone inline
+                                if (i === 0 && rtLine) {
+                                    const time = rtLine.replace('{{RT:', '').replace('}}', '');
+                                    const tooltipId = `tooltip-${numLinha}-${numCelula}`;
+                                    const isActive = activeTooltip === tooltipId;
+
+                                    return (
+                                        <div key={i} className="flex items-center justify-center gap-1 mb-0.5 w-full">
+                                            <div className={`text-[10px] text-slate-800 dark:text-slate-200 break-words leading-tight font-bold text-[11px] uppercase tracking-tight`}>
+                                                {line}
+                                            </div>
+                                            <div className="relative inline-flex items-center flex-shrink-0">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveTooltip(isActive ? null : tooltipId);
+                                                    }}
+                                                    onMouseEnter={() => setActiveTooltip(tooltipId)}
+                                                    onMouseLeave={() => setActiveTooltip(null)}
+                                                    className="relative focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1 rounded-full transition-all p-0.5"
+                                                    aria-label={`Horário real: ${time}`}
+                                                >
+                                                    <span
+                                                        className="material-symbols-outlined text-[14px] text-amber-600 dark:text-amber-400 cursor-pointer hover:text-amber-700 dark:hover:text-amber-300 transition-colors animate-pulse-subtle"
+                                                        style={{ fontVariationSettings: "'FILL' 1" }}
+                                                    >
+                                                        schedule
+                                                    </span>
+                                                </button>
+                                                <div
+                                                    className={`absolute left-full top-1/2 -translate-y-1/2 ml-2 ${isActive ? 'block' : 'hidden'} bg-slate-900 dark:bg-slate-800 text-white text-[11px] font-bold py-2 px-3 rounded-lg shadow-xl z-[100] whitespace-nowrap border border-amber-500/20 animate-fade-in`}
+                                                >
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-[14px] text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>schedule</span>
+                                                        <span>Horário Real: {time}</span>
+                                                    </div>
+                                                    <div className="absolute right-full top-1/2 -translate-y-1/2 mr-[-4px] border-4 border-transparent border-r-slate-900 dark:border-r-slate-800"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div key={i} className={`text-[10px] text-slate-800 dark:text-slate-200 break-words w-full leading-tight ${i === 0 ? 'font-bold text-[11px] mb-0.5 uppercase tracking-tight' : 'font-medium text-slate-600 dark:text-slate-400'}`}>
+                                        {line}
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
                 )}
             </td>

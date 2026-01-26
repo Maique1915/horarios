@@ -29,6 +29,7 @@ interface ClassSchedule {
     class_name: string;
     ho: number[][]; // [[day_id, time_slot_id]]
     da: number[];
+    rt: ({ start: string, end: string } | null)[];
 }
 
 export interface Enrollment extends Subject {
@@ -193,10 +194,18 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                 let subjectSchedules = schedulesBySubjectId.get(subject_id)!;
                 let classSchedule = subjectSchedules.find(cs => cs.class_name === className);
                 if (!classSchedule) {
-                    classSchedule = { class_name: className, ho: [], da: [] };
+                    classSchedule = { class_name: className, ho: [], da: [], rt: [] };
                     subjectSchedules.push(classSchedule);
                 }
                 classSchedule.ho.push([day_id, time_slot_id]);
+                if ((schedule as any).start_real_time && (schedule as any).end_real_time) {
+                    classSchedule.rt.push({
+                        start: (schedule as any).start_real_time,
+                        end: (schedule as any).end_real_time
+                    });
+                } else {
+                    classSchedule.rt.push(null);
+                }
             });
 
             // Map Data
@@ -403,6 +412,7 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                         _pr: subject._pr,
                         _pr_creditos_input: subject._pr_creditos_input,
                         _ho: cls.ho,
+                        _rt: cls.rt || [],
                         _da: cls.da || [],
                         class_name: cls.class_name
                     } as Subject);
