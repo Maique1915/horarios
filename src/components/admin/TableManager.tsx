@@ -22,11 +22,27 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
     const [editForm, setEditForm] = useState<any>({});
     const [isCreating, setIsCreating] = useState(false);
 
+    const [adminPassword, setAdminPassword] = useState('');
+    const [isUnlocked, setIsUnlocked] = useState(false);
+    const [unlockError, setUnlockError] = useState('');
+
     useEffect(() => {
+        if (config.rpc?.read && !isUnlocked) {
+            // Wait for unlock
+            return;
+        }
+
         if (user || !config.rpc?.read) {
             fetchData();
         }
-    }, [config.tableName, page, user]);
+    }, [config.tableName, page, user, isUnlocked]);
+
+    const handleUnlock = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!adminPassword.trim()) return;
+        setUnlockError('');
+        setIsUnlocked(true);
+    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -40,14 +56,19 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
             if (config.rpc?.read) {
                 if (!user) return;
                 const response = await supabase.rpc(config.rpc.read, {
-                    requesting_user_id: user.id
+                    requesting_user_id: user.id,
+                    confirmation_password: adminPassword
                 });
                 result = response.data;
                 fetchError = response.error;
-                // RPC pagination might be harder, assuming all data for now or need RPC update. 
-                // For now, if RPC, we might not have count easily unless RPC returns it.
+
+                if (fetchError && fetchError.message.includes('Acesso negado')) {
+                    setIsUnlocked(false);
+                    setUnlockError('Senha incorreta ou sessão expirada.');
+                    throw new Error('Acesso negado. Por favor, confirme sua senha.');
+                }
+
                 count = result?.length || 0;
-                // TODO: RPC server-side pagination support if needed.
             } else {
                 const { data, error, count: total } = await supabase
                     .from(config.tableName)
@@ -163,6 +184,54 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
     const handleInputChange = (key: string, value: any) => {
         setEditForm((prev: any) => ({ ...prev, [key]: value }));
     };
+
+
+
+    if (config.rpc?.read && !isUnlocked) {
+        return (
+            <div className="max-w-md mx-auto mt-10 px-4">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-border-light dark:border-border-dark p-8">
+                    <div className="text-center mb-6">
+                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-500">
+                            <span className="material-symbols-outlined text-4xl">lock</span>
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Acesso Protegido</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
+                            Gerenciar <b>{config.displayName}</b> requer confirmação de senha.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleUnlock} className="space-y-4">
+                        {unlockError && (
+                            <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg flex items-center gap-2">
+                                <span className="material-symbols-outlined text-lg">error</span>
+                                {unlockError}
+                            </div>
+                        )}
+
+                        <div>
+                            <input
+                                type="password"
+                                value={adminPassword}
+                                onChange={(e) => setAdminPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
+                                placeholder="Sua senha de administrador"
+                                autoFocus
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">key</span>
+                            Liberar Tabela
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     if (loading && data.length === 0) return <LoadingSpinner message="Carregando dados..." />;
 

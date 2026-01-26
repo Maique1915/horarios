@@ -7,27 +7,46 @@ import LoadingSpinner from '../../components/shared/LoadingSpinner';
 export default function AdminPage() {
     const { user: currentUser } = useAuth();
     const [users, setUsers] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [processingId, setProcessingId] = useState<number | null>(null);
 
+    // Security State
+    const [isUnlocked, setIsUnlocked] = useState(false);
+    const [adminPassword, setAdminPassword] = useState('');
+    const [unlockError, setUnlockError] = useState('');
+
     useEffect(() => {
-        if (currentUser) {
+        if (currentUser && isUnlocked) {
             fetchUsers();
         }
-    }, [currentUser]);
+    }, [currentUser, isUnlocked]);
+
+    const handleUnlock = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!adminPassword.trim()) return;
+        setUnlockError('');
+        setIsUnlocked(true);
+        // The fetchUsers effect will run next
+    };
 
     const fetchUsers = async () => {
         setLoading(true);
         try {
             const { data, error } = await supabase.rpc('admin_get_users', {
-                requesting_user_id: currentUser?.id
+                requesting_user_id: currentUser?.id,
+                confirmation_password: adminPassword
             });
 
-            if (error) throw error;
+            if (error) {
+                if (error.message.includes('Acesso negado')) {
+                    setIsUnlocked(false);
+                    setUnlockError('Senha incorreta ou acesso negado.');
+                }
+                throw error;
+            }
             setUsers(data || []);
         } catch (err: any) {
             console.error('Error fetching users:', err);
-            // alert('Erro ao carregar usuários: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -38,18 +57,10 @@ export default function AdminPage() {
 
         setProcessingId(user.id);
         try {
-            // Optimistic expiration date calculation for UI update
-            const createdAt = new Date(user.created_at);
-            const expiresAt = new Date(); // Start from NOW for manual approval? 
-            // NOTE: The previous logic in UserModal used 'created_at'. 
-            // However, usually manual payment entry implies "starts now" or "starts from creation".
-            // Since we call an RPC, the RPC decides. 
-            // We just assume the RPC works. We'll refresh list or update optimistically.
-
-            // To be consistent with existing logic, let's look at the RPC call.
             const { error } = await supabase.rpc('admin_activate_user', {
                 target_user_id: user.id,
-                requesting_user_id: currentUser?.id
+                requesting_user_id: currentUser?.id,
+                confirmation_password: adminPassword
             });
 
             if (error) throw error;
@@ -70,8 +81,57 @@ export default function AdminPage() {
 
     const pendingUsers = users.filter(u => !u.is_paid);
 
+    if (!isUnlocked) {
+        return (
+            <div className="max-w-md mx-auto mt-20 px-4">
+                <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-xl border border-border-light dark:border-border-dark p-8">
+                    <div className="text-center mb-6">
+                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-500">
+                            <span className="material-symbols-outlined text-4xl">lock</span>
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Acesso Protegido</h2>
+                        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
+                            Esta área contém dados sensíveis. Confirme sua senha de administrador para continuar.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleUnlock} className="space-y-4">
+                        {unlockError && (
+                            <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg flex items-center gap-2">
+                                <span className="material-symbols-outlined text-lg">error</span>
+                                {unlockError}
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                                Senha de Administrador
+                            </label>
+                            <input
+                                type="password"
+                                value={adminPassword}
+                                onChange={(e) => setAdminPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all"
+                                placeholder="Sua senha atual"
+                                autoFocus
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">key</span>
+                            Liberar Acesso
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8 animate-fadeIn">
             <div>
                 <h1 className="text-3xl font-bold mb-2">Painel Administrativo</h1>
                 <p className="text-text-light-secondary dark:text-text-dark-secondary">
