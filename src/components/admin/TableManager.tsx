@@ -142,7 +142,9 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
 
                 if (updateError) throw updateError;
                 // Optimistic update or refresh
-                setData(data.map(item => item[config.primaryKey] === editingId ? (updated ? updated[0] : editForm) : item));
+                // Optimistic update or refresh
+                const updatedItem = (updated && updated.length > 0) ? updated[0] : editForm;
+                setData(data.map(item => item[config.primaryKey] === editingId ? updatedItem : item));
             }
 
             setEditingId(null);

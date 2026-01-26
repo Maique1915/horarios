@@ -418,15 +418,24 @@ export const usePredictionController = () => {
     const handleAddSubjectToSemester = (subject: Subject, semesterIndex: number | null) => {
         if (semesterIndex === null || semesterIndex >= fixedSemesters.length) return;
 
-        const newFixed = [...fixedSemesters];
-        const currentSem = [...newFixed[semesterIndex]];
+        // Create new fixed semesters state
+        const newFixed = fixedSemesters.map((semester, idx) => {
+            if (idx === semesterIndex) {
+                // Target semester: Append if not present
+                if (!semester.find(s => s._id === subject._id)) {
+                    return [...semester, subject];
+                }
+                return semester;
+            } else {
+                // Other semesters: Remove if present (fixes the "hole" issue)
+                return semester.filter(s => s._id !== subject._id);
+            }
+        });
 
-        if (!currentSem.find(s => s._id === subject._id)) {
-            currentSem.push(subject);
-            newFixed[semesterIndex] = currentSem;
-            setFixedSemesters(newFixed);
-            pushToHistory(newFixed, blacklistedIds);
-        }
+        // Only update if changes happened (or if added)
+        // Ideally checking change detection, but simple set is fine
+        setFixedSemesters(newFixed);
+        pushToHistory(newFixed, blacklistedIds);
     };
 
     const handleRemoveSubjectFromSemester = (subjectId: string | number, semesterIndex: number | null) => {
