@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap&v=2" crossOrigin="anonymous" />
                 <meta name="google-adsense-account" content="ca-pub-6346152303245774" />
                 <meta name="c0412664d2920880eb8e455ba11ad4c45daa7826" content="c0412664d2920880eb8e455ba11ad4c45daa7826" />
-
+                <meta name="referrer" content="no-referrer-when-downgrade" />
             </head>
             <body className={lexend.className}>
                 <QueryProvider>
