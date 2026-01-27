@@ -439,7 +439,11 @@ const GroupDetailsModal = ({ group, onClose }: { group: GroupProgress, onClose: 
 
                     <div className="space-y-3">
                         {group.subgroups.map(sub => {
-                            const subPercent = sub.limit ? Math.min(100, (sub.capped_total / sub.limit) * 100) : 0;
+                            const hasLimit = (sub.limit || 0) > 0;
+                            const countedPercent = hasLimit ? Math.min(100, (sub.capped_total / sub.limit) * 100) : 0;
+                            const donePercent = hasLimit ? Math.min(100, (sub.total / sub.limit) * 100) : 0;
+                            const extraHours = sub.total - sub.capped_total;
+
                             return (
                                 <div key={sub.id} className="p-4 rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-slate-900/20">
                                     <div className="flex justify-between items-start mb-2">
@@ -453,16 +457,29 @@ const GroupDetailsModal = ({ group, onClose }: { group: GroupProgress, onClose: 
                                             {sub.formula && <p className="text-[10px] text-text-light-secondary italic">{sub.formula}</p>}
                                         </div>
                                         <div className="text-right ml-4">
-                                            <span className="font-bold text-sm">{sub.capped_total.toFixed(2)}h</span>
-                                            {sub.limit && <span className="text-[10px] text-text-light-secondary block">/ {sub.limit}h</span>}
+                                            <span className="font-bold text-sm">{sub.total.toFixed(2)}h</span>
+                                            {hasLimit && (
+                                                <span className="text-[10px] text-text-light-secondary block">
+                                                    contabiliza {sub.capped_total.toFixed(2)}h / {sub.limit}h
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                    {sub.limit && (
-                                        <div className="w-full h-1.5 bg-background-light dark:bg-background-dark rounded-full overflow-hidden">
+                                    {hasLimit && (
+                                        <div className="relative w-full h-1.5 bg-background-light dark:bg-background-dark rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-primary/60 rounded-full transition-all duration-700"
-                                                style={{ width: `${subPercent}%` }}
+                                                className="absolute left-0 top-0 h-full bg-primary/20 transition-all duration-700"
+                                                style={{ width: `${donePercent}%` }}
                                             />
+                                            <div
+                                                className="absolute left-0 top-0 h-full bg-primary rounded-full transition-all duration-700"
+                                                style={{ width: `${countedPercent}%` }}
+                                            />
+                                            {extraHours > 0 && (
+                                                <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[8px] font-bold text-orange-500">
+                                                    +{extraHours.toFixed(1)}h
+                                                </span>
+                                            )}
                                         </div>
                                     )}
                                 </div>
