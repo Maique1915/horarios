@@ -136,17 +136,22 @@ export const usePredictionController = () => {
         if (!authLoading && user) init();
     }, [user, authLoading]);
 
-    // History Init
+    // History Init - Usar matrícula do período atual como base
     useEffect(() => {
         if (!loading && history.length === 0) {
+            // Se o usuário já tem matérias matriculadas no período atual, use como primeira grade fixa
+            const hasCurrentEnrollments = currentEnrollments.length > 0;
+            const initialFixed = hasCurrentEnrollments ? [currentEnrollments] : [];
+            
             const initialState: HistoryState = {
-                fixedSemesters: [],
+                fixedSemesters: initialFixed,
                 blacklistedIds: new Set()
             };
             setHistory([initialState]);
             setHistoryIndex(0);
+            setFixedSemesters(initialFixed);
         }
-    }, [loading]);
+    }, [loading, currentEnrollments]);
 
     // historyIndex dependency is sufficient to re-bind listener
     useEffect(() => {
@@ -172,8 +177,8 @@ export const usePredictionController = () => {
 
         const availableSubjects = allSubjects.filter(s => s._id !== undefined && !blacklistedIds.has(s._id) && s._ag);
 
-        // Only consider completed subjects for prediction, NOT current enrollments
-        // This allows subjects being taken now to appear in future semester predictions
+        // Considera matérias completadas E matérias do período atual para cálculo de pré-requisitos
+        // As matérias do período atual já estão em fixedSemesters[0] se existirem
         let simulatedCompleted = [...completedSubjects];
         const finalGrid: Subject[][] = [];
 
@@ -204,8 +209,8 @@ export const usePredictionController = () => {
     const suggestions = useMemo(() => {
         if (selectedSemesterIndex === null) return [];
 
-        // Only consider completed subjects, NOT current enrollments
-        // This ensures credit prerequisites are checked against credits BEFORE the semester starts
+        // Considera completadas as matérias de semestres anteriores ao selecionado
+        // Se o primeiro semestre contém matrícula atual, já está em fixedSemesters[0]
         let previousCompleted = [...completedSubjects];
         for (let i = 0; i < selectedSemesterIndex; i++) {
             previousCompleted = [...previousCompleted, ...fixedSemesters[i]];
@@ -244,24 +249,44 @@ export const usePredictionController = () => {
         const nodes: any[] = [];
         const links: any[] = [];
         const nodeMap = new Map();
+        
+        const periodoAtual = getCurrentPeriod();
 
         simulationResult.semesters.forEach((subjects, index) => {
             const semesterNum = index + 1;
             const columnX = (semesterNum - 1) * COLUMN_WIDTH;
 
-            const baseYear = 2026;
-            const baseSemester = 1;
+            // Determina ano e semestre baseado no período atual
+            const periodoAtual = getCurrentPeriod(); // Ex: "2026.1"
+            const [currentYearStr, currentSemStr] = periodoAtual.split('.');
+            const baseYear = parseInt(currentYearStr);
+            const baseSemester = parseInt(currentSemStr);
 
-            const addedSemesters = index;
-            const currentSemesterVal = baseSemester + addedSemesters;
+            // Se o primeiro semestre fixo contém matrículas do período atual
+            const hasCurrentEnrollments = currentEnrollments.length > 0;
+            const firstIsCurrentPeriod = hasCurrentEnrollments && index === 0;
 
-            const yearOffset = Math.floor((currentSemesterVal - 1) / 2);
-            const displayYear = baseYear + yearOffset;
-            const displaySemester = ((currentSemesterVal - 1) % 2) + 1;
+            let displayYear: number;
+            let displaySemester: number;
+            let labelSuffix = 'Previsto';
+
+            if (firstIsCurrentPeriod) {
+                // Primeiro período é o atual
+                displayYear = baseYear;
+                displaySemester = baseSemester;
+                labelSuffix = 'Atual';
+            } else {
+                // Calcula offset considerando que o primeiro pode ser o atual
+                const addedSemesters = hasCurrentEnrollments ? index : index + 1;
+                const futureSemesterVal = baseSemester + addedSemesters;
+                const yearOffset = Math.floor((futureSemesterVal - 1) / 2);
+                displayYear = baseYear + yearOffset;
+                displaySemester = ((futureSemesterVal - 1) % 2) + 1;
+            }
 
             const titleNode = {
                 id: `period-title-${semesterNum}`,
-                name: `${displayYear}.${displaySemester} Previsto`,
+                name: `${displayYear}.${displaySemester} ${labelSuffix}`,
                 type: 'title',
                 x: columnX + (NODE_WIDTH / 2),
                 y: -100,
@@ -320,7 +345,7 @@ export const usePredictionController = () => {
         const graphBounds = { minX: minX - padding, minY: minY - padding, maxX: maxX + padding, maxY: maxY + padding };
 
         return { nodes, links, graphBounds };
-    }, [simulationResult, fixedSemesters]);
+    }, [simulationResult, fixedSemesters, currentEnrollments, canInteract]);
 
 
     // --- Actions ---
