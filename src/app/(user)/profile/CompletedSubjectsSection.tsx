@@ -132,7 +132,7 @@ export const CompletedSubjectsSection = ({ ctrl }: CompletedSubjectsSectionProps
                                     <div
                                         key={subject._id}
                                         onClick={() => ctrl.handleToggleSubject(String(subject._id))}
-                                        className={`px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${isSelected ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}
+                                        className={`px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${isSelected ? 'bg-green-50/50 dark:bg-green-900/10' : ''}`}
                                     >
                                         <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-green-500 border-green-500' : 'border-slate-300 dark:border-slate-600'}`}>
                                             {isSelected && <span className="material-symbols-outlined text-white text-sm">check</span>}
@@ -159,7 +159,7 @@ export const CompletedSubjectsSection = ({ ctrl }: CompletedSubjectsSectionProps
                             filteredCompletedSubjects
                                 .sort((a, b) => (Number(b._se) || 0) - (Number(a._se) || 0))
                                 .map((subject) => (
-                                    <div key={subject._id} className="px-6 py-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                                    <div key={subject._id} className="px-6 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group">
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <p className="text-sm font-medium text-text-light-primary dark:text-text-dark-primary group-hover:text-primary transition-colors">{subject._di}</p>

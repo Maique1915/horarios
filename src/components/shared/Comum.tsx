@@ -387,7 +387,7 @@ const Comum: React.FC<ComumProps> = (props) => {
         const hasContent = conteudoNovo && conteudoNovo.trim() !== "";
 
         return (
-            <td key={key} className="relative p-1 align-middle h-auto min-w-[120px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/20">
+            <td key={key} className="relative p-1 align-middle h-auto min-w-[120px] transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/30">
                 {/* Empty State visual helper (optional) */}
                 {!hasContent && !conteudoAnterior && (
                     <div className="w-full min-h-[3.5rem] rounded-md bg-transparent"></div>
@@ -427,7 +427,7 @@ const Comum: React.FC<ComumProps> = (props) => {
 
                                     return (
                                         <div key={i} className="flex items-center justify-center gap-1 mb-0.5 w-full">
-                                            <div className={`text-[10px] text-slate-800 dark:text-slate-200 break-words leading-tight font-bold text-[11px] uppercase tracking-tight`}>
+                                            <div className={`text-[10px] text-slate-900 break-words leading-tight font-bold text-[11px] uppercase tracking-tight`}>
                                                 {line}
                                             </div>
                                             <div className="relative inline-flex items-center flex-shrink-0">
@@ -481,7 +481,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                                 }
 
                                 return (
-                                    <div key={i} className={`text-[10px] text-slate-800 dark:text-slate-200 break-words w-full leading-tight ${i === 0 ? 'font-bold text-[11px] mb-0.5 uppercase tracking-tight' : 'font-medium text-slate-600 dark:text-slate-400'}`}>
+                                    <div key={i} className={`text-[10px] text-slate-900 break-words w-full leading-tight ${i === 0 ? 'font-bold text-[11px] mb-0.5 uppercase tracking-tight' : 'font-medium text-slate-700'}`}>
                                         {line}
                                     </div>
                                 );
@@ -503,7 +503,7 @@ const Comum: React.FC<ComumProps> = (props) => {
             renderCelula(numLinha, numCelula, `cell-${numLinha}-${numCelula}`)
         );
         return (
-            <tr key={`row-${numLinha}`} className="group min-h-[4rem] h-auto hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+            <tr key={`row-${numLinha}`} className="group min-h-[4rem] h-auto hover:bg-slate-100/50 dark:hover:bg-slate-800/20">
                 <td className="p-1 px-2 text-[10px] font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap text-center bg-background-light dark:bg-background-dark sticky left-0 z-20 group-hover:text-primary transition-colors">
                     <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded tracking-wide border border-slate-200 dark:border-slate-700">{labelHorario}</span>
                 </td>
@@ -608,7 +608,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                                                 onClick={() => handlePageChange(idx)}
                                                 className={`w-9 h-9 rounded-lg text-sm font-bold transition-all duration-200 ${isActive
                                                     ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
-                                                    : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 hover:shadow-sm'}`}
+                                                    : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-600 hover:text-slate-700 dark:hover:text-slate-100 hover:shadow-sm'}`}
                                             >
                                                 {idx + 1}
                                             </button>

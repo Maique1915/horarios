@@ -85,7 +85,7 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                         </h3>
                         <div className="space-y-1">
                             {ctrl.suggestions.map(subject => (
-                                <div key={subject._id} className="flex items-center justify-between group p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-state-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
+                                <div key={subject._id} className="flex items-center justify-between group p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                                     <div className="flex-1 min-w-0 mr-2">
                                         <div className="truncate text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2" title={subject._di}>
                                             {subject._di}
@@ -131,7 +131,7 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                     if (isCompleted) return null; // Don't show completed
 
                                     return (
-                                        <div key={subject._id} className="flex items-center justify-between group p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-state-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
+                                        <div key={subject._id} className="flex items-center justify-between group p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                                             <div className="flex items-center gap-2 min-w-0 flex-1">
                                                 <div className="flex-1 min-w-0">
                                                     <div className={`truncate text-sm ${isBlacklisted ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300'}`} title={subject._di}>

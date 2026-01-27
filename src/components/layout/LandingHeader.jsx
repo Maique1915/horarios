@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import ROUTES from '../../routes';
+import ThemeToggle from '../shared/ThemeToggle';
 
 const LandingHeader = () => {
     const { user, logout } = useAuth();
@@ -49,6 +50,7 @@ const LandingHeader = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <ThemeToggle />
                         {user && (
                             <div className="flex items-center gap-3">
                                 <Link

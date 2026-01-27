@@ -326,7 +326,7 @@ const useGeraGradeController = () => {
 
 const SubjectItem = ({ itemData, isChecked, value, handleCheck }: { itemData: Subject, isChecked: boolean, value: any, handleCheck: any }) => {
     return (
-        <label key={itemData._re} className="flex items-start gap-3 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group" onClick={(e) => e.stopPropagation()}>
+        <label key={itemData._re} className="flex items-start gap-3 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" onClick={(e) => e.stopPropagation()}>
             <div className="relative flex items-center mt-1">
                 <input
                     type="checkbox"
@@ -381,7 +381,7 @@ const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriod
 
     return (
         <details className="flex flex-col rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark shadow-sm overflow-hidden group transition-all duration-300" open={isOpen}>
-            <summary className="flex cursor-pointer items-center justify-between gap-4 py-4 px-5 bg-surface-light dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors select-none" onClick={handleSummaryClick}>
+            <summary className="flex cursor-pointer items-center justify-between gap-4 py-4 px-5 bg-surface-light dark:bg-surface-dark hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors select-none" onClick={handleSummaryClick}>
                 <div className="flex items-center gap-4">
                     <div className="relative flex items-center" onClick={(e) => e.stopPropagation()}>
                         <input

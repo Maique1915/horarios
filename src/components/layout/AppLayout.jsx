@@ -9,6 +9,7 @@ import ROUTES from '../../routes';
 import { loadDbData } from '../../services/disciplinaService';
 import LandingHeader from './LandingHeader';
 import LandingFooter from './LandingFooter';
+import ThemeToggle from '../shared/ThemeToggle';
 
 const AppLayout = ({ children }) => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -238,6 +239,7 @@ const AppLayout = ({ children }) => {
 
 
                         <div className="flex items-center gap-4">
+                            <ThemeToggle />
                             {user && (
                                 <div className="flex items-center gap-3">
                                     <Link

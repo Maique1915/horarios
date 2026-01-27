@@ -1,6 +1,7 @@
 import React from 'react';
 import Script from 'next/script';
 import { AuthProvider } from '../contexts/AuthContext';
+import { ThemeProvider } from '../contexts/ThemeContext';
 import AppLayout from '../components/layout/AppLayout';
 import './globals.css';
 import { Lexend } from 'next/font/google';
@@ -31,12 +32,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </head>
             <body className={lexend.className}>
                 <QueryProvider>
-                    <AuthProvider>
-                        <AppLayout>
-                            {children}
-                            <SpeedInsights />
-                        </AppLayout>
-                    </AuthProvider>
+                    <ThemeProvider>
+                        <AuthProvider>
+                            <AppLayout>
+                                {children}
+                                <SpeedInsights />
+                            </AppLayout>
+                        </AuthProvider>
+                    </ThemeProvider>
                 </QueryProvider>
                 <script
                     async
