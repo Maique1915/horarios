@@ -33,8 +33,8 @@ interface ClassSchedule {
 }
 
 export interface Enrollment extends Subject {
-    class_name: string; // Override optional in Subject if needed, or keep compatible
-    semester: number;
+    class_name: string;
+    period: string;
     schedule_data: ClassSchedule[];
     created_at: string;
     course_name?: string;
@@ -56,10 +56,10 @@ const CACHE_DURATION = 0; // Disable cache for debugging
 
 // --- Helpers ---
 
-const processCategoryAndElective = (item: Subject) => {
+const processCategoryAndOptional = (item: Subject) => {
     return {
-        _el: !item.elective,
-        _category: item.elective ? 'ELECTIVE' : 'MANDATORY'
+        _el: item.optional, // true = OPTATIVA, false = OBRIGATÓRIA
+        _category: item.optional ? 'OPTIONAL' : 'MANDATORY'
     };
 };
 
@@ -106,13 +106,14 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
         _di: item.name,
         _ap: practCreds,
         _at: theoryCreds,
-        _el: !item.elective, // Logic inlined from processCategoryAndElective if easier, or adapt helper
-        _category: item.elective ? 'ELECTIVE' : 'MANDATORY',
+        _el: item.optional, // true = OPTATIVA, false = OBRIGATÓRIA (SEM inversão!)
+        _category: item.optional ? 'OPTIONAL' : 'MANDATORY',
         _workload: (practCreds + theoryCreds) * 18,
         _ag: item.active,
         _pr: _pr,
         _pr_creditos_input: creditsReq?.min_credits ?? 0,
         _classSchedules: schedulesBySubjectId ? (schedulesBySubjectId.get(item.id) || []) : [],
+        course_id: item.course_id
     };
 };
 
@@ -247,8 +248,8 @@ export const addSubject = async (courseCode: string, subjectData: Subject): Prom
     if (!courseData) throw new Error(`Curso ${courseCode} não encontrado.`);
     const courseId = courseData.id;
 
-    // Logic: _el=true (Mandatory) -> DB: elective=false
-    const dbElective = !_el;
+    // _el=true (OPTATIVA) -> DB: optional=true (SEM inversão!)
+    const dbOptional = _el;
 
     const insertedData = await subjectsModel.insertSubject({
         name: _di,
@@ -256,7 +257,7 @@ export const addSubject = async (courseCode: string, subjectData: Subject): Prom
         semester: _se,
         has_theory: _at,
         has_practical: _ap,
-        elective: dbElective,
+        optional: dbOptional,
         active: _ag,
         course_id: courseId
     });
@@ -290,7 +291,7 @@ export const updateSubject = async (courseCode: string, subjectId: number | stri
     console.log('Service: updateSubject called with ID:', subjectId, 'and data:', subjectData);
     const { _di, _re, _se, _at, _ap, _el, _ag, _pr } = subjectData;
     const sId = Number(subjectId);
-    const dbElective = !_el;
+    const dbOptional = _el; // _el=true (OPTATIVA) -> DB: optional=true
 
     console.log('Service: Sanitized data for DB:', {
         name: _di,
@@ -298,7 +299,7 @@ export const updateSubject = async (courseCode: string, subjectId: number | stri
         semester: Number(_se),
         has_theory: Number(_at),
         has_practical: Number(_ap),
-        elective: dbElective,
+        optional: dbOptional,
         active: _ag
     });
 
@@ -309,7 +310,7 @@ export const updateSubject = async (courseCode: string, subjectId: number | stri
             semester: Number(_se),
             has_theory: Number(_at),
             has_practical: Number(_ap),
-            elective: dbElective,
+            optional: dbOptional,
             active: _ag
         });
         console.log('Service: Subject updated in DB successfully');
@@ -414,7 +415,8 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                         _ho: cls.ho,
                         _rt: cls.rt || [],
                         _da: cls.da || [],
-                        class_name: cls.class_name
+                        class_name: cls.class_name,
+                        course_id: subject.course_id
                     } as Subject);
                 });
             }
@@ -462,10 +464,11 @@ export const loadCurrentEnrollments = async (userId: number): Promise<Enrollment
         return {
             ...processedSubject,
             class_name: item.class_name,
-            semester: parseInt(item.semester), // Ensure number
+            period: item.semester, // Academic period (e.g. 2026.1)
             schedule_data: typeof item.schedule_data === 'string' ? JSON.parse(item.schedule_data) : item.schedule_data,
             created_at: item.created_at,
-            course_name: item.subjects.courses?.name
+            course_name: item.subjects.courses?.name,
+            course_id: item.course_id
         };
     });
 };
@@ -497,7 +500,7 @@ export const toggleMultipleSubjects = async (userId: number, subjectIds: (number
     }
 };
 
-export const saveCurrentEnrollments = async (userId: number, enrollments: Subject[], semester: number | string): Promise<void> => {
+export const saveCurrentEnrollments = async (userId: number, enrollments: Subject[], semester: number | string, defaultCourseId?: number): Promise<void> => {
     // 1. Fetch existing enrollments for this user
     // Note: We fetch all and filter by semester in code or query by semester.
     // Given the model, let's fetch all (cheap) and filter.
@@ -523,14 +526,34 @@ export const saveCurrentEnrollments = async (userId: number, enrollments: Subjec
     }
 
     if (toInsert.length > 0) {
+        // Encontrar se algum item está sem course_id
+        const missingCourseId = toInsert.filter(item => !item.course_id);
+        if (missingCourseId.length > 0) {
+            console.warn(`Atenção: ${missingCourseId.length} disciplinas sem course_id detectadas.`, missingCourseId.map(m => m._re));
+        }
+
         const rows = toInsert.map(item => ({
             user_id: userId,
             subject_id: item._id,
             class_name: item.class_name || null,
             semester: semester,
-            schedule_data: item._ho || []
+            schedule_data: item._ho || [],
+            course_id: item.course_id || defaultCourseId || 3 // Fallback total para o curso 3 (Engenharia) se nada for encontrado
         }));
-        await currentEnrollmentsModel.insertCurrentEnrollments(rows);
+
+        try {
+            await currentEnrollmentsModel.insertCurrentEnrollments(rows);
+        } catch (dbError: any) {
+            const errorSnapshot = {
+                message: dbError.message || "Erro desconhecido",
+                details: dbError.details,
+                hint: dbError.hint,
+                code: dbError.code,
+                rowsSample: rows.slice(0, 1)
+            };
+            console.error("Erro DETALHADO ao inserir no banco (current_enrollments):", errorSnapshot);
+            throw new Error(JSON.stringify(errorSnapshot)); // Transforma em string para o component conseguir logar/mostrar
+        }
     }
 
     console.log(`Smart Update: Deleted ${toDelete.length}, Inserted ${toInsert.length}`);

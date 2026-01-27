@@ -88,6 +88,18 @@ export default function TimeSlotsManager() {
         e.preventDefault();
         if (!selectedCourseId) return;
 
+        // Check for duplicates client-side first
+        const isDuplicate = timeSlots.some(slot =>
+            slot.start_time.substring(0, 5) === formData.start_time &&
+            slot.end_time.substring(0, 5) === formData.end_time &&
+            (!editingSlot || slot.id !== editingSlot.id)
+        );
+
+        if (isDuplicate) {
+            alert('Este horário já está cadastrado para este curso!');
+            return;
+        }
+
         try {
             if (editingSlot) {
                 const { error } = await supabase
@@ -106,7 +118,16 @@ export default function TimeSlotsManager() {
                         end_time: formData.end_time,
                         course_id: selectedCourseId
                     }]);
-                if (error) throw error;
+
+                if (error) {
+                    if (error.code === '23505') {
+                        if (error.message.includes('time_slots_pkey')) {
+                            throw new Error('Erro de sincronismo no banco (PKEY). Por favor, execute o script de resync_sequences.sql no console do Supabase.');
+                        }
+                        throw new Error('Este horário já existe no sistema.');
+                    }
+                    throw error;
+                }
             }
 
             await fetchTimeSlots(selectedCourseId);
@@ -115,7 +136,7 @@ export default function TimeSlotsManager() {
             setFormData({ start_time: '', end_time: '' });
 
         } catch (error: any) {
-            alert('Erro ao salvar: ' + error.message);
+            alert('Erro ao salvar: ' + (error.message || 'Erro desconhecido'));
         }
     };
 

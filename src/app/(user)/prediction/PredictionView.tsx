@@ -10,9 +10,10 @@ import { usePredictionController, Subject, COLUMN_WIDTH, ROW_HEIGHT, NODE_WIDTH,
 const LoadingView = () => <LoadingSpinner message="Inicializando simulador..." />;
 
 const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController> }) => {
-    // Group electives for sidebar
-    const electives = useMemo(() =>
-        ctrl.allSubjects.filter(s => !s._el && s._ag).sort((a, b) => (a._di || '').localeCompare(b._di || '')),
+    // Group optionals for sidebar
+    // _el = true significa OPTATIVA
+    const optionals = useMemo(() =>
+        ctrl.allSubjects.filter(s => s._el && s._ag).sort((a, b) => (a._di || '').localeCompare(b._di || '')),
         [ctrl.allSubjects]);
 
     return (
@@ -88,7 +89,7 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                     <div className="flex-1 min-w-0 mr-2">
                                         <div className="truncate text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2" title={subject._di}>
                                             {subject._di}
-                                            {subject._el && <span className="px-1.5 py-0.5 rounded text-[9px] bg-red-100 text-red-700 font-bold">OBG</span>}
+                                            {!subject._el && <span className="px-1.5 py-0.5 rounded text-[9px] bg-red-100 text-red-700 font-bold">OBG</span>}
                                         </div>
                                         <div className="text-[10px] text-slate-400 dark:text-slate-500">
                                             {(subject._ap || 0) + (subject._at || 0)} cr • {subject._workload}h
@@ -120,7 +121,7 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                                 Matérias Optativas
                             </h3>
                             <div className="space-y-1">
-                                {electives.map(subject => {
+                                {optionals.map(subject => {
                                     const isBlacklisted = subject._id !== undefined && ctrl.blacklistedIds.has(subject._id);
                                     // Check if currently IN the plan (Fixed or Predicted)
                                     // This is expensive to scan every render, optimization needed if slow.

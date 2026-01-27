@@ -14,7 +14,9 @@ export interface ClassTableData {
     className: string;
     subjectId: number;
     rows: any[]; // We can be more specific if needed, but this is for counting slots
-    subjectName?: string; // We might want to pass this pre-calculated or lookup
+    subjectName?: string;
+    subjectAcronym?: string;
+    subjectSemester?: number;
 }
 
 interface ClassesTableProps {
@@ -23,21 +25,29 @@ interface ClassesTableProps {
     handleDeleteClass: (className: string) => void;
     selectedClassName?: string | null;
     getSubjectName: (id: number) => string;
+    getSubjectAcronym: (id: number) => string;
+    getSubjectSemester: (id: number) => number;
 }
 
-const ClassesTable = ({ data, handleEditClass, handleDeleteClass, selectedClassName, getSubjectName }: ClassesTableProps) => {
+const ClassesTable = ({ data, handleEditClass, handleDeleteClass, selectedClassName, getSubjectName, getSubjectAcronym, getSubjectSemester }: ClassesTableProps) => {
     const columns = useMemo<ColumnDef<ClassTableData>[]>(
         () => [
             {
-                accessorKey: 'className',
-                header: 'Turma',
+                accessorFn: row => getSubjectAcronym(row.subjectId),
+                id: 'subjectAcronym',
+                header: 'Código',
                 cell: info => <span className="font-bold text-slate-700 dark:text-slate-300">{info.getValue() as string}</span>
             },
             {
-                accessorFn: row => getSubjectName(row.subjectId),
-                id: 'subjectName', // Explicit ID for sorting
-                header: 'Disciplina',
-                cell: info => <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400">{info.getValue() as string}</span>,
+                accessorFn: row => getSubjectSemester(row.subjectId),
+                id: 'subjectSemester',
+                header: 'Período',
+                cell: info => <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400">{info.getValue() as number}º Período</span>,
+            },
+            {
+                accessorKey: 'className',
+                header: 'Turma',
+                cell: info => <span className="font-bold text-primary dark:text-blue-400">{info.getValue() as string}</span>
             },
             {
                 id: 'slots',
@@ -67,7 +77,7 @@ const ClassesTable = ({ data, handleEditClass, handleDeleteClass, selectedClassN
                 id: 'actions',
                 header: '',
                 cell: ({ row }) => (
-                    <div className="flex justify-end gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                             className="p-1.5 rounded-lg hover:bg-primary/10 text-primary dark:text-blue-400 transition-colors"
                             onClick={(e) => { e.stopPropagation(); handleEditClass(row.original); }}
@@ -86,7 +96,7 @@ const ClassesTable = ({ data, handleEditClass, handleDeleteClass, selectedClassN
                 ),
             },
         ],
-        [handleEditClass, handleDeleteClass, getSubjectName]
+        [handleEditClass, handleDeleteClass, getSubjectName, getSubjectAcronym, getSubjectSemester]
     );
 
     const table = useReactTable({
@@ -154,7 +164,7 @@ const ClassesTable = ({ data, handleEditClass, handleDeleteClass, selectedClassN
                             <tr>
                                 <td colSpan={columns.length} className="text-center py-12 text-slate-400 dark:text-slate-500">
                                     <div className="flex flex-col items-center gap-2">
-                                        <span className="material-symbols-outlined text-4xl opacity-50">school</span>
+                                        <span className="material-symbols-outlined text-4xl opacity-50">search_off</span>
                                         <span>Nenhuma turma encontrada.</span>
                                     </div>
                                 </td>
@@ -164,7 +174,28 @@ const ClassesTable = ({ data, handleEditClass, handleDeleteClass, selectedClassN
                 </table>
             </div>
 
-
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-5 py-4 border-t border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Página <span className="text-slate-800 dark:text-slate-200">{table.getState().pagination.pageIndex + 1}</span> de <span className="text-slate-800 dark:text-slate-200">{table.getPageCount()}</span>
+                </span>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="p-1.5 px-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium text-slate-600 dark:text-slate-300"
+                    >
+                        Anterior
+                    </button>
+                    <button
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="p-1.5 px-3 rounded-lg border border-border-light dark:border-border-dark hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium text-slate-600 dark:text-slate-300"
+                    >
+                        Próxima
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

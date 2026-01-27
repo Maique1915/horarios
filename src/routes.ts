@@ -6,6 +6,7 @@ export const ROUTES = {
     PREDICTION: '/prediction',
     ACTIVITIES: '/activities',
     PLANS: '/plans',
+    GRADE: '/grade',
 
     // Dynamic Routes Helpers
     COURSE: (code: string) => `/${code}`,

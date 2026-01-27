@@ -136,7 +136,7 @@ const RegisterView = ({ ctrl }: { ctrl: ReturnType<typeof useRegisterController>
                                 type="text"
                                 value={ctrl.fullName}
                                 onChange={(e) => ctrl.setFullName(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
                                 placeholder="Seu nome completo"
                                 required
                             />
@@ -169,7 +169,7 @@ const RegisterView = ({ ctrl }: { ctrl: ReturnType<typeof useRegisterController>
                                 type="text"
                                 value={ctrl.username}
                                 onChange={(e) => ctrl.setUsername(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
                                 placeholder="Seu usuário/email"
                                 required
                             />
@@ -184,7 +184,7 @@ const RegisterView = ({ ctrl }: { ctrl: ReturnType<typeof useRegisterController>
                                     type={ctrl.showPassword ? "text" : "password"}
                                     value={ctrl.password}
                                     onChange={(e) => ctrl.setPassword(e.target.value)}
-                                    className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                    className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
                                     placeholder="Sua senha"
                                     required
                                     minLength={6}
@@ -209,7 +209,7 @@ const RegisterView = ({ ctrl }: { ctrl: ReturnType<typeof useRegisterController>
                                 type={ctrl.showPassword ? "text" : "password"}
                                 value={ctrl.confirmPassword}
                                 onChange={(e) => ctrl.setConfirmPassword(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
+                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
                                 placeholder="Confirme a senha"
                                 required
                                 minLength={6}

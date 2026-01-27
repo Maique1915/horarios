@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { toPng } from 'html-to-image';
 import { Subject } from '../../types/Subject';
+import { getCurrentPeriod } from '@/utils/dateUtils';
 
 interface Day {
     id: number;
@@ -35,6 +36,8 @@ interface ComumProps {
     // Looking at code, it fetches only if props.materias is missing. 
     courseSchedule?: any;
     courseDimension?: any;
+    hideTitle?: boolean;
+    noCard?: boolean;
 }
 
 interface ComumState {
@@ -64,10 +67,7 @@ const cores = [
 ];
 const rand = Math.floor(Math.random() * cores.length);
 
-const dataAtual = new Date();
-const mesAtual = dataAtual.getMonth() + 1;
-const anoAtual = dataAtual.getFullYear();
-const periodoAtual = `${anoAtual}.${mesAtual > 6 ? "2" : "1"}`;
+const periodoAtual = getCurrentPeriod();
 
 const Comum: React.FC<ComumProps> = (props) => {
     const [state, setState] = useState<ComumState>({
@@ -201,7 +201,8 @@ const Comum: React.FC<ComumProps> = (props) => {
             const coresVazias = Array.from({ length: th }, () => Array(td).fill(""));
 
             semestre.forEach((disciplina, index) => {
-                const opt = !disciplina._el && disciplina._di && !disciplina._di.includes(" - OPT") ? " - OPT" : "";
+                // _el = true significa OPTATIVA, então adiciona " - OPT" quando _el for true
+                const opt = disciplina._el && disciplina._di && !disciplina._di.includes(" - OPT") ? " - OPT" : "";
 
                 if (Array.isArray(disciplina._ho)) {
                     disciplina._ho.forEach(([dayId, slotId], i) => {
@@ -341,7 +342,7 @@ const Comum: React.FC<ComumProps> = (props) => {
             const uniqueMaterias = Array.from(new Map(flatMaterias.map(item => [item._id, item])).values());
             console.log("Saving enrollments (deduplicated):", uniqueMaterias);
 
-            await saveCurrentEnrollments(user.id, uniqueMaterias, periodoAtual);
+            await saveCurrentEnrollments(user.id, uniqueMaterias, periodoAtual, user.course_id);
 
             if (props.feitas) {
                 // Deduplicate feitas IDs
@@ -627,14 +628,18 @@ const Comum: React.FC<ComumProps> = (props) => {
                         </div>
                     )}
 
-                    <div id="schedule-card" className={`bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 flex flex-col w-full border border-border-light dark:border-border-dark transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
+                    <div id="schedule-card" className={`${props.noCard ? 'w-full' : 'bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 border border-border-light dark:border-border-dark'} flex flex-col w-full transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
 
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark gap-4 md:gap-0">
+                        <div className={`flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark gap-4 md:gap-0 ${props.hideTitle && !props.hideSave && !props.fun && g !== "ª" ? 'hidden' : ''}`}>
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-primary tracking-widest uppercase mb-1">{periodoAtual}</span>
-                                <h3 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight">
-                                    {isPrinting ? "Grade Curricular" : `${state.id + 1}${g} ${f}`}
-                                </h3>
+                                {!props.hideTitle && (
+                                    <>
+                                        <span className="text-xs font-bold text-primary tracking-widest uppercase mb-1">{periodoAtual}</span>
+                                        <h3 className="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                                            {isPrinting ? "Grade Curricular" : `${g ? (state.id + 1 + g + " ") : ""}${f}`}
+                                        </h3>
+                                    </>
+                                )}
                             </div>
                             <div className={`flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-3 w-full md:w-auto export-ignore ${isPrinting ? 'invisible' : ''}`}>
 

@@ -6,6 +6,7 @@ export interface DbCurrentEnrollment {
     subject_id: number;
     class_name: string;
     semester: string;
+    course_id: number;
     schedule_data: any; // jsonb
     created_at: string;
     subjects?: any;
@@ -18,6 +19,7 @@ export const fetchCurrentEnrollments = async (userId: number) => {
         .select(`
             class_name,
             semester,
+            course_id,
             schedule_data,
             created_at,
             subjects (

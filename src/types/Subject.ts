@@ -8,6 +8,7 @@ export interface Subject {
     name?: string;          // Alias for _di
     _cu: string;          // Course code (e.g., 'EC')
     course_name?: string;
+    course_id?: number;
 
     // Academic Data
     _ap: number;          // Practical credits/hours
@@ -19,8 +20,8 @@ export interface Subject {
     // Status/Category
     _el: boolean;         // true if Elective (Optativa)
     _ag: boolean;         // true if Active
-    _category: string;    // 'MANDATORY', 'ELECTIVE', 'COMPLEMENTARY'
-    elective?: boolean;
+    _category: string;    // 'MANDATORY', 'OPTIONAL', 'COMPLEMENTARY'
+    optional?: boolean;
 
     // Metadata
     _workload: number;    // Total workload in hours

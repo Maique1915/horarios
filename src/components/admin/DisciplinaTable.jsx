@@ -18,7 +18,16 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
       {
         accessorKey: '_se',
         header: 'Período',
-        cell: info => <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400">{info.getValue()}º Período</span>,
+        cell: info => <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-400">{info.getValue() > 0 ? `${info.getValue()}º Período` : 'Optativa'}</span>,
+      },
+      {
+        accessorKey: '_el',
+        header: 'Tipo',
+        cell: info => info.getValue() ? (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800">OPT</span>
+        ) : (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">OBG</span>
+        )
       },
       {
         accessorKey: '_pr',

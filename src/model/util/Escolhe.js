@@ -170,7 +170,7 @@ export default class Escolhe {
      * @param {Object} scheduleMeta - { days: [], slots: [] } Metadata for schedule parsing.
      * @returns {{ semestersCount: number, semesterGrids: Array<Array<Object>> }} Prediction result containing count and grids.
      */
-    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { electiveHours: Infinity, mandatoryHours: Infinity }) {
+    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { optionalHours: Infinity, mandatoryHours: Infinity }) {
         if (!allSubjects || allSubjects.length === 0) return 0;
 
         let currentCompleted = [...completedSubjects]; // Copy to avoid mutating original
@@ -181,8 +181,10 @@ export default class Escolhe {
         while (semesters < MAX_SEMESTERS) {
 
             // 0. Calculate current accumulated hours
-            const currentMandatoryHours = currentCompleted.filter(s => s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
-            const currentElectiveHours = currentCompleted.filter(s => !s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
+            // _el = false significa OBRIGATÓRIA (mandatory)
+            // _el = true significa OPTATIVA (optional)
+            const currentMandatoryHours = currentCompleted.filter(s => !s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
+            const currentOptionalHours = currentCompleted.filter(s => s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
 
             // 1. Find candidates (what can be taken now)
             // Grafos expects (allSubjects, cr, names). 
@@ -192,12 +194,12 @@ export default class Escolhe {
 
             // 1.1 FILTER CANDIDATES BASED ON LIMITS
             candidates = candidates.filter(subject => {
-                if (subject._el) {
-                    // Mandatory: Always allowed
+                if (!subject._el) {
+                    // Mandatory (_el=false): Always allowed
                     return true;
                 } else {
-                    // Elective: Check if limit reached
-                    return currentElectiveHours < limits.electiveHours;
+                    // Optativa (_el=true): Check if limit reached
+                    return currentOptionalHours < limits.optionalHours;
                 }
             });
 
@@ -241,37 +243,37 @@ class EscolheDeterministico extends Escolhe {
         const originalCount = this.genesis.length;
         console.log(`🔧 Reduz: Starting with ${originalCount} candidates`);
 
-        // Separate mandatory and elective subjects
-        // _el=true means MANDATORY, _el=false means ELECTIVE
-        const mandatory = this.genesis.filter(s => s._el);
-        const electives = this.genesis.filter(s => !s._el);
+        // Separate mandatory and optional subjects
+        // _el=false means MANDATORY, _el=true means OPTIONAL
+        const mandatory = this.genesis.filter(s => !s._el);
+        const optionals = this.genesis.filter(s => s._el);
 
         // Keep all mandatory subjects - they should ALWAYS be considered
         this.genesis = [...mandatory];
 
-        // Add electives up to the limit
+        // Add optionals up to the limit
         const MAX_SUBJECTS = 20;
         const remainingSlots = Math.max(0, MAX_SUBJECTS - mandatory.length);
 
-        if (electives.length > remainingSlots) {
-            // Need to reduce electives
-            console.log(`  🔧 Reducing ${electives.length} electives to ${remainingSlots}`);
+        if (optionals.length > remainingSlots) {
+            // Need to reduce optionals
+            console.log(`  🔧 Reducing ${optionals.length} optionals to ${remainingSlots}`);
 
-            // Sort electives by priority (criticality first, then lower semester)
-            electives.sort((a, b) => {
+            // Sort optionals by priority (criticality first, then lower semester)
+            optionals.sort((a, b) => {
                 const critA = this.weights.get(a._re) || 0;
                 const critB = this.weights.get(b._re) || 0;
                 if (critA !== critB) return critB - critA; // Higher criticality first
                 return a._se - b._se; // Lower semester first
             });
 
-            const kept = electives.slice(0, remainingSlots);
+            const kept = optionals.slice(0, remainingSlots);
             this.genesis.push(...kept);
         } else {
-            this.genesis.push(...electives);
+            this.genesis.push(...optionals);
         }
 
-        console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatory.length} mandatory + ${this.genesis.length - mandatory.length} electives)`);
+        console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatory.length} mandatory + ${this.genesis.length - mandatory.length} optionals)`);
 
         if (mandatory.length > MAX_SUBJECTS) {
             console.warn(`⚠️ Warning: ${mandatory.length} mandatory subjects exceed the ${MAX_SUBJECTS} limit. All will be kept.`);

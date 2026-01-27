@@ -75,7 +75,7 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'has_theory', label: 'Créd. Teóricos', type: 'number', editable: true },
             { key: 'has_practical', label: 'Créd. Práticos', type: 'number', editable: true },
             { key: 'workload', label: 'Carga Horária', type: 'number', editable: true },
-            { key: 'elective', label: 'Eletiva?', type: 'boolean', editable: true },
+            { key: 'optional', label: 'Eletiva/Optativa?', type: 'boolean', editable: true },
             { key: 'active', label: 'Ativo?', type: 'boolean', editable: true },
             {
                 key: 'category',
@@ -84,7 +84,7 @@ export const tableConfigs: Record<string, TableConfig> = {
                 editable: true,
                 options: [
                     { label: 'Obrigatória', value: 'MANDATORY' },
-                    { label: 'Eletiva', value: 'ELECTIVE' },
+                    { label: 'Optativa', value: 'OPTIONAL' },
                     { label: 'Complementar', value: 'COMPLEMENTARY' }
                 ]
             },

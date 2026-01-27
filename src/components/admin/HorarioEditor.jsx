@@ -4,9 +4,9 @@ import LoadingSpinner from '../shared/LoadingSpinner';
 import { getDays, getTimeSlots } from '../../services/scheduleService';
 
 
-const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCancel, isReviewing }) => {
+const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCancel, isReviewing, courseId }) => {
   const [days, setDays] = useState([]);
-  const [timeSlots, setTimeSlots] = useState([]);
+  const [allTimeSlots, setAllTimeSlots] = useState([]); // Keep all slots to manage custom times
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,7 +24,7 @@ const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCance
       try {
         const [d, t] = await Promise.all([getDays(), getTimeSlots()]);
         setDays(d || []);
-        setTimeSlots(t || []);
+        setAllTimeSlots(t || []);
 
         setError(null);
       } catch (err) {
@@ -35,7 +35,7 @@ const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCance
       }
     };
     fetchScheduleData();
-  }, []); // Empty dependency array means it runs once on mount
+  }, [courseId]); // Empty dependency array means it runs once on mount
 
   const isSelected = useCallback((dayId, timeSlotId) => {
     return ho.some(item => item[0] === dayId && item[1] === timeSlotId);
@@ -66,7 +66,7 @@ const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCance
     const newDa = [...da];
     // Start with current daValue or derive from default slot time
     const hoItem = ho[hoIndex];
-    const timeSlot = timeSlots.find(ts => ts.id === hoItem[1]);
+    const timeSlot = allTimeSlots.find(ts => ts.id === hoItem[1]);
 
     // Current effective custom times (if null, use formatted default)
     let currentStart = newDa[hoIndex] ? newDa[hoIndex][0] : formatTime(timeSlot?.start_time);
@@ -101,6 +101,11 @@ const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCance
   if (error) {
     return <div className="text-red-500 p-4">Erro ao carregar grade de horários: {error}</div>;
   }
+
+  // Filter time slots by courseId
+  const timeSlots = allTimeSlots.filter(slot =>
+    !courseId || slot.course_id === Number(courseId)
+  );
 
   const sortedSelectedHoDa = initialHo
     .map((hoItem, index) => ({ hoItem, daItem: initialDa[index], originalIndex: index }))
@@ -201,7 +206,7 @@ const HorarioEditor = ({ initialClassName, initialHo, initialDa, onSave, onCance
             .map((item) => {
               const { hoItem, daItem, originalIndex } = item;
               const day = days.find(d => d.id === hoItem[0]);
-              const timeSlot = timeSlots.find(ts => ts.id === hoItem[1]);
+              const timeSlot = allTimeSlots.find(ts => ts.id === hoItem[1]);
 
               const displayValueStart = daItem?.[0] || formatTime(timeSlot?.start_time);
               const displayValueEnd = daItem?.[1] || formatTime(timeSlot?.end_time);

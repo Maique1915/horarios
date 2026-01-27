@@ -1,12 +1,16 @@
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useProfileController } from './useProfileController';
 import { Subject } from '@/types/Subject';
+import ROUTES from '../../../routes';
 
 interface CurrentEnrollmentsSectionProps {
     ctrl: ReturnType<typeof useProfileController>;
 }
 
 export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionProps) => {
+    const router = useRouter();
+
     return (
         <div className="bg-surface-light dark:bg-surface-dark lg:col-span-3 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
             <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
@@ -16,7 +20,7 @@ export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionPro
                 </h2>
                 {ctrl.currentEnrollments.length > 0 && (
                     <button
-                        onClick={() => ctrl.setShowScheduleView(true)}
+                        onClick={() => router.push(ROUTES.GRADE)}
                         className="text-xs font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider flex items-center gap-1"
                     >
                         <span className="material-symbols-outlined text-sm">grid_view</span>

@@ -16,6 +16,7 @@ import { getDays, getTimeSlots } from '../../../services/scheduleService';
 import { getUserTotalHours } from '../../../services/complementaryService';
 import { getComments, addComment } from '../../../services/commentService';
 import ROUTES from '../../../routes';
+import { getCurrentPeriod } from '@/utils/dateUtils';
 // @ts-ignore
 import Escolhe from '../../../model/util/Escolhe';
 
@@ -121,17 +122,23 @@ export const useProfileController = () => {
 
     const completedSubjects = useMemo(() => completedSubjectsRaw || [], [completedSubjectsRaw]);
 
-    const { data: currentEnrollmentsRaw, isLoading: loadingEnrollments } = useQuery<Subject[]>({
+    const { data: currentEnrollmentsRaw, isLoading: loadingEnrollments } = useQuery<Enrollment[]>({
         queryKey: ['currentEnrollments', user?.id],
         queryFn: async () => {
             const data = await loadCurrentEnrollments(user!.id);
-            return data as unknown as Subject[];
+            return data as Enrollment[];
         },
         enabled: !!user?.id,
         staleTime: 1000 * 60 * 5,
     });
 
-    const currentEnrollments = useMemo(() => currentEnrollmentsRaw || [], [currentEnrollmentsRaw]);
+    const currentEnrollments = useMemo(() => {
+        const raw = currentEnrollmentsRaw || [];
+        const periodoAtual = getCurrentPeriod();
+
+        // No perfil, mostramos apenas o que está em curso no período ATUAL
+        return raw.filter(e => e.period === periodoAtual);
+    }, [currentEnrollmentsRaw]);
 
     const { data: complementaryHours = 0, isLoading: loadingHours } = useQuery<number>({
         queryKey: ['userTotalHours', user?.id, user?.course_id],
@@ -202,7 +209,7 @@ export const useProfileController = () => {
 
                 if (subjectsToProcess.length > 0) {
                     const limits = {
-                        electiveHours: 360,
+                        optionalHours: 360,
                         mandatoryHours: Infinity
                     };
 
@@ -388,46 +395,49 @@ export const useProfileController = () => {
             _re: s.acronym,
             _ho: s.schedule_data,
             _se: s.semester,
-            _el: !s.elective,
+            _el: s._el, // true = OPTATIVA, false = OBRIGATÓRIA
             _ca: s.credits,
             _da: s.schedule_day_time,
             _ap: s._ap || 0,
             _at: s._at || 0,
-            _pr: s._pr || []
+            _pr: s._pr || [],
+            course_id: s.course_id
         }));
     }, [currentEnrollments]);
 
     // Derived Stats
     const MANDATORY_REQ_HOURS = 3774;
-    const ELECTIVE_REQ_HOURS = 360;
+    const OPTIONAL_REQ_HOURS = 360;
     const COMPLEMENTARY_REQ_HOURS = 210;
-    const TOTAL_REQ_HOURS = MANDATORY_REQ_HOURS + ELECTIVE_REQ_HOURS + COMPLEMENTARY_REQ_HOURS;
+    const TOTAL_REQ_HOURS = MANDATORY_REQ_HOURS + OPTIONAL_REQ_HOURS + COMPLEMENTARY_REQ_HOURS;
 
     const {
         mandatorySubjects,
-        electiveSubjects,
+        optionalSubjects,
         mandatoryEffective,
-        electiveEffective,
+        optionalEffective,
         compEffective,
         progressPercentage
     } = useMemo(() => {
-        const mSubs = completedSubjects.filter(s => s._el);
-        const eSubs = completedSubjects.filter(s => !s._el);
+        // _el = false significa OBRIGATÓRIA (mandatory)
+        // _el = true significa OPTATIVA (optional)
+        const mSubs = completedSubjects.filter(s => !s._el);
+        const eSubs = completedSubjects.filter(s => s._el);
 
         const mCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
         const eCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
 
         const mEff = Math.min(MANDATORY_REQ_HOURS, mCredits * 18);
-        const eEff = Math.min(ELECTIVE_REQ_HOURS, eCredits * 18);
+        const eEff = Math.min(OPTIONAL_REQ_HOURS, eCredits * 18);
         const cEff = Math.min(COMPLEMENTARY_REQ_HOURS, complementaryHours || 0);
 
         const percent = Math.round(((mEff + eEff + cEff) / TOTAL_REQ_HOURS) * 100);
 
         return {
             mandatorySubjects: mSubs,
-            electiveSubjects: eSubs,
+            optionalSubjects: eSubs,
             mandatoryEffective: mEff,
-            electiveEffective: eEff,
+            optionalEffective: eEff,
             compEffective: cEff,
             progressPercentage: percent
         };
@@ -449,8 +459,8 @@ export const useProfileController = () => {
         complementaryHours,
         // Stats
         progressPercentage, estimatedDate,
-        mandatorySubjects, electiveSubjects,
-        mandatoryEffective, electiveEffective, compEffective,
+        mandatorySubjects, optionalSubjects,
+        mandatoryEffective, optionalEffective, compEffective,
         // Subject Mgmt
         isEditingSubjects, setIsEditingSubjects,
         allSubjects, selectedSubjectIds, savingSubjects,

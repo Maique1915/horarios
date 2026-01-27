@@ -163,7 +163,7 @@ const EditProfileModal = ({ ctrl }: { ctrl: ReturnType<typeof useProfileControll
                             type="text"
                             value={ctrl.editForm.name}
                             onChange={(e) => ctrl.setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                            className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                            className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm text-text-light-primary dark:text-text-dark-primary"
                             placeholder="Seu nome"
                         />
                     </div>
@@ -173,7 +173,7 @@ const EditProfileModal = ({ ctrl }: { ctrl: ReturnType<typeof useProfileControll
                             type="text"
                             value={ctrl.editForm.username}
                             onChange={(e) => ctrl.setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                            className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"
+                            className="w-full px-4 py-2.5 rounded-lg bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm text-text-light-primary dark:text-text-dark-primary"
                             placeholder="seu.usuario"
                         />
                     </div>
@@ -193,22 +193,31 @@ const EditProfileModal = ({ ctrl }: { ctrl: ReturnType<typeof useProfileControll
                             <div className="space-y-3 animate-fadeIn bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-border-light dark:border-border-dark">
                                 <input
                                     type="password"
+                                    value={ctrl.editForm.currentPassword || ''}
+                                    onChange={(e) => ctrl.setEditForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-sm text-text-light-primary dark:text-text-dark-primary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                    placeholder="Senha atual"
+                                    required
+                                />
+                                <div className="h-px bg-border-light dark:bg-border-dark my-1"></div>
+                                <input
+                                    type="password"
                                     value={ctrl.editForm.password || ''}
                                     onChange={(e) => ctrl.setEditForm(prev => ({ ...prev, password: e.target.value }))}
-                                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-sm"
+                                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-sm text-text-light-primary dark:text-text-dark-primary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     placeholder="Nova senha"
                                 />
                                 <input
                                     type="password"
                                     value={ctrl.confirmPassword}
                                     onChange={(e) => ctrl.setConfirmPassword(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-sm"
+                                    className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-sm text-text-light-primary dark:text-text-dark-primary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     placeholder="Confirmar nova senha"
                                 />
                                 <div className="flex justify-end">
                                     <button
                                         type="button"
-                                        onClick={() => { ctrl.setShowPassword(false); ctrl.setEditForm(prev => ({ ...prev, password: '' })); ctrl.setConfirmPassword(''); }}
+                                        onClick={() => { ctrl.setShowPassword(false); ctrl.setEditForm(prev => ({ ...prev, password: '', currentPassword: '' })); ctrl.setConfirmPassword(''); }}
                                         className="text-xs text-red-500 hover:text-red-700 font-medium"
                                     >
                                         Cancelar
@@ -238,71 +247,46 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
             <ProfileHeaderView ctrl={ctrl} />
             <EditProfileModal ctrl={ctrl} />
 
-            {ctrl.showScheduleView ? (
-                <div className="animate-fadeIn">
-                    <Comum
-                        materias={ctrl.formattedEnrollmentsForGrid as any}
-                        tela={1}
-                        cur={ctrl.user.courses?.code || 'engcomp'}
-                        hideSave={true}
-                        fun={
-                            <button
-                                onClick={() => ctrl.setShowScheduleView(false)}
-                                className="group flex cursor-pointer items-center justify-center gap-2 rounded-xl h-10 px-5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm"
-                            >
-                                <span className="material-symbols-outlined text-lg">arrow_back</span>
-                                Voltar
-                            </button>
-                        }
-                        g="ª"
-                        f="Grade Atual"
-                        separa={false}
-                    />
-                </div>
-            ) : (
-                <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
-                        <CategoryProgress
-                            title="Obrigatórias"
-                            subjects={ctrl.mandatorySubjects}
-                            reqHours={3774}
-                            reqCredits={198}
-                            color="text-blue-600 dark:text-blue-400"
-                            bgColor="bg-blue-600"
-                            icon="school"
-                        />
-                        <CategoryProgress
-                            title="Optativas"
-                            subjects={ctrl.electiveSubjects}
-                            reqHours={360}
-                            reqCredits={20}
-                            color="text-purple-600 dark:text-purple-400"
-                            bgColor="bg-purple-600"
-                            icon="star"
-                        />
-                        <CategoryProgress
-                            title="Atividades Comp."
-                            subjects={[]}
-                            reqHours={210}
-                            reqCredits={0}
-                            color="text-orange-600 dark:text-orange-400"
-                            bgColor="bg-orange-600"
-                            icon="extension"
-                            customTotalHours={ctrl.complementaryHours}
-                            onClick={() => router.push(ROUTES.ACTIVITIES)}
-                        />
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
+                <CategoryProgress
+                    title="Obrigatórias"
+                    subjects={ctrl.mandatorySubjects}
+                    reqHours={3774}
+                    reqCredits={198}
+                    color="text-blue-600 dark:text-blue-400"
+                    bgColor="bg-blue-600"
+                    icon="school"
+                />
+                <CategoryProgress
+                    title="Optativas"
+                    subjects={ctrl.optionalSubjects}
+                    reqHours={360}
+                    reqCredits={20}
+                    color="text-purple-600 dark:text-purple-400"
+                    bgColor="bg-purple-600"
+                    icon="star"
+                />
+                <CategoryProgress
+                    title="Atividades Comp."
+                    subjects={[]}
+                    reqHours={210}
+                    reqCredits={0}
+                    color="text-orange-600 dark:text-orange-400"
+                    bgColor="bg-orange-600"
+                    icon="extension"
+                    customTotalHours={ctrl.complementaryHours}
+                    onClick={() => router.push(ROUTES.ACTIVITIES)}
+                />
+            </div>
 
-                    {/* TWO COLUMNS: Enrollments & Completed */}
-                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                        {/* Current Enrollments Section moved to separate component */}
-                        <CurrentEnrollmentsSection ctrl={ctrl} />
+            {/* TWO COLUMNS: Enrollments & Completed */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Current Enrollments Section moved to separate component */}
+                <CurrentEnrollmentsSection ctrl={ctrl} />
 
-                        {/* Completed Subjects Section moved to separate component */}
-                        <CompletedSubjectsSection ctrl={ctrl} />
-                    </div>
-                </>
-            )}
+                {/* Completed Subjects Section moved to separate component */}
+                <CompletedSubjectsSection ctrl={ctrl} />
+            </div>
         </div>
     );
 }

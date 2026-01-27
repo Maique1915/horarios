@@ -4,8 +4,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import {
     loadCompletedSubjects,
     loadDbData,
-    loadCurrentEnrollments
+    loadCurrentEnrollments,
+    Enrollment
 } from '../../../services/disciplinaService';
+import { getCurrentPeriod } from '@/utils/dateUtils';
 import { getDays, getTimeSlots } from '../../../services/scheduleService';
 // @ts-ignore
 import Escolhe from '../../../model/util/Escolhe';
@@ -119,9 +121,12 @@ export const usePredictionController = () => {
                     loadCurrentEnrollments(user.id)
                 ]);
 
+                const periodoAtual = getCurrentPeriod();
+                const filteredEnrollments = (dbEnrollments as Enrollment[]).filter(e => e.period === periodoAtual);
+
                 setAllSubjects(dbSubjects);
                 setCompletedSubjects(dbCompleted);
-                setCurrentEnrollments(dbEnrollments);
+                setCurrentEnrollments(filteredEnrollments);
             } catch (error) {
                 console.error("Failed to load prediction data", error);
             } finally {
@@ -178,7 +183,7 @@ export const usePredictionController = () => {
         });
 
         const limits = {
-            electiveHours: 360,
+            optionalHours: 360,
             mandatoryHours: Infinity
         };
 
@@ -357,35 +362,54 @@ export const usePredictionController = () => {
         const newSet = new Set(blacklistedIds);
 
         if (newSet.has(subjectId)) {
+            // Removendo da blacklist (adicionando de volta)
             newSet.delete(subjectId);
             setBlacklistedIds(newSet);
             pushToHistory(fixedSemesters, newSet);
         } else {
-            const subjectREMOVE = allSubjects.find(s => s._id === subjectId);
-            if (!subjectREMOVE) return;
+            // Adicionando à blacklist (removendo da grade)
+            const subjectToRemove = allSubjects.find(s => s._id === subjectId);
+            if (!subjectToRemove) return;
 
             const isSameSubject = (a: Subject, b: Subject) => a._id === b._id;
 
-            const securedHours = [...completedSubjects, ...currentEnrollments]
-                .filter(s => (!s._el || s._category === 'ELECTIVE'))
+            // Horas já COMPLETADAS de optativas (não conta as que está cursando)
+            // _el = true significa OPTATIVA
+            const completedOptionalHours = completedSubjects
+                .filter(s => s._el || s._category === 'OPTIONAL')
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
 
-            const remainingPoolHours = allSubjects
+            // Horas que está CURSANDO AGORA de optativas
+            const currentOptionalHours = currentEnrollments
+                .filter(s => s._el || s._category === 'OPTIONAL')
+                .reduce((acc, s) => acc + (s._workload || 0), 0);
+
+            // Horas da disciplina que está tentando remover (se for optativa)
+            const removingOptionalHours = (subjectToRemove._el || subjectToRemove._category === 'OPTIONAL')
+                ? (subjectToRemove._workload || 0)
+                : 0;
+
+            // Pool de horas disponíveis (disciplinas que ainda podem ser cursadas)
+            // INCLUINDO a disciplina que está sendo removida se ela estiver no pool
+            const availablePoolHours = allSubjects
                 .filter(s =>
-                    !s._el &&
-                    s._ag &&
-                    !completedSubjects.some(c => isSameSubject(c, s)) &&
-                    !currentEnrollments.some(e => isSameSubject(e, s)) &&
+                    (s._el || s._category === 'OPTIONAL') && // É optativa
+                    s._ag && // Está ativa
+                    !completedSubjects.some(c => isSameSubject(c, s)) && // Não foi concluída
+                    !currentEnrollments.some(e => isSameSubject(e, s)) && // Não está cursando
                     s._id !== undefined &&
-                    !newSet.has(s._id) &&
-                    s._id !== subjectId
+                    !newSet.has(s._id) && // Não está na blacklist atual
+                    s._id !== subjectId // NÃO é a disciplina sendo removida
                 )
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
 
-            const totalFutureCredits = securedHours + remainingPoolHours;
+            // Total de horas que o usuário pode conseguir:
+            // = horas já completadas + horas cursando agora + horas disponíveis no pool
+            const totalPossibleHours = completedOptionalHours + currentOptionalHours + availablePoolHours;
 
-            if (totalFutureCredits < 360) {
-                alert(`IMPOSSÍVEL REMOVER:\n\nPara formar, você precisa de 360 horas de optativas.\n\nVocê já garantiu: ${securedHours}h.\nO banco de matérias restante teria: ${remainingPoolHours}h.\nTotal Possível: ${totalFutureCredits}h.\n\nSe você excluir esta matéria, o sistema não terá opções suficientes para te formar.`);
+            // Se remover esta disciplina, o total possível será insuficiente
+            if (totalPossibleHours < 360) {
+                alert(`IMPOSSÍVEL REMOVER:\n\nPara formar, você precisa de 360 horas de optativas.\n\nVocê já garantiu: ${completedOptionalHours}h.\nO banco de matérias restante teria: ${availablePoolHours}h.\nTotal Possível: ${totalPossibleHours}h.\n\nSe você excluir esta matéria, o sistema não terá opções suficientes para te formar.`);
                 return;
             }
 

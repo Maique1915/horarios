@@ -256,7 +256,7 @@ const useGeraGradeController = () => {
 
                 if (newItem._di.includes(" - A") || newItem._di.includes(" - B")) {
                     newItem._di = newItem._di.substring(0, newItem._di.length - 4);
-                } else if (!newItem._el && !newItem._di.includes(" - OPT")) {
+                } else if (newItem._el && !newItem._di.includes(" - OPT")) {
                     newItem._di += " - OPT";
                 }
                 aux.push(newItem);
@@ -371,6 +371,7 @@ const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriod
     const isOpen = openPeriodKey === periodKey;
 
     const handleSummaryClick = (e: React.MouseEvent) => {
+        e.preventDefault(); // Evita o comportamento nativo do summary para não entrar em conflito com o React
         if (isOpen) {
             setOpenPeriodKey(null);
         } else {

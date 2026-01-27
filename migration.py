@@ -136,29 +136,33 @@ for sheet in subject_sheets:
 
         for m in pattern.findall(r["_ho"]):
             day, start, end = m
-            slots.add((start, end))
-            schedule_map.append((r["_di"], turma, day.strip(), start, end))
+            # Adicionando o código do curso ao conjunto para criar slots únicos por curso
+            slots.add((start, end, r["_cu"]))
+            schedule_map.append((r["_di"], turma, day.strip(), start, end, r["_cu"]))
 
-for s, e in slots:
-    sql.append(
-        f"INSERT INTO time_slots (start_time, end_time) "
-        f"VALUES ('{s}', '{e}') "
-        f"ON CONFLICT DO NOTHING;"
-    )
+for s, e, cu in sorted(slots):
+    sql.append(f"""
+INSERT INTO time_slots (start_time, end_time, course_id)
+SELECT '{s}', '{e}', c.id FROM courses c WHERE c.code = '{esc(cu)}'
+ON CONFLICT (start_time, end_time, course_id) DO NOTHING;
+""".strip())
 
 # =====================================
 # CLASSES
 # =====================================
 sql.append("\n-- CLASSES")
 
-for sub, turma, day, start, end in schedule_map:
+for sub, turma, day, start, end, cu in schedule_map:
     sql.append(f"""
 INSERT INTO classes
 (subject_id, class, day_id, time_slot_id)
 SELECT s.id, '{esc(turma)}', d.id, t.id
-FROM subjects s, days d, time_slots t
-WHERE s.name = '{esc(sub)}'
+FROM subjects s, days d, time_slots t, courses c
+WHERE c.code = '{cu}'
+  AND s.course_id = c.id
+  AND s.name = '{esc(sub)}'
   AND d.name = '{esc(day)}'
+  AND t.course_id = c.id
   AND t.start_time = '{start}'
   AND t.end_time = '{end}';
 """.strip())
