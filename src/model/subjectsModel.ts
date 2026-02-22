@@ -19,10 +19,19 @@ export interface DbSubject {
 }
 
 export const fetchSubjects = async (courseId?: number) => {
-    let q = supabase.from('subjects').select('id, semester, name, acronym, has_practical, has_theory, category, optional, active, course_id, courses (code)');
+    let q = supabase.from('subjects').select('id, semester, name, acronym, has_practical, has_theory, category, optional, active, course_id, courses (code, name)');
     if (courseId) q = q.eq('course_id', courseId);
 
     const { data, error } = await q;
+    if (error) throw error;
+    return data as DbSubject[];
+};
+
+export const fetchSubjectsByIds = async (ids: number[]) => {
+    const { data, error } = await supabase
+        .from('subjects')
+        .select('id, semester, name, acronym, has_practical, has_theory, category, optional, active, course_id, courses (code, name)')
+        .in('id', ids);
     if (error) throw error;
     return data as DbSubject[];
 };

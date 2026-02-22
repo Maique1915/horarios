@@ -41,7 +41,7 @@ const FormField = ({ label, id, type = "text", placeholder, maxLength, required,
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
-      className={`form-input w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-60 disabled:bg-slate-100 dark:disabled:bg-slate-900 transition-all ${error ? 'border-red-500 dark:border-red-500 focus:ring-red-500/20 focus:border-red-500' : ''}`}
+      className={`form-input w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-4 focus:ring-primary/10 focus:border-primary disabled:opacity-50 disabled:bg-slate-50 dark:disabled:bg-slate-950 transition-all duration-200 ${error ? 'border-red-500 dark:border-red-500 focus:ring-red-500/10 focus:border-red-500' : ''}`}
       id={id}
       type={type}
       placeholder={placeholder}
@@ -99,15 +99,10 @@ const DisciplinaForm = ({
     return uniquePrerequisites.map(re => ({ value: re, label: `${re} - ${activeDisciplinas.find(d => d._re === re)?._di || ''}` }));
   }, [disciplinas, watch]);
 
-  // Função para resetar o formulário completamente
+  // Função para resetar o formulário
   const handleCancel = () => {
-    // Reseta o formulário para um estado completamente "vazio"
     reset(blankForm);
-
-    // Chama a função onCancel original se existir
-    if (onCancel) {
-      onCancel();
-    }
+    if (onCancel) onCancel();
   };
 
   // Atualiza o formulário quando a disciplina prop muda (para edição)
@@ -130,34 +125,22 @@ const DisciplinaForm = ({
     }
   }, [disciplina, reset, cur]);
 
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log('Form: [WATCH] Validation errors changed:', errors);
-      window.alert('Form: [WATCH] Erros de validação detectados: ' + Object.keys(errors).join(', '));
-    }
-  }, [errors]);
 
 
   const onSubmitHandler = (data) => {
-    window.alert('Form: onSubmitHandler triggered! Verificando dados...');
-    console.log('Form: onSubmitHandler triggered WITH DATA:', data);
-    if (!onSubmit) {
-      console.error('Form: onSubmit prop is MISSING!');
-      window.alert('ERRO: onSubmit prop is MISSING!');
-      return;
-    }
+    console.log('Form: Submitting data:', data);
+    if (!onSubmit) return;
+
     const finalPrerequisites = [...data._pr];
     if (data._pr_creditos_input > 0) {
       finalPrerequisites.push(data._pr_creditos_input);
     }
     const finalData = { ...data, _pr: finalPrerequisites };
-    console.log('Form: Final data prepared for submission:', finalData);
     onSubmit(finalData);
   };
 
   const onValidationError = (errors) => {
-    console.error('Form: Validation errors blocked submission:', errors);
-    window.alert('❌ ERRO DE VALIDAÇÃO: ' + JSON.stringify(errors));
+    console.error('Form: Validation errors:', errors);
   };
 
   console.log('Form: Rendering. Values:', getValues(), 'Errors:', errors);
@@ -271,33 +254,40 @@ const DisciplinaForm = ({
               <label className="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Tipo de Pré-requisito
               </label>
-              <div className="flex gap-4 mb-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="prereqType"
-                    className="form-radio text-primary focus:ring-primary"
-                    checked={!watch('_pr_creditos_input')} // If credits is 0 or undefined, assume subjects mode (default)
-                    onChange={() => {
-                      setValue('_pr_creditos_input', 0);
-                    }}
-                    disabled={isReviewing}
-                  />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Disciplinas</span>
+              <div className="flex gap-6 mb-4 p-1">
+                <label className="flex items-center gap-2.5 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="radio"
+                      name="prereqType"
+                      className="sr-only"
+                      checked={!watch('_pr_creditos_input')}
+                      onChange={() => setValue('_pr_creditos_input', 0)}
+                      disabled={isReviewing}
+                    />
+                    <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 ${!watch('_pr_creditos_input') ? 'border-primary' : 'border-slate-300 dark:border-slate-600 group-hover:border-primary/50'}`}></div>
+                    <div className={`absolute w-2.5 h-2.5 rounded-full bg-primary transition-all duration-200 ${!watch('_pr_creditos_input') ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}></div>
+                  </div>
+                  <span className={`text-sm font-medium transition-colors ${!watch('_pr_creditos_input') ? 'text-primary' : 'text-slate-600 dark:text-slate-400'}`}>Disciplinas</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="prereqType"
-                    className="form-radio text-primary focus:ring-primary"
-                    checked={watch('_pr_creditos_input') > 0}
-                    onChange={() => {
-                      setValue('_pr', []); // Clear subjects when switching to credits
-                      setValue('_pr_creditos_input', 1); // Set default credits to 1 to activate mode
-                    }}
-                    disabled={isReviewing}
-                  />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Créditos Mínimos</span>
+
+                <label className="flex items-center gap-2.5 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="radio"
+                      name="prereqType"
+                      className="sr-only"
+                      checked={watch('_pr_creditos_input') > 0}
+                      onChange={() => {
+                        setValue('_pr', []);
+                        setValue('_pr_creditos_input', 1);
+                      }}
+                      disabled={isReviewing}
+                    />
+                    <div className={`w-5 h-5 rounded-full border-2 transition-all duration-200 ${watch('_pr_creditos_input') > 0 ? 'border-primary' : 'border-slate-300 dark:border-slate-600 group-hover:border-primary/50'}`}></div>
+                    <div className={`absolute w-2.5 h-2.5 rounded-full bg-primary transition-all duration-200 ${watch('_pr_creditos_input') > 0 ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}></div>
+                  </div>
+                  <span className={`text-sm font-medium transition-colors ${watch('_pr_creditos_input') > 0 ? 'text-primary' : 'text-slate-600 dark:text-slate-400'}`}>Créditos Mínimos</span>
                 </label>
               </div>
 
@@ -337,12 +327,12 @@ const DisciplinaForm = ({
                         id="_pr"
                         placeholder="Selecione os pré-requisitos..."
                         classNames={{
-                          control: () => '!border !border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-800 !rounded-xl !min-h-[42px] !shadow-none hover:!border-primary/50 !transition-colors',
-                          menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-xl !mt-2 !shadow-xl !overflow-hidden !z-20',
-                          option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200 !py-2',
-                          multiValue: () => '!bg-primary/10 !rounded-lg !text-primary dark:!text-blue-300',
-                          multiValueLabel: () => '!text-sm !font-medium !text-primary dark:!text-blue-300',
-                          multiValueRemove: () => 'hover:!bg-primary/20 hover:!text-primary-dark !rounded-r-lg',
+                          control: ({ isFocused }) => `!border !border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-xl !min-h-[42px] !transition-all duration-200 ${isFocused ? '!ring-4 !ring-primary/10 !border-primary' : 'hover:!border-primary/50'}`,
+                          menu: () => '!bg-white dark:!bg-slate-900 !border !border-slate-200 dark:!border-slate-800 !rounded-xl !mt-2 !shadow-2xl !overflow-hidden !z-20',
+                          option: ({ isFocused, isSelected }) => `!text-sm !py-2.5 !px-4 ${isSelected ? '!bg-primary !text-white' : isFocused ? '!bg-primary/10 !text-primary' : '!text-slate-700 dark:!text-slate-200'} !cursor-pointer`,
+                          multiValue: () => '!bg-primary/10 dark:!bg-primary/20 !rounded-lg',
+                          multiValueLabel: () => '!text-xs !font-bold !text-primary dark:!text-blue-300 !px-2 !py-1',
+                          multiValueRemove: () => '!text-primary hover:!bg-primary/20 hover:!text-primary-dark !rounded-r-lg !px-1.5 transition-colors',
                           placeholder: () => '!text-slate-400'
                         }}
                         styles={customSelectStyles}

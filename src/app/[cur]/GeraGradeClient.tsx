@@ -12,8 +12,9 @@ import Escolhe from '../../model/util/Escolhe';
 import MapaMental from '../../components/prediction/MapaMental';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { useAuth } from '../../contexts/AuthContext';
-import { loadCompletedSubjects, toggleMultipleSubjects, loadClassesForGrid, getCourseSchedule, getCourseDimension } from '../../services/disciplinaService';
+import { loadCompletedSubjects, toggleMultipleSubjects, loadClassesForGrid, getCourseSchedule, getCourseDimension, loadEffectiveCompletedSubjects, fetchEquivalentOptionsForSubjects } from '../../services/disciplinaService';
 import { Subject } from '../../types/Subject';
+import { EquivalencyManager } from '../../components/grade/EquivalencyManager';
 
 // --- Types ---
 interface GradeState {
@@ -42,6 +43,9 @@ const useGeraGradeController = () => {
     const [gradesResult, setGradesResult] = useState<Subject[]>([]);
     const [possibleGrades, setPossibleGrades] = useState<Subject[][]>([]);
     const [calculating, setCalculating] = useState(false);
+    const [subjectEquivalents, setSubjectEquivalents] = useState<Map<number, Subject[]>>(new Map());
+    const [selectedEquivalentIds, setSelectedEquivalentIds] = useState<Set<number>>(new Set());
+    const [showEquivalencyManager, setShowEquivalencyManager] = useState(false);
 
     const _cur = useRef(cur);
     const { user, isExpired } = useAuth();
@@ -69,6 +73,13 @@ const useGeraGradeController = () => {
         enabled: !!cur,
     });
 
+    const { data: effectiveCompletedIds = new Set<number>() } = useQuery({
+        queryKey: ['effectiveCompletedIds', user?.id],
+        queryFn: () => user ? loadEffectiveCompletedSubjects(user.id) : Promise.resolve(new Set<number>()),
+        enabled: !!user?.id && !isExpired,
+        staleTime: 1000 * 60 * 5,
+    });
+
     const { data: completedSubjects = [] } = useQuery({
         queryKey: ['completedSubjects', user?.id],
         queryFn: () => user ? loadCompletedSubjects(user.id) : Promise.resolve([]),
@@ -87,22 +98,21 @@ const useGeraGradeController = () => {
     }, [cur]);
 
     useEffect(() => {
-        if (!isExpired && arr.length > 0 && completedSubjects.length > 0 && state.names.length === 0) {
+        if (!isExpired && arr.length > 0 && effectiveCompletedIds.size > 0 && state.names.length === 0) {
             const newNames: string[] = [];
             const newKeys: number[] = [];
             const newCrs: number[] = [];
 
-            completedSubjects.forEach((completed: any) => {
-                const index = arr.findIndex((item: any) => item._re === completed._re);
-                if (index > -1) {
-                    newNames.push(completed._re);
+            arr.forEach((item: any, index: number) => {
+                if (effectiveCompletedIds.has(item._id)) {
+                    newNames.push(item._re);
                     newKeys.push(index);
-                    newCrs.push(parseInt(completed._ap || 0) + parseInt(completed._at || 0));
+                    newCrs.push(parseInt(item._ap || 0) + parseInt(item._at || 0));
                 }
             });
 
             if (newNames.length > 0) {
-                console.log("Auto-selecting completed subjects:", newNames.length);
+                console.log("Auto-selecting completed subjects (including equivalencies):", newNames.length);
                 setState(prev => ({
                     ...prev,
                     names: newNames,
@@ -111,7 +121,115 @@ const useGeraGradeController = () => {
                 }));
             }
         }
-    }, [arr, completedSubjects, isExpired, state.names.length]); // Added dependencies for stability
+    }, [arr, effectiveCompletedIds, isExpired, state.names.length]);
+
+    const handleToggleEquivalent = (localId: number, equivId: number, isChecked: boolean) => {
+        // Update selection state
+        setSelectedEquivalentIds(prev => {
+            const next = new Set(prev);
+            if (isChecked) next.add(equivId);
+            else next.delete(equivId);
+            return next;
+        });
+
+        // Update gradesResult (View) immediately so Escolhe will see it
+        if (state.estado === 1) { // Only relevant in choosing phase
+
+            // Auto-select the main subject if we are selecting an equivalent
+            if (isChecked) {
+                // Find local subject acronym to ensure it is selected
+                // We can find it in gradesResult (current candidates)
+                const localSub = gradesResult.find(s => s._id === localId);
+                if (localSub && !state.x.includes(localSub._re)) {
+                    setState(prevS => ({
+                        ...prevS,
+                        x: [...prevS.x, localSub._re]
+                    }));
+                }
+            }
+
+            setGradesResult(prev => {
+                if (isChecked) {
+                    // ADD virtual subject
+                    const equivalentList = subjectEquivalents.get(localId) || [];
+                    const equiv = equivalentList.find(e => e._id === equivId);
+                    const localSub = prev.find(s => s._id === localId);
+
+                    if (equiv && localSub) {
+                        const virtualSub = {
+                            ...equiv,
+                            _id: `v-${equiv._id}-${localId}`,
+                            _re: localSub._re,
+                            _di: `[EQ] ${equiv._di}`
+                        };
+                        return [...prev, virtualSub as any];
+                    }
+                    return prev;
+                } else {
+                    // REMOVE virtual subject
+                    const vId = `v-${equivId}-${localId}`;
+                    return prev.filter(s => (s._id as any) !== vId);
+                }
+            });
+        }
+        else if (state.estado === 0) {
+            // Step 0: "What have you completed?".
+            // If checking an equivalent, marks the MAIN subject as completed.
+
+            // Find the main subject based on localId
+            const localSubject = arr.find(s => s._id === localId);
+            if (!localSubject) return;
+
+            // Update state.names (completed acronyms) and state.keys (completed indices? or IDs?)
+            // state.keys seems to store IDs or Indices. 
+            // Looking at 'handleCheck':
+            // start line 246: keys.push(value); names.push(target.id [acronym]); crs.push(parseInt(target.name));
+            // In Step 0: key is 'originalIndex' (number).
+            // Let's find the original index.
+            const index = arr.findIndex(s => s._id === localId);
+            if (index === -1) return;
+
+            setState(prev => {
+                const newKeys = [...prev.keys];
+                const newNames = [...prev.names];
+                const newCrs = [...prev.crs];
+
+                if (isChecked) {
+                    if (!newKeys.includes(index)) {
+                        newKeys.push(index);
+                        newNames.push(localSubject._re);
+                        // credits input might be string
+                        newCrs.push(parseInt(String(localSubject._pr_creditos_input || 0)) || 0);
+                    }
+                } else {
+                    const i = newKeys.indexOf(index);
+                    if (i > -1) {
+                        newKeys.splice(i, 1);
+                        newNames.splice(i, 1);
+                        newCrs.splice(i, 1);
+                    }
+                }
+                return { ...prev, keys: newKeys, names: newNames, crs: newCrs };
+            });
+        }
+    };
+
+    // Fetch equivalents when subjects are loaded
+    useEffect(() => {
+        const fetchEquivalents = async () => {
+            if (arr.length > 0) {
+                const subjectIds = Array.from(new Set(arr.map(s => Number(s._id))));
+                const currentCourseId = Number(arr[0]?.course_id);
+                try {
+                    const equivalents = await fetchEquivalentOptionsForSubjects(subjectIds, currentCourseId);
+                    setSubjectEquivalents(equivalents);
+                } catch (err) {
+                    console.error('Error fetching equivalents for grade builder:', err);
+                }
+            }
+        };
+        fetchEquivalents();
+    }, [arr]);
 
     useEffect(() => {
         const calculatePossibleGrades = async () => {
@@ -281,9 +399,47 @@ const useGeraGradeController = () => {
     function mudaTela(i: number) {
         if (i === 1) {
             const cr = state.crs.reduce((a, b) => a + b, 0);
-            const calculatedGr = new Grafos(arr, cr, state.names).matriz();
-            setGradesResult(calculatedGr);
-            setState(e => ({ ...e, estado: i }));
+            const grafos = new Grafos(arr, cr, state.names);
+            const candidates = grafos.matriz();
+
+            const finalPool: Subject[] = [...candidates];
+            const preSelectedX: string[] = [];
+
+            // Injetar equivalentes selecionados
+            if (selectedEquivalentIds.size > 0) {
+                candidates.forEach(localSub => {
+                    const equivalents = subjectEquivalents.get(localSub._id as number) || [];
+                    const selectedForThisSub = equivalents.filter(eq => selectedEquivalentIds.has(eq._id as number));
+
+                    if (selectedForThisSub.length > 0) {
+                        // Se tem equivalente selecionado, marca a matéria como "selecionada" (quero cursar)
+                        preSelectedX.push(localSub._re);
+                    }
+
+                    selectedForThisSub.forEach(equiv => {
+                        // O equivalente pode ter várias turmas. No service, processamos isso.
+                        // Mas aqui no GeraGradeClient, o subjectEquivalents já vem processado do fetchEquivalentOptionsForSubjects
+                        // que retorna um Subject[] onde cada entrada já é uma turma (ou o processSubjectData cuidou disso).
+                        // Vamos garantir que ele herde o _re (sigla) da matéria local para que o agendador os trate como a mesma coisa.
+
+                        // Criar uma cópia do equivalente com a sigla da matéria local
+                        const virtualSub = {
+                            ...equiv,
+                            _id: `v-${equiv._id}-${localSub._id}`, // ID virtual único
+                            _re: localSub._re, // CRITICAL: Mesma sigla para exclusão mútua
+                            _di: `[EQ] ${equiv._di}` // Identificador visual
+                        };
+                        finalPool.push(virtualSub as any);
+                    });
+                });
+            }
+
+            setGradesResult(finalPool);
+            setState(e => ({
+                ...e,
+                estado: i,
+                x: [...new Set([...e.x, ...preSelectedX])] // Merge with existing selections, avoid duplicates
+            }));
         } else if (i === 2) {
             setCalculating(true);
             setState(e => ({ ...e, estado: i }));
@@ -318,47 +474,145 @@ const useGeraGradeController = () => {
         periodo, // Helpers needed for View
         remove,  // Helpers needed for View
         user,    // Authentication state
-        isExpired // Subscription state
+        isExpired, // Subscription state
+        subjectEquivalents, // Equivalency data
+        selectedEquivalentIds,
+        handleToggleEquivalent,
+        showEquivalencyManager,
+        setShowEquivalencyManager
     };
 };
 
 // --- Components ---
 
-const SubjectItem = ({ itemData, isChecked, value, handleCheck }: { itemData: Subject, isChecked: boolean, value: any, handleCheck: any }) => {
+const SubjectItem = ({
+    itemData,
+    isChecked,
+    value,
+    handleCheck,
+    equivalents = [],
+    selectedEquivalentIds,
+    handleToggleEquivalent
+}: {
+    itemData: Subject,
+    isChecked: boolean,
+    value: any,
+    handleCheck: any,
+    equivalents?: Subject[],
+    selectedEquivalentIds?: Set<number>,
+    handleToggleEquivalent?: (localId: number, equivId: number, checked: boolean) => void
+}) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const hasEquivalents = equivalents.length > 0;
+
     return (
-        <label key={itemData._re} className="flex items-start gap-3 py-3 px-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" onClick={(e) => e.stopPropagation()}>
-            <div className="relative flex items-center mt-1">
-                <input
-                    type="checkbox"
-                    name={String(itemData._ap + itemData._at)}
-                    checked={isChecked}
-                    className="subject-checkbox h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
-                    id={itemData._re}
-                    value={value}
-                    onChange={handleCheck}
-                />
-                <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
-                    <span className="material-symbols-outlined text-[16px] font-bold">check</span>
-                </span>
+        <div className="flex flex-col gap-1">
+            <div className={`flex items-start gap-3 py-3 px-2 rounded-lg transition-all duration-300 group ${isChecked ? 'bg-primary/5' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                <label className="flex items-start gap-3 flex-1 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                    <div className="relative flex items-center mt-1">
+                        <input
+                            type="checkbox"
+                            name={String(itemData._ap + itemData._at)}
+                            checked={isChecked}
+                            className="subject-checkbox h-5 w-5 appearance-none rounded border-2 border-slate-300 dark:border-slate-600 bg-transparent checked:bg-primary checked:border-primary transition-all cursor-pointer peer"
+                            id={itemData._re}
+                            value={value}
+                            onChange={handleCheck}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
+                            <span className="material-symbols-outlined text-[16px] font-bold">check</span>
+                        </span>
+                    </div>
+                    <div className="flex flex-col flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <p className={`text-sm font-medium leading-snug transition-colors ${isChecked ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                                {itemData._di}
+                            </p>
+                            {hasEquivalents && (
+                                <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter shadow-sm border border-emerald-200/50">
+                                    <span className="material-symbols-outlined text-[10px]">sync</span>
+                                    {equivalents.length}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                {itemData._re}
+                            </span>
+                            <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                                {itemData._ap + itemData._at} Créditos
+                            </span>
+                        </div>
+                    </div>
+                </label>
+
+                {hasEquivalents && (
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsExpanded(!isExpanded);
+                        }}
+                        className={`p-1.5 rounded-lg transition-colors mt-0.5 ${isExpanded ? 'bg-slate-200 dark:bg-slate-700 text-slate-700' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                    >
+                        <span className={`material-symbols-outlined text-lg transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                            keyboard_arrow_down
+                        </span>
+                    </button>
+                )}
             </div>
-            <div className="flex flex-col flex-1 min-w-0">
-                <p className={`text-sm font-medium leading-snug transition-colors ${isChecked ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
-                    {itemData._di}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                        {itemData._re}
-                    </span>
-                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                        {itemData._ap + itemData._at} Créditos
-                    </span>
+
+            {/* Equivalencies Accordion */}
+            {hasEquivalents && isExpanded && (
+                <div className="ml-8 pl-3 border-l-2 border-emerald-100 dark:border-emerald-900/40 mb-2 space-y-1 animate-slideDown">
+                    <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest py-1">Opções em outros cursos:</p>
+                    {equivalents.map((equiv: Subject) => {
+                        const isEquivChecked = selectedEquivalentIds?.has(equiv._id as number);
+                        return (
+                            <div key={equiv._id} className={`flex items-center justify-between p-2 rounded-lg border transition-all ${isEquivChecked ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-300 dark:border-emerald-700' : 'bg-emerald-50/30 dark:bg-emerald-900/10 border-emerald-100/50 dark:border-emerald-800/50 hover:bg-emerald-50/50'}`}>
+                                <label className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+                                    <div className="relative flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={isEquivChecked}
+                                            onChange={(e) => handleToggleEquivalent && handleToggleEquivalent(itemData._id as number, equiv._id as number, e.target.checked)}
+                                            className="h-4 w-4 appearance-none rounded border-2 border-emerald-300 dark:border-emerald-700 bg-transparent checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer peer"
+                                        />
+                                        <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity">
+                                            <span className="material-symbols-outlined text-[12px] font-bold">check</span>
+                                        </span>
+                                    </div>
+                                    <div className="min-w-0 pr-2">
+                                        <h5 className={`text-[11px] font-bold truncate ${isEquivChecked ? 'text-emerald-800 dark:text-emerald-200' : 'text-slate-700 dark:text-slate-300'}`}>
+                                            {equiv._di}
+                                        </h5>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            <span className="text-[9px] font-bold text-primary px-1 rounded bg-primary/5 border border-primary/10">
+                                                {equiv._cu}
+                                            </span>
+                                            <span className="text-[9px] font-medium text-slate-400">
+                                                {equiv._re}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <div className="flex items-center gap-1">
+                                    {isEquivChecked ? (
+                                        <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Selecionado</span>
+                                    ) : (
+                                        <span className="material-symbols-outlined text-[14px] text-emerald-400/50">swap_horiz</span>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
-            </div>
-        </label>
+            )}
+        </div>
     );
 };
 
-const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriodKey, state, arr, handleCheck }: { periodKey: string, subjectsData: Subject[], openPeriodKey: string | null, setOpenPeriodKey: (k: string | null) => void, state: GradeState, arr: Subject[], handleCheck: any }) => {
+const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriodKey, state, arr, handleCheck, subjectEquivalents, selectedEquivalentIds, handleToggleEquivalent }: { periodKey: string, subjectsData: Subject[], openPeriodKey: string | null, setOpenPeriodKey: (k: string | null) => void, state: GradeState, arr: Subject[], handleCheck: any, subjectEquivalents: Map<number, Subject[]>, selectedEquivalentIds?: Set<number>, handleToggleEquivalent?: (l: number, e: number, c: boolean) => void }) => {
     const allSubjectIdsInPeriod = subjectsData.map(s => s._re);
     const selectedSubjects = (state.estado === 0) ? state.names : state.x;
     const areAllSelected = allSubjectIdsInPeriod.length > 0 &&
@@ -416,6 +670,7 @@ const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriod
                         const isChecked = (state.estado === 0)
                             ? state.names.includes(item._re)
                             : state.x.includes(item._re);
+                        const equivalents = subjectEquivalents.get(Number(item._id)) || [];
                         return (
                             <SubjectItem
                                 key={item._re}
@@ -423,6 +678,9 @@ const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriod
                                 isChecked={isChecked}
                                 value={key}
                                 handleCheck={handleCheck}
+                                equivalents={equivalents}
+                                selectedEquivalentIds={selectedEquivalentIds}
+                                handleToggleEquivalent={handleToggleEquivalent}
                             />
                         );
                     })}
@@ -523,6 +781,29 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
 
             return (
                 <div className="flex flex-col py-4 gap-4 animate-fadeIn">
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => ctrl.setShowEquivalencyManager(true)}
+                            className="text-xs font-bold text-blue-700 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-100 flex items-center gap-1 bg-blue-100 dark:bg-blue-800/40 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-sm">sync_alt</span>
+                            Gerenciar Equivalências
+                        </button>
+                    </div>
+
+                    {ctrl.showEquivalencyManager && (
+                        <EquivalencyManager
+                            subjectsWithEquivalents={ctrl.arr.filter(s => {
+                                const equivs = ctrl.subjectEquivalents.get(Number(s._id));
+                                return equivs && equivs.length > 0;
+                            })}
+                            equivalentsMap={ctrl.subjectEquivalents}
+                            selectedEquivalentIds={ctrl.selectedEquivalentIds}
+                            onToggle={ctrl.handleToggleEquivalent}
+                            onClose={() => ctrl.setShowEquivalencyManager(false)}
+                        />
+                    )}
+
                     {/* Search Bar */}
                     <div className="relative mb-2">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -547,6 +828,9 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
                             state={ctrl.state}
                             arr={ctrl.arr}
                             handleCheck={ctrl.handleCheck}
+                            subjectEquivalents={ctrl.subjectEquivalents}
+                            selectedEquivalentIds={ctrl.selectedEquivalentIds}
+                            handleToggleEquivalent={ctrl.handleToggleEquivalent}
                         />
                     ))}
                 </div>
@@ -574,11 +858,13 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
 
             return (
                 <div className="flex flex-col py-4 gap-4 animate-fadeIn">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 mb-2 flex gap-3">
-                        <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
-                        <p className="text-sm text-blue-800 dark:text-blue-200">
-                            Desmarque as matérias que você <strong>NÃO</strong> quer cursar neste semestre. O gerador tentará encaixar todas as marcadas.
-                        </p>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 mb-2 flex gap-3 flex-wrap items-center justify-between">
+                        <div className="flex gap-3">
+                            <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 shrink-0">info</span>
+                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                                Desmarque as matérias que você <strong>NÃO</strong> quer cursar neste semestre.
+                            </p>
+                        </div>
                     </div>
 
                     {Object.keys(pe).map(key => (
@@ -591,6 +877,9 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
                             state={ctrl.state}
                             arr={ctrl.arr}
                             handleCheck={ctrl.handleCheck}
+                            subjectEquivalents={ctrl.subjectEquivalents}
+                            selectedEquivalentIds={ctrl.selectedEquivalentIds}
+                            handleToggleEquivalent={ctrl.handleToggleEquivalent}
                         />
                     ))}
                 </div>

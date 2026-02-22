@@ -38,6 +38,7 @@ interface ComumProps {
     courseDimension?: any;
     hideTitle?: boolean;
     noCard?: boolean;
+    dynamicSlots?: boolean;
 }
 
 interface ComumState {
@@ -111,12 +112,62 @@ const Comum: React.FC<ComumProps> = (props) => {
     useEffect(() => {
         const fetchScheduleData = async () => {
             try {
-                const [d, t] = await Promise.all([getDays(), getTimeSlots()]);
+                let d: Day[] = [];
+                let t: TimeSlot[] = [];
+
+                // Priority 1: Use courseSchedule provided via props
+                if (props.courseSchedule && Array.isArray(props.courseSchedule) && props.courseSchedule.length === 2) {
+                    const [pd, pt] = props.courseSchedule;
+                    if (pd && Array.isArray(pt) && pt.length > 0) {
+                        d = pd;
+                        t = pt;
+                    } else {
+                        const [fallbackDays, fallbackSlots] = await Promise.all([getDays(), getTimeSlots()]);
+                        d = fallbackDays;
+                        t = fallbackSlots;
+                    }
+                } else {
+                    // Priority 2: Fetch all days and slots as fallback
+                    const [pd, pt] = await Promise.all([getDays(), getTimeSlots()]);
+                    d = pd;
+                    t = pt;
+                }
+
+                // --- DYNAMIC SLOTS FILTERING ---
+                if (props.dynamicSlots && props.materias && Array.isArray(props.materias)) {
+                    const flatMaterias = Array.isArray(props.materias[0])
+                        ? (props.materias as Subject[][]).flat()
+                        : (props.materias as Subject[]);
+
+                    const occupiedDayIds = new Set<number>();
+                    const occupiedSlotIds = new Set<number>();
+
+                    flatMaterias.forEach(subject => {
+                        if (Array.isArray(subject._ho)) {
+                            subject._ho.forEach(([dayId, slotId]) => {
+                                occupiedDayIds.add(dayId);
+                                occupiedSlotIds.add(slotId);
+                            });
+                        }
+                    });
+
+                    // Filter TimeSlots (Vertical shrinkage)
+                    if (occupiedSlotIds.size > 0) {
+                        // We keep the original order (by ID or time)
+                        t = t.filter(slot => occupiedSlotIds.has(slot.id));
+                    }
+
+                    // Optional: Filter Days (Horizontal shrinkage)
+                    // if (occupiedDayIds.size > 0) {
+                    //     d = d.filter(day => occupiedDayIds.has(day.id));
+                    // }
+                }
+
                 setDbDays(d);
                 setDbTimeSlots(t);
 
                 // Se não houver matérias via props, carrega do Serviço
-                if (!props.materias || props.materias.length === 0) {
+                if (!props.materias || (Array.isArray(props.materias) && props.materias.length === 0)) {
                     const gridData: Subject[] = await loadClassesForGrid(_cur);
                     console.log("Comum: Loaded grid data from service", gridData.length);
 
@@ -137,7 +188,7 @@ const Comum: React.FC<ComumProps> = (props) => {
             }
         };
         fetchScheduleData();
-    }, [_cur, props.materias]); // Added props.materias dependency to avoid stale closure or race conditions
+    }, [_cur, props.materias, props.courseSchedule, props.dynamicSlots]); // Added props.dynamicSlots dependency
 
     // Close tooltip when clicking outside
     useEffect(() => {

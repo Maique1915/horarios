@@ -5,6 +5,7 @@ import Comum from '../../../components/shared/Comum';
 import { useProfileController } from './useProfileController';
 import { CompletedSubjectsSection } from './CompletedSubjectsSection';
 import { CurrentEnrollmentsSection } from './CurrentEnrollmentsSection';
+import { EquivalenciesSection } from './EquivalenciesSection';
 import { Subject } from '@/types/Subject';
 
 // --- View Components ---
@@ -286,6 +287,11 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
 
                 {/* Completed Subjects Section moved to separate component */}
                 <CompletedSubjectsSection ctrl={ctrl} />
+
+                {/* Equivalencies Section */}
+                <div className="lg:col-span-5">
+                    <EquivalenciesSection ctrl={ctrl} />
+                </div>
             </div>
         </div>
     );

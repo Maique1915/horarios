@@ -41,9 +41,9 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
                     isClearable
                     classNamePrefix="select"
                     classNames={{
-                        control: () => '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px]',
-                        menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-lg !mt-1',
-                        option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200',
+                        control: ({ isFocused }) => `!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px] !transition-all duration-200 ${isFocused ? '!ring-4 !ring-primary/10 !border-primary' : 'hover:!border-primary/50'}`,
+                        menu: () => '!bg-white dark:!bg-slate-900 !border !border-slate-200 dark:!border-slate-800 !rounded-lg !mt-2 !shadow-2xl !overflow-hidden !z-20',
+                        option: ({ isFocused, isSelected }) => `!text-sm !py-2 !px-4 ${isSelected ? '!bg-primary !text-white' : isFocused ? '!bg-primary/10 !text-primary' : '!text-slate-700 dark:!text-slate-200'} !cursor-pointer`,
                         singleValue: () => '!text-slate-800 dark:!text-slate-200',
                         placeholder: () => '!text-slate-400'
                     }}
@@ -58,9 +58,9 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
                     isClearable
                     classNamePrefix="select"
                     classNames={{
-                        control: () => '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px]',
-                        menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-lg !mt-1',
-                        option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200',
+                        control: ({ isFocused }) => `!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px] !transition-all duration-200 ${isFocused ? '!ring-4 !ring-primary/10 !border-primary' : 'hover:!border-primary/50'}`,
+                        menu: () => '!bg-white dark:!bg-slate-900 !border !border-slate-200 dark:!border-slate-800 !rounded-lg !mt-2 !shadow-2xl !overflow-hidden !z-20',
+                        option: ({ isFocused, isSelected }) => `!text-sm !py-2 !px-4 ${isSelected ? '!bg-primary !text-white' : isFocused ? '!bg-primary/10 !text-primary' : '!text-slate-700 dark:!text-slate-200'} !cursor-pointer`,
                         singleValue: () => '!text-slate-800 dark:!text-slate-200',
                         placeholder: () => '!text-slate-400'
                     }}
@@ -75,9 +75,9 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
                     isClearable
                     classNamePrefix="select"
                     classNames={{
-                        control: () => '!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px]',
-                        menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-lg !mt-1',
-                        option: () => '!text-sm hover:!bg-slate-100 dark:hover:!bg-slate-700 !text-slate-800 dark:!text-slate-200',
+                        control: ({ isFocused }) => `!border-slate-300 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-lg !text-sm !min-h-[40px] !transition-all duration-200 ${isFocused ? '!ring-4 !ring-primary/10 !border-primary' : 'hover:!border-primary/50'}`,
+                        menu: () => '!bg-white dark:!bg-slate-900 !border !border-slate-200 dark:!border-slate-800 !rounded-lg !mt-2 !shadow-2xl !overflow-hidden !z-20',
+                        option: ({ isFocused, isSelected }) => `!text-sm !py-2 !px-4 ${isSelected ? '!bg-primary !text-white' : isFocused ? '!bg-primary/10 !text-primary' : '!text-slate-700 dark:!text-slate-200'} !cursor-pointer`,
                         singleValue: () => '!text-slate-800 dark:!text-slate-200',
                         placeholder: () => '!text-slate-400'
                     }}
@@ -90,7 +90,7 @@ const FiltersView = ({ ctrl }: { ctrl: ReturnType<typeof useEditCourseController
                         <span className="material-symbols-outlined text-xl">search</span>
                     </div>
                     <input
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm shadow-sm transition-all h-[40px]"
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-4 focus:ring-primary/10 focus:border-primary text-sm shadow-sm transition-all h-[40px] outline-none hover:border-primary/50"
                         placeholder="Pesquisar disciplina..."
                         value={ctrl.filtroTexto}
                         onChange={(e) => ctrl.setFiltroTexto(e.target.value)}

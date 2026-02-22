@@ -3,7 +3,7 @@ import Select from 'react-select';
 import { supabase } from '../../../lib/supabaseClient';
 import Comum from '../../../components/shared/Comum';
 import { Subject } from '@/types/Subject';
-import { loadDbData } from '../../../services/disciplinaService';
+import { loadDbData, fetchEquivalentOptionsForSubjects } from '../../../services/disciplinaService';
 
 interface ScheduleEditorViewProps {
     currentEnrollments: Subject[];
@@ -28,6 +28,8 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
+    const [subjectEquivalents, setSubjectEquivalents] = useState<Map<number, Subject[]>>(new Map());
+    const [expandedSubjectId, setExpandedSubjectId] = useState<number | null>(null);
 
     // Converter currentEnrollments para o formato correto com _classSchedules
     const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(() => {
@@ -92,12 +94,18 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
             setLoading(true);
             try {
                 // Usar o serviço loadDbData que já faz todo o processamento de classes e requisitos
-                const data = await loadDbData(selectedCourse.code);
+                const data = await loadDbData(selectedCourse.code) as Subject[];
 
                 // Filtrar apenas disciplinas que possuem turmas cadastradas
                 const subjectsWithClasses = data.filter(s => s._classSchedules && s._classSchedules.length > 0);
-
                 setAvailableSubjects(subjectsWithClasses);
+
+                // Fetch equivalents for these subjects
+                const subjectIds = subjectsWithClasses.map(s => s._id).filter(id => id !== undefined) as number[];
+                if (subjectIds.length > 0) {
+                    const equivalents = await fetchEquivalentOptionsForSubjects(subjectIds);
+                    setSubjectEquivalents(equivalents);
+                }
             } catch (err) {
                 console.error('Error fetching subjects:', err);
             } finally {
@@ -246,6 +254,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                     tela={1}
                                     cur={userCourseCode}
                                     hideSave={false}
+                                    dynamicSlots={true}
                                     fun={
                                         <div className="flex items-center gap-3">
                                             <div className="text-sm font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl whitespace-nowrap border border-slate-200 dark:border-slate-700">
@@ -429,42 +438,114 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                             ) : (
                                                 filteredSubjects.map((subject: Subject) => {
                                                     const isSelected = selectedSubjects.some((s: Subject) => s._id === subject._id);
+                                                    const equivalents = subjectEquivalents.get(subject._id as number) || [];
+                                                    const hasEquivalents = equivalents.length > 0;
+                                                    const isExpanded = expandedSubjectId === subject._id;
+
                                                     return (
-                                                        <div
-                                                            key={subject._id}
-                                                            className={`p-4 rounded-xl border transition-all duration-300 flex justify-between items-center group
-                                                                ${isSelected
-                                                                    ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20'
-                                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5'
-                                                                }`}
-                                                        >
-                                                            <div className="flex-1 min-w-0 pr-3">
-                                                                <h4 className={`font-bold text-sm truncate ${isSelected ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
-                                                                    {subject._di}
-                                                                </h4>
-                                                                <div className="flex items-center gap-2 mt-1.5">
-                                                                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-600">
-                                                                        {subject._re}
-                                                                    </span>
-                                                                    <div className="h-1 w-1 rounded-full bg-slate-300"></div>
-                                                                    <span className="text-[10px] font-bold text-slate-400">
-                                                                        {subject._se}º Período
-                                                                    </span>
+                                                        <div key={subject._id} className="flex flex-col gap-1 w-full sm:col-span-2 md:col-span-1 lg:col-span-1">
+                                                            <div
+                                                                className={`p-4 rounded-xl border transition-all duration-300 flex justify-between items-center group
+                                                                    ${isSelected
+                                                                        ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20'
+                                                                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5'
+                                                                    }`}
+                                                            >
+                                                                <div className="flex-1 min-w-0 pr-3">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <h4 className={`font-bold text-sm truncate ${isSelected ? 'text-primary' : 'text-text-light-primary dark:text-text-dark-primary'}`}>
+                                                                            {subject._di}
+                                                                        </h4>
+                                                                        {hasEquivalents && (
+                                                                            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">
+                                                                                <span className="material-symbols-outlined text-[10px]">sync</span>
+                                                                                {equivalents.length}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 mt-1.5">
+                                                                        <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 shadow-sm border border-slate-200 dark:border-slate-600">
+                                                                            {subject._re}
+                                                                        </span>
+                                                                        <div className="h-1 w-1 rounded-full bg-slate-300"></div>
+                                                                        <span className="text-[10px] font-bold text-slate-400">
+                                                                            {subject._se}º Período
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-2">
+                                                                    {hasEquivalents && (
+                                                                        <button
+                                                                            onClick={() => setExpandedSubjectId(isExpanded ? null : (subject._id as number))}
+                                                                            className={`p-2 rounded-lg transition-colors ${isExpanded ? 'bg-slate-200 dark:bg-slate-700 text-slate-700' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                        >
+                                                                            <span className={`material-symbols-outlined transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                                                                                keyboard_arrow_down
+                                                                            </span>
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => isSelected ? handleRemoveSubject(subject._id as number) : handleAddSubject(subject)}
+                                                                        className={`p-2.5 rounded-xl transition-all flex-shrink-0
+                                                                            ${isSelected
+                                                                                ? 'text-red-500 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20'
+                                                                                : 'text-primary bg-primary/5 hover:bg-primary/15'
+                                                                            }`}
+                                                                        title={isSelected ? "Remover" : "Adicionar"}
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-2xl">
+                                                                            {isSelected ? 'do_not_disturb_on' : 'add_circle'}
+                                                                        </span>
+                                                                    </button>
                                                                 </div>
                                                             </div>
-                                                            <button
-                                                                onClick={() => isSelected ? handleRemoveSubject(subject._id as number) : handleAddSubject(subject)}
-                                                                className={`p-2.5 rounded-xl transition-all flex-shrink-0
-                                                                    ${isSelected
-                                                                        ? 'text-red-500 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20'
-                                                                        : 'text-primary bg-primary/5 hover:bg-primary/15'
-                                                                    }`}
-                                                                title={isSelected ? "Remover" : "Adicionar"}
-                                                            >
-                                                                <span className="material-symbols-outlined text-2xl">
-                                                                    {isSelected ? 'do_not_disturb_on' : 'add_circle'}
-                                                                </span>
-                                                            </button>
+
+                                                            {/* Mini Accordion for Equivalents */}
+                                                            {hasEquivalents && isExpanded && (
+                                                                <div className="ml-4 pl-4 border-l-2 border-slate-100 dark:border-slate-800 mt-1 space-y-1 animate-slideDown">
+                                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Equivalentes em outros cursos:</p>
+                                                                    {equivalents.map((equiv: Subject) => {
+                                                                        const isEquivSelected = selectedSubjects.some((s: Subject) => s._id === equiv._id);
+                                                                        return (
+                                                                            <div
+                                                                                key={equiv._id}
+                                                                                className={`p-3 rounded-lg border transition-all flex justify-between items-center
+                                                                                    ${isEquivSelected
+                                                                                        ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800'
+                                                                                        : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-emerald-200/50'
+                                                                                    }`}
+                                                                            >
+                                                                                <div className="min-w-0 pr-2">
+                                                                                    <h5 className="text-[xs] font-bold text-slate-700 dark:text-slate-300 truncate">
+                                                                                        {equiv._di}
+                                                                                    </h5>
+                                                                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                                                                        <span className="text-[9px] font-bold text-primary px-1 rounded bg-primary/5 border border-primary/10">
+                                                                                            {equiv._cu}
+                                                                                        </span>
+                                                                                        <span className="text-[9px] font-medium text-slate-400">
+                                                                                            {equiv._re}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={() => isEquivSelected ? handleRemoveSubject(equiv._id as number) : handleAddSubject(equiv)}
+                                                                                    className={`p-1.5 rounded-lg transition-colors
+                                                                                        ${isEquivSelected
+                                                                                            ? 'text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20'
+                                                                                            : 'text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20'
+                                                                                        }`}
+                                                                                >
+                                                                                    <span className="material-symbols-outlined text-lg">
+                                                                                        {isEquivSelected ? 'remove_circle' : 'add_circle'}
+                                                                                    </span>
+                                                                                </button>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     );
                                                 })

@@ -9,6 +9,9 @@ import {
     loadDbData,
     loadClassesForGrid,
     toggleMultipleSubjects,
+    getEquivalencies,
+    loadEffectiveCompletedSubjects,
+    DbEquivalency,
     Enrollment,
     CompletedSubject
 } from '../../../services/disciplinaService';
@@ -147,7 +150,21 @@ export const useProfileController = () => {
         staleTime: 1000 * 60 * 5,
     });
 
-    const loadingData = loadingCompleted;
+    const { data: allEquivalencies = [], isLoading: loadingEquivalencies } = useQuery<DbEquivalency[]>({
+        queryKey: ['allEquivalencies', user?.course_id],
+        queryFn: () => getEquivalencies(user?.course_id),
+        enabled: !!user,
+        staleTime: 1000 * 60 * 60,
+    });
+
+    const { data: effectiveCompletedIds = new Set<number>() } = useQuery<Set<number>>({
+        queryKey: ['effectiveCompletedIds', user?.id],
+        queryFn: () => user ? loadEffectiveCompletedSubjects(user.id) : Promise.resolve(new Set<number>()),
+        enabled: !!user?.id,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const loadingData = loadingCompleted || loadingEquivalencies;
 
     // Comments
     useEffect(() => {
@@ -164,28 +181,27 @@ export const useProfileController = () => {
         fetchComments();
     }, []);
 
-    // Subject Management Init
+    // Load all subjects for progress calculation and management
     useEffect(() => {
-        if (isEditingSubjects) {
-            if (allSubjects.length === 0) {
-                const loadAll = async () => {
-                    let courseCode = localStorage.getItem('last_active_course');
-                    if (courseCode === 'admin') courseCode = null;
+        if (user && allSubjects.length === 0) {
+            const loadAll = async () => {
+                let courseCode = user.courses?.code || localStorage.getItem('last_active_course');
+                if (courseCode === 'admin') courseCode = null;
+                if (courseCode) {
                     // @ts-ignore
                     const data = await loadDbData(courseCode);
                     setAllSubjects(data as any);
-                };
-                loadAll();
-            }
-            const currentIds = new Set(completedSubjects.map(s => String(s._id)));
-            // Only update if the content actually changed to avoid unnecessary re-renders
-            setSelectedSubjectIds(prev => {
-                if (prev.size !== currentIds.size) return currentIds;
-                for (const id of currentIds) {
-                    if (!prev.has(id)) return currentIds;
                 }
-                return prev;
-            });
+            };
+            loadAll();
+        }
+    }, [user]);
+
+    // Update selection state when in editing mode
+    useEffect(() => {
+        if (isEditingSubjects && completedSubjects.length > 0) {
+            const currentIds = new Set(completedSubjects.map(s => String(s._id)));
+            setSelectedSubjectIds(currentIds);
         }
     }, [isEditingSubjects, completedSubjects]);
 
@@ -419,13 +435,32 @@ export const useProfileController = () => {
         compEffective,
         progressPercentage
     } = useMemo(() => {
-        // _el = false significa OBRIGATÓRIA (mandatory)
-        // _el = true significa OPTATIVA (optional)
+        // Obter todas as disciplinas do curso para checar as que foram "vencidas" por equivalência
+        // Se ainda não carregamos allSubjects (pode acontecer se não abrimos o modo edit),
+        // o progresso será baseado apenas no que está explicitamente concluído.
+
         const mSubs = completedSubjects.filter(s => !s._el);
         const eSubs = completedSubjects.filter(s => s._el);
 
-        const mCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-        const eCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+        let mCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+        let eCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+
+        // Se temos allSubjects e as effectiveCompletedIds, refinamos o cálculo
+        // para incluir matérias que o aluno NÃO fez mas que foram vencidas por equivalência
+        if (allSubjects.length > 0 && effectiveCompletedIds.size > 0) {
+            const completedLiteralIds = new Set(completedSubjects.map(s => s._id));
+
+            allSubjects.forEach(s => {
+                if (effectiveCompletedIds.has(s._id as number) && !completedLiteralIds.has(s._id)) {
+                    // Esta matéria foi vencidada por equivalência mas não consta no user_subjects explicitamente
+                    if (s._el) {
+                        eCredits += (Number(s._ap || 0) + Number(s._at || 0));
+                    } else {
+                        mCredits += (Number(s._ap || 0) + Number(s._at || 0));
+                    }
+                }
+            });
+        }
 
         const mEff = Math.min(MANDATORY_REQ_HOURS, mCredits * 18);
         const eEff = Math.min(OPTIONAL_REQ_HOURS, eCredits * 18);
@@ -441,7 +476,7 @@ export const useProfileController = () => {
             compEffective: cEff,
             progressPercentage: percent
         };
-    }, [completedSubjects, complementaryHours, TOTAL_REQ_HOURS]);
+    }, [completedSubjects, complementaryHours, TOTAL_REQ_HOURS, allSubjects, effectiveCompletedIds]);
 
     return {
         user, authLoading, loadingData, isExpired,
@@ -456,11 +491,13 @@ export const useProfileController = () => {
         formattedEnrollmentsForGrid,
         currentEnrollments,
         completedSubjects,
+        effectiveCompletedIds,
         complementaryHours,
         // Stats
         progressPercentage, estimatedDate,
         mandatorySubjects, optionalSubjects,
         mandatoryEffective, optionalEffective, compEffective,
+        allEquivalencies,
         // Subject Mgmt
         isEditingSubjects, setIsEditingSubjects,
         allSubjects, selectedSubjectIds, savingSubjects,

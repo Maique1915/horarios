@@ -33,6 +33,7 @@ export interface Subject {
     _rt?: ({ start: string, end: string } | null)[]; // Real time info corresponding to slots
     _da?: number[]; // Dimension info
     class_name?: string;   // Class name
+    original_name?: string; // Original Subject name (without class suffix)
     schedule_data?: any;
     schedule_day_time?: any;
 

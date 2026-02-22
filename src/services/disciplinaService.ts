@@ -1,6 +1,6 @@
-
 import { saveClassSchedule as saveClassService } from './classService';
 import { getDays, getTimeSlots } from './scheduleService';
+import { supabase } from '../lib/supabaseClient';
 import { Subject } from '../types/Subject';
 import * as coursesModel from '../model/coursesModel';
 import { DbCourse } from '../model/coursesModel';
@@ -86,8 +86,8 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
     const creditsReq = subjectRequirements.find((r) => r.type === 'CREDITS');
 
     // Supabase might return 'courses' (plural) depending on relationship name
-    const _cu = (item as any).courses?.code || (item as any).course?.code;
-    if (!_cu) console.warn(`Service: Missing course code for subject ${item.acronym}`, item);
+    const _cu = (item as any).courses?.name || (item as any).courses?.code || (item as any).course?.name || (item as any).course?.code;
+    if (!_cu) console.warn(`Service: Missing course info for subject ${item.acronym}`, item);
 
     // Static fallback for credits removed
     const dbPractical = (item.has_practical !== undefined && item.has_practical !== null) ? Number(item.has_practical) : 0;
@@ -416,6 +416,7 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                         _rt: cls.rt || [],
                         _da: cls.da || [],
                         class_name: cls.class_name,
+                        original_name: subject._di,
                         course_id: subject.course_id
                     } as Subject);
                 });
@@ -600,4 +601,223 @@ export const getCourseSchedule = async (courseCode: string): Promise<[any[], any
 export const getCourseDimension = async (courseCode: string): Promise<number[]> => {
     const [days, slots] = await getCourseSchedule(courseCode);
     return [days.length, slots.length];
+};
+
+// --- Equivalency Operations ---
+
+export interface DbEquivalency {
+    id: number;
+    course_id: number | null;
+    target_subject_id: number;
+    source_subject_id: number;
+    // Joined data
+    target_subject?: { id: number; acronym: string; name: string; semester: number | null; course_id: number | null };
+    source_subject?: { id: number; acronym: string; name: string; semester: number | null; course_id: number | null };
+}
+
+export const getEquivalencies = async (courseId?: number): Promise<DbEquivalency[]> => {
+    let query = supabase
+        .from('subject_equivalencies')
+        .select(`
+            *,
+            target_subject:subjects!target_subject_id(id, acronym, name, semester, course_id),
+            source_subject:subjects!source_subject_id(id, acronym, name, semester, course_id)
+        `);
+
+    if (courseId) {
+        query = query.or(`course_id.eq.${courseId},course_id.is.null`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error('Error fetching equivalencies:', error);
+        throw error;
+    }
+
+    return (data || []) as DbEquivalency[];
+};
+
+export const saveEquivalency = async (equivalency: Partial<DbEquivalency>): Promise<DbEquivalency> => {
+    if (equivalency.id) {
+        const { data, error } = await supabase
+            .from('subject_equivalencies')
+            .update(equivalency)
+            .eq('id', equivalency.id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as DbEquivalency;
+    } else {
+        // Ensure id is not present at all in the insert payload
+        const { id, ...insertData } = equivalency;
+        const { data, error } = await supabase
+            .from('subject_equivalencies')
+            .insert([insertData])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data as DbEquivalency;
+    }
+};
+
+export const loadEffectiveCompletedSubjects = async (userId: number): Promise<Set<number>> => {
+    try {
+        const [completedRows, allEquivalencies] = await Promise.all([
+            completedSubjectsModel.fetchCompletedSubjects(userId),
+            getEquivalencies()
+        ]);
+
+        const completedSet = new Set<number>((completedRows as any[]).map(r => r.subjects?.id).filter(id => id !== undefined));
+        const effectiveSet = new Set<number>(completedSet);
+
+        // Recursive/Iterative expansion until no more subjects are added
+        let added = true;
+        while (added) {
+            added = false;
+            for (const eq of allEquivalencies) {
+                // Forward check: Source satisfies Target
+                // Note: If we had N-to-1 grouping, we'd need more complex logic, 
+                // but usually each row is an independent equivalency option.
+                if (!effectiveSet.has(eq.target_subject_id)) {
+                    if (effectiveSet.has(eq.source_subject_id)) {
+                        effectiveSet.add(eq.target_subject_id);
+                        added = true;
+                    }
+                }
+
+                // Backward check: Target satisfies Source (usually for global equivalencies)
+                if (eq.course_id === null && effectiveSet.has(eq.target_subject_id)) {
+                    if (!effectiveSet.has(eq.source_subject_id)) {
+                        effectiveSet.add(eq.source_subject_id);
+                        added = true;
+                    }
+                }
+            }
+        }
+
+        return effectiveSet;
+    } catch (error) {
+        console.error("Error calculating effective completed subjects:", error);
+        throw error;
+    }
+};
+
+export const deleteEquivalency = async (id: number): Promise<void> => {
+    const { error } = await supabase
+        .from('subject_equivalencies')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
+};
+
+/**
+ * Fetches equivalent subjects and their classes for a list of subject IDs.
+ * Used in Grade Generation to show alternative cross-course options.
+ */
+export const fetchEquivalentOptionsForSubjects = async (subjectIds: number[], targetCourseId?: number): Promise<Map<number, Subject[]>> => {
+    if (subjectIds.length === 0) return new Map();
+
+    console.log(`[Equivalence] Fetching for ${subjectIds.length} subjects. CourseID: ${targetCourseId}`);
+
+    // 1. Fetch all equivalencies involving these subjects
+    const { data: equivalencies, error: eqError } = await supabase
+        .from('subject_equivalencies')
+        .select(`
+            target_subject_id,
+            source_subject_id,
+            course_id
+        `)
+        .or(`target_subject_id.in.(${subjectIds.join(',')}),source_subject_id.in.(${subjectIds.join(',')})`);
+
+    if (eqError) throw eqError;
+
+    console.log(`[Equivalence] Raw found: ${equivalencies.length} rows.`);
+
+    // 2. Identify all related subject IDs
+    const relatedIds = new Set<number>();
+    const eqMap = new Map<number, Set<number>>();
+
+    equivalencies.forEach(eq => {
+        // FILTER: Validity for current course
+        if (eq.course_id !== null && targetCourseId && eq.course_id !== targetCourseId) {
+            // This rule is specific to another course. Skip it.
+            return;
+        }
+
+        const isTargetInList = subjectIds.includes(eq.target_subject_id);
+        const isSourceInList = subjectIds.includes(eq.source_subject_id);
+
+        // Debug
+        // if (eq.target_subject_id === 315 || eq.source_subject_id === 315) {
+        //     console.log(`[Equivalence-Debug] 315 found. S:${eq.source_subject_id} T:${eq.target_subject_id} C:${eq.course_id}. InList? S:${isSourceInList} T:${isTargetInList}`);
+        // }
+
+        if (isTargetInList) {
+            // S is target, so source is an equivalent
+            if (!eqMap.has(eq.target_subject_id)) eqMap.set(eq.target_subject_id, new Set());
+            eqMap.get(eq.target_subject_id)!.add(eq.source_subject_id);
+            relatedIds.add(eq.source_subject_id);
+        }
+
+        if (isSourceInList) {
+            // S is source, so target is an equivalent
+            if (!eqMap.has(eq.source_subject_id)) eqMap.set(eq.source_subject_id, new Set());
+            eqMap.get(eq.source_subject_id)!.add(eq.target_subject_id);
+            relatedIds.add(eq.target_subject_id);
+        }
+    });
+
+    console.log(`[Equivalence] Related IDs found: ${relatedIds.size}`);
+
+    if (relatedIds.size === 0) return new Map();
+
+    // 3. Fetch detailed data for all related subjects (including classes)
+    const allRelatedIds = Array.from(relatedIds);
+    const [subjectsData, classesData] = await Promise.all([
+        subjectsModel.fetchSubjectsByIds(allRelatedIds),
+        classesModel.fetchClassesBySubjectIds(allRelatedIds)
+    ]);
+
+    // Group subjects by ID
+    const subjectDetailsMap = new Map<number, DbSubject>();
+    subjectsData.forEach(s => subjectDetailsMap.set(s.id, s));
+
+    // Process Classes
+    const schedulesMap = new Map<number, ClassSchedule[]>();
+    classesData.forEach(schedule => {
+        const { subject_id, class: className, day_id, time_slot_id } = schedule;
+        if (!schedulesMap.has(subject_id)) schedulesMap.set(subject_id, []);
+        let subjectSchedules = schedulesMap.get(subject_id)!;
+        let classSchedule = subjectSchedules.find(cs => cs.class_name === className);
+        if (!classSchedule) {
+            classSchedule = { class_name: className, ho: [], da: [], rt: [] };
+            subjectSchedules.push(classSchedule);
+        }
+        classSchedule.ho.push([day_id, time_slot_id]);
+    });
+
+    // Final Mapping
+    const resultMap = new Map<number, Subject[]>();
+    eqMap.forEach((equivIds, originalId) => {
+        const equivalents: Subject[] = [];
+        equivIds.forEach(eid => {
+            const dbSub = subjectDetailsMap.get(eid);
+            if (dbSub) {
+                const sub = processSubjectData(dbSub, new Map(), schedulesMap);
+                // Only include if has classes
+                if (sub._classSchedules && sub._classSchedules.length > 0) {
+                    equivalents.push(sub);
+                }
+            }
+        });
+        if (equivalents.length > 0) {
+            resultMap.set(originalId, equivalents);
+        }
+    });
+
+    return resultMap;
 };

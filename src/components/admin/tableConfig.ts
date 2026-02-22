@@ -160,6 +160,17 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'max_hours', label: 'Max. Horas', type: 'number', editable: true },
             { key: 'course_id', label: 'ID Curso', type: 'number', editable: true },
         ]
+    },
+    subject_equivalencies: {
+        tableName: 'subject_equivalencies',
+        displayName: 'Equivalências',
+        primaryKey: 'id',
+        columns: [
+            { key: 'id', label: 'ID', type: 'number', editable: false },
+            { key: 'course_id', label: 'ID Curso', type: 'number', editable: true },
+            { key: 'target_subject_id', label: 'ID Alvo', type: 'number', editable: true },
+            { key: 'source_subject_id', label: 'ID Origem', type: 'number', editable: true },
+            { key: 'equivalence_group_id', label: 'ID Grupo', type: 'text', editable: true },
+        ]
     }
-    // Add more tables as needed
 };
