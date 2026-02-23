@@ -266,6 +266,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                     f="Sua Grade de Horários"
                                     separa={false}
                                     noCard={true}
+                                    showPrint={true}
                                 />
                             </div>
                         </div>

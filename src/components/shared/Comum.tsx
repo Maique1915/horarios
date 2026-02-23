@@ -39,6 +39,7 @@ interface ComumProps {
     hideTitle?: boolean;
     noCard?: boolean;
     dynamicSlots?: boolean;
+    showPrint?: boolean;
 }
 
 interface ComumState {
@@ -94,7 +95,7 @@ const Comum: React.FC<ComumProps> = (props) => {
     const [scheduleLoading, setScheduleLoading] = useState(true);
 
     // Desestruturando a prop 'separa' para fácil acesso
-    let { cur: _cur, fun: _fun, separa: _separa, g, f } = props;
+    let { cur: _cur, fun: _fun, separa: _separa, g, f, showPrint } = props;
     _cur = _cur || (typeof window !== 'undefined' ? window.location.href.split("/")[3] : "engcomp") || "engcomp";
 
     // Sincroniza state.materias quando props.materias muda
@@ -312,19 +313,24 @@ const Comum: React.FC<ComumProps> = (props) => {
         setState(s => ({ ...s, pageBlockStart: s.pageBlockStart - 10 }));
     };
 
-    // Função de exportação para imagem
     const handleExportImage = async () => {
         setIsPrinting(true);
         // Timeout to allow UI updates
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        const element = document.getElementById('schedule-card');
+        const element = document.getElementById('schedule-table-export');
         if (!element) {
             setIsPrinting(false);
             return;
         }
 
+        const isDark = document.documentElement.classList.contains('dark');
         try {
+            // Force light mode for export
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+            }
+
             const dataUrl = await toPng(element, {
                 cacheBust: true,
                 backgroundColor: '#ffffff',
@@ -350,9 +356,13 @@ const Comum: React.FC<ComumProps> = (props) => {
             console.error("Erro ao exportar imagem:", error);
             alert("Erro ao salvar imagem. Tente novamente.");
         } finally {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            }
             setIsPrinting(false);
         }
     };
+
 
 
 
@@ -609,12 +619,12 @@ const Comum: React.FC<ComumProps> = (props) => {
             corpoTabela.push(renderLinha(i));
         }
         return (
-            <div className="rounded-2xl border border-border-light dark:border-border-dark overflow-hidden bg-white dark:bg-slate-900 shadow-sm ring-1 ring-black/5 dark:ring-white/5">
+            <div id="schedule-table-export" className={`rounded-2xl border border-border-light dark:border-border-dark overflow-hidden ${props.noCard ? 'bg-transparent' : 'bg-white dark:bg-surface-dark'} shadow-sm ring-1 ring-black/5 dark:ring-white/5`}>
                 <div className={`${isPrinting ? 'overflow-visible' : 'overflow-auto max-h-[70vh]'} scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent`}>
-                    <table className="w-full border-collapse table-fixed min-w-[1000px]">
+                    <table className={`w-full border-collapse table-fixed min-w-[1000px]`}>
                         <thead>
-                            <tr className="bg-slate-50 dark:bg-slate-800 sticky top-0 z-30">
-                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-slate-800 sticky left-0 z-50">
+                            <tr className="bg-slate-50 dark:bg-surface-dark sticky top-0 z-30">
+                                <th className="p-3 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider w-24 bg-slate-50 dark:bg-surface-dark sticky left-0 z-50">
                                     Horário
                                 </th>
                                 {dias.map(dia => (
@@ -679,7 +689,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                         </div>
                     )}
 
-                    <div id="schedule-card" className={`${props.noCard ? 'w-full' : 'bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 border border-border-light dark:border-border-dark'} flex flex-col w-full transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
+                    <div id="schedule-card" className={`${props.noCard ? 'w-full' : 'bg-white dark:bg-surface-dark shadow-xl shadow-slate-200/50 dark:shadow-black/20 rounded-3xl p-6 border border-border-light dark:border-border-dark'} flex flex-col w-full transition-all duration-500 ${isPrinting ? 'shadow-none border-none p-0' : ''}`}>
 
                         <div className={`flex flex-col md:flex-row justify-between items-start md:items-end mb-6 pb-4 border-b border-dashed border-border-light dark:border-border-dark gap-4 md:gap-0 ${props.hideTitle && !props.hideSave && !props.fun && g !== "ª" ? 'hidden' : ''}`}>
                             <div className="flex flex-col">
@@ -699,7 +709,7 @@ const Comum: React.FC<ComumProps> = (props) => {
                                         onClick={handleSave}
                                         disabled={saving || isExpired}
                                         title={isExpired ? "Conta expirada. Renove para salvar." : "Salvar Grade"}
-                                        className={`group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-primary-light text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isExpired ? 'cursor-not-allowed opacity-50' : ''}`}
+                                        className={`group flex items-center gap-2 bg-primary/10 dark:bg-primary/20 hover:bg-primary/20 dark:hover:bg-primary/30 text-primary dark:text-blue-400 text-sm font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${isExpired ? 'cursor-not-allowed opacity-50' : ''}`}
                                     >
                                         {saving ? (
                                             <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
@@ -710,23 +720,26 @@ const Comum: React.FC<ComumProps> = (props) => {
                                     </button>
                                 )}
 
-                                {g !== "ª" ? "" : (
-                                    <button
-                                        onClick={() => {
-                                            if (!user || isExpired) {
-                                                window.open('https://vain-phrase.com/b.3ZVF0yPD3_p-vvbLmQVnJ/ZBDo0r2HN/zEUv3HNNzaANz/LxT/Y/3sN/TOcY3/MRDvQh', '_blank');
-                                            }
-                                            handleExportImage();
-                                        }}
-                                        className="group hidden md:flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
-                                    >
-                                        <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">image</span>
-                                        Printar
-                                    </button>
-                                )}
+                                {(_fun || showPrint || g === "ª") && (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        {(showPrint || g === "ª") && (
 
-                                {/* Render 'fun' (Custom Button/Component) at the end */}
-                                {_fun && _fun}
+                                            <button
+                                                onClick={() => {
+                                                    if (!user || isExpired) {
+                                                        window.open('https://vain-phrase.com/b.3ZVF0yPD3_p-vvbLmQVnJ/ZBDo0r2HN/zEUv3HNNzaANz/LxT/Y/3sN/TOcY3/MRDvQh', '_blank');
+                                                    }
+                                                    handleExportImage();
+                                                }}
+                                                className="group flex items-center gap-2 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-sm font-medium py-2.5 px-5 rounded-xl transition-all shadow-lg shadow-slate-900/20 dark:shadow-white/10 active:scale-95"
+                                            >
+                                                <span className="material-symbols-outlined text-lg opacity-70 group-hover:opacity-100 transition-opacity">image</span>
+                                                Printar
+                                            </button>
+                                        )}
+                                        {_fun && _fun}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

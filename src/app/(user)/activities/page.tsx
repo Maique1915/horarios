@@ -262,6 +262,204 @@ const useActivitiesController = () => {
         }
     });
 
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const getDirectDownloadLink = (url: string) => {
+        if (!url) return url;
+
+        // Google Drive: Handle various link formats (/file/d/... or /open?id=...)
+        // Supports resourcekey and other query params
+        const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/) ||
+            url.match(/drive\.google\.com\/open\?id=([^&#]+)/);
+
+        if (driveMatch && driveMatch[1]) {
+            let direct = `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+
+            // Preserve resourcekey if present
+            const resKey = url.match(/resourcekey=([^&#]+)/);
+            if (resKey && resKey[1]) {
+                direct += `&resourcekey=${resKey[1]}`;
+            }
+            return direct;
+        }
+
+        // Dropbox: Convert dl=0 to dl=1
+        if (url.includes('dropbox.com') && url.includes('dl=0')) {
+            return url.replace('dl=0', 'dl=1');
+        }
+
+        return url;
+    };
+
+    const handleDownloadAllData = async () => {
+        if (userActivities.length === 0) {
+            alert('Você não possui atividades cadastradas.');
+            return;
+        }
+
+        setIsDownloading(true);
+        try {
+            const JSZip = (await import('jszip')).default;
+            const { saveAs } = await import('file-saver');
+            const zip = new JSZip();
+
+            // Map to hold successfully downloaded blobs: { group: { code: [ { fileName, blob } ] } }
+            const downloads: Record<string, Record<string, { fileName: string, blob: Blob }[]>> = {};
+            let filesFoundCount = 0;
+            // Track failed downloads grouped by group/code
+            const failedByGroup: Record<string, Record<string, string[]>> = {};
+
+            // 1. Fetch all documents first
+            await Promise.all(userActivities.map(async (act) => {
+                if (!act.document_link) return;
+
+                const directUrl = getDirectDownloadLink(act.document_link);
+                const groupName = act.activity?.group || 'Outros';
+                const code = act.activity?.code || 'S-C';
+
+                try {
+                    // Use server-side proxy to bypass CORS
+                    const response = await fetch('/api/proxy-download', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: directUrl })
+                    });
+
+                    if (!response.ok) {
+                        if (!failedByGroup[groupName]) failedByGroup[groupName] = {};
+                        if (!failedByGroup[groupName][code]) failedByGroup[groupName][code] = [];
+                        failedByGroup[groupName][code].push(act.document_link);
+
+                        console.warn(`Erro ${response.status} ao baixar via proxy: ${directUrl}`);
+                        return;
+                    }
+
+                    const contentType = response.headers.get('Content-Type') || '';
+                    const blob = await response.blob();
+
+                    // Basic validation: ignore very small files or HTML (which often indicates error pages from G-Drive/Dropbox)
+                    if (blob.size < 100 || contentType.includes('text/html')) {
+                        if (!failedByGroup[groupName]) failedByGroup[groupName] = {};
+                        if (!failedByGroup[groupName][code]) failedByGroup[groupName][code] = [];
+                        failedByGroup[groupName][code].push(act.document_link);
+
+                        console.warn(`Arquivo ignorado (provavelmente erro ou bloqueio CORS): ${directUrl}`);
+                        return;
+                    }
+
+                    // Improved extension detection using MIME mapping
+                    const mimeMap: Record<string, string> = {
+                        'application/pdf': 'pdf',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+                        'application/msword': 'doc',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+                        'application/vnd.ms-excel': 'xls',
+                        'image/jpeg': 'jpg',
+                        'image/png': 'png',
+                        'image/gif': 'gif',
+                        'application/zip': 'zip',
+                        'text/plain': 'txt'
+                    };
+
+                    let ext = '';
+                    // 1. Try mapping from Content-Type
+                    const cleanMime = contentType.split(';')[0].toLowerCase().trim();
+                    if (mimeMap[cleanMime]) {
+                        ext = mimeMap[cleanMime];
+                    }
+                    // 2. Fallback to URL extension
+                    else {
+                        const urlExt = act.document_link.split('.').pop()?.split(/[?#]/)[0]?.toLowerCase() || '';
+                        if (urlExt && urlExt.length <= 5) {
+                            ext = urlExt;
+                        } else {
+                            ext = 'pdf'; // Generic fallback for documents
+                        }
+                    }
+
+                    // Sanitize filename
+                    const safeDesc = (act.description || act.activity?.description || 'documento')
+                        .replace(/[/\\?%*:|"<>]/g, '-')
+                        .trim();
+
+                    const fileName = `${safeDesc}.${ext}`;
+
+                    // Initialize structure if needed
+                    if (!downloads[groupName]) downloads[groupName] = {};
+                    if (!downloads[groupName][code]) downloads[groupName][code] = [];
+
+                    downloads[groupName][code].push({ fileName, blob });
+                    filesFoundCount++;
+                } catch (err) {
+                    if (!failedByGroup[groupName]) failedByGroup[groupName] = {};
+                    if (!failedByGroup[groupName][code]) failedByGroup[groupName][code] = [];
+                    failedByGroup[groupName][code].push(act.document_link);
+
+                    console.error(`CORS ou Erro de Rede para ${act.document_link}:`, err);
+                }
+            }));
+
+            if (filesFoundCount === 0 && Object.keys(failedByGroup).length === 0) {
+                alert('Nenhum documento com link foi encontrado.');
+                return;
+            }
+
+            // 2. Build ZIP structure only for successful downloads
+            Object.entries(downloads).forEach(([groupName, codes]) => {
+                const groupFolder = zip.folder(`Grupo ${groupName}`);
+                if (!groupFolder) return;
+
+                Object.entries(codes).forEach(([code, files]) => {
+                    const subFolder = groupFolder.folder(code);
+                    if (!subFolder) return;
+
+                    files.forEach(file => {
+                        subFolder.file(file.fileName, file.blob);
+                    });
+                });
+            });
+
+            // Add a report file if some files couldn't be fetched
+            const hasFailures = Object.keys(failedByGroup).length > 0;
+            if (hasFailures) {
+                let report = "DENTRO DESTE ZIP FALTAM DOCUMENTOS.\n\n" +
+                    "Os seguintes links não puderam ser baixados e você precisará baixá-los manualmente:\n\n";
+
+                Object.entries(failedByGroup).forEach(([group, codes]) => {
+                    report += `GRUPO ${group}:\n`;
+                    Object.entries(codes).forEach(([code, links]) => {
+                        report += `  - Subcategoria ${code}:\n`;
+                        links.forEach(link => {
+                            report += `    * Link: ${link}\n`;
+                        });
+                        report += `\n`;
+                    });
+                    report += `------------------------------------------\n\n`;
+                });
+
+                report += "\nMotivo: Bloqueio de segurança da fonte (CORS) ou link inválido.";
+                zip.file('DOCUMENTOS_FALTANDO_LEIA_ME.txt', report);
+            }
+
+            const content = await zip.generateAsync({ type: 'blob' });
+            const userName = user?.name?.split(' ')[0].toLowerCase() || 'usuario';
+            saveAs(content, `atividades_${userName}_${new Date().getFullYear()}.zip`);
+
+            if (hasFailures) {
+                const totalFailed = Object.values(failedByGroup).reduce((acc, codes) =>
+                    acc + Object.values(codes).reduce((a, l) => a + l.length, 0), 0
+                );
+                alert(`${filesFoundCount} arquivos baixados com sucesso. \n\n${totalFailed} documentos não puderam ser baixados e foram listados por Grupos no arquivo "DOCUMENTOS_FALTANDO_LEIA_ME.txt" dentro do ZIP.`);
+            }
+
+        } catch (error) {
+            console.error('Erro na geração do ZIP:', error);
+            alert('Ocorreu um erro ao gerar o arquivo para download.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     return {
         // Data & State
         userId,
@@ -274,12 +472,14 @@ const useActivitiesController = () => {
         globalFilter, setGlobalFilter,
         columnFilters, setColumnFilters,
         selectedGroupDetails, setSelectedGroupDetails,
+        isDownloading,
 
         // Actions
         handleNewActivity,
         handleCloseForm,
         handleEdit,
-        getGroupIcon
+        getGroupIcon,
+        handleDownloadAllData
     };
 };
 
@@ -613,13 +813,30 @@ const ActivitiesView = ({ ctrl }: { ctrl: ReturnType<typeof useActivitiesControl
                         Gerencie suas atividades extracurriculares e acompanhe seu progresso.
                     </p>
                 </div>
-                <Link
-                    href="/profile"
-                    className="group px-5 py-2.5 bg-white dark:bg-surface-dark text-text-light-secondary dark:text-text-dark-secondary font-medium rounded-lg border border-border-light dark:border-border-dark hover:text-primary hover:border-primary/50 transition-all duration-300 flex items-center gap-2 self-start md:self-auto shadow-sm"
-                >
-                    <span className="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
-                    <span>Voltar ao Perfil</span>
-                </Link>
+                <div className="flex flex-col items-end gap-2 self-start md:self-auto">
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            onClick={ctrl.handleDownloadAllData}
+                            disabled={ctrl.isDownloading}
+                            className="group px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-all duration-300 flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <span className={`material-symbols-outlined text-xl ${ctrl.isDownloading ? 'animate-spin' : ''}`}>
+                                {ctrl.isDownloading ? 'sync' : 'download'}
+                            </span>
+                            <span>{ctrl.isDownloading ? 'Preparando...' : 'Baixar Meus Dados'}</span>
+                        </button>
+                        <Link
+                            href="/profile"
+                            className="group px-5 py-2.5 bg-white dark:bg-surface-dark text-text-light-secondary dark:text-text-dark-secondary font-medium rounded-lg border border-border-light dark:border-border-dark hover:text-primary hover:border-primary/50 transition-all duration-300 flex items-center gap-2 shadow-sm"
+                        >
+                            <span className="material-symbols-outlined text-xl group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                            <span>Voltar ao Perfil</span>
+                        </Link>
+                    </div>
+                    <p className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary italic max-w-xs text-right">
+                        * Links externos (ex: Google Drive) podem ser bloqueados pelo navegador. Use links diretos se possível.
+                    </p>
+                </div>
             </header>
 
             <ProgressSummaryView ctrl={ctrl} />

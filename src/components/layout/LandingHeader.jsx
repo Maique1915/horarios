@@ -59,7 +59,7 @@ const LandingHeader = () => {
                                     title="Ver Perfil"
                                 >
                                     <span className="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">account_circle</span>
-                                    <span className="text-sm font-medium text-primary hidden sm:block">{user.name || user.username}</span>
+                                    <span className="text-sm font-medium text-primary hidden md:block">{user.name || user.username}</span>
                                 </Link>
                                 <button
                                     onClick={handleLogout}
@@ -67,7 +67,7 @@ const LandingHeader = () => {
                                     title="Sair"
                                 >
                                     <span className="material-symbols-outlined text-lg">logout</span>
-                                    <span className="hidden sm:block">Sair</span>
+                                    <span className="hidden md:block">Sair</span>
                                 </button>
                             </div>
                         )}
@@ -83,7 +83,7 @@ const LandingHeader = () => {
                                 title="Gerenciar disciplinas"
                             >
                                 <span className="material-symbols-outlined text-lg">settings</span>
-                                <span className="hidden sm:block">Admin</span>
+                                <span className="hidden md:block">Admin</span>
                             </Link>
                         )}
 

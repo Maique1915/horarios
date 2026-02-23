@@ -248,7 +248,7 @@ const AppLayout = ({ children }) => {
                                         title="Ver Perfil"
                                     >
                                         <span className="material-symbols-outlined text-lg text-primary group-hover:scale-110 transition-transform">account_circle</span>
-                                        <span className="text-sm font-medium text-primary hidden sm:block">{user.name || user.username}</span>
+                                        <span className="text-sm font-medium text-primary hidden md:block">{user.name || user.username}</span>
                                     </Link>
                                     <button
                                         onClick={handleLogout}
@@ -256,7 +256,7 @@ const AppLayout = ({ children }) => {
                                         title="Sair"
                                     >
                                         <span className="material-symbols-outlined text-lg">logout</span>
-                                        <span className="hidden sm:block">Sair</span>
+                                        <span className="hidden md:block">Sair</span>
                                     </button>
                                 </div>
                             )}
@@ -276,7 +276,7 @@ const AppLayout = ({ children }) => {
                                     }}
                                 >
                                     <span className="material-symbols-outlined text-lg">settings</span>
-                                    <span className="hidden sm:block">Admin</span>
+                                    <span className="hidden md:block">Admin</span>
                                 </Link>
                             )}
 
@@ -288,7 +288,7 @@ const AppLayout = ({ children }) => {
                                     title="Fazer login"
                                 >
                                     <span className="material-symbols-outlined text-lg">login</span>
-                                    <span className="hidden sm:block">Logar</span>
+                                    <span className="hidden md:block">Logar</span>
                                 </Link>
                             )}
                         </div>
