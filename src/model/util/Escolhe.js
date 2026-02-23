@@ -1,9 +1,10 @@
 import Grafos from './Grafos';
 export default class Escolhe {
 
-    constructor(genesis, schedule, weights = new Map()) {
+    constructor(genesis, schedule, weights = new Map(), mainCourseId = null) {
         this.weights = weights;
         this.schedule = schedule || [[], []]
+        this.mainCourseId = mainCourseId;
 
         // Normalize genesis subjects 
         this.genesis = genesis.map(subject => this.normalize(subject))
@@ -151,6 +152,14 @@ export default class Escolhe {
 
     // Returns true if NO collision (safe)
     semColisao(a, b) {
+        // Se alguma das matérias for de outro curso, não verificar choque de horário (conforme pedido do usuário)
+        // Isso permite que matérias "extras" convivam na mesma grade mesmo que os horários coincidam no papel.
+        const isFromOtherCourse = (s) => s.course_id && this.mainCourseId && s.course_id !== this.mainCourseId;
+
+        if (isFromOtherCourse(a) || isFromOtherCourse(b)) {
+            return true;
+        }
+
         // a._grid and b._grid are arrays of strings
         // Iterate smaller one for efficiency
         const [small, large] = a._grid.length < b._grid.length ? [a, b] : [b, a];
@@ -170,7 +179,7 @@ export default class Escolhe {
      * @param {Object} scheduleMeta - { days: [], slots: [] } Metadata for schedule parsing.
      * @returns {{ semestersCount: number, semesterGrids: Array<Array<Object>> }} Prediction result containing count and grids.
      */
-    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { optionalHours: Infinity, mandatoryHours: Infinity }) {
+    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { optionalHours: Infinity, mandatoryHours: Infinity }, mainCourseId = null, equivalencies = []) {
         if (!allSubjects || allSubjects.length === 0) return 0;
 
         let currentCompleted = [...completedSubjects]; // Copy to avoid mutating original
@@ -181,10 +190,31 @@ export default class Escolhe {
         while (semesters < MAX_SEMESTERS) {
 
             // 0. Calculate current accumulated hours
-            // _el = false significa OBRIGATÓRIA (mandatory)
-            // _el = true significa OPTATIVA (optional)
-            const currentMandatoryHours = currentCompleted.filter(s => !s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
-            const currentOptionalHours = currentCompleted.filter(s => s._el).reduce((acc, s) => acc + (s._workload || 0), 0);
+            // Using a more robust elective check: _el=true OR Period 0 OR from other course
+            const isOptional = (s) => {
+                const isFromMainCourse = !s.course_id || (mainCourseId && s.course_id === mainCourseId);
+                if (isFromMainCourse) {
+                    return s._el || s._se === 0 || s._category === 'OPTIONAL';
+                }
+
+                const equiv = equivalencies.find(e => e.source_subject_id === s._id);
+                if (equiv) {
+                    // Se tem equivalência no curso alvo, checa se a ALVO é optativa
+                    const targetInMain = allSubjects.find(m => m._id === equiv.target_subject_id);
+                    if (targetInMain) {
+                        return targetInMain._el || targetInMain._se === 0 || targetInMain._category === 'OPTIONAL';
+                    }
+                    if (equiv.target_subject) {
+                        return equiv.target_subject.semester === 0 || !equiv.target_subject.semester;
+                    }
+                }
+
+                // Se não tem equivalência e é de outro curso, assume optativa (conforme pedido)
+                return true;
+            };
+
+            const currentMandatoryHours = currentCompleted.filter(s => !isOptional(s)).reduce((acc, s) => acc + (s._workload || 0), 0);
+            const currentOptionalHours = currentCompleted.filter(s => isOptional(s)).reduce((acc, s) => acc + (s._workload || 0), 0);
 
             // 1. Find candidates (what can be taken now)
             // Grafos expects (allSubjects, cr, names). 
@@ -213,7 +243,7 @@ export default class Escolhe {
             const heights = grafos.calculateHeights();
 
             // Use Deterministic chooser to avoid random results in prediction
-            const escolhe = new EscolheDeterministico(candidates, scheduleMeta, heights);
+            const escolhe = new EscolheDeterministico(candidates, scheduleMeta, heights, mainCourseId);
             const possibleSchedules = escolhe.exc();
 
             if (possibleSchedules.length === 0) {

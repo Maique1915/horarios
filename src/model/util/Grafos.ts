@@ -4,20 +4,34 @@ export default class Grafos {
     materias: Subject[]; // List of available subjects
     cr: number;          // Coeffcient of Rendimento (Credits)
     re: string[];        // Requirements / Completed subjects (acronyms)
+    ids: Set<string | number>; // IDs das matérias concluídas
 
     constructor(materias: Subject[], cr: number, names: string[] | Subject[]) {
         this.materias = materias;
+        this.ids = new Set();
+
+        // Convert names/subjects to acronym list
         this.re = (names || []).map((n: string | Subject) => {
             if (typeof n === 'string') return n;
+            if (n._id !== undefined) this.ids.add(n._id);
             return n._re || '';
         });
 
         if (cr === -1) {
-            this.cr = this.materias.reduce((acc, materia) => {
-                if (materia._re && this.re.includes(materia._re)) {
-                    return acc + (Number(materia._ap) || 0) + (Number(materia._at) || 0);
+            // Calculate CR by summing credits of all subjects in 'names'
+            // This ensures subjects from other courses (not in this.materias) are counted
+            this.cr = (names as (string | Subject)[]).reduce((acc, n) => {
+                if (typeof n === 'string') {
+                    // Fallback to searching in materias if only acronym is provided
+                    const materia = this.materias.find(m => m._re === n);
+                    if (materia) {
+                        return acc + (Number(materia._ap) || 0) + (Number(materia._at) || 0);
+                    }
+                    return acc;
+                } else {
+                    // Direct sum from Subject object
+                    return acc + (Number(n._ap) || 0) + (Number(n._at) || 0);
                 }
-                return acc;
             }, 0);
         } else {
             this.cr = cr;
@@ -27,7 +41,11 @@ export default class Grafos {
     matriz(): Subject[] {
         const resultado = this.materias.filter(
             materia => {
-                const jaFeita = materia._re ? this.re.includes(materia._re) : false;
+                // Se tiver o ID, verifica pelo ID. Se não (legado), usa o acrônimo.
+                const jaFeita = (materia._id !== undefined)
+                    ? this.ids.has(materia._id)
+                    : (materia._re ? this.re.includes(materia._re) : false);
+
                 // Ensure _pr is handled as an array, even if it might be a string or undefined in raw data
                 // The Subject interface says string | string[], but logic expects array.
                 const prList = Array.isArray(materia._pr) ? materia._pr : (materia._pr ? [materia._pr] : []);

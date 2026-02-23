@@ -5,7 +5,9 @@ import {
     loadCompletedSubjects,
     loadDbData,
     loadCurrentEnrollments,
-    Enrollment
+    getEquivalencies,
+    Enrollment,
+    DbEquivalency
 } from '../../../services/disciplinaService';
 import { getCurrentPeriod } from '@/utils/dateUtils';
 import { getDays, getTimeSlots } from '../../../services/scheduleService';
@@ -74,6 +76,7 @@ export const usePredictionController = () => {
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
     const [completedSubjects, setCompletedSubjects] = useState<Subject[]>([]);
     const [currentEnrollments, setCurrentEnrollments] = useState<Subject[]>([]);
+    const [equivalencies, setEquivalencies] = useState<DbEquivalency[]>([]);
     const [scheduleMeta, setScheduleMeta] = useState<ScheduleMeta>({ days: [], slots: [] });
     const [loading, setLoading] = useState(true);
 
@@ -111,14 +114,17 @@ export const usePredictionController = () => {
                 const [days, slots] = await Promise.all([getDays(), getTimeSlots()]);
                 setScheduleMeta({ days: days || [], slots: slots || [] });
 
+                const courseId = user.course_id;
                 const courseCode = user.courses?.code || localStorage.getItem('last_active_course');
-                const [dbSubjects, dbCompleted, dbEnrollments] = await Promise.all([
+                const [dbSubjects, dbCompleted, dbEnrollments, dbEquivalencies] = await Promise.all([
                     // @ts-ignore
                     loadDbData(courseCode),
                     // @ts-ignore
                     loadCompletedSubjects(user.id),
                     // @ts-ignore
-                    loadCurrentEnrollments(user.id)
+                    loadCurrentEnrollments(user.id),
+                    // @ts-ignore
+                    getEquivalencies(courseId)
                 ]);
 
                 const periodoAtual = getCurrentPeriod();
@@ -127,6 +133,7 @@ export const usePredictionController = () => {
                 setAllSubjects(dbSubjects);
                 setCompletedSubjects(dbCompleted);
                 setCurrentEnrollments(filteredEnrollments);
+                setEquivalencies(dbEquivalencies);
             } catch (error) {
                 console.error("Failed to load prediction data", error);
             } finally {
@@ -142,7 +149,7 @@ export const usePredictionController = () => {
             // Se o usuário já tem matérias matriculadas no período atual, use como primeira grade fixa
             const hasCurrentEnrollments = currentEnrollments.length > 0;
             const initialFixed = hasCurrentEnrollments ? [currentEnrollments] : [];
-            
+
             const initialState: HistoryState = {
                 fixedSemesters: initialFixed,
                 blacklistedIds: new Set()
@@ -175,6 +182,25 @@ export const usePredictionController = () => {
     const simulationResult: SimulationResult | null = useMemo(() => {
         if (loading || allSubjects.length === 0) return null;
 
+        // Função uniforme para identificar optativas (considera também matérias de outros cursos e equivalências)
+        const getIsOptional = (s: Subject) => {
+            const isFromMainCourse = !s.course_id || s.course_id === user?.courses?.id;
+            if (isFromMainCourse) {
+                return s._el || s._se === 0 || s._category === 'OPTIONAL';
+            }
+            const equiv = equivalencies.find(e => e.source_subject_id === s._id);
+            if (equiv) {
+                const targetInMain = allSubjects.find(main => main._id === equiv.target_subject_id);
+                if (targetInMain) {
+                    return targetInMain._el || targetInMain._se === 0 || targetInMain._category === 'OPTIONAL';
+                }
+                if (equiv.target_subject) {
+                    return equiv.target_subject.semester === 0 || !equiv.target_subject.semester;
+                }
+            }
+            return true;
+        };
+
         const availableSubjects = allSubjects.filter(s => s._id !== undefined && !blacklistedIds.has(s._id) && s._ag);
 
         // Considera matérias completadas E matérias do período atual para cálculo de pré-requisitos
@@ -187,8 +213,11 @@ export const usePredictionController = () => {
             simulatedCompleted = [...simulatedCompleted, ...semesterSubjects];
         });
 
+        const mandatoryHours = simulatedCompleted.filter(s => !getIsOptional(s)).reduce((acc, s) => acc + (s._workload || 0), 0);
+        const optionalHours = simulatedCompleted.filter(s => getIsOptional(s)).reduce((acc, s) => acc + (s._workload || 0), 0);
+
         const limits = {
-            optionalHours: 360,
+            optionalHours: Math.max(0, 360 - optionalHours),
             mandatoryHours: Infinity
         };
 
@@ -196,7 +225,9 @@ export const usePredictionController = () => {
             availableSubjects,
             simulatedCompleted,
             scheduleMeta,
-            limits
+            limits,
+            user?.courses?.id as any,
+            equivalencies
         );
 
         return {
@@ -230,6 +261,10 @@ export const usePredictionController = () => {
         );
 
         candidates = candidates.filter(candidate => {
+            // Se a disciplina for de outro curso, o usuário quer que ela apareça mesmo com choque
+            const isFromOtherCourse = candidate.course_id && candidate.course_id !== user?.courses?.id;
+            if (isFromOtherCourse) return true;
+
             for (let existing of currentSemesterSubjects) {
                 if (checkCollision(candidate, existing)) return false;
             }
@@ -249,7 +284,7 @@ export const usePredictionController = () => {
         const nodes: any[] = [];
         const links: any[] = [];
         const nodeMap = new Map();
-        
+
         const periodoAtual = getCurrentPeriod();
 
         simulationResult.semesters.forEach((subjects, index) => {
@@ -257,7 +292,6 @@ export const usePredictionController = () => {
             const columnX = (semesterNum - 1) * COLUMN_WIDTH;
 
             // Determina ano e semestre baseado no período atual
-            const periodoAtual = getCurrentPeriod(); // Ex: "2026.1"
             const [currentYearStr, currentSemStr] = periodoAtual.split('.');
             const baseYear = parseInt(currentYearStr);
             const baseSemester = parseInt(currentSemStr);
@@ -299,9 +333,15 @@ export const usePredictionController = () => {
             nodes.push(titleNode);
 
             subjects.forEach((subject, subIndex) => {
+                // ID único composto para evitar colisões entre cursos ou semestres
+                const nodeId = subject._id
+                    ? `id-${subject._id}-${index}`
+                    : `re-${subject._re}-${index}-${subIndex}`;
+
                 const node = {
                     ...subject,
-                    id: subject._re || `sub-${subIndex}`,
+                    id: nodeId,
+                    acronym: subject._re, // Guardar o acrônimo para os links e exibição
                     name: subject._di,
                     type: 'subject',
                     status: 'podeFazer',
@@ -312,8 +352,18 @@ export const usePredictionController = () => {
                     depth: semesterNum,
                 };
                 nodes.push(node);
-                nodeMap.set(node.id, node);
-                if (subject._re) nodeMap.set(subject._re, node);
+
+                // Mapeamento por ID único
+                nodeMap.set(nodeId, node);
+
+                // Mapeamento por Acrônimo (para requisitos)
+                // Se houver colisão de 4D, priorizar a matéria que pertence ao curso principal do usuário
+                const existingAcronymNode = nodeMap.get(subject._re);
+                const isFromMainCourse = !subject.course_id || subject.course_id === user?.courses?.id;
+
+                if (!existingAcronymNode || isFromMainCourse) {
+                    nodeMap.set(subject._re, node);
+                }
             });
         });
 
@@ -396,17 +446,41 @@ export const usePredictionController = () => {
             const subjectToRemove = allSubjects.find(s => s._id === subjectId);
             if (!subjectToRemove) return;
 
+            // Função uniforme para identificar optativas (considera também matérias de outros cursos e equivalências)
+            const getIsOptional = (s: Subject) => {
+                // Se é do curso principal, checa atributos nativos
+                const isFromMainCourse = !s.course_id || s.course_id === user?.courses?.id;
+                if (isFromMainCourse) {
+                    return s._el || s._se === 0 || s._category === 'OPTIONAL';
+                }
+
+                // Se é de outro curso, checa equivalência no curso principal
+                const equiv = equivalencies.find(e => e.source_subject_id === s._id);
+                if (equiv) {
+                    // Tenta achar a matéria alvo no plano do curso principal para pegar a categoria real
+                    const targetInMain = allSubjects.find(main => main._id === equiv.target_subject_id);
+                    if (targetInMain) {
+                        return targetInMain._el || targetInMain._se === 0 || targetInMain._category === 'OPTIONAL';
+                    }
+                    if (equiv.target_subject) {
+                        return equiv.target_subject.semester === 0 || !equiv.target_subject.semester;
+                    }
+                }
+
+                // Se não tem equivalência e é de outro curso, o usuário quer que conte como OPTIONAL (extra)
+                return true;
+            };
+
             const isSameSubject = (a: Subject, b: Subject) => a._id === b._id;
 
             // Horas já COMPLETADAS de optativas (não conta as que está cursando)
-            // _el = true significa OPTATIVA
             const completedOptionalHours = completedSubjects
-                .filter(s => s._el || s._category === 'OPTIONAL')
+                .filter(getIsOptional)
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
 
             // Horas que está CURSANDO AGORA de optativas
             const currentOptionalHours = currentEnrollments
-                .filter(s => s._el || s._category === 'OPTIONAL')
+                .filter(getIsOptional)
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
 
             // Horas da disciplina que está tentando remover (se for optativa)

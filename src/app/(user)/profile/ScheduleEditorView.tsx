@@ -96,12 +96,16 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                 // Usar o serviço loadDbData que já faz todo o processamento de classes e requisitos
                 const data = await loadDbData(selectedCourse.code) as Subject[];
 
-                // Filtrar apenas disciplinas que possuem turmas cadastradas
-                const subjectsWithClasses = data.filter(s => s._classSchedules && s._classSchedules.length > 0);
-                setAvailableSubjects(subjectsWithClasses);
+                // Filtrar disciplinas: incluir se tiver turmas OU se for do Período 0 OU se for optativa
+                const relevantSubjects = data.filter(s =>
+                    (s._classSchedules && s._classSchedules.length > 0) ||
+                    s._se === 0 ||
+                    s._el
+                );
+                setAvailableSubjects(relevantSubjects);
 
                 // Fetch equivalents for these subjects
-                const subjectIds = subjectsWithClasses.map(s => s._id).filter(id => id !== undefined) as number[];
+                const subjectIds = relevantSubjects.map(s => s._id).filter(id => id !== undefined) as number[];
                 if (subjectIds.length > 0) {
                     const equivalents = await fetchEquivalentOptionsForSubjects(subjectIds);
                     setSubjectEquivalents(equivalents);
@@ -372,12 +376,16 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                         </label>
                                         <Select
                                             placeholder="Todos os períodos"
-                                            value={selectedSemester ? { value: selectedSemester, label: `${selectedSemester}º Período` } : { value: null, label: 'Todos os períodos' }}
+                                            value={selectedSemester !== null ? (
+                                                selectedSemester === 0
+                                                    ? { value: 0, label: 'Período Extra' }
+                                                    : { value: selectedSemester, label: `${selectedSemester}º Período` }
+                                            ) : { value: null, label: 'Todos os períodos' }}
                                             options={[
                                                 { value: null, label: 'Todos os períodos' },
                                                 ...Array.from({ length: 13 }, (_, i) => ({ value: i, label: i === 0 ? 'Período Extra' : `${i}º Período` }))
                                             ]}
-                                            onChange={(opt: any) => setSelectedSemester(opt?.value || null)}
+                                            onChange={(opt: any) => setSelectedSemester(opt?.value !== undefined && opt?.value !== null ? opt.value : null)}
                                             isClearable
                                             classNamePrefix="select"
                                             classNames={{
@@ -485,6 +493,14 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                                                         <span className="text-[10px] font-bold text-slate-400">
                                                                             {subject._se === 0 ? 'Período Extra' : `${subject._se}º Período`}
                                                                         </span>
+                                                                        {(!subject._classSchedules || subject._classSchedules.length === 0) && (
+                                                                            <>
+                                                                                <div className="h-1 w-1 rounded-full bg-slate-300"></div>
+                                                                                <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-[9px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider border border-amber-200 dark:border-amber-800/50">
+                                                                                    Sem Turma
+                                                                                </span>
+                                                                            </>
+                                                                        )}
                                                                     </div>
                                                                 </div>
 

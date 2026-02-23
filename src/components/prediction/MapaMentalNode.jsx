@@ -58,7 +58,7 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
           />
 
           <p className="text-xs font-bold font-mono opacity-60 mb-0.5 leading-none">
-            {node.id}
+            {node.acronym || node.id}
           </p>
           <p className="text-sm font-medium leading-tight line-clamp-2 w-full px-2">
             {node.name}
