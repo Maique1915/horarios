@@ -20,6 +20,7 @@ export const metadata = {
 import QueryProvider from '@/components/layout/QueryProvider';
 
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                             <AppLayout>
                                 {children}
                                 <SpeedInsights />
+                                <Analytics />
                             </AppLayout>
                         </AuthProvider>
                     </ThemeProvider>
