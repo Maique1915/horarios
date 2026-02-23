@@ -47,8 +47,8 @@ export const CompletedSubjectsSection = ({ ctrl }: CompletedSubjectsSectionProps
                         >
                             <option value="all">Todos</option>
                             <option value="optativas">Optativas</option>
-                            {Array.from(new Set(ctrl.allSubjects.map(s => s._se).filter(s => s && Number(s) > 0))).sort((a, b) => Number(a) - Number(b)).map((sem: any) => (
-                                <option key={sem} value={sem}>{sem}º Per</option>
+                            {Array.from(new Set(ctrl.allSubjects.map(s => s._se).filter(s => s !== undefined && s !== null))).sort((a, b) => Number(a) - Number(b)).map((sem: any) => (
+                                <option key={sem} value={sem}>{sem === 0 ? 'Extra' : `${sem}º Per`}</option>
                             ))}
                         </select>
                     )}
@@ -117,8 +117,8 @@ export const CompletedSubjectsSection = ({ ctrl }: CompletedSubjectsSectionProps
                         {ctrl.allSubjects
                             .filter(s => {
                                 if (ctrl.selectedSemesterFilter === 'all') return true;
-                                // _el = true significa OPTATIVA
-                                if (ctrl.selectedSemesterFilter === 'optativas') return s._el;
+                                // _el = true significa OPTATIVA. Também incluímos período 0 como optativa.
+                                if (ctrl.selectedSemesterFilter === 'optativas') return s._el || s._se === 0;
                                 return s._se == Number(ctrl.selectedSemesterFilter);
                             })
                             .sort((a, b) => {
@@ -139,7 +139,10 @@ export const CompletedSubjectsSection = ({ ctrl }: CompletedSubjectsSectionProps
                                         </div>
                                         <div className="flex-1">
                                             <p className={`text-sm font-medium ${isSelected ? 'text-green-900 dark:text-green-100' : 'text-text-light-primary dark:text-text-dark-primary'}`}>{subject._di}</p>
-                                            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">{subject._re} • {subject._se}º Período</p>
+                                            <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">
+                                                {subject._re} • {subject._se === 0 ? 'Período Extra' : `${subject._se}º Período`}
+                                                {!subject._ag && <span className="ml-2 text-amber-500 font-bold">(Inativa)</span>}
+                                            </p>
                                         </div>
                                     </div>
                                 );

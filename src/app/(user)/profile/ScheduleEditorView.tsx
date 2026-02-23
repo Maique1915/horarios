@@ -207,7 +207,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
 
     const subjectOptions: SubjectOption[] = filteredSubjects.map((subject: Subject) => ({
         value: subject._id as number,
-        label: `${subject._re} - ${subject._di} (${subject._se}º Período)`,
+        label: `${subject._re} - ${subject._di} (${subject._se === 0 ? 'Extra' : `${subject._se}º Período`})`,
         subject
     }));
 
@@ -362,7 +362,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                             value={selectedSemester ? { value: selectedSemester, label: `${selectedSemester}º Período` } : { value: null, label: 'Todos os períodos' }}
                                             options={[
                                                 { value: null, label: 'Todos os períodos' },
-                                                ...Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1}º Período` }))
+                                                ...Array.from({ length: 13 }, (_, i) => ({ value: i, label: i === 0 ? 'Período Extra' : `${i}º Período` }))
                                             ]}
                                             onChange={(opt: any) => setSelectedSemester(opt?.value || null)}
                                             isClearable
@@ -470,7 +470,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                                                         </span>
                                                                         <div className="h-1 w-1 rounded-full bg-slate-300"></div>
                                                                         <span className="text-[10px] font-bold text-slate-400">
-                                                                            {subject._se}º Período
+                                                                            {subject._se === 0 ? 'Período Extra' : `${subject._se}º Período`}
                                                                         </span>
                                                                     </div>
                                                                 </div>
