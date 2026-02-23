@@ -3,8 +3,9 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { ScheduleEditorView } from '../profile/ScheduleEditorView';
-import { loadCurrentEnrollments } from '../../../services/disciplinaService';
+import { loadCurrentEnrollments, saveCurrentEnrollments } from '../../../services/disciplinaService';
 import { getCurrentPeriod } from '@/utils/dateUtils';
 
 export default function GradePage() {
@@ -12,6 +13,10 @@ export default function GradePage() {
     const router = useRouter();
     const [currentEnrollments, setCurrentEnrollments] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState(true);
+
+    const handleClose = () => {
+        router.push('/profile');
+    };
 
     React.useEffect(() => {
         if (!authLoading) {
@@ -39,8 +44,18 @@ export default function GradePage() {
         }
     };
 
-    const handleClose = () => {
-        router.push('/profile');
+    const queryClient = useQueryClient();
+    const handleSave = async (enrollments: any[]) => {
+        if (!user) return;
+        try {
+            const periodoAtual = getCurrentPeriod();
+            // Precisamos garantir que as disciplinas tenham o formato que o saveCurrentEnrollments espera
+            // (especialmente _id e horários)
+            await saveCurrentEnrollments(user.id, enrollments, periodoAtual, user.course_id);
+            await queryClient.invalidateQueries({ queryKey: ['currentEnrollments', user.id] });
+        } catch (error) {
+            console.error('Error saving grade:', error);
+        }
     };
 
     if (authLoading || loading) {
@@ -61,6 +76,7 @@ export default function GradePage() {
             currentEnrollments={currentEnrollments}
             userCourseCode={user.courses?.code || 'engcomp'}
             onClose={handleClose}
+            onSave={handleSave}
         />
     );
 }

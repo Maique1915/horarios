@@ -148,11 +148,24 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
             return;
         }
 
-        setSelectedSubjects([...selectedSubjects, subject]);
+        // Se a disciplina tiver turmas, selecionar a primeira por padrão
+        let updatedSubject = { ...subject };
+        if (subject._classSchedules && subject._classSchedules.length > 0) {
+            const firstClass = subject._classSchedules[0];
+            updatedSubject.class_name = firstClass.class_name;
+            updatedSubject._ho = firstClass.ho;
+            updatedSubject.schedule_data = firstClass;
+        }
+
+        const newSelected = [...selectedSubjects, updatedSubject];
+        setSelectedSubjects(newSelected);
+        if (onSave) onSave(newSelected);
     };
 
     const handleRemoveSubject = (subjectId: number) => {
-        setSelectedSubjects(selectedSubjects.filter((s: Subject) => s._id !== subjectId));
+        const newSelected = selectedSubjects.filter((s: Subject) => s._id !== subjectId);
+        setSelectedSubjects(newSelected);
+        if (onSave) onSave(newSelected);
     };
 
     // Preparar disciplinas para exibição na grade

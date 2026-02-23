@@ -462,13 +462,19 @@ export const loadCurrentEnrollments = async (userId: number): Promise<Enrollment
     const data = await currentEnrollmentsModel.fetchCurrentEnrollments(userId);
     return (data as DbCurrentEnrollment[]).map(item => {
         const processedSubject = processSubjectData(item.subjects, null, null);
+        const schedule_data = typeof item.schedule_data === 'string' ? JSON.parse(item.schedule_data) : item.schedule_data;
+
+        // Ensure _ho and name are present for frontend consistency
         return {
             ...processedSubject,
+            _di: processedSubject._di || item.subjects?.name,
+            name: processedSubject.name || item.subjects?.name,
             class_name: item.class_name,
             period: item.semester, // Academic period (e.g. 2026.1)
-            schedule_data: typeof item.schedule_data === 'string' ? JSON.parse(item.schedule_data) : item.schedule_data,
+            schedule_data: schedule_data,
+            _ho: schedule_data?.ho || schedule_data?.[0]?.ho || [], // Populate _ho from schedule_data
             created_at: item.created_at,
-            course_name: item.subjects.courses?.name,
+            course_name: item.subjects?.courses?.name,
             course_id: item.course_id
         };
     });
@@ -533,14 +539,25 @@ export const saveCurrentEnrollments = async (userId: number, enrollments: Subjec
             console.warn(`Atenção: ${missingCourseId.length} disciplinas sem course_id detectadas.`, missingCourseId.map(m => m._re));
         }
 
-        const rows = toInsert.map(item => ({
-            user_id: userId,
-            subject_id: item._id,
-            class_name: item.class_name || null,
-            semester: semester,
-            schedule_data: item._ho || [],
-            course_id: item.course_id || defaultCourseId || 3 // Fallback total para o curso 3 (Engenharia) se nada for encontrado
-        }));
+        const rows = toInsert.map(item => {
+            // Get schedule from _ho or schedule_data or first available class
+            let schedule = item._ho || [];
+            if (schedule.length === 0 && item.schedule_data) {
+                schedule = item.schedule_data.ho || (Array.isArray(item.schedule_data) ? item.schedule_data[0]?.ho : []);
+            }
+            if (schedule.length === 0 && item._classSchedules?.length > 0) {
+                schedule = item._classSchedules[0].ho;
+            }
+
+            return {
+                user_id: userId,
+                subject_id: item._id,
+                class_name: item.class_name || (item._classSchedules?.[0]?.class_name) || null,
+                semester: semester,
+                schedule_data: schedule,
+                course_id: item.course_id || defaultCourseId || 3
+            };
+        });
 
         try {
             await currentEnrollmentsModel.insertCurrentEnrollments(rows);
