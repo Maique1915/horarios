@@ -1,5 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+    calculateMandatorySubjects,
+    calculateOptionalSubjects,
+    calculateElectiveSubjects,
+    calculateComplementaryActivities
+} from './calculators';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Subject } from '@/types/Subject';
@@ -467,50 +473,24 @@ export const useProfileController = () => {
             let onClick: (() => void) | undefined = undefined;
 
             if (type === 'obrigatórias') {
-                subjects = allSubjects.filter(s => !s._el && effectiveCompletedIds.has(s._id as number));
+                subjects = calculateMandatorySubjects(allSubjects, effectiveCompletedIds);
                 icon = "school";
                 color = "text-blue-600 dark:text-blue-400";
                 bgColor = "bg-blue-600";
             } else if (type === 'optativas') {
-                subjects = allSubjects.filter(s => s._el && effectiveCompletedIds.has(s._id as number));
+                subjects = calculateOptionalSubjects(allSubjects, effectiveCompletedIds);
                 icon = "star";
                 color = "text-purple-600 dark:text-purple-400";
                 bgColor = "bg-purple-600";
             } else if (type === 'eletivas') {
-                // Eletivas: Subjects from OTHER courses that have NO equivalency (direct or bidirectional) to the current course grid
-                subjects = takenSubjects.filter(s => {
-                    // CRITICAL: A subject is an elective ONLY if its course_id is different from the grid course ID
-                    // AND it doesn't exist in the current grid directly
-                    const subjectCourseId = Number(s.course_id);
-                    const isFromDifferentCourse = subjectCourseId !== userCourseId;
-                    const existsInGrid = gridSubjectIds.has(s._id as number);
-
-                    // If it's from the same course or already in the grid, it's NOT an elective
-                    if (!isFromDifferentCourse || existsInGrid) return false;
-
-                    // Check if this subject has any equivalency that maps into our grid
-                    const hasGridEquivalency = allEquivalencies.some(eq => {
-                        const isSource = eq.source_subject_id === s._id;
-                        const isTarget = eq.target_subject_id === s._id;
-                        const isBidirectional = eq.course_id === null;
-
-                        // Case 1: The subject taken IS the source of an equivalency pointing to a grid subject
-                        if (isSource && gridSubjectIds.has(eq.target_subject_id)) return true;
-
-                        // Case 2: Bidirectional - the subject taken is the target of an eq pointing to a grid subject (which is the source)
-                        if (isBidirectional && isTarget && gridSubjectIds.has(eq.source_subject_id)) return true;
-
-                        return false;
-                    });
-
-                    return !hasGridEquivalency;
-                });
+                subjects = calculateElectiveSubjects(takenSubjects, userCourseId, gridSubjectIds, allEquivalencies as any);
                 icon = "auto_awesome";
                 color = "text-emerald-600 dark:text-emerald-400";
                 bgColor = "bg-emerald-600";
             } else if (type === 'atividades complementares') {
-                currentHours = Math.min(w.min_hours, complementaryHours || 0);
-                customTotalHours = complementaryHours;
+                const results = calculateComplementaryActivities(w.min_hours, complementaryHours);
+                currentHours = results.currentHours;
+                customTotalHours = results.customTotalHours;
                 icon = "extension";
                 color = "text-orange-600 dark:text-orange-400";
                 bgColor = "bg-orange-600";
