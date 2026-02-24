@@ -41,10 +41,10 @@ export default class Grafos {
     matriz(): Subject[] {
         const resultado = this.materias.filter(
             materia => {
-                // Se tiver o ID, verifica pelo ID. Se não (legado), usa o acrônimo.
-                const jaFeita = (materia._id !== undefined)
-                    ? this.ids.has(materia._id)
-                    : (materia._re ? this.re.includes(materia._re) : false);
+                // Verifica se a matéria já foi feita por ID ou por Acrônimo
+                const jaFeitaById = (materia._id !== undefined) && this.ids.has(materia._id);
+                const jaFeitaByAcr = (materia._re !== undefined) && this.re.includes(materia._re);
+                const jaFeita = jaFeitaById || jaFeitaByAcr;
 
                 // Ensure _pr is handled as an array, even if it might be a string or undefined in raw data
                 // The Subject interface says string | string[], but logic expects array.

@@ -11,6 +11,7 @@ import {
     toggleMultipleSubjects,
     getEquivalencies,
     loadEffectiveCompletedSubjects,
+    fetchCourseConfig,
     DbEquivalency,
     Enrollment,
     CompletedSubject
@@ -57,6 +58,7 @@ export const useProfileController = () => {
 
     // -- State --
     const [scheduleMeta, setScheduleMeta] = useState<ScheduleMeta>({ days: [], slots: [] });
+    const [courseConfig, setCourseConfig] = useState<any>(null);
 
     // Edit Profile Modal
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -111,6 +113,18 @@ export const useProfileController = () => {
         };
         loadMeta();
     }, []);
+
+    useEffect(() => {
+        const loadConfig = async () => {
+            if (user?.courses?.code) {
+                try {
+                    const config = await fetchCourseConfig(user.courses.code);
+                    setCourseConfig(config);
+                } catch (e) { console.error("Error loading course config", e); }
+            }
+        };
+        loadConfig();
+    }, [user]);
 
     // Queries
     const { data: completedSubjectsRaw, isLoading: loadingCompleted } = useQuery<Subject[]>({
@@ -422,61 +436,96 @@ export const useProfileController = () => {
     }, [currentEnrollments]);
 
     // Derived Stats
-    const MANDATORY_REQ_HOURS = 3774;
-    const OPTIONAL_REQ_HOURS = 360;
-    const COMPLEMENTARY_REQ_HOURS = 210;
-    const TOTAL_REQ_HOURS = MANDATORY_REQ_HOURS + OPTIONAL_REQ_HOURS + COMPLEMENTARY_REQ_HOURS;
-
     const {
-        mandatorySubjects,
-        optionalSubjects,
-        mandatoryEffective,
-        optionalEffective,
-        compEffective,
+        categoryStats,
         progressPercentage
     } = useMemo(() => {
-        // Obter todas as disciplinas do curso para checar as que foram "vencidas" por equivalência
-        // Se ainda não carregamos allSubjects (pode acontecer se não abrimos o modo edit),
-        // o progresso será baseado apenas no que está explicitamente concluído.
-
         const mSubs = completedSubjects.filter(s => !s._el);
         const eSubs = completedSubjects.filter(s => s._el);
 
-        let mCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-        let eCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+        const workloads = courseConfig?.workloads || [];
 
-        // Se temos allSubjects e as effectiveCompletedIds, refinamos o cálculo
-        // para incluir matérias que o aluno NÃO fez mas que foram vencidas por equivalência
-        if (allSubjects.length > 0 && effectiveCompletedIds.size > 0) {
-            const completedLiteralIds = new Set(completedSubjects.map(s => s._id));
+        let totalEff = 0;
+        let totalReq = 0;
 
-            allSubjects.forEach(s => {
-                if (effectiveCompletedIds.has(s._id as number) && !completedLiteralIds.has(s._id)) {
-                    // Esta matéria foi vencidada por equivalência mas não consta no user_subjects explicitamente
-                    if (s._el) {
-                        eCredits += (Number(s._ap || 0) + Number(s._at || 0));
-                    } else {
-                        mCredits += (Number(s._ap || 0) + Number(s._at || 0));
-                    }
+        const stats = workloads.map((w: any) => {
+            const type = w.type.toLowerCase();
+            let currentHours = 0;
+            let currentCredits = 0;
+            let icon = "school";
+            let color = "text-blue-600 dark:text-blue-400";
+            let bgColor = "bg-blue-600";
+            let subjects: any[] = [];
+            let customTotalHours: number | undefined = undefined;
+            let onClick: (() => void) | undefined = undefined;
+
+            if (type === 'obrigatórias') {
+                subjects = mSubs;
+                currentCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+
+                if (allSubjects.length > 0 && effectiveCompletedIds.size > 0) {
+                    const completedLiteralIds = new Set(completedSubjects.map(s => s._id));
+                    allSubjects.forEach(s => {
+                        if (!s._el && effectiveCompletedIds.has(s._id as number) && !completedLiteralIds.has(s._id)) {
+                            currentCredits += (Number(s._ap || 0) + Number(s._at || 0));
+                        }
+                    });
                 }
-            });
-        }
+                currentHours = Math.min(w.min_hours, currentCredits * 18);
+                icon = "school";
+                color = "text-blue-600 dark:text-blue-400";
+                bgColor = "bg-blue-600";
+            } else if (type === 'optativas' || type === 'eletivas') {
+                subjects = eSubs;
+                currentCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
 
-        const mEff = Math.min(MANDATORY_REQ_HOURS, mCredits * 18);
-        const eEff = Math.min(OPTIONAL_REQ_HOURS, eCredits * 18);
-        const cEff = Math.min(COMPLEMENTARY_REQ_HOURS, complementaryHours || 0);
+                if (allSubjects.length > 0 && effectiveCompletedIds.size > 0) {
+                    const completedLiteralIds = new Set(completedSubjects.map(s => s._id));
+                    allSubjects.forEach(s => {
+                        if (s._el && effectiveCompletedIds.has(s._id as number) && !completedLiteralIds.has(s._id)) {
+                            currentCredits += (Number(s._ap || 0) + Number(s._at || 0));
+                        }
+                    });
+                }
+                currentHours = Math.min(w.min_hours, currentCredits * 18);
+                icon = type === 'optativas' ? "star" : "auto_awesome";
+                color = type === 'optativas' ? "text-purple-600 dark:text-purple-400" : "text-emerald-600 dark:text-emerald-400";
+                bgColor = type === 'optativas' ? "bg-purple-600" : "bg-emerald-600";
+            } else if (type === 'atividades complementares') {
+                currentHours = Math.min(w.min_hours, complementaryHours || 0);
+                customTotalHours = complementaryHours;
+                icon = "extension";
+                color = "text-orange-600 dark:text-orange-400";
+                bgColor = "bg-orange-600";
+                // @ts-ignore
+                onClick = () => router.push(ROUTES.ACTIVITIES);
+            }
 
-        const percent = Math.round(((mEff + eEff + cEff) / TOTAL_REQ_HOURS) * 100);
+            totalEff += currentHours;
+            totalReq += w.min_hours;
+
+            return {
+                title: w.type.charAt(0).toUpperCase() + w.type.slice(1),
+                subjects,
+                currentHours,
+                reqHours: w.min_hours,
+                currentCredits,
+                reqCredits: w.min_credits,
+                color,
+                bgColor,
+                icon,
+                customTotalHours,
+                onClick
+            };
+        });
+
+        const percent = totalReq > 0 ? Math.round((totalEff / totalReq) * 100) : 0;
 
         return {
-            mandatorySubjects: mSubs,
-            optionalSubjects: eSubs,
-            mandatoryEffective: mEff,
-            optionalEffective: eEff,
-            compEffective: cEff,
+            categoryStats: stats,
             progressPercentage: percent
         };
-    }, [completedSubjects, complementaryHours, TOTAL_REQ_HOURS, allSubjects, effectiveCompletedIds]);
+    }, [completedSubjects, complementaryHours, allSubjects, effectiveCompletedIds, user, courseConfig]);
 
     return {
         user, authLoading, loadingData, isExpired,
@@ -493,10 +542,10 @@ export const useProfileController = () => {
         completedSubjects,
         effectiveCompletedIds,
         complementaryHours,
+        courseConfig,
         // Stats
         progressPercentage, estimatedDate,
-        mandatorySubjects, optionalSubjects,
-        mandatoryEffective, optionalEffective, compEffective,
+        categoryStats,
         allEquivalencies,
         // Subject Mgmt
         isEditingSubjects, setIsEditingSubjects,

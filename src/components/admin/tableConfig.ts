@@ -53,6 +53,18 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'code', label: 'Código', type: 'text', editable: true },
             { key: 'name', label: 'Nome', type: 'text', editable: true },
             { key: 'shift', label: 'Turno', type: 'text', editable: true },
+            {
+                key: 'university_id',
+                label: 'Universidade',
+                type: 'select',
+                editable: true,
+                options: [
+                    { label: 'CEFET', value: 1 },
+                    { label: 'FAETERJ', value: 2 },
+                ]
+            },
+            { key: 'needs_complementary_activities', label: 'Atv. Compl.?', type: 'boolean', editable: true },
+            { key: 'credit_categories', label: 'Cat. Créditos (JSON)', type: 'json', editable: true },
         ],
         customActions: [
             {
@@ -60,6 +72,16 @@ export const tableConfigs: Record<string, TableConfig> = {
                 icon: 'edit_calendar',
                 hrefPattern: '/admin/curriculum/{code}'
             }
+        ]
+    },
+    universities: {
+        tableName: 'universities',
+        displayName: 'Universidades',
+        primaryKey: 'id',
+        columns: [
+            { key: 'id', label: 'ID', type: 'number', editable: false },
+            { key: 'name', label: 'Nome', type: 'text', editable: true },
+            { key: 'created_at', label: 'Criado em', type: 'datetime', editable: false },
         ]
     },
     subjects: {
@@ -72,8 +94,7 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'acronym', label: 'Sigla/Código', type: 'text', editable: true },
             { key: 'name', label: 'Nome', type: 'text', editable: true },
             { key: 'semester', label: 'Semestre', type: 'number', editable: true },
-            { key: 'has_theory', label: 'Créd. Teóricos', type: 'number', editable: true },
-            { key: 'has_practical', label: 'Créd. Práticos', type: 'number', editable: true },
+            { key: 'credits', label: 'Créditos (Array)', type: 'json', editable: true },
             { key: 'workload', label: 'Carga Horária', type: 'number', editable: true },
             { key: 'optional', label: 'Eletiva/Optativa?', type: 'boolean', editable: true },
             { key: 'active', label: 'Ativo?', type: 'boolean', editable: true },

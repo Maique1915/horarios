@@ -651,7 +651,7 @@ const PeriodAccordion = ({ periodKey, subjectsData, openPeriodKey, setOpenPeriod
                     </div>
                     <div>
                         <p className="text-text-light-primary dark:text-text-dark-primary text-base font-bold leading-none">
-                            {periodKey}º Período
+                            {periodKey === "0" ? "Extracurriculares" : `${periodKey}º Período`}
                         </p>
                         <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary mt-1 font-medium">
                             {selectedCount} de {subjectsData.length} selecionadas

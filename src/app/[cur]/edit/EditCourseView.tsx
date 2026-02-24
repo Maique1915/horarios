@@ -169,6 +169,7 @@ export default function EditCourseView({ ctrl }: { ctrl: ReturnType<typeof useEd
                                 cur={ctrl.cur}
                                 isReviewing={false}
                                 disciplinas={ctrl.disciplinas}
+                                course={ctrl.course}
                             />
                         </div>
                     </div>

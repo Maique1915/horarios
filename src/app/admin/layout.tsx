@@ -1,25 +1,35 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { tableConfigs } from '../../components/admin/tableConfig';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user } = useAuth();
+    const router = useRouter();
+    const { user, loading } = useAuth();
 
-    // Simple protection check (can make stricter if needed)
-    if (!user) {
+    React.useEffect(() => {
+        if (!loading && (!user || user.role !== 'admin')) {
+            router.push('/');
+        }
+    }, [user, loading, router]);
+
+    if (loading) {
         return (
-            <div className="flex h-screen items-center justify-center">
-                <p>Acesso restrito. Faça login.</p>
+            <div className="flex h-screen items-center justify-center bg-surface-light dark:bg-surface-dark">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         );
     }
 
+    if (!user || user.role !== 'admin') {
+        return null; // Redirection will happen in useEffect
+    }
+
     return (
-        <div className="min-h-screen bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary flex flex-col">
+        <div className="min-h-screen bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary flex flex-col transition-colors duration-300">
             {/* Horizontal Submenu */}
             <nav className="w-full border-b border-border-light dark:border-border-dark bg-white dark:bg-gray-800 shadow-sm shrink-0 sticky top-0 z-40">
                 <div className="flex items-center px-4 py-2 gap-2 overflow-x-auto no-scrollbar">

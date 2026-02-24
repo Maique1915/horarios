@@ -12,8 +12,9 @@ const formSchema = z.object({
   _di: z.string().min(3, "Nome muito curto"),
   _re: z.string().min(2, "A sigla é muito curta"),
   _se: z.coerce.number(),
-  _at: z.coerce.number().min(0),
-  _ap: z.coerce.number().min(0),
+  _at: z.coerce.number().min(0).optional(),
+  _ap: z.coerce.number().min(0).optional(),
+  credits_array: z.array(z.coerce.number()).optional(),
   _pr: z.array(z.union([z.string(), z.coerce.number()])),
   _el: z.boolean(),
   _ag: z.boolean(),
@@ -28,6 +29,7 @@ const blankForm = {
   _se: 0,
   _at: 0,
   _ap: 0,
+  credits_array: [],
   _pr: [],
   _el: false,
   _ag: false,
@@ -78,6 +80,7 @@ const DisciplinaForm = ({
   onCancel,
   cur,
   disciplinas,
+  course,
   isReviewing = false,
 }) => {
   const { handleSubmit, register, control, setValue, watch, reset, getValues, formState: { errors } } = useForm({
@@ -111,8 +114,15 @@ const DisciplinaForm = ({
       const numericPrerequisites = disciplina._pr.filter(pr => typeof pr === 'number');
       const stringPrerequisites = disciplina._pr.filter(pr => typeof pr === 'string');
 
+      // Initialize credits array
+      let creditsArray = disciplina.credits_array || [];
+      if (creditsArray.length === 0 && (disciplina._at || disciplina._ap)) {
+        creditsArray = [Number(disciplina._at || 0), Number(disciplina._ap || 0)];
+      }
+
       reset({
         ...disciplina,
+        credits_array: creditsArray,
         _pr: stringPrerequisites,
         _cu: disciplina._cu || cur,
         _pr_creditos_input: disciplina._pr_creditos_input !== undefined
@@ -121,9 +131,11 @@ const DisciplinaForm = ({
       });
 
     } else {
-      reset({ ...blankForm, _cu: cur });
+      // For new disciplines, initialize credits array with zeros based on course config
+      const initialCredits = (course?.credit_categories || [{}, {}]).map(() => 0);
+      reset({ ...blankForm, _cu: cur, credits_array: initialCredits });
     }
-  }, [disciplina, reset, cur]);
+  }, [disciplina, reset, cur, course]);
 
 
 
@@ -135,7 +147,17 @@ const DisciplinaForm = ({
     if (data._pr_creditos_input > 0) {
       finalPrerequisites.push(data._pr_creditos_input);
     }
-    const finalData = { ...data, _pr: finalPrerequisites };
+
+    // Ensure _at and _ap are set from credits_array for legacy components if needed
+    const theory = data.credits_array?.[0] || 0;
+    const practical = data.credits_array?.[1] || 0;
+
+    const finalData = {
+      ...data,
+      _pr: finalPrerequisites,
+      _at: theory,
+      _ap: practical
+    };
     onSubmit(finalData);
   };
 
@@ -216,29 +238,48 @@ const DisciplinaForm = ({
               className="col-span-12 flex flex-col"
             />
 
-            <div className="col-span-12 md:col-span-6 flex gap-4">
-              <FormField
-                label="Teóricos"
-                id="_at"
-                type="number"
-                placeholder="3"
-                required
-                register={register}
-                valueAsNumber
-                disabled={isReviewing}
-                className="flex-1 flex flex-col"
-              />
-              <FormField
-                label="Práticos"
-                id="_ap"
-                type="number"
-                placeholder="3"
-                required
-                register={register}
-                valueAsNumber
-                disabled={isReviewing}
-                className="flex-1 flex flex-col"
-              />
+            <div className="col-span-12 md:col-span-6 flex flex-wrap gap-4">
+              {course?.credit_categories && course.credit_categories.length > 0 ? (
+                course.credit_categories.map((cat, idx) => (
+                  <FormField
+                    key={cat.id || idx}
+                    label={cat.name}
+                    id={`credits_array.${idx}`}
+                    type="number"
+                    placeholder="0"
+                    required
+                    register={register}
+                    valueAsNumber
+                    disabled={isReviewing}
+                    className="flex-1 min-w-[120px] flex flex-col"
+                  />
+                ))
+              ) : (
+                <>
+                  <FormField
+                    label="Teóricos"
+                    id="_at"
+                    type="number"
+                    placeholder="3"
+                    required
+                    register={register}
+                    valueAsNumber
+                    disabled={isReviewing}
+                    className="flex-1 flex flex-col"
+                  />
+                  <FormField
+                    label="Práticos"
+                    id="_ap"
+                    type="number"
+                    placeholder="3"
+                    required
+                    register={register}
+                    valueAsNumber
+                    disabled={isReviewing}
+                    className="flex-1 flex flex-col"
+                  />
+                </>
+              )}
             </div>
 
             <div className="col-span-12 md:col-span-6 flex flex-col justify-end pb-3">

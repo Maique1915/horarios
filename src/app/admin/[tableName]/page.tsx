@@ -6,6 +6,7 @@ import TableManager from '../../../components/admin/TableManager';
 import TimeSlotsManager from '../../../components/admin/TimeSlotsManager';
 import ComplementaryGroupsManager from '../../../components/admin/ComplementaryGroupsManager';
 import ComplementaryActivitiesManager from '../../../components/admin/ComplementaryActivitiesManager';
+import UniversitiesManager from '../../../components/admin/UniversitiesManager';
 
 interface PageProps {
     params: Promise<{
@@ -31,6 +32,10 @@ export default function TablePage({ params }: PageProps) {
 
     if (tableName === 'complementary_activities') {
         return <ComplementaryActivitiesManager />;
+    }
+
+    if (tableName === 'universities') {
+        return <UniversitiesManager />;
     }
 
     return (

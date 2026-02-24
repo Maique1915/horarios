@@ -49,7 +49,12 @@ const DisciplinaTable = ({ data, handleEditDisciplina, removeDisciplina, handleT
       {
         id: 'creditos',
         header: 'Créditos',
-        accessorFn: row => row._at + row._ap,
+        accessorFn: row => {
+          if (row.credits_array && row.credits_array.length > 0) {
+            return row.credits_array.reduce((acc, curr) => acc + (Number(curr) || 0), 0);
+          }
+          return (Number(row._at) || 0) + (Number(row._ap) || 0);
+        },
         cell: info => <div className="text-center font-mono text-xs">{info.getValue()}</div>
       },
       {

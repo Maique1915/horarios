@@ -113,7 +113,14 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
 
     const startEdit = (item: any) => {
         setEditingId(item[config.primaryKey]);
-        setEditForm({ ...item });
+        const newForm = { ...item };
+        // Process JSON fields to strings for editing
+        config.columns.forEach(col => {
+            if (col.type === 'json' && item[col.key] !== undefined && item[col.key] !== null) {
+                newForm[col.key] = JSON.stringify(item[col.key], null, 2);
+            }
+        });
+        setEditForm(newForm);
         setIsCreating(false);
     };
 
@@ -131,6 +138,20 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
 
     const handleSave = async () => {
         try {
+            const finalForm = { ...editForm };
+
+            // Parse JSON fields back to objects
+            config.columns.forEach(col => {
+                if (col.type === 'json' && typeof finalForm[col.key] === 'string' && finalForm[col.key].trim() !== '') {
+                    try {
+                        finalForm[col.key] = JSON.parse(finalForm[col.key]);
+                    } catch (e) {
+                        alert(`Erro no campo ${col.label}: JSON inválido`);
+                        throw new Error(`Invalid JSON in field ${col.label}`);
+                    }
+                }
+            });
+
             let result;
             if (isCreating) {
                 // Check if Primary Key is editable (manual entry) or not (auto-increment)
@@ -139,10 +160,10 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
 
                 let newItem;
                 if (isPkEditable) {
-                    newItem = editForm;
+                    newItem = finalForm;
                 } else {
                     // Remove ID if it's auto-increment
-                    const { [config.primaryKey]: id, ...rest } = editForm;
+                    const { [config.primaryKey]: id, ...rest } = finalForm;
                     newItem = rest;
                 }
 
@@ -157,7 +178,7 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
             } else {
                 const { data: updated, error: updateError } = await supabase
                     .from(config.tableName)
-                    .update(editForm)
+                    .update(finalForm)
                     .eq(config.primaryKey, editingId)
                     .select();
 
@@ -274,17 +295,38 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
                                             <option value="true">Sim</option>
                                             <option value="false">Não</option>
                                         </select>
-                                    ) : (
-                                        <input
-                                            type={col.type === 'number' ? 'number' : col.type === 'datetime' ? 'datetime-local' : 'text'}
-                                            value={
-                                                col.type === 'datetime' && editForm[col.key]
-                                                    ? new Date(editForm[col.key]).toISOString().slice(0, 16)
-                                                    : editForm[col.key] ?? ''
-                                            }
+                                    ) : col.type === 'select' ? (
+                                        <select
+                                            value={String(editForm[col.key] ?? '')}
                                             onChange={(e) => handleInputChange(col.key, col.type === 'number' ? Number(e.target.value) : e.target.value)}
                                             className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary"
-                                        />
+                                        >
+                                            <option value="">Selecione</option>
+                                            {col.options?.map(opt => (
+                                                <option key={String(opt.value)} value={String(opt.value)}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        col.type === 'json' ? (
+                                            <textarea
+                                                value={editForm[col.key] ?? ''}
+                                                onChange={(e) => handleInputChange(col.key, e.target.value)}
+                                                className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary font-mono text-xs"
+                                                rows={5}
+                                                placeholder='{"key": "value"}'
+                                            />
+                                        ) : (
+                                            <input
+                                                type={col.type === 'number' ? 'number' : col.type === 'datetime' ? 'datetime-local' : 'text'}
+                                                value={
+                                                    col.type === 'datetime' && editForm[col.key]
+                                                        ? new Date(editForm[col.key]).toISOString().slice(0, 16)
+                                                        : editForm[col.key] ?? ''
+                                                }
+                                                onChange={(e) => handleInputChange(col.key, col.type === 'number' ? Number(e.target.value) : e.target.value)}
+                                                className="w-full p-2 rounded border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary"
+                                            />
+                                        )
                                     )
                                 ) : (
                                     <div className="p-2 bg-slate-100 dark:bg-slate-900 rounded text-text-light-disabled dark:text-text-dark-disabled text-sm">
@@ -328,7 +370,11 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
                                             ? (item[col.key] ? 'Sim' : 'Não')
                                             : col.type === 'datetime' && item[col.key]
                                                 ? new Date(item[col.key]).toLocaleString('pt-BR')
-                                                : String(item[col.key] ?? '-')
+                                                : col.type === 'json' && item[col.key]
+                                                    ? <span className="text-xs font-mono truncate max-w-[150px] block" title={JSON.stringify(item[col.key])}>
+                                                        {JSON.stringify(item[col.key])}
+                                                    </span>
+                                                    : String(item[col.key] ?? '-')
                                         }
                                     </td>
                                 ))}

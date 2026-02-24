@@ -249,35 +249,20 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
             <EditProfileModal ctrl={ctrl} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
-                <CategoryProgress
-                    title="Obrigatórias"
-                    subjects={ctrl.mandatorySubjects}
-                    reqHours={3774}
-                    reqCredits={198}
-                    color="text-blue-600 dark:text-blue-400"
-                    bgColor="bg-blue-600"
-                    icon="school"
-                />
-                <CategoryProgress
-                    title="Optativas"
-                    subjects={ctrl.optionalSubjects}
-                    reqHours={360}
-                    reqCredits={20}
-                    color="text-purple-600 dark:text-purple-400"
-                    bgColor="bg-purple-600"
-                    icon="star"
-                />
-                <CategoryProgress
-                    title="Atividades Comp."
-                    subjects={[]}
-                    reqHours={210}
-                    reqCredits={0}
-                    color="text-orange-600 dark:text-orange-400"
-                    bgColor="bg-orange-600"
-                    icon="extension"
-                    customTotalHours={ctrl.complementaryHours}
-                    onClick={() => router.push(ROUTES.ACTIVITIES)}
-                />
+                {ctrl.categoryStats.map((stat: any) => (
+                    <CategoryProgress
+                        key={stat.title}
+                        title={stat.title}
+                        subjects={stat.subjects}
+                        reqHours={stat.reqHours}
+                        reqCredits={stat.reqCredits}
+                        color={stat.color}
+                        bgColor={stat.bgColor}
+                        icon={stat.icon}
+                        customTotalHours={stat.customTotalHours}
+                        onClick={stat.onClick}
+                    />
+                ))}
             </div>
 
             {/* TWO COLUMNS: Enrollments & Completed */}

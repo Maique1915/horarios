@@ -1,19 +1,24 @@
 import React from 'react';
-import { Course } from './CoursesManager';
 
-interface CoursesTableProps {
-    courses: Course[];
-    selectedCourseId?: number;
-    onEdit: (course: Course) => void;
+interface University {
+    id: number;
+    name: string;
+    created_at?: string;
+}
+
+interface UniversitiesTableProps {
+    universities: University[];
+    selectedUniversityId?: number;
+    onEdit: (university: University) => void;
     onDelete: (id: number) => void;
 }
 
-export default function CoursesTable({ courses, selectedCourseId, onEdit, onDelete }: CoursesTableProps) {
-    if (courses.length === 0) {
+export default function UniversitiesTable({ universities, selectedUniversityId, onEdit, onDelete }: UniversitiesTableProps) {
+    if (universities.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center p-12 text-slate-400">
                 <span className="material-symbols-outlined text-4xl mb-2">search_off</span>
-                <p>Nenhum curso encontrado.</p>
+                <p>Nenhuma universidade encontrada.</p>
             </div>
         );
     }
@@ -23,47 +28,43 @@ export default function CoursesTable({ courses, selectedCourseId, onEdit, onDele
             <table className="w-full text-left border-collapse">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 sticky top-0 z-10 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     <tr>
-                        <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">CÓDIGO</th>
-                        <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">UNIVERSIDADE</th>
+                        <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">ID</th>
                         <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">NOME</th>
-                        <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">TURNO</th>
+                        <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">CRIADO EM</th>
                         <th className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 text-right">AÇÕES</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {courses.map((course) => {
-                        const isSelected = selectedCourseId === course.id;
+                    {universities.map((uni) => {
+                        const isSelected = selectedUniversityId === uni.id;
                         return (
                             <tr
-                                key={course.id}
+                                key={uni.id}
                                 className={`group transition-colors ${isSelected
                                     ? 'bg-primary/5 dark:bg-primary/10'
                                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                     }`}
                             >
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium font-mono text-slate-600 dark:text-slate-400">
-                                    {course.code}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                                    {course.universities?.name || '-'}
+                                    {uni.id}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-slate-100">
-                                    {course.name}
+                                    {uni.name}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                                    {course.shift || '-'}
+                                    {uni.created_at ? new Date(uni.created_at).toLocaleString('pt-BR') : '-'}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                                     <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                         <button
-                                            onClick={() => onEdit(course)}
+                                            onClick={() => onEdit(uni)}
                                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors dark:text-blue-400 dark:hover:bg-blue-900/30"
                                             title="Editar"
                                         >
                                             <span className="material-symbols-outlined text-xl">edit</span>
                                         </button>
                                         <button
-                                            onClick={() => onDelete(course.id)}
+                                            onClick={() => onDelete(uni.id)}
                                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors dark:text-red-400 dark:hover:bg-red-900/30"
                                             title="Excluir"
                                         >

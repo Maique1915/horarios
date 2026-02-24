@@ -198,11 +198,15 @@ export default function ClassesManager() {
             alert('Turma salva com sucesso!');
             await fetchClasses();
 
-            setIsCreating(false);
-            setEditingClass(null);
-            setNewClassName('');
-            setNewClassSubjectId(null);
-            setNewClassSemesterFilter(null);
+            if (editingClass) {
+                setEditingClass(null);
+                setIsCreating(false);
+            } else {
+                // Modo Criação: Mantém o painel aberto e o período selecionado
+                setNewClassName('');
+                setNewClassSubjectId(null);
+                // Mantém isCreating = true e o newClassSemesterFilter intacto
+            }
 
         } catch (err: any) {
             console.error('Error saving class:', err);

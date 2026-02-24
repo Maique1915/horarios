@@ -163,6 +163,7 @@ export const useEditCourseController = (props?: { courseCode?: string }) => {
         handleAddDisciplinaInteraction,
         handleRemoveDisciplinaInteraction,
         onRefreshClick,
+        course: (useDisciplinas(cur) as any).course,
         toggleStatus
     };
 };

@@ -89,14 +89,11 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
     const _cu = (item as any).courses?.name || (item as any).courses?.code || (item as any).course?.name || (item as any).course?.code;
     if (!_cu) console.warn(`Service: Missing course info for subject ${item.acronym}`, item);
 
-    // Static fallback for credits removed
-    const dbPractical = (item.has_practical !== undefined && item.has_practical !== null) ? Number(item.has_practical) : 0;
-    const dbTheory = (item.has_theory !== undefined && item.has_theory !== null) ? Number(item.has_theory) : 0;
-
-    const practCreds = dbPractical;
-    const theoryCreds = dbTheory;
-
-
+    // Use the credits array
+    // index 0: theory, index 1: practical (mapping matches SQL migration)
+    const credits = item.credits || [];
+    const theoryCreds = credits[0] || 0;
+    const practCreds = credits[1] || 0;
 
     return {
         _id: item.id,
@@ -141,6 +138,10 @@ export const loadCoursesRegistry = async (): Promise<CourseRegistryItem[]> => {
         }));
     })();
     return globalCoursesRegistryPromise;
+};
+
+export const fetchCourseConfig = async (courseCode: string): Promise<DbCourse | null> => {
+    return coursesModel.fetchCourseByCode(courseCode);
 };
 
 export const loadDbData = async (courseCode: string | null = null): Promise<Subject[]> => {
@@ -255,8 +256,7 @@ export const addSubject = async (courseCode: string, subjectData: Subject): Prom
         name: _di,
         acronym: _re,
         semester: _se,
-        has_theory: _at,
-        has_practical: _ap,
+        credits: subjectData.credits_array || [_at, _ap],
         optional: dbOptional,
         active: _ag,
         course_id: courseId
@@ -297,8 +297,7 @@ export const updateSubject = async (courseCode: string, subjectId: number | stri
         name: _di,
         acronym: _re,
         semester: Number(_se),
-        has_theory: Number(_at),
-        has_practical: Number(_ap),
+        credits: subjectData.credits_array || [Number(_at), Number(_ap)],
         optional: dbOptional,
         active: _ag
     });
@@ -308,8 +307,7 @@ export const updateSubject = async (courseCode: string, subjectId: number | stri
             name: _di,
             acronym: _re,
             semester: Number(_se),
-            has_theory: Number(_at),
-            has_practical: Number(_ap),
+            credits: subjectData.credits_array || [Number(_at), Number(_ap)],
             optional: dbOptional,
             active: _ag
         });
@@ -403,7 +401,7 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                     gridData.push({
                         _id: subject._id,
                         _cu: subject._cu,
-                        _se: subject._se, // loadDbData has already processed
+                        _se: subject._se,
                         _di: displayName,
                         _re: subject._re,
                         _ap: subject._ap,
@@ -420,12 +418,36 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                         course_id: subject.course_id
                     } as Subject);
                 });
+            } else if (subject._ag === true) {
+                // Incluir matéria ativa mesmo sem turmas para visibilidade no passo 1
+                const { _el, _category } = processCategoryAndOptional(subject);
+                gridData.push({
+                    _id: subject._id,
+                    _cu: subject._cu,
+                    _se: subject._se,
+                    _di: subject._di,
+                    _re: subject._re,
+                    _ap: subject._ap,
+                    _at: subject._at,
+                    _el: _el,
+                    _category: _category,
+                    _workload: (Number(subject._ap || 0) + Number(subject._at || 0)) * 18,
+                    _ag: subject._ag,
+                    _pr: subject._pr,
+                    _pr_creditos_input: subject._pr_creditos_input,
+                    _ho: [],
+                    _rt: [],
+                    _da: [],
+                    class_name: undefined,
+                    original_name: subject._di,
+                    course_id: subject.course_id
+                } as Subject);
             }
         });
         // Ensure _se is present and is a number for filtering/sorting
         return gridData.filter(item =>
             item._se !== undefined &&
-            Number(item._se) > 0 &&
+            Number(item._se) >= 0 &&
             item._ag === true
         ).sort((a, b) => Number(a._se || 0) - Number(b._se || 0));
     } catch (error) {

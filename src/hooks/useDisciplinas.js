@@ -9,7 +9,8 @@ import {
     deleteSubjectByAcronym,
     toggleSubjectStatus,
     getCourseSchedule,
-    getCourseDimension
+    getCourseDimension,
+    fetchCourseConfig
 } from '../services/disciplinaService';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -51,6 +52,16 @@ export const useDisciplinas = (courseCode) => {
         enabled: !!courseCode,
     });
 
+    const {
+        data: course,
+        isLoading: loadingCourse
+    } = useQuery({
+        queryKey: ['curso', courseCode],
+        queryFn: () => fetchCourseConfig(courseCode),
+        staleTime: Infinity,
+        enabled: !!courseCode,
+    });
+
     // 2. Initialize Local State from Query Data
     useEffect(() => {
         if (dbData) {
@@ -59,7 +70,7 @@ export const useDisciplinas = (courseCode) => {
         }
     }, [dbData]);
 
-    const loading = loadingDb || loadingSch || loadingDim;
+    const loading = loadingDb || loadingSch || loadingDim || loadingCourse;
     const error = errorDb ? (errorDb.message || "Erro ao carregar dados") : null;
 
     // Helper to invalidate
@@ -73,8 +84,9 @@ export const useDisciplinas = (courseCode) => {
             const newDisciplineWithParsedNumbers = {
                 ...newDisciplineData,
                 _se: parseInt(newDisciplineData._se),
-                _at: parseInt(newDisciplineData._at),
-                _ap: parseInt(newDisciplineData._ap),
+                _at: parseInt(newDisciplineData._at || 0),
+                _ap: parseInt(newDisciplineData._ap || 0),
+                credits_array: (newDisciplineData.credits_array || []).map(c => parseInt(c || 0)),
                 _cu: courseCode,
             };
 
@@ -114,8 +126,9 @@ export const useDisciplinas = (courseCode) => {
             const sanitizedData = {
                 ...updatedData,
                 _se: Number(updatedData._se),
-                _at: Number(updatedData._at),
-                _ap: Number(updatedData._ap),
+                _at: Number(updatedData._at || 0),
+                _ap: Number(updatedData._ap || 0),
+                credits_array: (updatedData.credits_array || []).map(c => Number(c || 0)),
             };
 
             console.log('Hook: Sanitized data for service:', sanitizedData);
@@ -193,6 +206,7 @@ export const useDisciplinas = (courseCode) => {
         syncing,
         courseSchedule: schedule || [],
         courseDimension: dimension || [0, 0],
+        course: course,
         addDisciplina,
         updateDisciplina,
         removeDisciplina,

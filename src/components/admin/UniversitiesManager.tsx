@@ -3,133 +3,110 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import Pagination from '../shared/Pagination';
-import CoursesTable from './CoursesTable';
-import CourseForm from './CourseForm';
+import UniversitiesTable from './UniversitiesTable';
+import UniversityForm from './UniversityForm';
 
-export interface Course {
+interface University {
     id: number;
-    code: string;
     name: string;
-    shift: string | null;
-    university_id?: number | null;
-    needs_complementary_activities?: boolean;
-    credit_categories?: any[];
-    universities?: { name: string };
+    created_at?: string;
 }
 
-export default function CoursesManager() {
+export default function UniversitiesManager() {
     const [loading, setLoading] = useState(true);
-    const [courses, setCourses] = useState<Course[]>([]);
+    const [universities, setUniversities] = useState<University[]>([]);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
     // Selection / Edit state
-    const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+    const [editingUniversity, setEditingUniversity] = useState<University | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        fetchCourses();
+        fetchUniversities();
     }, []);
 
-    const fetchCourses = async () => {
+    const fetchUniversities = async () => {
         setLoading(true);
         const { data, error } = await supabase
-            .from('courses')
-            .select('*, universities(name)')
+            .from('universities')
+            .select('*')
             .order('name');
 
         if (data) {
-            setCourses(data);
+            setUniversities(data);
         } else if (error) {
-            console.error('Error fetching courses:', error);
+            console.error('Error fetching universities:', error);
         }
         setLoading(false);
     };
 
-    const handleSave = async (formData: { code: string; name: string; shift?: string | null }) => {
+    const handleSave = async (formData: { name: string }) => {
         setLoading(true);
         try {
-            const courseData: Omit<Course, 'id'> = {
-                ...formData,
-                shift: formData.shift ?? null
-            };
-
-            if (editingCourse) {
+            if (editingUniversity) {
                 // Update
                 const { error } = await supabase
-                    .from('courses')
-                    .update({
-                        ...courseData,
-                        university_id: (formData as any).university_id,
-                        needs_complementary_activities: (formData as any).needs_complementary_activities,
-                        credit_categories: (formData as any).credit_categories,
-                    })
-                    .eq('id', editingCourse.id);
+                    .from('universities')
+                    .update(formData)
+                    .eq('id', editingUniversity.id);
 
                 if (error) throw error;
             } else {
                 // Create
                 const { error } = await supabase
-                    .from('courses')
-                    .insert([{
-                        ...courseData,
-                        university_id: (formData as any).university_id,
-                        needs_complementary_activities: (formData as any).needs_complementary_activities,
-                        credit_categories: (formData as any).credit_categories,
-                    }]);
+                    .from('universities')
+                    .insert([formData]);
 
                 if (error) throw error;
             }
 
-            await fetchCourses();
-            setEditingCourse(null);
+            await fetchUniversities();
+            setEditingUniversity(null);
             setIsCreating(false);
 
         } catch (error: any) {
-            console.error('Error saving course:', error);
-            alert('Erro ao salvar curso: ' + error.message);
+            console.error('Error saving university:', error);
+            alert('Erro ao salvar universidade: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (courseId: number) => {
-        if (!confirm('Tem certeza que deseja excluir este curso?')) return;
+    const handleDelete = async (id: number) => {
+        if (!confirm('Tem certeza que deseja excluir esta universidade?')) return;
 
         setLoading(true);
         try {
             const { error } = await supabase
-                .from('courses')
+                .from('universities')
                 .delete()
-                .eq('id', courseId);
+                .eq('id', id);
 
             if (error) throw error;
 
-            await fetchCourses();
-            if (editingCourse?.id === courseId) {
-                setEditingCourse(null);
+            await fetchUniversities();
+            if (editingUniversity?.id === id) {
+                setEditingUniversity(null);
             }
         } catch (error: any) {
-            console.error('Error deleting course:', error);
-            alert('Erro ao excluir curso: ' + error.message);
+            console.error('Error deleting university:', error);
+            alert('Erro ao excluir universidade: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
     // Filter Logic
-    const filteredCourses = courses.filter(course => {
+    const filteredUniversities = universities.filter(uni => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
-        return (
-            course.name.toLowerCase().includes(q) ||
-            course.code.toLowerCase().includes(q)
-        );
+        return uni.name.toLowerCase().includes(q);
     });
 
     const renderRightPanel = () => {
@@ -140,9 +117,9 @@ export default function CoursesManager() {
                 <div className={`${stickyClass} bg-white dark:bg-gray-800 p-6 rounded-lg shadow`}>
                     <div className="flex items-center gap-2 mb-6 text-primary">
                         <span className="material-symbols-outlined">add_circle</span>
-                        <h3 className="text-lg font-bold">Novo Curso</h3>
+                        <h3 className="text-lg font-bold">Nova Universidade</h3>
                     </div>
-                    <CourseForm
+                    <UniversityForm
                         onSave={handleSave}
                         onCancel={() => setIsCreating(false)}
                     />
@@ -150,25 +127,25 @@ export default function CoursesManager() {
             );
         }
 
-        if (editingCourse) {
+        if (editingUniversity) {
             return (
                 <div className={`${stickyClass} bg-white dark:bg-gray-800 p-6 rounded-lg shadow`}>
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-2 text-primary">
                             <span className="material-symbols-outlined">edit</span>
-                            <h3 className="text-lg font-bold">Editar Curso</h3>
+                            <h3 className="text-lg font-bold">Editar Universidade</h3>
                         </div>
                         <button
-                            onClick={() => setEditingCourse(null)}
+                            onClick={() => setEditingUniversity(null)}
                             className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                         >
                             <span className="material-symbols-outlined">close</span>
                         </button>
                     </div>
-                    <CourseForm
-                        initialData={editingCourse}
+                    <UniversityForm
+                        initialData={editingUniversity}
                         onSave={handleSave}
-                        onCancel={() => setEditingCourse(null)}
+                        onCancel={() => setEditingUniversity(null)}
                     />
                 </div>
             );
@@ -180,34 +157,34 @@ export default function CoursesManager() {
                     <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                         <span className="material-symbols-outlined text-3xl text-primary">school</span>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Gerenciar Cursos</h3>
-                    <p className="max-w-xs mx-auto text-sm">Selecione um curso na lista para editar ou crie um novo.</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Gerenciar Universidades</h3>
+                    <p className="max-w-xs mx-auto text-sm">Selecione uma universidade na lista para editar ou crie uma nova.</p>
                     <button
-                        onClick={() => { setIsCreating(true); setEditingCourse(null); }}
+                        onClick={() => { setIsCreating(true); setEditingUniversity(null); }}
                         className="mt-4 px-5 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
                     >
-                        Criar Novo Curso
+                        Criar Nova Universidade
                     </button>
                 </div>
             </div>
         );
     };
 
-    if (loading && courses.length === 0) return <LoadingSpinner message="Carregando cursos..." />;
+    if (loading && universities.length === 0) return <LoadingSpinner message="Carregando universidades..." />;
 
     return (
         <div className="mx-auto max-w-[1920px] p-6 lg:p-8 space-y-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-3xl font-display font-bold leading-tight tracking-tight text-text-light-primary dark:text-text-dark-primary">
-                        Gerenciar Cursos
+                        Gerenciar Universidades
                     </h1>
                     <p className="text-base font-normal leading-normal text-text-light-secondary dark:text-text-dark-secondary">
-                        Cadastre e edite os cursos da instituição.
+                        Cadastre e edite as universidades da plataforma.
                     </p>
                 </div>
                 <button
-                    onClick={fetchCourses}
+                    onClick={fetchUniversities}
                     className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-xl h-11 px-5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark text-text-light-primary dark:text-text-dark-primary text-sm font-bold shadow-sm hover:shadow-md transition-all group"
                 >
                     <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
@@ -227,7 +204,7 @@ export default function CoursesManager() {
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="Pesquisar curso por nome ou código..."
+                                    placeholder="Pesquisar universidade por nome..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-10 pr-4 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
@@ -236,11 +213,11 @@ export default function CoursesManager() {
                         </div>
 
                         {/* Table */}
-                        <CoursesTable
-                            courses={filteredCourses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)}
-                            selectedCourseId={editingCourse?.id}
-                            onEdit={(course) => {
-                                setEditingCourse(course);
+                        <UniversitiesTable
+                            universities={filteredUniversities.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)}
+                            selectedUniversityId={editingUniversity?.id}
+                            onEdit={(uni) => {
+                                setEditingUniversity(uni);
                                 setIsCreating(false);
                             }}
                             onDelete={handleDelete}
@@ -248,7 +225,7 @@ export default function CoursesManager() {
 
                         <Pagination
                             currentPage={currentPage}
-                            totalItems={filteredCourses.length}
+                            totalItems={filteredUniversities.length}
                             itemsPerPage={itemsPerPage}
                             onPageChange={setCurrentPage}
                         />

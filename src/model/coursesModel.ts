@@ -5,17 +5,25 @@ export interface DbCourse {
     id: number;
     code: string;
     name: string;
+    university_id?: number | null;
+    needs_complementary_activities?: boolean;
+    credit_categories?: any[];
+    workloads?: any[];
     subjects: DbSubject[];
 }
 
 export const fetchAllCourses = async () => {
-    const { data, error } = await supabase.from('courses').select('*');
+    const { data, error } = await supabase.from('courses').select('*, workloads:course_workloads(*)');
     if (error) throw error;
     return data as DbCourse[];
 };
 
 export const fetchCourseByCode = async (courseCode: string) => {
-    const { data, error } = await supabase.from('courses').select('id, code, name').eq('code', courseCode).limit(1);
+    const { data, error } = await supabase
+        .from('courses')
+        .select('id, code, name, university_id, needs_complementary_activities, credit_categories, workloads:course_workloads(*)')
+        .eq('code', courseCode)
+        .limit(1);
     if (error) throw error;
     return data && data.length > 0 ? (data[0] as DbCourse) : null;
 };

@@ -26,6 +26,7 @@ export interface Subject {
     // Metadata
     _workload: number;    // Total workload in hours
     credits?: number;      // Total credits
+    credits_array?: number[]; // Array of credits corresponding to categories
     _pr_creditos_input: number; // Minimum credits required as prereq
 
     // Scheduling
