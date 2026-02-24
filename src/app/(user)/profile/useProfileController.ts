@@ -440,8 +440,15 @@ export const useProfileController = () => {
         categoryStats,
         progressPercentage
     } = useMemo(() => {
-        const mSubs = completedSubjects.filter(s => !s._el);
-        const eSubs = completedSubjects.filter(s => s._el);
+        // Derive userCourseId with multiple fallbacks
+        // Prioritize the ID of the subjects in the current grid (allSubjects) as that's the "local" course
+        const gridCourseId = allSubjects.length > 0 ? allSubjects[0].course_id : null;
+        const userCourseId = Number(gridCourseId || user?.course_id || (user as any)?.courses?.id);
+
+        const gridSubjectIds = new Set(allSubjects.map(s => s._id));
+
+        // Combine completed and in-progress subjects to check for extra credits (Electives)
+        const takenSubjects = [...completedSubjects, ...currentEnrollments];
 
         const workloads = courseConfig?.workloads || [];
 
@@ -460,37 +467,47 @@ export const useProfileController = () => {
             let onClick: (() => void) | undefined = undefined;
 
             if (type === 'obrigatórias') {
-                subjects = mSubs;
-                currentCredits = mSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-
-                if (allSubjects.length > 0 && effectiveCompletedIds.size > 0) {
-                    const completedLiteralIds = new Set(completedSubjects.map(s => s._id));
-                    allSubjects.forEach(s => {
-                        if (!s._el && effectiveCompletedIds.has(s._id as number) && !completedLiteralIds.has(s._id)) {
-                            currentCredits += (Number(s._ap || 0) + Number(s._at || 0));
-                        }
-                    });
-                }
-                currentHours = Math.min(w.min_hours, currentCredits * 18);
+                subjects = allSubjects.filter(s => !s._el && effectiveCompletedIds.has(s._id as number));
                 icon = "school";
                 color = "text-blue-600 dark:text-blue-400";
                 bgColor = "bg-blue-600";
-            } else if (type === 'optativas' || type === 'eletivas') {
-                subjects = eSubs;
-                currentCredits = eSubs.reduce((sum: number, s: Subject) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+            } else if (type === 'optativas') {
+                subjects = allSubjects.filter(s => s._el && effectiveCompletedIds.has(s._id as number));
+                icon = "star";
+                color = "text-purple-600 dark:text-purple-400";
+                bgColor = "bg-purple-600";
+            } else if (type === 'eletivas') {
+                // Eletivas: Subjects from OTHER courses that have NO equivalency (direct or bidirectional) to the current course grid
+                subjects = takenSubjects.filter(s => {
+                    // CRITICAL: A subject is an elective ONLY if its course_id is different from the grid course ID
+                    // AND it doesn't exist in the current grid directly
+                    const subjectCourseId = Number(s.course_id);
+                    const isFromDifferentCourse = subjectCourseId !== userCourseId;
+                    const existsInGrid = gridSubjectIds.has(s._id as number);
 
-                if (allSubjects.length > 0 && effectiveCompletedIds.size > 0) {
-                    const completedLiteralIds = new Set(completedSubjects.map(s => s._id));
-                    allSubjects.forEach(s => {
-                        if (s._el && effectiveCompletedIds.has(s._id as number) && !completedLiteralIds.has(s._id)) {
-                            currentCredits += (Number(s._ap || 0) + Number(s._at || 0));
-                        }
+                    // If it's from the same course or already in the grid, it's NOT an elective
+                    if (!isFromDifferentCourse || existsInGrid) return false;
+
+                    // Check if this subject has any equivalency that maps into our grid
+                    const hasGridEquivalency = allEquivalencies.some(eq => {
+                        const isSource = eq.source_subject_id === s._id;
+                        const isTarget = eq.target_subject_id === s._id;
+                        const isBidirectional = eq.course_id === null;
+
+                        // Case 1: The subject taken IS the source of an equivalency pointing to a grid subject
+                        if (isSource && gridSubjectIds.has(eq.target_subject_id)) return true;
+
+                        // Case 2: Bidirectional - the subject taken is the target of an eq pointing to a grid subject (which is the source)
+                        if (isBidirectional && isTarget && gridSubjectIds.has(eq.source_subject_id)) return true;
+
+                        return false;
                     });
-                }
-                currentHours = Math.min(w.min_hours, currentCredits * 18);
-                icon = type === 'optativas' ? "star" : "auto_awesome";
-                color = type === 'optativas' ? "text-purple-600 dark:text-purple-400" : "text-emerald-600 dark:text-emerald-400";
-                bgColor = type === 'optativas' ? "bg-purple-600" : "bg-emerald-600";
+
+                    return !hasGridEquivalency;
+                });
+                icon = "auto_awesome";
+                color = "text-emerald-600 dark:text-emerald-400";
+                bgColor = "bg-emerald-600";
             } else if (type === 'atividades complementares') {
                 currentHours = Math.min(w.min_hours, complementaryHours || 0);
                 customTotalHours = complementaryHours;
@@ -499,6 +516,11 @@ export const useProfileController = () => {
                 bgColor = "bg-orange-600";
                 // @ts-ignore
                 onClick = () => router.push(ROUTES.ACTIVITIES);
+            }
+
+            if (type !== 'atividades complementares') {
+                currentCredits = subjects.reduce((sum: number, s: any) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
+                currentHours = Math.min(w.min_hours, currentCredits * 18);
             }
 
             totalEff += currentHours;
@@ -525,7 +547,7 @@ export const useProfileController = () => {
             categoryStats: stats,
             progressPercentage: percent
         };
-    }, [completedSubjects, complementaryHours, allSubjects, effectiveCompletedIds, user, courseConfig]);
+    }, [completedSubjects, currentEnrollments, complementaryHours, allSubjects, effectiveCompletedIds, allEquivalencies, user, courseConfig]);
 
     return {
         user, authLoading, loadingData, isExpired,

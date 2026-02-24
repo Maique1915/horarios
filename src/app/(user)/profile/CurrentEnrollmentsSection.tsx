@@ -39,14 +39,14 @@ export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionPro
                         {ctrl.currentEnrollments.map((subject: Subject, index: number) => {
                             const scheduleGroups = ctrl.getFormattedSchedule(subject.schedule_data);
                             return (
-                                <li key={`${subject._id}-${index}`} className="p-4 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
-                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                                <li key={`${subject._id}-${index}`} className="p-3 rounded-xl bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark hover:border-primary/30 transition-colors group">
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-base leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
-                                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{subject._re || "N/A"}</span>
+                                            <h3 className="font-semibold text-text-light-primary dark:text-text-dark-primary text-sm leading-tight mb-1" title={subject.name}>{subject.name || subject.class_name || "Disciplina"}</h3>
+                                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{subject._re || "N/A"}</span>
                                                 {(subject.course_name || subject.semester) && (
-                                                    <span className="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
+                                                    <span className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
                                                         <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                                                         {subject.course_name || subject.semester}
                                                     </span>
@@ -54,10 +54,10 @@ export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionPro
                                             </div>
                                         </div>
                                         {scheduleGroups.length > 0 && (
-                                            <div className="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+                                            <div className="flex flex-col gap-1 shrink-0 w-full sm:w-auto">
                                                 {scheduleGroups.map((group: any, idx: number) => (
-                                                    <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800/80 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
-                                                        <span className="text-xs font-bold text-primary dark:text-blue-400 uppercase tracking-wide min-w-[24px]">{group.day}</span>
+                                                    <div key={idx} className="flex items-center gap-2 px-2 py-1 bg-white dark:bg-slate-800/80 rounded border border-slate-100 dark:border-slate-700 shadow-sm">
+                                                        <span className="text-[10px] font-bold text-primary dark:text-blue-400 uppercase tracking-wide min-w-[20px]">{group.day}</span>
                                                         <div className="h-3 w-px bg-slate-200 dark:bg-slate-700"></div>
                                                         <div className="flex flex-wrap gap-x-2 text-xs font-medium text-slate-600 dark:text-slate-300">
                                                             {group.times.map((time: string, tIdx: number) => (

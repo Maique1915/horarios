@@ -21,7 +21,7 @@ export interface DbUser {
 export const fetchStudentData = async (userId: number) => {
     const { data, error } = await supabase
         .from('users')
-        .select('name, registration, course_name') // Note: registration and course_name might not be direct columns based on screenshot, checking if they are aliases or joined
+        .select('name, registration, course_name, course_id')
         .eq('id', userId)
         .single();
     if (error) return null;

@@ -6,68 +6,11 @@ import { useProfileController } from './useProfileController';
 import { CompletedSubjectsSection } from './CompletedSubjectsSection';
 import { CurrentEnrollmentsSection } from './CurrentEnrollmentsSection';
 import { EquivalenciesSection } from './EquivalenciesSection';
+import { WorkloadSection } from './WorkloadSection';
 import { Subject } from '@/types/Subject';
 
 // --- View Components ---
 
-interface CategoryProgressProps {
-    title: string;
-    subjects: any[];
-    reqHours: number;
-    reqCredits: number;
-    color: string;
-    bgColor: string;
-    icon: string;
-    customTotalHours?: number;
-    onClick?: () => void;
-}
-
-const CategoryProgress = ({ title, subjects, reqHours, reqCredits, color, bgColor, icon, customTotalHours, onClick }: CategoryProgressProps) => {
-    const totalCredits = subjects.reduce((sum: number, s: any) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const totalHours = customTotalHours !== undefined ? customTotalHours : totalCredits * 18;
-    const hoursPct = reqHours > 0 ? Math.min(100, Math.round((totalHours / reqHours) * 100)) : 0;
-    const creditsPct = reqCredits > 0 ? Math.min(100, Math.round((totalCredits / reqCredits) * 100)) : 0;
-
-    return (
-        <div
-            onClick={onClick}
-            className={`bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 flex flex-col gap-4 group ${onClick ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''}`}
-        >
-            <div className="flex items-center gap-4 mb-2">
-                <div className={`w-10 h-10 rounded-lg ${bgColor}/10 flex items-center justify-center shrink-0`}>
-                    <span className={`material-symbols-outlined ${color} text-xl`}>{icon}</span>
-                </div>
-                <h3 className="font-bold text-base text-text-light-primary dark:text-text-dark-primary leading-tight">{title}</h3>
-            </div>
-            <div className="space-y-4">
-                <div>
-                    <div className="flex justify-between text-xs mb-2">
-                        <span className="text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wide font-semibold">Carga Horária</span>
-                        <span className="font-medium text-text-light-primary dark:text-text-dark-primary">
-                            {Math.round(totalHours)} / {reqHours} h
-                        </span>
-                    </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div className={`h-full rounded-full ${bgColor} transition-all duration-1000`} style={{ width: `${hoursPct}%` }}></div>
-                    </div>
-                </div>
-                {reqCredits > 0 && (
-                    <div>
-                        <div className="flex justify-between text-xs mb-2">
-                            <span className="text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wide font-semibold">Créditos</span>
-                            <span className="font-medium text-text-light-primary dark:text-text-dark-primary">
-                                {totalCredits} / {reqCredits}
-                            </span>
-                        </div>
-                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div className={`h-full rounded-full ${bgColor} opacity-70 transition-all duration-1000`} style={{ width: `${creditsPct}%` }}></div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
 
 const ProfileHeaderView = ({ ctrl }: { ctrl: ReturnType<typeof useProfileController> }) => {
     if (!ctrl.user) return null;
@@ -244,39 +187,30 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
     if (!ctrl.user) return null;
 
     return (
-        <div className="container mx-auto px-4 py-8 animate-fadeIn max-w-6xl">
+        <div className="container mx-auto px-4 py-6 animate-fadeIn max-w-[1400px]">
             <ProfileHeaderView ctrl={ctrl} />
             <EditProfileModal ctrl={ctrl} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 animate-fadeIn delay-100">
-                {ctrl.categoryStats.map((stat: any) => (
-                    <CategoryProgress
-                        key={stat.title}
-                        title={stat.title}
-                        subjects={stat.subjects}
-                        reqHours={stat.reqHours}
-                        reqCredits={stat.reqCredits}
-                        color={stat.color}
-                        bgColor={stat.bgColor}
-                        icon={stat.icon}
-                        customTotalHours={stat.customTotalHours}
-                        onClick={stat.onClick}
-                    />
-                ))}
+            <div className="mb-6">
+                <WorkloadSection categories={ctrl.categoryStats} />
             </div>
 
             {/* TWO COLUMNS: Enrollments & Completed */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Current Enrollments Section moved to separate component */}
-                <CurrentEnrollmentsSection ctrl={ctrl} />
-
-                {/* Completed Subjects Section moved to separate component */}
-                <CompletedSubjectsSection ctrl={ctrl} />
-
-                {/* Equivalencies Section */}
-                <div className="lg:col-span-5">
-                    <EquivalenciesSection ctrl={ctrl} />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+                {/* Current Enrollments Section - 7/12 width */}
+                <div className="lg:col-span-7">
+                    <CurrentEnrollmentsSection ctrl={ctrl} />
                 </div>
+
+                {/* Completed Subjects Section - 5/12 width */}
+                <div className="lg:col-span-5">
+                    <CompletedSubjectsSection ctrl={ctrl} />
+                </div>
+            </div>
+
+            {/* Equivalencies Section */}
+            <div className="w-full">
+                <EquivalenciesSection ctrl={ctrl} />
             </div>
         </div>
     );
