@@ -178,6 +178,7 @@ export default function EditDbView({ ctrl }: { ctrl: ReturnType<typeof useEditDb
                                     onCancel={ctrl.handleCancelFormInteraction}
                                     cur={ctrl.cur}
                                     disciplinas={ctrl.disciplinas}
+                                    course={ctrl.course}
                                     isReviewing={false}
                                 />
                             </div>

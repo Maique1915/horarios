@@ -22,6 +22,7 @@ export const useEditDbController = () => {
         syncing,
         courseSchedule,
         courseDimension,
+        course,
         addDisciplina,
         updateDisciplina,
         removeDisciplina,
@@ -152,6 +153,7 @@ export const useEditDbController = () => {
         syncing,
         courseSchedule,
         courseDimension,
+        course,
         showUserModal,
         // UI State
         editingDisciplineId,
