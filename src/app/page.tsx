@@ -119,15 +119,8 @@ const BannerSection = ({ user, ROUTES }: { user: DbUser | null, ROUTES: any }) =
                 <div className="mt-16 relative mx-auto max-w-5xl">
                     <div className="rounded-2xl bg-surface-light dark:bg-surface-dark shadow-2xl border border-border-light dark:border-border-dark overflow-hidden p-2">
                         <div className="rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-900 aspect-[16/9] flex items-center justify-center relative">
-                            <div className="absolute inset-0 grid grid-cols-4 gap-4 p-8 opacity-20 pointer-events-none">
-                                <div className="col-span-1 bg-primary/20 rounded-lg h-full"></div>
-                                <div className="col-span-3 grid grid-rows-3 gap-4">
-                                    <div className="bg-gray-200 dark:bg-slate-700 rounded-lg h-full"></div>
-                                    <div className="bg-gray-200 dark:bg-slate-700 rounded-lg h-full row-span-2"></div>
-                                </div>
-                            </div>
                             <img
-                                alt="Estudantes universitários trabalhando juntos com laptop, representando o uso do sistema"
+                                alt="Dashboard acadêmico"
                                 className="object-cover w-full h-full opacity-60 mix-blend-overlay"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDszD8IyyOQJWa3cjrwyH42as-xaAPDX52FIc5agxlhOrz9DWr-vBZJaPQdlt75la65x-a0WtEtV_hrb5gV8c8SaAD5WdTKCqBa8nD4QqkxB_-KBkGpQuIf1NrF0ib3WdHcV8TnhKaaaUB8jKo3LXq23ph5Zdt_3LA-AvdYh3umqS1vcwqyKCi_NsOd962zSWAK2Y4UOHm35dVp9XxxghKgb93s0WOScxWN1a3BIY9t3LwWNmR58_I6MnWkwCWVh-Ltm0HJzTXTPCSc"
                             />
@@ -149,7 +142,7 @@ const BannerSection = ({ user, ROUTES }: { user: DbUser | null, ROUTES: any }) =
 
 const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }) => {
     return (
-        <section className="py-20 bg-white dark:bg-slate-900" id="funcionalidades">
+        <section className="py-24 bg-white dark:bg-slate-900" id="funcionalidades">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <h2 className="text-base font-semibold text-primary uppercase tracking-wide">Recursos</h2>
@@ -160,115 +153,117 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                         Ferramentas projetadas especificamente para simplificar a burocracia acadêmica.
                     </p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {/* Funcionalidade 1: Gera Grade */}
-                    <Link
-                        href={getLinkHref('gera_grade')}
-                        className="flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300 group cursor-pointer"
-                    >
-                        <div className="h-48 overflow-hidden bg-blue-50 dark:bg-slate-800 relative border-b border-border-light dark:border-border-dark">
-                            <Image
-                                src="/gera_grade.png"
-                                alt="Interface do Gerador de Grade"
-                                fill
-                                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                                sizes="(max-width: 768px) 100vw, 25vw"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <Link href={getLinkHref('gera_grade')} className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-blue-50 dark:bg-blue-900/20">
+                            <img src="/gera_grade.png" alt="Gerador de Grade" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
                         </div>
-                        <div className="p-5 flex flex-col flex-grow">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-primary">
-                                    <span className="material-symbols-outlined">add_task</span>
+                        <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-blue-500/10 rounded-xl">
+                                    <span className="material-symbols-outlined text-blue-500">auto_awesome_motion</span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Gera Grade</h3>
+                                <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">Gera Grade</h3>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                                Monte sua grade horária visualmente, experimente combinações e evite conflitos.
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Monte sua grade horária visualmente, experimente combinações e evite conflitos de horário com nossa inteligência de grade.
                             </p>
                         </div>
                     </Link>
 
                     {/* Funcionalidade 2: Horários */}
-                    <Link
-                        href={getLinkHref('horarios')}
-                        className="flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300 group cursor-pointer"
-                    >
-                        <div className="h-48 overflow-hidden bg-purple-50 dark:bg-slate-800 relative border-b border-border-light dark:border-border-dark">
-                            <Image
-                                src="/horarios.png"
-                                alt="Visualização de Horários"
-                                fill
-                                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                                sizes="(max-width: 768px) 100vw, 25vw"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <Link href={getLinkHref('horarios')} className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-purple-50 dark:bg-purple-900/20">
+                            <img src="/horarios.png" alt="Consulta de Horários" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
                         </div>
-                        <div className="p-5 flex flex-col flex-grow">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
-                                    <span className="material-symbols-outlined">grid_on</span>
+                        <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-purple-500/10 rounded-xl">
+                                    <span className="material-symbols-outlined text-purple-500">calendar_today</span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Horários</h3>
+                                <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">Horários</h3>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                                Consulte rapidamente os horários de todas as disciplinas por período.
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Acesso instantâneo a todos os horários de disciplinas, professores e salas do seu curso de forma organizada.
                             </p>
                         </div>
                     </Link>
 
-                    {/* Funcionalidade 3: Mapa/Cronograma */}
-                    <Link
-                        href={getLinkHref('cronograma')}
-                        className="flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300 group cursor-pointer"
-                    >
-                        <div className="h-48 overflow-hidden bg-green-50 dark:bg-slate-800 relative border-b border-border-light dark:border-border-dark">
-                            <Image
-                                src="/mapa.png"
-                                alt="Mapa de Pré-requisitos e Cronograma"
-                                fill
-                                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                                sizes="(max-width: 768px) 100vw, 25vw"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Funcionalidade 3: Mapa de Disciplinas */}
+                    <Link href="/mapa" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-green-50 dark:bg-green-900/20">
+                            <img src="/mapa.png" alt="Mapa de Disciplinas" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
                         </div>
-                        <div className="p-5 flex flex-col flex-grow">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
-                                    <span className="material-symbols-outlined">timeline</span>
+                        <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-green-500/10 rounded-xl">
+                                    <span className="material-symbols-outlined text-green-500">account_tree</span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Cronograma</h3>
+                                <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">Mapa de Curso</h3>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                                Visualize pré-requisitos, planeje semestres e acompanhe sua trajetória.
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Visualize pré-requisitos e a estrutura completa do seu curso em um mapa interativo e intuitivo.
                             </p>
                         </div>
                     </Link>
 
                     {/* Funcionalidade 4: Previsão */}
-                    <Link
-                        href={getLinkHref('previsao')}
-                        className="flex flex-col bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-300 group cursor-pointer"
-                    >
-                        <div className="h-48 overflow-hidden bg-teal-50 dark:bg-slate-800 relative border-b border-border-light dark:border-border-dark">
-                            <Image
-                                src="/predition.png"
-                                alt="Simulação de Previsão"
-                                fill
-                                className="object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                                sizes="(max-width: 768px) 100vw, 25vw"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <Link href="/previsao" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-orange-50 dark:bg-orange-900/20">
+                            <img src="/predition.png" alt="Previsão de Formatura" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
                         </div>
-                        <div className="p-5 flex flex-col flex-grow">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center text-teal-600 dark:text-teal-400">
-                                    <span className="material-symbols-outlined">neurology</span>
+                        <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-orange-500/10 rounded-xl">
+                                    <span className="material-symbols-outlined text-orange-500">query_stats</span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Previsão</h3>
+                                <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">Previsão</h3>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                                Simule seus próximos semestres e receba sugestões otimizadas para formatura.
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Simule seus próximos semestres e receba projeções reais de quando você irá finalmente colar grau.
+                            </p>
+                        </div>
+                    </Link>
+
+                    {/* Funcionalidade 5: Minhas Atividades */}
+                    <Link href="/activities" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-rose-50 dark:bg-rose-900/20">
+                            <img src="/atividades.png" alt="Minhas Atividades" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
+                        </div>
+                        <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-rose-500/10 rounded-xl">
+                                    <span className="material-symbols-outlined text-rose-500">task_alt</span>
+                                </div>
+                                <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">Atividades</h3>
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Gerencie suas tarefas, trabalhos e provas em um só lugar integrado com seu calendário de aulas.
+                            </p>
+                        </div>
+                    </Link>
+
+                    {/* Funcionalidade 6: Perfil Acadêmico */}
+                    <Link href="/profile" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-cyan-50 dark:bg-cyan-900/20">
+                            <img src="/perfil.png" alt="Perfil Acadêmico" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
+                        </div>
+                        <div className="p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-cyan-500/10 rounded-xl">
+                                    <span className="material-symbols-outlined text-cyan-500">person_filled</span>
+                                </div>
+                                <h3 className="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">Meu Perfil</h3>
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                Acompanhe seu CR, horas complementares e estatísticas detalhadas do seu progresso acadêmico.
                             </p>
                         </div>
                     </Link>
@@ -295,7 +290,7 @@ const CoursesSection = ({ courses, loading }: { courses: CourseStats[], loading:
     };
 
     return (
-        <section className="py-20 bg-background-light dark:bg-background-dark" id="cursos">
+        <section className="py-24 bg-gray-50 dark:bg-background-dark" id="cursos">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
                     <div>
@@ -330,9 +325,9 @@ const CoursesSection = ({ courses, loading }: { courses: CourseStats[], loading:
                         </div>
                     )}
                 </div>
+
                 {/* Courses Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Dynamic Courses */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {loading && (
                         <div className="col-span-full text-center py-8">
                             <p className="text-gray-500 animate-pulse italic">Carregando cursos disponíveis...</p>
@@ -344,66 +339,66 @@ const CoursesSection = ({ courses, loading }: { courses: CourseStats[], loading:
                             <Link
                                 key={course.code}
                                 href={isActive ? `/${course.code}` : '#'}
-                                className={`group flex flex-col bg-white dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark transition-all duration-300 shadow-sm hover:shadow-lg ${!isActive ? 'opacity-60 grayscale-[0.5] cursor-not-allowed pointer-events-none' : 'hover:border-primary/50'}`}
+                                className={`group relative overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-2 ${isActive ? 'shadow-xl hover:shadow-primary/20 bg-slate-900' : 'bg-gray-50 dark:bg-slate-800/30 cursor-not-allowed grayscale'}`}
                             >
-                                {/* Header with Course Name */}
-                                <div className={`${isActive ? 'bg-slate-900 dark:bg-slate-800 group-hover:bg-primary' : 'bg-gray-200 dark:bg-slate-700'} p-4 rounded-t-xl transition-colors duration-300`}>
-                                    <h3 className={`text-sm font-bold ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'} leading-tight uppercase tracking-wide truncate`}>
-                                        {course.name}
-                                    </h3>
+                                {/* Decorative Gradient Overlay for Active Cards */}
+                                {isActive && (
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors"></div>
+                                )}
+
+                                <div className={`p-8 min-h-[300px] flex flex-col justify-between relative z-10`}>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-start mb-6 gap-4 h-14">
+                                            <h3 className={`text-xl font-black leading-tight uppercase tracking-tight ${isActive ? 'text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+                                                {course.name}
+                                            </h3>
+                                            {isActive ? (
+                                                <span className="shrink-0 text-[10px] font-black bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-xl border border-blue-500/20 uppercase tracking-[0.2em] h-fit">
+                                                    ATIVO
+                                                </span>
+                                            ) : (
+                                                <span className="shrink-0 text-[10px] font-black bg-gray-200 dark:bg-slate-700/50 text-gray-500 dark:text-gray-400 px-3 py-1.5 rounded-xl border border-gray-300 dark:border-slate-600 uppercase tracking-[0.2em] h-fit">
+                                                    EM BREVE
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-2 min-h-[64px]">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`material-symbols-outlined text-sm ${isActive ? 'text-blue-400' : 'text-gray-400'}`}>account_balance</span>
+                                                <p className={`text-xs font-bold tracking-widest uppercase ${isActive ? 'text-blue-400/90' : 'text-gray-500'}`}>
+                                                    {course.universityName}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`material-symbols-outlined text-sm ${isActive ? 'text-gray-400' : 'text-gray-500'}`}>location_on</span>
+                                                <p className={`text-xs ${isActive ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                    Campus {course.campus}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <p className={`mt-6 text-xs font-medium px-3 py-1 inline-block rounded-lg ${isActive ? 'bg-white/5 text-gray-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-500'}`}>
+                                            {course.shift || 'Integral'} • {course.modalities || 'Graduação'}
+                                        </p>
+                                    </div>
+
+                                    <div className={`grid grid-cols-2 gap-4 pt-8 mt-8 border-t ${isActive ? 'border-white/5' : 'border-gray-200 dark:border-white/5'} text-center`}>
+                                        <div className="group/stat">
+                                            <p className={`text-[10px] uppercase font-black tracking-[0.2em] mb-2 ${isActive ? 'text-gray-500' : 'text-gray-600'}`}>Disciplinas</p>
+                                            <p className={`text-2xl font-black ${isActive ? 'text-white group-hover/stat:text-primary transition-colors' : 'text-gray-400'}`}>{course.disciplineCount}</p>
+                                        </div>
+                                        <div className="group/stat">
+                                            <p className={`text-[10px] uppercase font-black tracking-[0.2em] mb-2 ${isActive ? 'text-gray-500' : 'text-gray-600'}`}>Períodos</p>
+                                            <p className={`text-2xl font-black ${isActive ? 'text-white group-hover/stat:text-primary transition-colors' : 'text-gray-400'}`}>{course.periods}</p>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* Body */}
-                                <div className="p-5 flex-1 flex flex-col relative">
-                                    {/* University Name */}
-                                    <div className="mb-4">
-                                        <p className="text-[11px] leading-tight text-gray-700 dark:text-gray-300 font-medium uppercase tracking-wider mb-1">
-                                            {course.universityName}
-                                        </p>
-                                        <p className="text-[10px] leading-tight text-gray-500 dark:text-gray-400 italic">
-                                            Campus {course.campus}
-                                        </p>
-                                        {!isActive && (
-                                            <p className="text-[10px] mt-1.5 font-bold text-primary dark:text-blue-400 bg-primary/5 dark:bg-blue-400/10 py-1 px-2 rounded-md inline-block">
-                                                {course.registeredPeriodsCount} de {course.periods} períodos prontos
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {/* Shift and Modality */}
-                                    <div className="mb-6">
-                                        <div className="flex items-center gap-2 text-[12px] text-gray-500 dark:text-gray-400">
-                                            <span className="italic">{course.shift || 'Integral'}</span>
-                                            <span>-</span>
-                                            <span className="italic">{course.modalities || 'Graduação'}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Footer Stats */}
-                                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-tighter">Disciplinas</span>
-                                            <span className="text-sm font-bold text-gray-900 dark:text-white">{course.disciplineCount}</span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-tighter">Períodos</span>
-                                            <span className="text-sm font-bold text-gray-900 dark:text-white">{course.periods}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Status Badge */}
-                                    <div className="absolute top-2 right-2 flex gap-1 z-10">
-                                        {isActive ? (
-                                            <span className="text-[9px] font-bold px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded shadow-sm">
-                                                ATIVO
-                                            </span>
-                                        ) : (
-                                            <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded shadow-sm">
-                                                EM BREVE
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
+                                {/* Hover Glow for Active Cards */}
+                                {isActive && (
+                                    <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary/30 rounded-3xl transition-all duration-500"></div>
+                                )}
                             </Link>
                         );
                     })}
@@ -446,74 +441,61 @@ const CoursesSection = ({ courses, loading }: { courses: CourseStats[], loading:
 
 const ContributionSection = () => {
     return (
-        <section className="py-20 bg-white dark:bg-slate-900 border-t border-border-light dark:border-border-dark">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-primary/5 dark:bg-primary/10 rounded-3xl p-8 md:p-12 border border-primary/20 relative overflow-hidden">
-                    {/* Decorative blobs */}
-                    <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                    <div className="max-w-4xl relative z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-6">
-                            <span className="material-symbols-outlined text-sm">rocket_launch</span> Contribua com a plataforma
-                        </div>
-
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
-                            Não encontrou seu curso?
-                        </h2>
-                        <p className="text-lg text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl">
-                            O Horários é uma plataforma colaborativa e fomos feitos para crescer. Se o seu curso de graduação ainda não está disponível, você pode nos ajudar a trazê-lo para o sistema!
-                        </p>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12">
-                            <div className="group space-y-4">
-                                <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/5 group-hover:scale-110 group-hover:-rotate-3 transition-transform">
-                                    <span className="material-symbols-outlined text-3xl">list_alt</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Grade Curricular</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">Lista das matérias obrigatórias, optativas e seus códigos oficiais.</p>
-                                </div>
-                            </div>
-                            <div className="group space-y-4">
-                                <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/5 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-                                    <span className="material-symbols-outlined text-3xl">account_tree</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Fluxograma</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">Quais matérias são pré-requisitos de quais para montarmos o grafo inteligente.</p>
-                                </div>
-                            </div>
-                            <div className="group space-y-4">
-                                <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/5 group-hover:scale-110 group-hover:-rotate-3 transition-transform">
-                                    <span className="material-symbols-outlined text-3xl">military_tech</span>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Regras de Formatura</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">Carga horária de atividades complementares e horas de optativas necessárias.</p>
-                                </div>
+        <section className="py-24 bg-white dark:bg-surface-dark border-t border-blue-200 dark:border-slate-700 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div className="absolute top-0 right-0 p-8 opacity-5">
+                    <span className="material-symbols-outlined text-9xl">diversity_3</span>
+                </div>
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest mb-4">
+                        <span className="material-symbols-outlined text-lg">volunteer_activism</span>
+                        Contribua com a plataforma
+                    </div>
+                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Não encontrou seu curso?</h3>
+                    <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl">
+                        O Horários é uma plataforma colaborativa e fomos feitos para crescer. Se o seu curso de graduação ainda não está disponível, você pode nos ajudar a trazê-lo para o sistema!
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                        <div className="flex items-start gap-3">
+                            <span className="material-symbols-outlined text-primary bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">content_paste_search</span>
+                            <div>
+                                <h4 className="font-bold text-sm text-gray-900 dark:text-white">Grade Curricular</h4>
+                                <p className="text-xs text-gray-500">Lista das matérias obrigatórias e eletivas.</p>
                             </div>
                         </div>
-
-                        <div className="flex flex-col lg:flex-row items-center gap-6 p-6 bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-primary/10 shadow-lg shadow-primary/5">
-                            <div className="flex-1 flex gap-4 items-start">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 mt-1">
-                                    <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm">info</span>
-                                </div>
-                                <p className="text-gray-700 dark:text-gray-200 font-medium leading-relaxed">
-                                    Para adicionar um novo curso, basta entrar em contato. Nossa equipe técnica fará toda a automação e personalização para o seu currículo.
-                                </p>
+                        <div className="flex items-start gap-3">
+                            <span className="material-symbols-outlined text-primary bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">account_tree</span>
+                            <div>
+                                <h4 className="font-bold text-sm text-gray-900 dark:text-white">Fluxograma</h4>
+                                <p className="text-xs text-gray-500">Quais matérias são pré-requisitos de quais.</p>
                             </div>
-                            <a
-                                href="https://wa.me/5521988567387?text=Olá! Gostaria de adicionar um novo curso ao sistema Horários."
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full lg:w-auto inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-primary hover:bg-primary-hover shadow-lg hover:shadow-primary/30 active:scale-95 transition-all duration-200"
-                            >
-                                <span className="material-symbols-outlined mr-2">forum</span>
-                                Falar com Admin
-                            </a>
                         </div>
+                        <div className="flex items-start gap-3">
+                            <span className="material-symbols-outlined text-primary bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg">rule</span>
+                            <div>
+                                <h4 className="font-bold text-sm text-gray-900 dark:text-white">Regras de Formatura</h4>
+                                <p className="text-xs text-gray-500">Carga horária e regras de atividades extras.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-blue-50/50 dark:bg-slate-800/50 rounded-2xl border border-blue-100 dark:border-slate-700">
+                        <div className="flex items-center gap-3 flex-grow">
+                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
+                                <span className="material-symbols-outlined">info</span>
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-200">
+                                Para adicionar um novo curso, basta entrar em contato. Nossa equipe técnica fará toda a automação e personalização para o seu currículo.
+                            </p>
+                        </div>
+                        <a
+                            href="https://wa.me/5521988567387?text=Olá! Gostaria de adicionar um novo curso ao sistema Horários."
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors whitespace-nowrap gap-2"
+                        >
+                            <span className="material-symbols-outlined">forum</span>
+                            Falar com Admin
+                        </a>
                     </div>
                 </div>
             </div>
@@ -521,47 +503,53 @@ const ContributionSection = () => {
     );
 };
 
-const TestimonialsSection = ({ comments }: { comments: CommentWithUser[] }) => {
+const TestimonialsSection = ({ comments, loading }: { comments: CommentWithUser[], loading: boolean }) => {
     return (
-        <section className="py-20 bg-white dark:bg-slate-900 border-t border-border-light dark:border-border-dark" id="depoimentos">
+        <section className="py-24 bg-gray-50 dark:bg-background-dark overflow-hidden" id="depoimentos">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-extrabold text-center text-gray-900 dark:text-white mb-16">
-                    O que os alunos dizem
-                </h2>
+                <div className="text-center mb-16">
+                    <h2 className="text-base font-semibold text-primary uppercase tracking-wide">Depoimentos</h2>
+                    <p className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                        O que os estudantes dizem
+                    </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {comments.length > 0 ? (
-                        comments.map((comment) => (
-                            <div key={comment.id} className="flex flex-col bg-background-light dark:bg-surface-dark p-8 rounded-2xl shadow-sm border border-transparent hover:border-border-light dark:hover:border-border-dark transition-all">
-                                <div className="flex items-center mb-4 text-yellow-400">
-                                    {[...Array(5)].map((_, i) => (
-                                        <span key={i} className="material-symbols-outlined text-lg leading-none">
-                                            {i < (comment.rating || 5) ? 'star' : 'star_outline'}
-                                        </span>
-                                    ))}
+                    {loading && (
+                        <div className="col-span-full py-12 text-center text-gray-500 italic animate-pulse">
+                            Carregando depoimentos...
+                        </div>
+                    )}
+                    {!loading && comments.length > 0 ? (
+                        comments.map((comment, idx) => (
+                            <div key={idx} className="bg-white dark:bg-surface-dark p-8 rounded-2xl shadow-sm border border-border-light dark:border-border-dark relative group hover:shadow-xl transition-all duration-300">
+                                <div className="flex text-orange-400 mb-6">
+                                    <span className="material-symbols-outlined text-sm">star</span>
+                                    <span className="material-symbols-outlined text-sm">star</span>
+                                    <span className="material-symbols-outlined text-sm">star</span>
+                                    <span className="material-symbols-outlined text-sm">star</span>
+                                    <span className="material-symbols-outlined text-sm">star</span>
                                 </div>
-                                <p className="text-gray-600 dark:text-gray-300 flex-grow italic mb-6 text-sm leading-relaxed">
+                                <p className="text-gray-600 dark:text-gray-300 italic mb-8 h-24 overflow-y-auto">
                                     "{comment.content}"
                                 </p>
-                                <div className="flex items-center mt-auto">
-                                    <div className="h-10 w-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary font-bold text-sm uppercase">
+                                <div className="flex items-center gap-4 border-t border-gray-100 dark:border-slate-700 pt-6">
+                                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                                         {comment.user?.name ? comment.user.name.charAt(0) : '?'}
                                     </div>
-                                    <div className="ml-3">
-                                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                            {comment.user?.name || 'Aluno CEFET'}
-                                        </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            @{comment.user?.username || 'usuario'}
-                                        </p>
+                                    <div>
+                                        <h4 className="font-bold text-gray-900 dark:text-white">{comment.user?.name || 'Estudante'}</h4>
+                                        <p className="text-xs text-gray-500 uppercase tracking-tighter">Estudante CEFET</p>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        // Fallback se não houver comentários
-                        <div className="col-span-full text-center py-8 text-gray-500">
-                            <p>Seja o primeiro a deixar seu depoimento!</p>
-                        </div>
+                        !loading && (
+                            <div className="col-span-full text-center py-12">
+                                <p className="text-gray-500 italic">Seja o primeiro a deixar um depoimento!</p>
+                            </div>
+                        )
                     )}
                 </div>
             </div>
@@ -569,112 +557,83 @@ const TestimonialsSection = ({ comments }: { comments: CommentWithUser[] }) => {
     );
 };
 
-const PricingSection = ({ ROUTES, getLinkHref, user }: { ROUTES: any, getLinkHref: (key: string) => string, user: any }) => {
+const PricingSection = ({ ROUTES, user }: { ROUTES: any, user: any }) => {
     return (
-        <section className="py-20 bg-background-light dark:bg-background-dark border-t border-border-light dark:border-border-dark" id="precos">
+        <section className="py-24 bg-white dark:bg-slate-900" id="precos">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <h2 className="text-base font-semibold text-primary uppercase tracking-wide">Planos</h2>
                     <p className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
                         Escolha o melhor para você
                     </p>
-                    <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-400 mx-auto">
-                        Comece gratuitamente ou desbloqueie todo o potencial da sua vida acadêmica.
-                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                     {/* Plano Gratuito */}
-                    <div className="relative flex flex-col bg-white dark:bg-surface-dark rounded-3xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden transition-all hover:shadow-md">
-                        <div className="p-8 pb-4">
-                            <h3 className="text-lg leading-6 font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Gratuito</h3>
-                            <div className="mt-4 flex items-baseline text-5xl font-extrabold text-gray-900 dark:text-white">
-                                <span className="text-2xl font-medium text-gray-500 mr-1">R$</span>
-                                0
-                                <span className="ml-1 text-2xl font-medium text-gray-500">/semestre</span>
-                            </div>
-                            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                Para quem precisa de uma organização rápida e pontual.
-                            </p>
+                    <div className="bg-white dark:bg-surface-dark p-10 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center">
+                        <div className="p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl mb-6">
+                            <span className="material-symbols-outlined text-3xl text-gray-400">person</span>
                         </div>
-                        <div className="px-6 pb-8 flex-grow flex flex-col justify-between">
-                            <ul className="space-y-4 mb-8">
-                                {[
-                                    'Gera Grade (Básico)',
-                                    'Visualização de Horários',
-                                    'Cronograma Simples',
-                                    'Salvo no navegador (dados perdem se limpar cache)'
-                                ].map((feature, index) => (
-                                    <li key={index} className="flex items-start">
-                                        <div className="flex-shrink-0">
-                                            <span className="material-symbols-outlined text-gray-400 text-xl">check</span>
-                                        </div>
-                                        <p className="ml-3 text-base text-gray-600 dark:text-gray-400">{feature}</p>
-                                    </li>
-                                ))}
-                            </ul>
-                            <Link
-                                href="#cursos"
-                                className="w-full flex items-center justify-center px-6 py-3 border border-border-light dark:border-border-dark text-base font-medium rounded-xl text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
-                            >
-                                Usar Ferramentas
-                            </Link>
-                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Individual</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6">Comece agora mesmo</p>
+                        <div className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8">Grátis</div>
+                        <ul className="space-y-4 mb-10 text-gray-600 dark:text-gray-300 text-sm">
+                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-gray-400 text-lg">check</span> Gera Grade (Básico)</li>
+                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-gray-400 text-lg">check</span> Visualização de Horários</li>
+                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-gray-400 text-lg">check</span> Cronograma Simples</li>
+                        </ul>
+                        <Link href="#cursos" className="w-full py-4 text-center border-2 border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white font-bold rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-800 transition">Usar Ferramentas</Link>
                     </div>
 
-                    {/* Plano Semestral */}
-                    <div className="relative flex flex-col bg-white dark:bg-surface-dark rounded-3xl shadow-xl overflow-hidden border-2 border-primary transform md:-translate-y-4">
-                        <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider text-center w-full md:w-auto">
+                    {/* Plano Premium */}
+                    <div className="bg-[#0F172A] p-10 rounded-3xl border-2 border-primary shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider text-center">
                             Recomendado
                         </div>
-                        <div className="p-8 pb-4 bg-primary/5 dark:bg-primary/10 border-b border-border-light dark:border-border-dark">
-                            <h3 className="text-lg leading-6 font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Premium</h3>
-                            <div className="mt-4 flex items-baseline text-5xl font-extrabold text-gray-900 dark:text-white">
-                                <span className="text-2xl font-medium text-gray-500 mr-1">R$</span>
-                                3,00
-                                <span className="ml-1 text-2xl font-medium text-gray-500">/semestre</span>
-                            </div>
-                            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                                A experiência completa. Segurança e ferramentas avançadas.
-                            </p>
+                        <div className="p-3 bg-primary/20 rounded-2xl mb-6">
+                            <span className="material-symbols-outlined text-3xl text-primary">workspace_premium</span>
                         </div>
-                        <div className="px-6 pb-8 pt-6 flex-grow flex flex-col justify-between">
-                            <ul className="space-y-4 mb-8">
-                                {[
-                                    'Tudo do Gratuito',
-                                    'Salvo na Nuvem (Acesse de qualquer lugar)',
-                                    'Previsão de Conclusão de Curso',
-                                    'Gestão de Atividades Complementares',
-                                    'Suporte Prioritário',
-                                    'Sem Anúncios'
-                                ].map((feature, index) => (
-                                    <li key={index} className="flex items-start">
-                                        <div className="flex-shrink-0">
-                                            <span className="material-symbols-outlined text-green-500 text-xl">check_circle</span>
-                                        </div>
-                                        <p className="ml-3 text-base text-gray-700 dark:text-gray-300 font-medium">{feature}</p>
-                                    </li>
-                                ))}
-                            </ul>
-
-                            {user?.is_paid ? (
-                                <button
-                                    disabled
-                                    className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 cursor-not-allowed md:py-4 md:text-lg transition-all"
-                                >
-                                    <span className="material-symbols-outlined mr-2">check_circle</span>
-                                    Plano Ativo
-                                </button>
-                            ) : (
-                                <Link
-                                    href={ROUTES.PLANS}
-                                    className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-primary-hover md:py-4 md:text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                                >
-                                    Assinar Agora
-                                </Link>
-                            )}
-                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Premium</h3>
+                        <p className="text-gray-400 mb-6">A experiência completa</p>
+                        <div className="text-4xl font-extrabold text-white mb-8">R$ 3,00 <span className="text-sm font-normal text-gray-500">/semestre</span></div>
+                        <ul className="space-y-4 mb-10 text-gray-300 text-sm">
+                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-green-500 text-lg">check_circle</span> Salvo na Nuvem</li>
+                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-green-500 text-lg">check_circle</span> Previsão de Conclusão</li>
+                            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-green-500 text-lg">check_circle</span> Gestão de Atividades</li>
+                        </ul>
+                        {user?.is_paid ? (
+                            <button
+                                disabled
+                                className="w-full py-4 text-center bg-green-500/10 text-green-500 font-bold rounded-2xl cursor-not-allowed border border-green-500/20"
+                            >
+                                Plano Ativo
+                            </button>
+                        ) : (
+                            <Link href={ROUTES.PLANS} className="w-full py-4 text-center bg-primary text-white font-bold rounded-2xl hover:bg-primary-hover shadow-lg shadow-primary/20 transition">Assinar Agora</Link>
+                        )}
                     </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const CTASection = () => {
+    return (
+        <section className="py-24 bg-[#0F172A] overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <div className="absolute top-10 left-10 w-64 h-64 bg-primary rounded-full blur-3xl animate-blob"></div>
+                <div className="absolute bottom-10 right-10 w-64 h-64 bg-purple-600 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+            </div>
+
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-8">Pronto para organizar sua vida acadêmica?</h2>
+                <p className="text-xl text-gray-400 mb-12">
+                    Junte-se a centenas de estudantes do CEFET que já facilitaram seu processo de montagem de grade.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Link href="/register" className="px-10 py-5 bg-primary text-white font-bold rounded-2xl hover:bg-primary-hover shadow-xl shadow-primary/20 transition-all transform hover:-translate-y-1">Criar Minha Conta</Link>
+                    <a href="#cursos" className="px-10 py-5 bg-white/10 text-white font-bold rounded-2xl border border-white/10 hover:bg-white/20 transition-all backdrop-blur-sm">Ver Cursos</a>
                 </div>
             </div>
         </section>
@@ -766,8 +725,9 @@ export default function HomePage() {
             <FeaturesSection getLinkHref={ctrl.getLinkHref} />
             <CoursesSection courses={ctrl.courses} loading={ctrl.loading} />
             <ContributionSection />
-            <TestimonialsSection comments={ctrl.comments} />
-            <PricingSection ROUTES={ROUTES} getLinkHref={ctrl.getLinkHref} user={ctrl.user} />
+            <TestimonialsSection comments={ctrl.comments} loading={ctrl.loading} />
+            <PricingSection ROUTES={ROUTES} user={ctrl.user} />
+            <CTASection />
             <WhatsAppFloatingButton />
         </>
     );
