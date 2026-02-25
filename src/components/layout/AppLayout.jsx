@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter, usePathname } from 'next/navigation';
@@ -14,6 +14,7 @@ import ThemeToggle from '../shared/ThemeToggle';
 const AppLayout = ({ children }) => {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const params = useParams();
     const cur = params?.cur; // Handle potential undefined
     const router = useRouter();
@@ -62,10 +63,21 @@ const AppLayout = ({ children }) => {
 
     const hasCourseSelected = !!effectiveCur;
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         if (confirm('Deseja realmente sair?')) {
-            logout();
-            router.push('/');
+            // Immediate UI feedback
+            setIsLoggingOut(true);
+            setIsMobileMenuOpen(false);
+            
+            // Defer heavy operations to not block the UI
+            startTransition(async () => {
+                try {
+                    await logout(); // logout already handles navigation
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    setIsLoggingOut(false);
+                }
+            });
         }
     };
 
@@ -274,11 +286,12 @@ const AppLayout = ({ children }) => {
                                     </Link>
                                     <button
                                         onClick={handleLogout}
-                                        className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                        disabled={isLoggingOut}
+                                        className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Sair"
                                     >
-                                        <span className="material-symbols-outlined text-lg">logout</span>
-                                        <span className="hidden md:block">Sair</span>
+                                        <span className="material-symbols-outlined text-lg">{isLoggingOut ? 'hourglass_empty' : 'logout'}</span>
+                                        <span className="hidden md:block">{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
                                     </button>
                                 </div>
                             )}
