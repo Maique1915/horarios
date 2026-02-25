@@ -8,7 +8,7 @@ import ROUTES from '../../routes';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
 // --- Constants ---
-const SLIDES = [
+export const SLIDES = [
     {
         icon: 'cloud_sync',
         image: '/mapa.png',

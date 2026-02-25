@@ -22,12 +22,12 @@ const LandingHeader = () => {
         <nav className="sticky top-0 z-50 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark">
             <div className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16 items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center">
+                    <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
+                        <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center shadow-sm group-hover:shadow-md transition-all">
                             <span className="material-symbols-outlined text-white text-xl">school</span>
                         </div>
                         <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Horários CEFET</span>
-                    </div>
+                    </Link>
                     <div className="hidden md:flex space-x-8">
                         <a
                             href="#funcionalidades"

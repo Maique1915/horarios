@@ -606,12 +606,28 @@ export const getCourseStats = async (): Promise<any[]> => {
     return (courses as any[]).map(course => {
         const activeSubjects = course.subjects ? course.subjects.filter((s: DbSubject) => s.active) : [];
         const hasClasses = activeSubjects.some((s: any) => s.classes && s.classes.length > 0);
+        const actualPeriods = new Set(activeSubjects.map((s: DbSubject) => s.semester)).size;
+        const targetPeriods = course.periods || 0;
+        const isComplete = actualPeriods > 0 && actualPeriods === targetPeriods;
+
+        // Calculate how many periods have at least one registered class
+        const registeredPeriods = new Set(
+            activeSubjects
+                .filter((s: any) => s.classes && s.classes.length > 0)
+                .map((s: DbSubject) => s.semester)
+        ).size;
+
         return {
             code: course.code,
             name: course.name,
+            shift: course.shift,
+            modalities: course.modalities,
+            campus: course.campus || (course.code.includes('P') ? 'Petrópolis' : 'Maracanã'),
+            universityName: course.university?.name || 'Universidade',
             disciplineCount: activeSubjects.length,
-            periods: new Set(activeSubjects.map((s: DbSubject) => s.semester)).size,
-            status: hasClasses ? 'active' : 'upcoming'
+            periods: targetPeriods || actualPeriods,
+            registeredPeriodsCount: registeredPeriods,
+            status: course.activies ? 'active' : 'upcoming'
         };
     });
 };

@@ -2,16 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 import ROUTES from '../../routes';
 import { supabase } from '../../lib/supabaseClient';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import PixPayment from '../../components/plans/PixPayment';
+import { SLIDES } from '../login/page';
 
 // --- Types ---
 interface Course {
     id: string;
     name: string;
+    shift: string | null;
+    university?: {
+        name: string;
+    }
 }
 
 // --- Controller ---
@@ -27,15 +34,31 @@ const useRegisterController = () => {
     const [showPixUI, setShowPixUI] = useState(false);
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedCourse, setSelectedCourse] = useState('');
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     const { register } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
         const fetchCourses = async () => {
-            const { data, error } = await supabase.from('courses').select('id, name');
+            const { data, error } = await supabase
+                .from('courses')
+                .select('id, name, shift, university:universities(name)');
             if (error) console.error("Error fetching courses:", error);
-            else setCourses(data || []);
+            else {
+                const formatted = (data || []).map((c: any) => ({
+                    ...c,
+                    university: Array.isArray(c.university) ? c.university[0] : c.university
+                }));
+                setCourses(formatted as Course[]);
+            }
         };
         fetchCourses();
     }, []);
@@ -83,6 +106,8 @@ const useRegisterController = () => {
         showPixUI,
         courses,
         selectedCourse, setSelectedCourse,
+        currentSlide, setCurrentSlide,
+        slides: SLIDES,
         // Actions
         handleSubmit,
         router,
@@ -101,140 +126,222 @@ const RegisterView = ({ ctrl }: { ctrl: ReturnType<typeof useRegisterController>
     }
 
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg border border-border-light dark:border-border-dark overflow-hidden transition-all">
-                    {/* Header */}
-                    <div className="p-8 text-center border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
-                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">
-                            <span className="material-symbols-outlined text-4xl">
-                                person_add
-                            </span>
+        <div className="min-h-screen bg-background-light dark:bg-background-dark flex">
+            {/* Left Side - Carousel (Desktop Only) */}
+            <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-slate-900">
+                {ctrl.slides.map((slide: any, index: number) => (
+                    <div
+                        key={index}
+                        className={`absolute inset-0 transition-opacity duration-1000 ${index === ctrl.currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                    >
+                        {/* Background Image with Blur */}
+                        <div className="absolute inset-0">
+                            <Image
+                                src={slide.image}
+                                alt={slide.title}
+                                fill
+                                className="object-cover blur-[3px] scale-105 transform"
+                                priority={index === 0}
+                            />
+                            {/* Overlays for readability */}
+                            <div className="absolute inset-0 bg-primary/70 mix-blend-multiply" />
+                            <div className="absolute inset-0 bg-black/40" />
                         </div>
-                        <h1 className="text-2xl font-bold text-text-light-primary dark:text-text-dark-primary mb-2 tracking-tight">
+
+                        {/* Content Overlay */}
+                        <div className="relative h-full flex flex-col items-center justify-center p-16 text-center text-white">
+                            <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center mb-8 backdrop-blur-md border border-white/20 shadow-2xl">
+                                <span className="material-symbols-outlined text-5xl text-white">{slide.icon}</span>
+                            </div>
+                            <h2 className="text-4xl font-bold mb-6 tracking-tight drop-shadow-lg">{slide.title}</h2>
+                            <p className="text-lg text-blue-50 leading-relaxed max-w-lg font-medium drop-shadow-md">
+                                {slide.description}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+
+                {/* Dots Navigation */}
+                <div className="absolute bottom-12 left-0 right-0 z-20 flex justify-center gap-3">
+                    {ctrl.slides.map((_: any, index: number) => (
+                        <button
+                            key={index}
+                            onClick={() => ctrl.setCurrentSlide(index)}
+                            className={`h-2.5 rounded-full transition-all duration-300 backdrop-blur-sm ${index === ctrl.currentSlide
+                                ? 'w-10 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]'
+                                : 'w-2.5 bg-white/40 hover:bg-white/60'
+                                }`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Right Side - Registration Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-slate-900 overflow-y-auto">
+                <div className="w-full max-w-md space-y-8 py-8">
+                    <div className="text-center lg:text-left">
+                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto lg:mx-0 mb-4 text-primary lg:hidden">
+                            <span className="material-symbols-outlined text-4xl">person_add</span>
+                        </div>
+                        <h1 className="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">
                             Criar Conta
                         </h1>
-                        <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">
-                            Cadastre-se para acessar
+                        <p className="mt-2 text-slate-500 dark:text-slate-400">
+                            Cadastre-se para começar a organizar sua vida acadêmica.
                         </p>
                     </div>
 
-                    {/* Form */}
-                    <form onSubmit={ctrl.handleSubmit} className="p-8 space-y-6">
+                    <form onSubmit={ctrl.handleSubmit} className="space-y-5">
                         {ctrl.error && (
-                            <div className="border border-red-500/20 bg-red-500/10 rounded-lg p-3 flex items-start gap-3">
-                                <span className="material-symbols-outlined text-lg text-red-500">error</span>
+                            <div className="border border-red-500/20 bg-red-500/10 rounded-lg p-4 flex items-start gap-3 animate-pulse">
+                                <span className="material-symbols-outlined text-xl text-red-500 mt-0.5">error</span>
                                 <p className="text-sm font-medium text-red-600">{ctrl.error}</p>
                             </div>
                         )}
 
-                        <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
-                                Nome Completo
-                            </label>
-                            <input
-                                type="text"
-                                value={ctrl.fullName}
-                                onChange={(e) => ctrl.setFullName(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
-                                placeholder="Seu nome completo"
-                                required
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
-                                Curso
-                            </label>
-                            <select
-                                value={ctrl.selectedCourse}
-                                onChange={(e) => ctrl.setSelectedCourse(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary appearance-none cursor-pointer"
-                                required
-                            >
-                                <option value="" disabled>Selecione seu curso</option>
-                                {ctrl.courses.map(course => (
-                                    <option key={course.id} value={course.id}>
-                                        {course.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
-                                Usuário (Email)
-                            </label>
-                            <input
-                                type="text"
-                                value={ctrl.username}
-                                onChange={(e) => ctrl.setUsername(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
-                                placeholder="Seu usuário/email"
-                                required
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
-                                Senha
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={ctrl.showPassword ? "text" : "password"}
-                                    value={ctrl.password}
-                                    onChange={(e) => ctrl.setPassword(e.target.value)}
-                                    className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
-                                    placeholder="Sua senha"
-                                    required
-                                    minLength={6}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => ctrl.setShowPassword(!ctrl.showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary"
-                                >
-                                    <span className="material-symbols-outlined text-xl">
-                                        {ctrl.showPassword ? 'visibility_off' : 'visibility'}
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                    Nome Completo
+                                </label>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                        badge
                                     </span>
-                                </button>
+                                    <input
+                                        type="text"
+                                        value={ctrl.fullName}
+                                        onChange={(e) => ctrl.setFullName(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                        placeholder="Seu nome completo"
+                                        required
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                    Curso
+                                </label>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+                                        school
+                                    </span>
+                                    <select
+                                        value={ctrl.selectedCourse}
+                                        onChange={(e) => ctrl.setSelectedCourse(e.target.value)}
+                                        className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none appearance-none cursor-pointer"
+                                        required
+                                    >
+                                        <option value="" disabled>Selecione seu curso</option>
+                                        {ctrl.courses.map(course => (
+                                            <option key={course.id} value={course.id}>
+                                                {course.name} ({course.university?.name || 'Uni'} - {course.shift || 'Geral'})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                        keyboard_arrow_down
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                    Usuário (Email)
+                                </label>
+                                <div className="relative">
+                                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                        person
+                                    </span>
+                                    <input
+                                        type="text"
+                                        value={ctrl.username}
+                                        onChange={(e) => ctrl.setUsername(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                        placeholder="Seu usuário/email"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                        Senha
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={ctrl.showPassword ? "text" : "password"}
+                                            value={ctrl.password}
+                                            onChange={(e) => ctrl.setPassword(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                            placeholder="Sua senha"
+                                            required
+                                            minLength={6}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => ctrl.setShowPassword(!ctrl.showPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-primary rounded-lg"
+                                        >
+                                            <span className="material-symbols-outlined text-xl flex items-center justify-center">
+                                                {ctrl.showPassword ? 'visibility_off' : 'visibility'}
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                        Confirmar
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={ctrl.showPassword ? "text" : "password"}
+                                            value={ctrl.confirmPassword}
+                                            onChange={(e) => ctrl.setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                            placeholder="Confirme"
+                                            required
+                                            minLength={6}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold uppercase text-text-light-secondary dark:text-text-dark-secondary tracking-wider">
-                                Confirmar Senha
-                            </label>
-                            <input
-                                type={ctrl.showPassword ? "text" : "password"}
-                                value={ctrl.confirmPassword}
-                                onChange={(e) => ctrl.setConfirmPassword(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-text-light-primary dark:text-text-dark-primary"
-                                placeholder="Confirme a senha"
-                                required
-                                minLength={6}
-                            />
-                        </div>
+                        <button
+                            type="submit"
+                            disabled={ctrl.loading}
+                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] flex items-center justify-center gap-2 mt-2"
+                        >
+                            <span>Criar Minha Conta</span>
+                            <span className="material-symbols-outlined text-xl">arrow_forward</span>
+                        </button>
 
-                        <div className="pt-2">
-                            <button
-                                type="submit"
-                                disabled={ctrl.loading}
-                                className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm hover:translate-y-px"
-                            >
-                                <span className="text-sm">Cadastrar</span>
-                                <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                            </button>
+                        <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-white dark:bg-slate-900 text-slate-500 uppercase text-xs font-bold tracking-widest">ou</span>
+                            </div>
                         </div>
 
                         <div className="text-center">
-                            <button
-                                type="button"
-                                onClick={() => ctrl.router.push(ctrl.ROUTES.LOGIN)}
-                                className="text-xs text-slate-500 hover:text-primary font-medium transition-colors"
-                            >
-                                Já tem uma conta? Faça login
-                            </button>
+                            <p className="text-slate-600 dark:text-slate-400">
+                                Já possui uma conta?{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => ctrl.router.push(ctrl.ROUTES.LOGIN)}
+                                    className="text-primary hover:text-primary-dark font-bold hover:underline"
+                                >
+                                    Fazer login
+                                </button>
+                            </p>
                         </div>
                     </form>
                 </div>

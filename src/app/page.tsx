@@ -15,8 +15,13 @@ import { DbUser } from '../model/usersModel';
 interface CourseStats {
     code: string;
     name: string;
+    universityName: string;
+    shift: string | null;
+    modalities: string | null;
+    campus: string | null;
     disciplineCount: number;
     periods: number;
+    registeredPeriodsCount: number;
     status: 'active' | 'upcoming';
 }
 
@@ -274,6 +279,21 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
 };
 
 const CoursesSection = ({ courses, loading }: { courses: CourseStats[], loading: boolean }) => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 6;
+
+    const totalPages = Math.ceil(courses.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentCourses = courses.slice(startIndex, startIndex + itemsPerPage);
+
+    const handleNext = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+    };
+
+    const handlePrev = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    };
+
     return (
         <section className="py-20 bg-background-light dark:bg-background-dark" id="cursos">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -284,74 +304,217 @@ const CoursesSection = ({ courses, loading }: { courses: CourseStats[], loading:
                             Atualmente suportamos os seguintes cursos de graduação.
                         </p>
                     </div>
+
+                    {/* Pagination Controls - Desktop */}
+                    {!loading && totalPages > 1 && (
+                        <div className="hidden md:flex items-center gap-4">
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                Página {currentPage} de {totalPages}
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handlePrev}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary/50 transition-colors shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined text-lg">chevron_left</span>
+                                </button>
+                                <button
+                                    onClick={handleNext}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary/50 transition-colors shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined text-lg">chevron_right</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 {/* Courses Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Dynamic Courses */}
                     {loading && (
                         <div className="col-span-full text-center py-8">
-                            <p className="text-gray-500">Carregando cursos...</p>
+                            <p className="text-gray-500 animate-pulse italic">Carregando cursos disponíveis...</p>
                         </div>
                     )}
-                    {!loading && courses.map((course) => (
-                        course.status === 'active' ? (
+                    {!loading && currentCourses.map((course) => {
+                        const isActive = course.status === 'active';
+                        return (
                             <Link
                                 key={course.code}
-                                href={`/${course.code}`}
-                                className="group bg-white dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark transition-all hover:border-primary dark:hover:border-primary cursor-pointer"
+                                href={isActive ? `/${course.code}` : '#'}
+                                className={`group flex flex-col bg-white dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark transition-all duration-300 shadow-sm hover:shadow-lg ${!isActive ? 'opacity-60 grayscale-[0.5] cursor-not-allowed pointer-events-none' : 'hover:border-primary/50'}`}
                             >
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary">
-                                        <span className="material-symbols-outlined">computer</span>
-                                    </div>
-                                    <span className="text-xs font-semibold px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">
-                                        Ativo
-                                    </span>
+                                {/* Header with Course Name */}
+                                <div className={`${isActive ? 'bg-slate-900 dark:bg-slate-800 group-hover:bg-primary' : 'bg-gray-200 dark:bg-slate-700'} p-4 rounded-t-xl transition-colors duration-300`}>
+                                    <h3 className={`text-sm font-bold ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'} leading-tight uppercase tracking-wide truncate`}>
+                                        {course.name}
+                                    </h3>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{course.name}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 uppercase">{course.code}</p>
-                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-sm">
-                                    <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-base">book</span> {course.disciplineCount} Disciplinas
-                                    </span>
-                                    <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-base">event</span> {course.periods} Períodos
-                                    </span>
+
+                                {/* Body */}
+                                <div className="p-5 flex-1 flex flex-col relative">
+                                    {/* University Name */}
+                                    <div className="mb-4">
+                                        <p className="text-[11px] leading-tight text-gray-700 dark:text-gray-300 font-medium uppercase tracking-wider mb-1">
+                                            {course.universityName}
+                                        </p>
+                                        <p className="text-[10px] leading-tight text-gray-500 dark:text-gray-400 italic">
+                                            Campus {course.campus}
+                                        </p>
+                                        {!isActive && (
+                                            <p className="text-[10px] mt-1.5 font-bold text-primary dark:text-blue-400 bg-primary/5 dark:bg-blue-400/10 py-1 px-2 rounded-md inline-block">
+                                                {course.registeredPeriodsCount} de {course.periods} períodos prontos
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Shift and Modality */}
+                                    <div className="mb-6">
+                                        <div className="flex items-center gap-2 text-[12px] text-gray-500 dark:text-gray-400">
+                                            <span className="italic">{course.shift || 'Integral'}</span>
+                                            <span>-</span>
+                                            <span className="italic">{course.modalities || 'Graduação'}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer Stats */}
+                                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-tighter">Disciplinas</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-white">{course.disciplineCount}</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-tighter">Períodos</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-white">{course.periods}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Status Badge */}
+                                    <div className="absolute top-2 right-2 flex gap-1 z-10">
+                                        {isActive ? (
+                                            <span className="text-[9px] font-bold px-1.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded shadow-sm">
+                                                ATIVO
+                                            </span>
+                                        ) : (
+                                            <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded shadow-sm">
+                                                EM BREVE
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </Link>
-                        ) : (
-                            <div
-                                key={course.code}
-                                className="group bg-white dark:bg-surface-dark rounded-xl p-6 border border-border-light dark:border-border-dark transition-all opacity-70 cursor-not-allowed pointer-events-none"
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-primary">
-                                        <span className="material-symbols-outlined">computer</span>
-                                    </div>
-                                    <span className="text-xs font-semibold px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-full">
-                                        Em Breve
-                                    </span>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{course.name}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 uppercase">{course.code}</p>
-                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-sm">
-                                    <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-base">book</span> {course.disciplineCount} Disciplinas
-                                    </span>
-                                    <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-base">event</span> {course.periods} Períodos
-                                    </span>
-                                </div>
-                            </div>
-                        )
-                    ))}
+                        );
+                    })}
 
-                    {/* Em Breve placeholder if needed, or remove */}
                     {!loading && courses.length === 0 && (
                         <div className="col-span-full text-center py-4">
                             <p className="text-gray-500">Nenhum curso disponível no momento.</p>
                         </div>
                     )}
+                </div>
+
+                {/* Pagination Controls - Mobile */}
+                {!loading && totalPages > 1 && (
+                    <div className="flex md:hidden flex-col items-center gap-4 mt-8">
+                        <div className="flex gap-4 w-full">
+                            <button
+                                onClick={handlePrev}
+                                disabled={currentPage === 1}
+                                className="flex-1 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary/50 transition-colors shadow-sm font-medium text-sm flex items-center justify-center gap-2"
+                            >
+                                <span className="material-symbols-outlined text-base">chevron_left</span> Anterior
+                            </button>
+                            <button
+                                onClick={handleNext}
+                                disabled={currentPage === totalPages}
+                                className="flex-1 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed hover:border-primary/50 transition-colors shadow-sm font-medium text-sm flex items-center justify-center gap-2"
+                            >
+                                Próximo <span className="material-symbols-outlined text-base">chevron_right</span>
+                            </button>
+                        </div>
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 italic">
+                            Página {currentPage} de {totalPages}
+                        </span>
+                    </div>
+                )}
+            </div>
+        </section>
+    );
+};
+
+const ContributionSection = () => {
+    return (
+        <section className="py-20 bg-white dark:bg-slate-900 border-t border-border-light dark:border-border-dark">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-primary/5 dark:bg-primary/10 rounded-3xl p-8 md:p-12 border border-primary/20 relative overflow-hidden">
+                    {/* Decorative blobs */}
+                    <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div className="max-w-4xl relative z-10">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-6">
+                            <span className="material-symbols-outlined text-sm">rocket_launch</span> Contribua com a plataforma
+                        </div>
+
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-6">
+                            Não encontrou seu curso?
+                        </h2>
+                        <p className="text-lg text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl">
+                            O Horários é uma plataforma colaborativa e fomos feitos para crescer. Se o seu curso de graduação ainda não está disponível, você pode nos ajudar a trazê-lo para o sistema!
+                        </p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-12">
+                            <div className="group space-y-4">
+                                <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/5 group-hover:scale-110 group-hover:-rotate-3 transition-transform">
+                                    <span className="material-symbols-outlined text-3xl">list_alt</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Grade Curricular</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">Lista das matérias obrigatórias, optativas e seus códigos oficiais.</p>
+                                </div>
+                            </div>
+                            <div className="group space-y-4">
+                                <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/5 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+                                    <span className="material-symbols-outlined text-3xl">account_tree</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Fluxograma</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">Quais matérias são pré-requisitos de quais para montarmos o grafo inteligente.</p>
+                                </div>
+                            </div>
+                            <div className="group space-y-4">
+                                <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/5 group-hover:scale-110 group-hover:-rotate-3 transition-transform">
+                                    <span className="material-symbols-outlined text-3xl">military_tech</span>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-1">Regras de Formatura</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug">Carga horária de atividades complementares e horas de optativas necessárias.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col lg:flex-row items-center gap-6 p-6 bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-primary/10 shadow-lg shadow-primary/5">
+                            <div className="flex-1 flex gap-4 items-start">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 mt-1">
+                                    <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm">info</span>
+                                </div>
+                                <p className="text-gray-700 dark:text-gray-200 font-medium leading-relaxed">
+                                    Para adicionar um novo curso, basta entrar em contato. Nossa equipe técnica fará toda a automação e personalização para o seu currículo.
+                                </p>
+                            </div>
+                            <a
+                                href="https://wa.me/5521988567387?text=Olá! Gostaria de adicionar um novo curso ao sistema Horários."
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full lg:w-auto inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-bold rounded-xl text-white bg-primary hover:bg-primary-hover shadow-lg hover:shadow-primary/30 active:scale-95 transition-all duration-200"
+                            >
+                                <span className="material-symbols-outlined mr-2">forum</span>
+                                Falar com Admin
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -602,6 +765,7 @@ export default function HomePage() {
             <BannerSection user={ctrl.user} ROUTES={ROUTES} />
             <FeaturesSection getLinkHref={ctrl.getLinkHref} />
             <CoursesSection courses={ctrl.courses} loading={ctrl.loading} />
+            <ContributionSection />
             <TestimonialsSection comments={ctrl.comments} />
             <PricingSection ROUTES={ROUTES} getLinkHref={ctrl.getLinkHref} user={ctrl.user} />
             <WhatsAppFloatingButton />

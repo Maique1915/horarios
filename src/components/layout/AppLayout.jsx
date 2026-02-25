@@ -38,9 +38,13 @@ const AppLayout = ({ children }) => {
     const [effectiveCur, setEffectiveCur] = useState(cur);
 
     useEffect(() => {
+        // Define public routes that should not have a specific course context in the header
+        const genericRoutes = [ROUTES.HOME, ROUTES.LOGIN, ROUTES.REGISTER, ROUTES.PLANS];
+        const isGenericRoute = genericRoutes.includes(pathname);
+
         if (cur) {
             setEffectiveCur(cur);
-        } else {
+        } else if (!isGenericRoute) {
             const stored = localStorage.getItem('last_active_course');
             if (stored && stored !== 'admin') {
                 setEffectiveCur(stored);
@@ -48,9 +52,13 @@ const AppLayout = ({ children }) => {
                 // Fallback to user's registered course if available
                 setEffectiveCur(user.courses.code);
                 localStorage.setItem('last_active_course', user.courses.code);
+            } else {
+                setEffectiveCur(null);
             }
+        } else {
+            setEffectiveCur(null);
         }
-    }, [cur, user]);
+    }, [cur, user, pathname]);
 
     const hasCourseSelected = !!effectiveCur;
 
@@ -99,8 +107,8 @@ const AppLayout = ({ children }) => {
                 >
                     {/* Header da Sidebar */}
                     <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
-                        <button
-                            onClick={() => router.push('/')}
+                        <Link
+                            href="/"
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3 w-full"
                             title="Voltar para página inicial"
                         >
@@ -111,7 +119,7 @@ const AppLayout = ({ children }) => {
                             <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ml-2 font-semibold text-text-light-primary dark:text-text-dark-primary ${isSidebarExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden md:block'}`}>
                                 Horários CEFET
                             </span>
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Menu Items */}
@@ -176,8 +184,8 @@ const AppLayout = ({ children }) => {
                     className={`fixed inset-y-0 left-0 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark transition-transform duration-300 ease-in-out z-50 w-64 md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 >
                     <div className="flex items-center justify-between h-16 px-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
-                        <button
-                            onClick={() => router.push('/')}
+                        <Link
+                            href="/"
                             className="hover:opacity-80 cursor-pointer transition-opacity flex items-center gap-3"
                         >
                             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -186,7 +194,7 @@ const AppLayout = ({ children }) => {
                             <span className="font-semibold text-text-light-primary dark:text-text-dark-primary ml-2">
                                 Horários CEFET
                             </span>
-                        </button>
+                        </Link>
                         <button
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500"
@@ -232,9 +240,23 @@ const AppLayout = ({ children }) => {
                                     <span className="material-symbols-outlined">menu</span>
                                 </button>
                             )}
-                            <h1 className="text-lg md:text-xl font-bold text-text-light-primary dark:text-text-dark-primary truncate max-w-[200px] md:max-w-none">
-                                Horários CEFET {hasCourseSelected && effectiveCur ? `- ${effectiveCur.toUpperCase()}` : ''}
-                            </h1>
+                            <Link
+                                href="/"
+                                className="flex items-center gap-2 hover:opacity-80 transition-opacity group"
+                                title="Ir para o Início"
+                            >
+                                <div className="bg-primary rounded-lg p-1.5 flex items-center justify-center shadow-sm">
+                                    <span className="material-symbols-outlined text-white text-sm md:text-base">school</span>
+                                </div>
+                                <h1 className="text-lg md:text-xl font-bold text-text-light-primary dark:text-text-dark-primary tracking-tight">
+                                    Horários CEFET
+                                    {hasCourseSelected && effectiveCur && (
+                                        <span className="text-primary/70 dark:text-primary/50 ml-1 hidden sm:inline">
+                                            - {effectiveCur.toUpperCase()}
+                                        </span>
+                                    )}
+                                </h1>
+                            </Link>
                         </div>
 
 
