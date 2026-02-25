@@ -1,23 +1,19 @@
-'use client';
+import React from 'react';
+import { loadCoursesRegistry } from '../../../services/disciplinaService';
+import AdminCoursePageClient from './AdminCoursePageClient';
 
-import React, { Suspense } from 'react';
-import ProtectedRoute from '../../../components/shared/ProtectedRoute';
-import LoadingSpinner from '../../../components/shared/LoadingSpinner';
-import { useEditCourseController } from './useEditCourseController';
-import EditCourseView from './EditCourseView';
-
-// Main Component
-const AdminCoursePageContent = () => {
-    const ctrl = useEditCourseController();
-    return <EditCourseView ctrl={ctrl} />;
+export async function generateStaticParams() {
+    try {
+        const courses = await loadCoursesRegistry();
+        return courses.map((course: any) => ({
+            cur: course._cu,
+        }));
+    } catch (error) {
+        console.error('Error generating static params:', error);
+        return [];
+    }
 }
 
 export default function AdminCoursePage() {
-    return (
-        <Suspense fallback={<LoadingSpinner message="Carregando..." />}>
-            <ProtectedRoute>
-                <AdminCoursePageContent />
-            </ProtectedRoute>
-        </Suspense>
-    );
+    return <AdminCoursePageClient />;
 }

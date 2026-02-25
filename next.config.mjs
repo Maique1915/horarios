@@ -3,7 +3,12 @@ const isGithubPages = process.env.GITHUB_PAGES === 'true';
 
 const nextConfig = {
     reactStrictMode: true,
-    // output: 'export', // Comentado para habilitar API Routes (Vercel suporta serverless)
+    // Note: output: 'export' is disabled because this app has:
+    // - API routes that need server-side execution
+    // - Dynamic admin pages requiring authentication
+    // - Real-time database connections
+    // Deploy to Vercel instead for full functionality
+    // output: isGithubPages ? 'export' : undefined,
     images: {
         unoptimized: true,
     },

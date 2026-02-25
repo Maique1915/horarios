@@ -1,4 +1,3 @@
-'use client';
 import { use } from 'react';
 import { notFound } from 'next/navigation';
 import { tableConfigs } from '../../../components/admin/tableConfig';
@@ -7,6 +6,16 @@ import TimeSlotsManager from '../../../components/admin/TimeSlotsManager';
 import ComplementaryGroupsManager from '../../../components/admin/ComplementaryGroupsManager';
 import ComplementaryActivitiesManager from '../../../components/admin/ComplementaryActivitiesManager';
 import UniversitiesManager from '../../../components/admin/UniversitiesManager';
+import TablePageClient from './TablePageClient';
+
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+    // Return empty array to skip this dynamic route in static export
+    // Admin pages require server-side functionality
+    return [];
+}
 
 interface PageProps {
     params: Promise<{
@@ -15,37 +24,5 @@ interface PageProps {
 }
 
 export default function TablePage({ params }: PageProps) {
-    const { tableName } = use(params);
-    const config = tableConfigs[tableName];
-
-    if (!config) {
-        notFound();
-    }
-
-    if (tableName === 'time_slots') {
-        return <TimeSlotsManager />;
-    }
-
-    if (tableName === 'complementary_activity_groups') {
-        return <ComplementaryGroupsManager />;
-    }
-
-    if (tableName === 'complementary_activities') {
-        return <ComplementaryActivitiesManager />;
-    }
-
-    if (tableName === 'universities') {
-        return <UniversitiesManager />;
-    }
-
-    return (
-        <div className="w-full">
-            <div className="mb-4">
-                <h1 className="text-xl font-bold">Gerenciar: {config.displayName}</h1>
-                <p className="text-xs text-slate-500">Tabela: {config.tableName}</p>
-            </div>
-
-            <TableManager config={config} />
-        </div>
-    );
+    return <TablePageClient params={params} />;
 }

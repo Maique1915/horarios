@@ -1,16 +1,19 @@
-'use client';
-
 import React, { Suspense } from 'react';
-import ProtectedRoute from '../../../components/shared/ProtectedRoute';
-import LoadingSpinner from '../../../components/shared/LoadingSpinner';
-import ClassesManager from '../../../components/admin/ClassesManager';
+import { loadCoursesRegistry } from '../../../services/disciplinaService';
+import ClassManagerPageClient from './ClassManagerPageClient';
+
+export async function generateStaticParams() {
+    try {
+        const courses = await loadCoursesRegistry();
+        return courses.map((course: any) => ({
+            cur: course._cu,
+        }));
+    } catch (error) {
+        console.error('Error generating static params:', error);
+        return [];
+    }
+}
 
 export default function ClassManagerPage() {
-    return (
-        <Suspense fallback={<LoadingSpinner message="Carregando..." />}>
-            <ProtectedRoute>
-                <ClassesManager />
-            </ProtectedRoute>
-        </Suspense>
-    );
+    return <ClassManagerPageClient />;
 }

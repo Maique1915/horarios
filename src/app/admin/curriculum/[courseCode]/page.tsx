@@ -1,8 +1,14 @@
-'use client';
+import React from 'react';
+import CurriculumPageClient from './CurriculumPageClient';
 
-import React, { use } from 'react';
-import EditCourseView from '../../../../app/[cur]/edit/EditCourseView';
-import { useEditCourseController } from '../../../../app/[cur]/edit/useEditCourseController';
+export const dynamic = 'force-static';
+export const dynamicParams = false;
+
+export async function generateStaticParams() {
+    // Return empty array to skip this dynamic route in static export
+    // Admin pages require server-side functionality
+    return [];
+}
 
 interface PageProps {
     params: Promise<{
@@ -11,12 +17,5 @@ interface PageProps {
 }
 
 export default function AdminCurriculumPage({ params }: PageProps) {
-    const { courseCode } = use(params);
-    const ctrl = useEditCourseController({ courseCode });
-
-    return (
-        <div className="h-full">
-            <EditCourseView ctrl={ctrl} />
-        </div>
-    );
+    return <CurriculumPageClient params={params} />;
 }
