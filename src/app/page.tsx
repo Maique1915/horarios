@@ -30,6 +30,10 @@ const useHomeController = () => {
     const [courses, setCourses] = useState<CourseStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState<CommentWithUser[]>([]);
+    
+    // Course Selection Modal State
+    const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+    const [pendingFeature, setPendingFeature] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,8 +84,92 @@ const useHomeController = () => {
         courses,
         loading,
         comments,
+        isCourseModalOpen,
+        setIsCourseModalOpen,
+        pendingFeature,
+        setPendingFeature,
         getLinkHref
     };
+};
+
+const CourseSelectionModal = ({ 
+    isOpen, 
+    onClose, 
+    courses, 
+    feature 
+}: { 
+    isOpen: boolean, 
+    onClose: () => void, 
+    courses: CourseStats[], 
+    feature: string | null 
+}) => {
+    if (!isOpen) return null;
+
+    const getFeaturePath = (courseCode: string) => {
+        switch (feature) {
+            case 'gera_grade': return ROUTES.COURSE(courseCode);
+            case 'horarios': return ROUTES.GRADES(courseCode);
+            case 'mapa': return ROUTES.FLOW(courseCode);
+            case 'previsao': return ROUTES.PREDICTION;
+            case 'atividades': return ROUTES.ACTIVITIES;
+            default: return ROUTES.COURSE(courseCode);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div 
+                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                onClick={onClose}
+            />
+            <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in duration-300">
+                <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Selecione seu curso</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1">Escolha um curso para visualizar as ferramentas disponíveis.</p>
+                    </div>
+                    <button 
+                        onClick={onClose}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                    >
+                        <span className="material-symbols-outlined text-slate-500">close</span>
+                    </button>
+                </div>
+                
+                <div className="p-8 overflow-y-auto max-h-[50vh]">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {courses.filter(c => c.status === 'active').map((course) => (
+                            <Link 
+                                key={course.code}
+                                href={getFeaturePath(course.code)}
+                                onClick={onClose}
+                                className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-primary hover:bg-primary/5 transition-all group"
+                            >
+                                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <span className="material-symbols-outlined">school</span>
+                                </div>
+                                <div>
+                                    <div className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors uppercase">{course.code}</div>
+                                    <div className="text-xs text-slate-500 dark:text-slate-400">{course.universityName}</div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="p-8 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Não encontrou seu curso? Entre em contato conosco.</p>
+                    <a 
+                        href="https://wa.me/5521988567387" 
+                        target="_blank" 
+                        className="text-sm font-bold text-primary hover:underline"
+                    >
+                        Falar com Suporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 // --- View Components ---
@@ -140,7 +228,22 @@ const BannerSection = ({ user, ROUTES }: { user: DbUser | null, ROUTES: any }) =
     );
 };
 
-const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }) => {
+const FeaturesSection = ({ 
+    getLinkHref, 
+    user, 
+    onOpenModal 
+}: { 
+    getLinkHref: (t: string) => string, 
+    user: any,
+    onOpenModal: (feature: string) => void 
+}) => {
+    const handleCardClick = (e: React.MouseEvent, feature: string) => {
+        if (!user) {
+            e.preventDefault();
+            onOpenModal(feature);
+        }
+    };
+
     return (
         <section className="py-24 bg-white dark:bg-slate-900" id="funcionalidades">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -155,7 +258,11 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {/* Funcionalidade 1: Gera Grade */}
-                    <Link href={getLinkHref('gera_grade')} className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                    <Link 
+                        href={getLinkHref('gera_grade')} 
+                        onClick={(e) => handleCardClick(e, 'gera_grade')}
+                        className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    >
                         <div className="relative aspect-[16/10] overflow-hidden bg-blue-50 dark:bg-blue-900/20">
                             <img src="/gera_grade.png" alt="Gerador de Grade" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
@@ -174,7 +281,11 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                     </Link>
 
                     {/* Funcionalidade 2: Horários */}
-                    <Link href={getLinkHref('horarios')} className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                    <Link 
+                        href={getLinkHref('horarios')} 
+                        onClick={(e) => handleCardClick(e, 'horarios')}
+                        className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    >
                         <div className="relative aspect-[16/10] overflow-hidden bg-purple-50 dark:bg-purple-900/20">
                             <img src="/horarios.png" alt="Consulta de Horários" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
@@ -193,7 +304,11 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                     </Link>
 
                     {/* Funcionalidade 3: Mapa de Disciplinas */}
-                    <Link href="/mapa" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                    <Link 
+                        href={getLinkHref('mapa')} 
+                        onClick={(e) => handleCardClick(e, 'mapa')}
+                        className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    >
                         <div className="relative aspect-[16/10] overflow-hidden bg-green-50 dark:bg-green-900/20">
                             <img src="/mapa.png" alt="Mapa de Disciplinas" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
@@ -212,7 +327,11 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                     </Link>
 
                     {/* Funcionalidade 4: Previsão */}
-                    <Link href="/previsao" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                    <Link 
+                        href={getLinkHref('previsao')} 
+                        onClick={(e) => handleCardClick(e, 'previsao')}
+                        className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    >
                         <div className="relative aspect-[16/10] overflow-hidden bg-orange-50 dark:bg-orange-900/20">
                             <img src="/predition.png" alt="Previsão de Formatura" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
@@ -231,7 +350,11 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                     </Link>
 
                     {/* Funcionalidade 5: Minhas Atividades */}
-                    <Link href="/activities" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                    <Link 
+                        href={getLinkHref('atividades')} 
+                        onClick={(e) => handleCardClick(e, 'atividades')}
+                        className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    >
                         <div className="relative aspect-[16/10] overflow-hidden bg-rose-50 dark:bg-rose-900/20">
                             <img src="/atividades.png" alt="Minhas Atividades" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
@@ -250,7 +373,11 @@ const FeaturesSection = ({ getLinkHref }: { getLinkHref: (t: string) => string }
                     </Link>
 
                     {/* Funcionalidade 6: Perfil Acadêmico */}
-                    <Link href="/profile" className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                    <Link 
+                        href={getLinkHref('perfil')} 
+                        onClick={(e) => handleCardClick(e, 'perfil')}
+                        className="group flex flex-col bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                    >
                         <div className="relative aspect-[16/10] overflow-hidden bg-cyan-50 dark:bg-cyan-900/20">
                             <img src="/perfil.png" alt="Perfil Acadêmico" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent opacity-60"></div>
@@ -719,16 +846,32 @@ const WhatsAppFloatingButton = () => {
 export default function HomePage() {
     const ctrl = useHomeController();
 
+    const handleOpenModal = (feature: string) => {
+        ctrl.setPendingFeature(feature);
+        ctrl.setIsCourseModalOpen(true);
+    };
+
     return (
         <>
             <BannerSection user={ctrl.user} ROUTES={ROUTES} />
-            <FeaturesSection getLinkHref={ctrl.getLinkHref} />
+            <FeaturesSection 
+                getLinkHref={ctrl.getLinkHref} 
+                user={ctrl.user}
+                onOpenModal={handleOpenModal}
+            />
             <CoursesSection courses={ctrl.courses} loading={ctrl.loading} />
             <ContributionSection />
             <TestimonialsSection comments={ctrl.comments} loading={ctrl.loading} />
             <PricingSection ROUTES={ROUTES} user={ctrl.user} />
             <CTASection />
             <WhatsAppFloatingButton />
+
+            <CourseSelectionModal 
+                isOpen={ctrl.isCourseModalOpen}
+                onClose={() => ctrl.setIsCourseModalOpen(false)}
+                courses={ctrl.courses}
+                feature={ctrl.pendingFeature}
+            />
         </>
     );
 }
