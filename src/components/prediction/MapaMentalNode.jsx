@@ -57,6 +57,13 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId }) => {
             style={{ backgroundColor: periodColor }}
           />
 
+          {/* Optional badge */}
+          {node.isOptional && (
+            <div className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-purple-400 dark:bg-purple-600 text-white text-[9px] font-bold shadow-sm">
+              OPT
+            </div>
+          )}
+
           <p className="text-xs font-bold font-mono opacity-60 mb-0.5 leading-none">
             {node.acronym || node.id}
           </p>

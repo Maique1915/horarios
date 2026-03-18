@@ -56,7 +56,15 @@ const useCronogramaController = () => {
         const sortedPeriods = Array.from(periodosMap.keys()).sort((a: any, b: any) => a - b);
 
         sortedPeriods.forEach((periodo: any) => {
-            const disciplinasNoPeriodo = periodosMap.get(periodo);
+            let disciplinasNoPeriodo = periodosMap.get(periodo);
+            // Sort disciplines by alphabetic part of code only (ignoring numeric part)
+            disciplinasNoPeriodo = disciplinasNoPeriodo.sort((a: string, b: string) => {
+                const getAlphabeticPart = (code: string) => code.replace(/\d+/g, '');
+                const alphaPart_a = getAlphabeticPart(a);
+                const alphaPart_b = getAlphabeticPart(b);
+                return alphaPart_a.localeCompare(alphaPart_b);
+            });
+            
             const columnX = (periodo - 1) * COLUMN_WIDTH;
 
             // Add Period Title Node
@@ -91,6 +99,7 @@ const useCronogramaController = () => {
                         width: NODE_WIDTH,
                         height: NODE_HEIGHT,
                         depth: periodo,
+                        isOptional: disciplina._el || disciplina._category === 'OPTIONAL',
                     });
                 }
             });

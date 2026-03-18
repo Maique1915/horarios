@@ -1,0 +1,67 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           ADICIONAR DISCIPLINAS DE FÍSICA - GUIA RÁPIDO                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📊 O QUE FOI GERADO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. physics_subjects.sql         ← SQL pronto para colar no Supabase
+2. csv_to_sql_physics.py        ← Script Python para regenerar
+3. physics_prerequisites.sql    ← SQL dos pré-requisitos (opcional)
+4. ADICIONAR_DISCIPLINAS.md     ← Documentação completa
+5. PHYSICS_IMPORT_SUMMARY.md    ← Resumo técnico
+
+🚀 PASSO A PASSO (3 PASSOS):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASSO 1: Copie o SQL
+  $ cat physics_subjects.sql
+
+PASSO 2: Cole no Supabase
+  • Abra: https://supabase.com/dashboard
+  • SQL Editor → New Query
+  • Cole todo o conteúdo de physics_subjects.sql
+  • Clique em: Run ou Execute
+
+PASSO 3: Pronto!
+  • 45 disciplinas foram adicionadas
+  • Veja em: http://localhost:3000/admin/subjects
+  • Teste em: http://localhost:3000/fisica/cronograma
+
+📋 DADOS INSERIDOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total: 45 disciplinas
+Períodos: 1º ao 9º semestre
+Optativas: 4 (8F, 9B, 9C, 9D)
+Status: Ativas e prontas para uso
+
+📝 SE PRECISAR REGENERAR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Se o CSV mudar:
+  $ cd /home/maiq/Projetos/Horarios
+  $ python3 csv_to_sql_physics.py fisica.csv physics_subjects.sql
+
+🔗 PRÉ-REQUISITOS (OPCIONAL):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Depois de inserir as disciplinas, você pode:
+
+Opção 1: Interface Web (Recomendado)
+  http://localhost:3000/admin/subjects
+  → Selecione Física
+  → Clique em cada disciplina
+  → Adicione pré-requisitos
+
+Opção 2: SQL (physics_prerequisites.sql)
+  Copie o conteúdo e execute no Supabase
+  (Requer confirmar IDs das disciplinas primeiro)
+
+❓ DÚVIDAS?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Leia: ADICIONAR_DISCIPLINAS.md (documentação completa)
+Leia: PHYSICS_IMPORT_SUMMARY.md (resumo técnico)
+
+═══════════════════════════════════════════════════════════════════════════════

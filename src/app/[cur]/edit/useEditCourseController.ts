@@ -62,6 +62,7 @@ export const useEditCourseController = (props?: { courseCode?: string }) => {
         if (result.success) {
             setEditingDisciplina(null);
             setEditingDisciplineId(null);
+            setNewDisciplina({ ...defaultNewDisciplina });
             setShowForm(false);
             alert('✅ Disciplina atualizada com sucesso!');
         } else {
@@ -84,6 +85,7 @@ export const useEditCourseController = (props?: { courseCode?: string }) => {
         const result = await addDisciplina(newDisciplinaData);
         console.log('Controller: Add result:', result);
         if (result.success) {
+            setNewDisciplina({ ...defaultNewDisciplina });
             setShowForm(false);
             alert('✅ Disciplina adicionada com sucesso!');
         } else {

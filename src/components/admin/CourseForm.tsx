@@ -8,16 +8,16 @@ import { fetchAllUniversities, DbUniversity } from '../../model/universitiesMode
 const formSchema = z.object({
     code: z.string().min(2, "O código deve ter pelo menos 2 caracteres"),
     name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-    shift: z.string().min(1, "O turno é obrigatório").nullable(),
-    university_id: z.number().nullable().refine(val => val !== null && val > 0, {
+    shift: z.string().min(1, "O turno é obrigatório").or(z.literal('')).transform(val => val || null).nullable(),
+    university_id: z.coerce.number().positive("A universidade é obrigatória").nullable().refine(val => val !== null && val > 0, {
         message: "A universidade é obrigatória"
     }),
-    needs_complementary_activities: z.boolean(),
+    needs_complementary_activities: z.boolean().default(false),
     credit_categories: z.array(z.object({
         id: z.string(),
         name: z.string().min(1, "O nome da categoria é obrigatório"),
-        required_hours: z.number().min(0, "As horas devem ser um número positivo"),
-    })),
+        required_hours: z.coerce.number().min(0, "As horas devem ser um número positivo"),
+    })).default([]),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -89,7 +89,26 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
     };
 
     const onError = (errors: any) => {
-        console.error('Form Validation Errors:', errors);
+        console.error('Form Validation Errors:', JSON.stringify(errors, null, 2));
+        
+        // Try to find the first field with an error
+        const flattenErrors = (obj: any, prefix = ''): string[] => {
+            const msgs: string[] = [];
+            for (const key in obj) {
+                const fullKey = prefix ? `${prefix}.${key}` : key;
+                if (obj[key]?.message) {
+                    msgs.push(`${fullKey}: ${obj[key].message}`);
+                } else if (typeof obj[key] === 'object') {
+                    msgs.push(...flattenErrors(obj[key], fullKey));
+                }
+            }
+            return msgs;
+        };
+
+        const allErrors = flattenErrors(errors);
+        if (allErrors.length > 0) {
+            alert(`Erro de validação:\n\n${allErrors.slice(0, 3).join('\n')}`);
+        }
     };
 
     const addCategory = () => {
@@ -137,7 +156,10 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
                         Universidade <span className="text-red-500">*</span>
                     </label>
                     <select
-                        {...register('university_id', { valueAsNumber: true })}
+                        {...register('university_id', { 
+                            valueAsNumber: false,
+                            setValueAs: (val) => val === '' ? null : (typeof val === 'string' ? parseInt(val, 10) : val)
+                        })}
                         className={`w-full rounded-xl border ${errors.university_id ? 'border-red-500' : 'border-slate-300 dark:border-slate-700'
                             } bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary p-2.5 outline-none transition-all`}
                     >
@@ -226,7 +248,14 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
                                         <span className="text-[10px] text-slate-500 whitespace-nowrap">ID: {fields[index].id}</span>
                                         <input
                                             type="number"
-                                            {...register(`credit_categories.${index}.required_hours`, { valueAsNumber: true })}
+                                            {...register(`credit_categories.${index}.required_hours`, { 
+                                                valueAsNumber: true,
+                                                setValueAs: (value) => {
+                                                    if (value === '' || value === undefined || value === null) return 0;
+                                                    const num = typeof value === 'string' ? parseInt(value, 10) : Number(value);
+                                                    return isNaN(num) ? 0 : num;
+                                                }
+                                            })}
                                             className="w-20 bg-transparent border-none text-[10px] text-slate-400 focus:ring-0 p-0"
                                             placeholder="Horas req."
                                         />
