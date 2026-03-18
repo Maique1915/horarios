@@ -114,47 +114,19 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                         </div>
                     </div>
                 ) : (
-                    /* DEFAULT MODE: Show Blacklist Electives */
+                    /* DEFAULT MODE: Empty State */
                     <div className="space-y-4">
-                        <div>
-                            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 block">
-                                Matérias Optativas
+                        <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                            <h3 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-2 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-base">info</span>
+                                Como Adicionar Optativas
                             </h3>
-                            <div className="space-y-1">
-                                {optionals.map(subject => {
-                                    const isBlacklisted = subject._id !== undefined && ctrl.blacklistedIds.has(subject._id);
-                                    // Check if currently IN the plan (Fixed or Predicted)
-                                    // This is expensive to scan every render, optimization needed if slow.
-                                    const isInPlan = ctrl.simulationResult?.semesters.some(sem => sem.some(s => s._id === subject._id));
-                                    const isCompleted = ctrl.completedSubjects.some(s => s._id === subject._id);
-
-                                    if (isCompleted) return null; // Don't show completed
-
-                                    return (
-                                        <div key={subject._id} className="flex items-center justify-between group p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className={`truncate text-sm ${isBlacklisted ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-300'}`} title={subject._di}>
-                                                        {subject._di}
-                                                    </div>
-                                                    <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                                                        {(subject._ap || 0) + (subject._at || 0)} cr • {subject._workload}h
-                                                    </div>
-                                                </div>
-                                                {ctrl.canInteract && (
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={!isBlacklisted}
-                                                        onChange={() => subject._id !== undefined && ctrl.toggleBlacklist(subject._id)}
-                                                        className="rounded border-slate-300 text-primary focus:ring-primary"
-                                                        title={isBlacklisted ? "Incluir na simulação" : "Remover da simulação"}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                1. Clique em um período no mapa para editá-lo<br/>
+                                2. Veja a lista de matérias sugeridas (sem conflito de horário)<br/>
+                                3. Adicione optativas ou remova matérias do período<br/>
+                                4. Clique em "Sair da Edição" para voltar ao modo visualização
+                            </p>
                         </div>
                     </div>
                 )}
