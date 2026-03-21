@@ -147,6 +147,25 @@ const CanvasView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController>
                 </button>
             )}
 
+            {/* Invalid Drop Reason Toast */}
+            {ctrl.invalidDropReason && (
+                <div className="absolute top-4 left-4 z-50 max-w-sm">
+                    <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-600 rounded-lg px-4 py-3 shadow-2xl flex items-start gap-3 animate-pulse">
+                        <span className="material-symbols-outlined text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5 text-xl">error</span>
+                        <div className="flex-1">
+                            <p className="text-sm font-bold text-red-800 dark:text-red-300">❌ Não pode soltar aqui!</p>
+                            <p className="text-xs text-red-700 dark:text-red-400 mt-1 font-medium">{ctrl.invalidDropReason}</p>
+                        </div>
+                        <button
+                            onClick={() => ctrl.setInvalidDropReason(null)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 flex-shrink-0 mt-0.5 hover:scale-125 transition-transform"
+                        >
+                            <span className="material-symbols-outlined text-base">close</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Info Bar */}
             <div className="absolute top-4 right-4 z-10 flex gap-2">
                 <div className="bg-white dark:bg-slate-800 px-4 py-2 rounded-lg shadow-sm border border-border-light dark:border-border-dark text-sm flex items-center gap-2">
@@ -175,6 +194,14 @@ const CanvasView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController>
                             ctrl.setSelectedNodeId(prev => prev === nodeId ? null : nodeId);
                         }
                     }}
+                    // DnD Props
+                    draggedSubject={ctrl.draggedSubject}
+                    hoveredSemesterIndex={ctrl.hoveredSemesterIndex}
+                    dragPosition={ctrl.dragPosition}
+                    isHoverCollision={ctrl.isHoverCollision}
+                    onDragStart={ctrl.handleDragStart}
+                    onDragMove={ctrl.handleDragMove}
+                    onDragEnd={ctrl.handleDragEnd}
                 />
             )}
         </div>

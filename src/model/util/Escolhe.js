@@ -12,6 +12,13 @@ export default class Escolhe {
         // Initialize NxN collision matrix with -1
         this.n = this.genesis.length;
         this.matrix = Array(this.n).fill(null).map(() => Array(this.n).fill(-1));
+
+        // Allow subclasses to reduce search space before heavy processing
+        if (typeof this.reduz === 'function') {
+            this.reduz();
+            this.n = this.genesis.length;
+            this.matrix = Array(this.n).fill(null).map(() => Array(this.n).fill(-1));
+        }
     }
 
     normalize(subject) {
@@ -135,10 +142,24 @@ export default class Escolhe {
     }
 
     compare(a, b) {
-        // First priority: Number of subjects (more is better)
+        // First priority: Critical Path (Max individual weight)
+        const getMaxWeight = (arr) => {
+            let max = 0;
+            for (const s of arr) {
+                const w = this.weights.get(s._re) || 0;
+                if (w > max) max = w;
+            }
+            return max;
+        };
+
+        const maxA = getMaxWeight(a);
+        const maxB = getMaxWeight(b);
+        if (maxA !== maxB) return maxB - maxA;
+
+        // Second priority: Number of subjects (more is better)
         if (a.length !== b.length) return b.length - a.length;
 
-        // Second priority: Maximum criticality (unlocking longest chains)
+        // Third priority: Total weight sum
         const getSumWeight = (arr) => arr.reduce((acc, s) => acc + (this.weights.get(s._re) || 0), 0);
         return getSumWeight(b) - getSumWeight(a);
     }

@@ -2,18 +2,20 @@
 
 import React, { startTransition } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import ROUTES from '../../routes';
 import ThemeToggle from '../shared/ThemeToggle';
 
-const LandingHeader = () => {
+const Header = () => {
     const { user, logout, isExpired } = useAuth();
     const router = useRouter();
+    const params = useParams();
+    const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = React.useState(false); // User Dropdown
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false); // Mobile Nav Toggle
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
-    const [effectiveCur, setEffectiveCur] = React.useState(null);
+    const [effectiveCur, setEffectiveCur] = React.useState(params?.cur);
     const menuRef = React.useRef(null);
 
     React.useEffect(() => {
@@ -27,13 +29,17 @@ const LandingHeader = () => {
     }, []);
 
     React.useEffect(() => {
-        const stored = localStorage.getItem('last_active_course');
-        if (stored && stored !== 'admin') {
-            setEffectiveCur(stored);
-        } else if (user?.courses?.code && user.courses.code !== 'admin') {
-            setEffectiveCur(user.courses.code);
+        if (params?.cur) {
+            setEffectiveCur(params.cur);
+        } else {
+            const stored = localStorage.getItem('last_active_course');
+            if (stored && stored !== 'admin') {
+                setEffectiveCur(stored);
+            } else if (user?.courses?.code && user.courses.code !== 'admin') {
+                setEffectiveCur(user.courses.code);
+            }
         }
-    }, [user]);
+    }, [user, params?.cur]);
 
     const handleLogout = async () => {
         if (confirm('Deseja realmente sair?')) {
@@ -65,10 +71,37 @@ const LandingHeader = () => {
                             <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">Horários CEFET</span>
                         </Link>
 
-                        <div className="hidden md:flex space-x-8 text-center">
-                            <a href="#funcionalidades" className="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition">Funcionalidades</a>
-                            <a href="#cursos" className="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition">Cursos</a>
-                            <a href="#precos" className="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition">Planos</a>
+                        <div className="hidden md:flex items-center space-x-1">
+                            {pathname === '/' ? (
+                                <>
+                                    <a href="#funcionalidades" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition">Funcionalidades</a>
+                                    <a href="#cursos" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition">Cursos</a>
+                                    <a href="#precos" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-white transition">Planos</a>
+                                </>
+                            ) : (
+                                effectiveCur && (
+                                    <>
+                                        <Link href={`/${effectiveCur}`} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname === `/${effectiveCur}` ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}>
+                                            <span className="material-symbols-outlined text-xl">add_task</span>
+                                            Gera Grade
+                                        </Link>
+                                        <Link href={ROUTES.GRADES(effectiveCur)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname.includes('/grades') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}>
+                                            <span className="material-symbols-outlined text-xl">grid_on</span>
+                                            Horários
+                                        </Link>
+                                        <Link href={ROUTES.FLOW(effectiveCur)} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname.includes('/cronograma') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}>
+                                            <span className="material-symbols-outlined text-xl">timeline</span>
+                                            Cronograma
+                                        </Link>
+                                        {!isExpired && user?.is_paid && (
+                                            <Link href={ROUTES.PREDICTION} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${pathname.includes('/prediction') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}>
+                                                <span className="material-symbols-outlined text-xl">neurology</span>
+                                                Previsão
+                                            </Link>
+                                        )}
+                                    </>
+                                )
+                            )}
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -92,6 +125,7 @@ const LandingHeader = () => {
                                                 <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.name || user.username}</p>
                                             </div>
 
+                                            <div className="h-px bg-gray-50 dark:bg-slate-800 my-1" />
                                             <Link
                                                 href={ROUTES.PROFILE}
                                                 onClick={() => setIsMenuOpen(false)}
@@ -100,47 +134,6 @@ const LandingHeader = () => {
                                                 <span className="material-symbols-outlined text-lg">person</span>
                                                 Meu Perfil
                                             </Link>
-
-                                            {effectiveCur && (
-                                                <>
-                                                    <div className="h-px bg-gray-50 dark:bg-slate-800 my-1" />
-                                                    <Link
-                                                        href={`/${effectiveCur}`}
-                                                        onClick={() => setIsMenuOpen(false)}
-                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-primary dark:hover:text-blue-400 transition-colors"
-                                                    >
-                                                        <span className="material-symbols-outlined text-lg">add_task</span>
-                                                        Gera Grade
-                                                    </Link>
-                                                    <Link
-                                                        href={ROUTES.GRADES(effectiveCur)}
-                                                        onClick={() => setIsMenuOpen(false)}
-                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-primary dark:hover:text-blue-400 transition-colors"
-                                                    >
-                                                        <span className="material-symbols-outlined text-lg">grid_on</span>
-                                                        Horários
-                                                    </Link>
-                                                    <Link
-                                                        href={ROUTES.FLOW(effectiveCur)}
-                                                        onClick={() => setIsMenuOpen(false)}
-                                                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-primary dark:hover:text-blue-400 transition-colors"
-                                                    >
-                                                        <span className="material-symbols-outlined text-lg">timeline</span>
-                                                        Cronograma
-                                                    </Link>
-                                                    {!isExpired && user?.is_paid && (
-                                                        <Link
-                                                            href={ROUTES.PREDICTION}
-                                                            onClick={() => setIsMenuOpen(false)}
-                                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800/50 hover:text-primary dark:hover:text-blue-400 transition-colors"
-                                                        >
-                                                            <span className="material-symbols-outlined text-lg">neurology</span>
-                                                            Previsão
-                                                        </Link>
-                                                    )}
-                                                    <div className="h-px bg-gray-50 dark:bg-slate-800 my-1" />
-                                                </>
-                                            )}
 
                                             {user && (user.role === 'admin' || user.role === 'curso') && (
                                                 <Link
@@ -215,39 +208,52 @@ const LandingHeader = () => {
                             </div>
 
                             <nav className="flex flex-col gap-2">
-                                <a
-                                    href="#funcionalidades"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
-                                >
-                                    <span className="material-symbols-outlined">auto_awesome_motion</span>
-                                    Funcionalidades
-                                </a>
-                                <a
-                                    href="#cursos"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
-                                >
-                                    <span className="material-symbols-outlined">school</span>
-                                    Cursos
-                                </a>
-                                <a
-                                    href="#precos"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
-                                >
-                                    <span className="material-symbols-outlined">payments</span>
-                                    Planos
-                                </a>
+                                {pathname === '/' ? (
+                                    <>
+                                        <a
+                                            href="#funcionalidades"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                        >
+                                            <span className="material-symbols-outlined">auto_awesome_motion</span>
+                                            Funcionalidades
+                                        </a>
+                                        <a
+                                            href="#cursos"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                        >
+                                            <span className="material-symbols-outlined">school</span>
+                                            Cursos
+                                        </a>
+                                        <a
+                                            href="#precos"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                        >
+                                            <span className="material-symbols-outlined">payments</span>
+                                            Planos
+                                        </a>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href="/"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                    >
+                                        <span className="material-symbols-outlined">home</span>
+                                        Início
+                                    </Link>
+                                )}
 
-                                {user && effectiveCur && (
+                                {effectiveCur && (
                                     <>
                                         <div className="h-px bg-gray-50 dark:bg-slate-800 my-4" />
-                                        <p className="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Plataforma</p>
+                                        <p className="px-4 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Plataforma ({effectiveCur.toUpperCase()})</p>
                                         <Link
                                             href={`/${effectiveCur}`}
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                            className={`flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all ${pathname === `/${effectiveCur}` ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary'}`}
                                         >
                                             <span className="material-symbols-outlined">add_task</span>
                                             Gera Grade
@@ -255,7 +261,7 @@ const LandingHeader = () => {
                                         <Link
                                             href={ROUTES.GRADES(effectiveCur)}
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                            className={`flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all ${pathname.includes('/grades') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary'}`}
                                         >
                                             <span className="material-symbols-outlined">grid_on</span>
                                             Horários
@@ -263,7 +269,7 @@ const LandingHeader = () => {
                                         <Link
                                             href={ROUTES.FLOW(effectiveCur)}
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                            className={`flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all ${pathname.includes('/cronograma') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary'}`}
                                         >
                                             <span className="material-symbols-outlined">timeline</span>
                                             Cronograma
@@ -272,7 +278,7 @@ const LandingHeader = () => {
                                             <Link
                                                 href={ROUTES.PREDICTION}
                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary rounded-xl transition-all"
+                                                className={`flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-xl transition-all ${pathname.includes('/prediction') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-300 hover:bg-primary/5 hover:text-primary'}`}
                                             >
                                                 <span className="material-symbols-outlined">neurology</span>
                                                 Previsão
@@ -327,4 +333,4 @@ const LandingHeader = () => {
     );
 };
 
-export default LandingHeader;
+export default Header;

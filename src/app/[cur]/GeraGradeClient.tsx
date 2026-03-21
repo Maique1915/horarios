@@ -889,7 +889,7 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
 
     return (
         <>
-            <aside className="sticky top-0 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
+            <aside className="sticky top-16 z-40 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-border-light dark:border-border-dark">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
@@ -978,7 +978,7 @@ const SelectionView = ({ ctrl }: { ctrl: ReturnType<typeof useGeraGradeControlle
                 </div>
             </aside>
 
-            <div className="bg-background-light dark:bg-background-dark min-h-[calc(100vh-80px)] scroll-mt-20">
+            <div className="bg-background-light dark:bg-background-dark min-h-[calc(100vh-64px)] scroll-mt-20">
                 <div className="max-w-5xl mx-auto px-4 py-8">
                     {renderContent()}
                 </div>

@@ -36,6 +36,10 @@ export default class Grafos {
         } else {
             this.cr = cr;
         }
+
+        if (this.re.some(n => n.includes('MET') || n.includes('METO'))) {
+            console.log(`[Grafos] Constructor: CR=${this.cr}, Completed includes MET-like subject`);
+        }
     }
 
     matriz(): Subject[] {
@@ -63,7 +67,14 @@ export default class Grafos {
                 }
 
                 if (!temCreditos) {
+                    if (materia._di?.includes('Metodologia') || materia._re?.includes('MET')) {
+                        console.log(`[Grafos] !Candidate: ${materia._re} (${materia._di}) - Credits needed: ${minCreditos}, User has: ${this.cr}`);
+                    }
                     return false;
+                }
+
+                if (materia._di?.includes('Metodologia') || materia._re?.includes('MET')) {
+                    console.log(`[Grafos] ✓Candidate: ${materia._re} (${materia._di}) - CR=${this.cr} >= ${minCreditos}, temReq=${temReq}`);
                 }
 
                 return true;
@@ -82,20 +93,17 @@ export default class Grafos {
         //console.log(`    Verificando ${requisitos.length} pré-requisito(s): ${JSON.stringify(requisitos)}`);
 
         const resultado = requisitos.every(requisito => {
-            const isCredito = Number.isInteger(requisito);
-            const temCredito = isCredito && this.cr >= parseInt(String(requisito));
-
-            // Note: If requisito can be a string, includes needs a string.
-            const temMateria = !isCredito && this.re.includes(String(requisito));
-            const atende = temCredito || temMateria;
-
-            if (isCredito) {
-                //console.log(`      ${atende ? '✓' : '✗'} Crédito: ${requisito} (você tem: ${this.cr})`);
-            } else {
-                //console.log(`      ${atende ? '✓' : '✗'} Matéria: ${requisito} (${temMateria ? 'FEITA' : 'NÃO FEITA'})`);
+            // Check if it's a number or a string that looks like a number
+            const reqStr = String(requisito);
+            const isNumeric = !isNaN(Number(reqStr)) && !isNaN(parseFloat(reqStr));
+            
+            if (isNumeric) {
+                const totalNeeded = parseInt(reqStr, 10);
+                return this.cr >= totalNeeded;
             }
 
-            return atende;
+            // Otherwise, treat as subject acronym
+            return this.re.includes(reqStr);
         });
 
         //console.log(`    Resultado final: ${resultado ? '✓ TODOS OK' : '✗ FALTAM REQUISITOS'}`);

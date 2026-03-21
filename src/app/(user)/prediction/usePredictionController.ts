@@ -85,6 +85,13 @@ export const usePredictionController = () => {
     const [selectedSemesterIndex, setSelectedSemesterIndex] = useState<number | null>(null);
     const [selectedNodeId, setSelectedNodeId] = useState<string | number | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    // --- Drag and Drop State ---
+    const [draggedSubject, setDraggedSubject] = useState<Subject | null>(null);
+    const [hoveredSemesterIndex, setHoveredSemesterIndex] = useState<number | null>(null);
+    const [dragPosition, setDragPosition] = useState<{ x: number, y: number } | null>(null);
+    const [invalidDropReason, setInvalidDropReason] = useState<string | null>(null);
+
     const svgRef = useRef<SVGSVGElement>(null);
 
     // History State
@@ -113,11 +120,8 @@ export const usePredictionController = () => {
 
                 const courseCode = user.courses?.code || localStorage.getItem('last_active_course');
                 const [dbSubjects, dbCompleted, dbEnrollments] = await Promise.all([
-                    // @ts-ignore
                     loadDbData(courseCode),
-                    // @ts-ignore
                     loadCompletedSubjects(user.id),
-                    // @ts-ignore
                     loadCurrentEnrollments(user.id)
                 ]);
 
@@ -136,10 +140,9 @@ export const usePredictionController = () => {
         if (!authLoading && user) init();
     }, [user, authLoading]);
 
-    // History Init - Usar matrícula do período atual como base
+    // History Init
     useEffect(() => {
         if (!loading && history.length === 0) {
-            // Se o usuário já tem matérias matriculadas no período atual, use como primeira grade fixa
             const hasCurrentEnrollments = currentEnrollments.length > 0;
             const initialFixed = hasCurrentEnrollments ? [currentEnrollments] : [];
             
@@ -153,7 +156,7 @@ export const usePredictionController = () => {
         }
     }, [loading, currentEnrollments]);
 
-    // historyIndex dependency is sufficient to re-bind listener
+    // Undo/Redo Shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
@@ -170,6 +173,18 @@ export const usePredictionController = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [history, historyIndex]);
 
+    // Auto-dismiss invalid drop reason after 5 seconds
+    useEffect(() => {
+        if (invalidDropReason) {
+            console.log('📢 Mostrando mensagem:', invalidDropReason);
+            const timer = setTimeout(() => {
+                console.log('⏰ Auto-fechando mensagem');
+                setInvalidDropReason(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [invalidDropReason]);
+
 
     // --- Core Logic (Memoized) ---
     const simulationResult: SimulationResult | null = useMemo(() => {
@@ -177,8 +192,6 @@ export const usePredictionController = () => {
 
         const availableSubjects = allSubjects.filter(s => s._id !== undefined && !blacklistedIds.has(s._id) && s._ag);
 
-        // Considera matérias completadas E matérias do período atual para cálculo de pré-requisitos
-        // As matérias do período atual já estão em fixedSemesters[0] se existirem
         let simulatedCompleted = [...completedSubjects];
         const finalGrid: Subject[][] = [];
 
@@ -206,11 +219,42 @@ export const usePredictionController = () => {
 
     }, [allSubjects, completedSubjects, currentEnrollments, scheduleMeta, blacklistedIds, fixedSemesters, loading]);
 
+    // --- Collision Detection during Hover ---
+    const isHoverCollision = useMemo(() => {
+        if (!draggedSubject || hoveredSemesterIndex === null) return false;
+
+        const allSemesters = simulationResult?.semesters || [];
+        const targetSemester = allSemesters[hoveredSemesterIndex] || [];
+        
+        // 1. Check Time Collision with ALL subjects in target semester
+        // Exclude the dragged subject itself
+        const otherSubjectsInTarget = targetSemester.filter(s => s._re !== draggedSubject._re);
+        for (const s of otherSubjectsInTarget) {
+            if (checkCollision(draggedSubject, s)) return true; 
+        }
+
+        // 2. Check Prerequisites / Credits for this period
+        // Build list of subjects completed before hoveredSemesterIndex
+        let previousCompleted = [...completedSubjects];
+        for (let i = 0; i < hoveredSemesterIndex; i++) {
+            previousCompleted = [...previousCompleted, ...(allSemesters[i] || [])];
+        }
+        // Remove the dragged subject from previous levels if it was there (internal shift)
+        previousCompleted = previousCompleted.filter(s => s._re !== draggedSubject._re);
+
+        // Verify if subject can be taken in this semester based on prerequisites
+        const grafos = new Grafos(allSubjects, -1, previousCompleted);
+        const candidates = grafos.matriz();
+        if (!candidates.some(c => c._re === draggedSubject._re)) {
+            return true; // Prerequisite or Credit lock
+        }
+
+        return false;
+    }, [draggedSubject, hoveredSemesterIndex, simulationResult, allSubjects, completedSubjects]);
+
     const suggestions = useMemo(() => {
         if (selectedSemesterIndex === null) return [];
 
-        // Considera completadas as matérias de semestres anteriores ao selecionado
-        // Se o primeiro semestre contém matrícula atual, já está em fixedSemesters[0]
         let previousCompleted = [...completedSubjects];
         for (let i = 0; i < selectedSemesterIndex; i++) {
             previousCompleted = [...previousCompleted, ...fixedSemesters[i]];
@@ -251,19 +295,15 @@ export const usePredictionController = () => {
         const nodeMap = new Map();
         
         const periodoAtual = getCurrentPeriod();
+        const [currentYearStr, currentSemStr] = periodoAtual.split('.');
+        const baseYear = parseInt(currentYearStr);
+        const baseSemester = parseInt(currentSemStr);
+        const hasCurrentEnrollments = currentEnrollments.length > 0;
 
         simulationResult.semesters.forEach((subjects, index) => {
             const semesterNum = index + 1;
             const columnX = (semesterNum - 1) * COLUMN_WIDTH;
 
-            // Determina ano e semestre baseado no período atual
-            const periodoAtual = getCurrentPeriod(); // Ex: "2026.1"
-            const [currentYearStr, currentSemStr] = periodoAtual.split('.');
-            const baseYear = parseInt(currentYearStr);
-            const baseSemester = parseInt(currentSemStr);
-
-            // Se o primeiro semestre fixo contém matrículas do período atual
-            const hasCurrentEnrollments = currentEnrollments.length > 0;
             const firstIsCurrentPeriod = hasCurrentEnrollments && index === 0;
 
             let displayYear: number;
@@ -271,12 +311,10 @@ export const usePredictionController = () => {
             let labelSuffix = 'Previsto';
 
             if (firstIsCurrentPeriod) {
-                // Primeiro período é o atual
                 displayYear = baseYear;
                 displaySemester = baseSemester;
                 labelSuffix = 'Atual';
             } else {
-                // Calcula offset considerando que o primeiro pode ser o atual
                 const addedSemesters = hasCurrentEnrollments ? index : index + 1;
                 const futureSemesterVal = baseSemester + addedSemesters;
                 const yearOffset = Math.floor((futureSemesterVal - 1) / 2);
@@ -355,10 +393,8 @@ export const usePredictionController = () => {
             fixedSemesters: newFixed,
             blacklistedIds: newBlacklisted
         };
-
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push(newState);
-
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
     };
@@ -385,68 +421,284 @@ export const usePredictionController = () => {
 
     const toggleBlacklist = (subjectId: string | number) => {
         const newSet = new Set(blacklistedIds);
-
         if (newSet.has(subjectId)) {
-            // Removendo da blacklist (adicionando de volta)
             newSet.delete(subjectId);
             setBlacklistedIds(newSet);
             pushToHistory(fixedSemesters, newSet);
         } else {
-            // Adicionando à blacklist (removendo da grade)
             const subjectToRemove = allSubjects.find(s => s._id === subjectId);
             if (!subjectToRemove) return;
 
             const isSameSubject = (a: Subject, b: Subject) => a._id === b._id;
-
-            // Horas já COMPLETADAS de optativas (não conta as que está cursando)
-            // _el = true significa OPTATIVA
             const completedOptionalHours = completedSubjects
                 .filter(s => s._el || s._category === 'OPTIONAL')
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
-
-            // Horas que está CURSANDO AGORA de optativas
             const currentOptionalHours = currentEnrollments
                 .filter(s => s._el || s._category === 'OPTIONAL')
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
-
-            // Horas da disciplina que está tentando remover (se for optativa)
-            const removingOptionalHours = (subjectToRemove._el || subjectToRemove._category === 'OPTIONAL')
-                ? (subjectToRemove._workload || 0)
-                : 0;
-
-            // Pool de horas disponíveis (disciplinas que ainda podem ser cursadas)
-            // INCLUINDO a disciplina que está sendo removida se ela estiver no pool
             const availablePoolHours = allSubjects
                 .filter(s =>
-                    (s._el || s._category === 'OPTIONAL') && // É optativa
-                    s._ag && // Está ativa
-                    !completedSubjects.some(c => isSameSubject(c, s)) && // Não foi concluída
-                    !currentEnrollments.some(e => isSameSubject(e, s)) && // Não está cursando
+                    (s._el || s._category === 'OPTIONAL') && 
+                    s._ag && 
+                    !completedSubjects.some(c => isSameSubject(c, s)) && 
+                    !currentEnrollments.some(e => isSameSubject(e, s)) && 
                     s._id !== undefined &&
-                    !newSet.has(s._id) && // Não está na blacklist atual
-                    s._id !== subjectId // NÃO é a disciplina sendo removida
+                    !newSet.has(s._id) && 
+                    s._id !== subjectId 
                 )
                 .reduce((acc, s) => acc + (s._workload || 0), 0);
 
-            // Total de horas que o usuário pode conseguir:
-            // = horas já completadas + horas cursando agora + horas disponíveis no pool
             const totalPossibleHours = completedOptionalHours + currentOptionalHours + availablePoolHours;
-
-            // Se remover esta disciplina, o total possível será insuficiente
             if (totalPossibleHours < 360) {
-                alert(`IMPOSSÍVEL REMOVER:\n\nPara formar, você precisa de 360 horas de optativas.\n\nVocê já garantiu: ${completedOptionalHours}h.\nO banco de matérias restante teria: ${availablePoolHours}h.\nTotal Possível: ${totalPossibleHours}h.\n\nSe você excluir esta matéria, o sistema não terá opções suficientes para te formar.`);
+                alert(`IMPOSSÍVEL REMOVER: Pelo menos 360h de optativas são necessárias.`);
                 return;
             }
-
             newSet.add(subjectId);
-
-            // Remove the blacklisted subject from all fixed semesters
-            const newFixed = fixedSemesters.map(semester =>
-                semester.filter(subject => subject._id !== subjectId)
-            );
-
+            const newFixed = fixedSemesters.map(semester => semester.filter(subject => subject._id !== subjectId));
             setBlacklistedIds(newSet);
             pushToHistory(newFixed, newSet);
+        }
+    };
+
+    const handleDragStart = (subject: Subject, initialPos: { x: number, y: number }) => {
+        // TODO: Reativar após testes
+        // if (!canInteract) return;
+        console.log('🔴 handleDragStart called:', { subject: subject._di, subject_re: subject._re, subject_id: subject._id });
+        
+        // Buscar o subject completo em allSubjects para ter todos os dados (_pr, _pr_creditos_input, etc)
+        const fullSubject = allSubjects.find(s => 
+            s._id === subject._id || s._re === subject._re || s._id === subject.id
+        ) || subject;
+        
+        console.log('📦 Full subject loaded:', { 
+            _di: fullSubject._di, 
+            _pr: fullSubject._pr,
+            _pr_creditos_input: fullSubject._pr_creditos_input
+        });
+        
+        setDraggedSubject(fullSubject);
+        setDragPosition(initialPos);
+    };
+
+    // Função auxiliar para calcular créditos até um semestre específico
+    // semesterIndex: 0 = 2026.1, 1 = 2026.2, etc.
+    // IMPORTANTE: fixedSemesters[0] = 2026.1 (sempre contém currentEnrollments)
+    //             fixedSemesters[1] = 2026.2, etc.
+    //             simulationResult.semesters começa de 2026.2
+    const calculateCreditsUntilSemester = (semesterIndex: number): { total: number; breakdown: string } => {
+        let totalCR = 0;
+        let breakdown = '';
+        
+        // 1. Matérias já completadas
+        const completedCR = completedSubjects.reduce((total, s) => total + ((s._ap || 0) + (s._at || 0)), 0);
+        totalCR += completedCR;
+        breakdown += `✓ Completadas: ${completedCR} créditos\n`;
+        
+        // 2-N. Semestres do fixedSemesters (começa de 0 = 2026.1, para ANTES de semesterIndex)
+        for (let i = 0; i < semesterIndex && i < fixedSemesters.length; i++) {
+            const semCR = fixedSemesters[i].reduce((total, s) => total + ((s._ap || 0) + (s._at || 0)), 0);
+            const semName = i === 0 ? '2026.1' : `2026.${i + 1}`;
+            totalCR += semCR;
+            breakdown += `✓ ${semName}: ${semCR} (${fixedSemesters[i].map(s => `${s._re}`).join(', ')})\n`;
+        }
+        
+        // Semestres previstos (só aparecem se há espaço após fixedSemesters)
+        const allSemesters = simulationResult?.semesters || [];
+        for (let i = fixedSemesters.length; i < semesterIndex && i < allSemesters.length; i++) {
+            const semCR = allSemesters[i].reduce((total, s) => total + ((s._ap || 0) + (s._at || 0)), 0);
+            const semName = `2026.${i + 2}`;  // simulationResult[0] = 2026.2
+            totalCR += semCR;
+            breakdown += `✓ ${semName}: ${semCR} (${allSemesters[i].map(s => `${s._re}`).join(', ')})\n`;
+        }
+        
+        return { total: totalCR, breakdown };
+    };
+
+    // Função para detalhar o motivo específico da colisão
+    const getDetailedCollisionReason = (subject: Subject, semesterIndex: number): string | null => {
+        console.log(`🔎 Analisando motivo da colisão para ${subject._di} no semestre ${semesterIndex}`);
+        
+        // 1. VERIFICAR COLISÃO DE HORÁRIO
+        // Precisamos saber que semestres teriam matérias neste índice
+        // fixedSemesters[semesterIndex] ou simulationResult.semesters[semesterIndex - fixedSemesters.length]
+        let targetSemester: Subject[] = [];
+        if (semesterIndex < fixedSemesters.length) {
+            targetSemester = fixedSemesters[semesterIndex];
+        } else {
+            const predIndex = semesterIndex - fixedSemesters.length;
+            targetSemester = (simulationResult?.semesters || [])[predIndex] || [];
+        }
+        
+        for (const otherSubject of targetSemester.filter(s => s._re !== subject._re)) {
+            if (checkCollision(subject, otherSubject)) {
+                const reason = `⏰ Colisão de horário: ${subject._di} choca com ${otherSubject._di}`;
+                console.log(`  → ${reason}`);
+                return reason;
+            }
+        }
+        
+        // 2. VERIFICAR FALTA DE CRÉDITOS
+        const { total: totalCR, breakdown } = calculateCreditsUntilSemester(semesterIndex);
+        console.log(`💰 Breakdown de créditos:\n${breakdown}`);
+        
+        if (subject._pr_creditos_input && subject._pr_creditos_input > 0) {
+            if (totalCR < subject._pr_creditos_input) {
+                const reason = `💰 Falta de créditos: ${subject._di} precisa de ${subject._pr_creditos_input} créditos (você terá ${totalCR})`;
+                console.log(`  → ${reason}`);
+                return reason;
+            }
+        }
+        
+        // 3. VERIFICAR FALTA DE PRÉ-REQUISITOS
+        // Recalcular quais matérias estarão completas até este semestre
+        let semesterCompleted = [
+            ...completedSubjects
+        ];
+        
+        // Adicionar semestres fixos até o semestre destino
+        for (let i = 0; i < semesterIndex && i < fixedSemesters.length; i++) {
+            semesterCompleted = [...semesterCompleted, ...fixedSemesters[i]];
+        }
+        
+        // Adicionar semestres previstos até o semestre destino
+        const allSemesters = simulationResult?.semesters || [];
+        for (let i = fixedSemesters.length; i < semesterIndex && i < allSemesters.length; i++) {
+            semesterCompleted = [...semesterCompleted, ...allSemesters[i]];
+        }
+        
+        const prList = Array.isArray(subject._pr) ? subject._pr : (subject._pr ? [subject._pr] : []);
+        for (const pr of prList) {
+            const prStr = String(pr);
+            const isNumeric = !isNaN(Number(prStr)) && !isNaN(parseFloat(prStr));
+            
+            if (!isNumeric) {
+                // É uma disciplina pré-requisita
+                const hasPrereq = semesterCompleted.some(s => s._re === prStr);
+                if (!hasPrereq) {
+                    const prereqSubject = allSubjects.find(s => s._re === prStr);
+                    const prereqName = prereqSubject?._di || prStr;
+                    const reason = `📚 Falta pré-requisito: ${subject._di} precisa ter cursado ${prereqName}`;
+                    console.log(`  → ${reason}`);
+                    return reason;
+                }
+            }
+        }
+        
+        // 4. SEM RESTRIÇÃO
+        console.log(`  → ✅ Nenhuma restrição detectada`);
+        return null;
+    };
+
+    const handleDragMove = (pos: { x: number, y: number }, semesterIndex: number | null) => {
+        if (!draggedSubject) return;
+        console.log('🟢 handleDragMove:', { semesterIndex, collision: isHoverCollision });
+        setDragPosition(pos);
+        setHoveredSemesterIndex(semesterIndex);
+    };
+
+    const handleDragEnd = () => {
+        console.log('🔵 handleDragEnd:', { 
+            draggedSubject: draggedSubject?._di, 
+            hoveredSemester: hoveredSemesterIndex, 
+            collision: isHoverCollision 
+        });
+        
+        if (!draggedSubject || hoveredSemesterIndex === null) {
+            console.log('❌ Sem subject ou semester');
+            setDraggedSubject(null);
+            setHoveredSemesterIndex(null);
+            setDragPosition(null);
+            setInvalidDropReason(null);
+            return;
+        }
+
+        // 1. PRIMEIRO: Verificar colisão de horário (tem PRIORIDADE)
+        if (isHoverCollision) {
+            console.log('🔴 BLOQUEADO: Colisão de horário detectada');
+            
+            // Usar função detalhada para encontrar o motivo específico
+            const reason = getDetailedCollisionReason(draggedSubject, hoveredSemesterIndex);
+            console.log('💥 Motivo específico:', reason);
+            
+            setInvalidDropReason(reason || '❌ Colisão detectada');
+            setDraggedSubject(null);
+            setHoveredSemesterIndex(null);
+            setDragPosition(null);
+            
+            return; // SEMPRE retorna quando há colisão
+        }
+        
+        // 2. SEGUNDO: Verificar pré-requisitos
+        const reason = getDetailedCollisionReason(draggedSubject, hoveredSemesterIndex);
+        
+        if (reason) {
+            // Há restrição de pré-requisitos, créditos ou outro motivo
+            console.log('❌ Motivo:', reason);
+            setInvalidDropReason(reason);
+            setDraggedSubject(null);
+            setHoveredSemesterIndex(null);
+            setDragPosition(null);
+        } else {
+            // ✅ Nenhuma restrição - PODE SOLTAR
+            console.log('✅ Sem colisão ou pré-requisitos, tentando mover...');
+            console.log('📊 fixedSemesters antes:', fixedSemesters.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
+            
+            // Procurar em TODOS os semestres (fixedSemesters + simulados)
+            let originalSemIndex = -1;
+            let isFromFixed = false;
+            
+            // Primeiro procurar em fixedSemesters
+            originalSemIndex = fixedSemesters.findIndex(sem => 
+                sem.some(s => s._re === draggedSubject._re || s._id === draggedSubject._id)
+            );
+            
+            if (originalSemIndex >= 0) {
+                isFromFixed = true;
+            } else {
+                // Se não achou em fixed, procurar em simulationResult
+                originalSemIndex = simulationResult?.semesters.findIndex(sem => 
+                    sem.some(s => s._re === draggedSubject._re || s._id === draggedSubject._id)
+                ) ?? -1;
+            }
+            
+            console.log(`🔍 Procurando ${draggedSubject._re} (${draggedSubject._di})...`);
+            console.log(`📍 Encontrado em semestre: ${originalSemIndex} (isFromFixed: ${isFromFixed})`);
+            console.log(`📍 Destino: semestre ${hoveredSemesterIndex}`);
+
+            if (originalSemIndex >= 0 && originalSemIndex !== hoveredSemesterIndex) {
+                 console.log('✅ Movendo matéria!');
+                 
+                 // Sempre trabalhar com fixedSemesters
+                 const newFixed = fixedSemesters.map((sem, idx) => {
+                     if (idx === originalSemIndex && isFromFixed) {
+                         // Remove do semestre original em fixed
+                         return sem.filter(s => s._re !== draggedSubject._re && s._id !== draggedSubject._id);
+                     }
+                     return sem;
+                 });
+                 
+                 // Adiciona ao semestre destino
+                 while (newFixed.length <= hoveredSemesterIndex!) {
+                     newFixed.push([]);
+                 }
+                 newFixed[hoveredSemesterIndex!] = [...newFixed[hoveredSemesterIndex!], draggedSubject];
+                 
+                 console.log('📊 fixedSemesters depois:', newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
+                 
+                 setFixedSemesters(newFixed);
+                 pushToHistory(newFixed, blacklistedIds);
+                 setInvalidDropReason(null);
+            } else if (originalSemIndex === hoveredSemesterIndex) {
+                 console.log('⚠️ Mesmo semestre, ignorando');
+                 setInvalidDropReason(null);
+            } else {
+                 console.log('⚠️ Matéria não encontrada em nenhum semestre');
+                 setInvalidDropReason(null);
+            }
+            
+            setDraggedSubject(null);
+            setHoveredSemesterIndex(null);
+            setDragPosition(null);
         }
     };
 
@@ -465,56 +717,37 @@ export const usePredictionController = () => {
     };
 
     const handleAddSubjectToSemester = (subject: Subject, semesterIndex: number | null) => {
-        if (semesterIndex === null || semesterIndex >= fixedSemesters.length) return;
-
-        // Create new fixed semesters state
-        const newFixed = fixedSemesters.map((semester, idx) => {
-            if (idx === semesterIndex) {
-                // Target semester: Append if not present
-                if (!semester.find(s => s._id === subject._id)) {
-                    return [...semester, subject];
-                }
-                return semester;
-            } else {
-                // Other semesters: Remove if present (fixes the "hole" issue)
-                return semester.filter(s => s._id !== subject._id);
-            }
-        });
-
-        // Only update if changes happened (or if added)
-        // Ideally checking change detection, but simple set is fine
-        setFixedSemesters(newFixed);
-        pushToHistory(newFixed, blacklistedIds);
+        if (semesterIndex === null) return;
+        const newFixed = [...fixedSemesters];
+        while (newFixed.length <= semesterIndex) newFixed.push([]);
+        if (!newFixed[semesterIndex].find(s => s._id === subject._id)) {
+            newFixed[semesterIndex] = [...newFixed[semesterIndex], subject];
+            setFixedSemesters(newFixed);
+            pushToHistory(newFixed, blacklistedIds);
+        }
     };
 
     const handleRemoveSubjectFromSemester = (subjectId: string | number, semesterIndex: number | null) => {
         if (semesterIndex === null || semesterIndex >= fixedSemesters.length) return;
-
         const newFixed = [...fixedSemesters];
         newFixed[semesterIndex] = newFixed[semesterIndex].filter(s => s._id !== subjectId);
         setFixedSemesters(newFixed);
         pushToHistory(newFixed, blacklistedIds);
     };
 
-
     return {
-        // State
         allSubjects, completedSubjects, loading,
         blacklistedIds, fixedSemesters,
         selectedSemesterIndex, selectedNodeId, isSidebarOpen,
         simulationResult, suggestions, mindMapData,
         svgRef,
+        
+        // DnD
+        draggedSubject, hoveredSemesterIndex, dragPosition, isHoverCollision, invalidDropReason,
+        handleDragStart, handleDragMove, handleDragEnd,
 
-        // Actions
-        setIsSidebarOpen,
-        setSelectedSemesterIndex,
-        setSelectedNodeId,
-        toggleBlacklist,
-        handleEditSemester,
-        handleAddSubjectToSemester,
-        handleRemoveSubjectFromSemester,
-
-        // Trial Status
+        setIsSidebarOpen, setSelectedSemesterIndex, setSelectedNodeId, setInvalidDropReason,
+        toggleBlacklist, handleEditSemester, handleAddSubjectToSemester, handleRemoveSubjectFromSemester,
         canInteract
     };
 };

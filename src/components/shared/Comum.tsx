@@ -620,7 +620,7 @@ const Comum: React.FC<ComumProps> = (props) => {
         }
         return (
             <div id="schedule-table-export" className={`rounded-2xl border border-border-light dark:border-border-dark overflow-hidden ${props.noCard ? 'bg-transparent' : 'bg-white dark:bg-surface-dark'} shadow-sm ring-1 ring-black/5 dark:ring-white/5`}>
-                <div className={`${isPrinting ? 'overflow-visible' : 'overflow-auto max-h-[70vh]'} scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent`}>
+                <div className={`${isPrinting ? 'overflow-visible' : 'overflow-x-auto'} scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent`}>
                     <table className={`w-full border-collapse table-fixed min-w-[1000px]`}>
                         <thead>
                             <tr className="bg-slate-50 dark:bg-surface-dark sticky top-0 z-30">
@@ -644,8 +644,8 @@ const Comum: React.FC<ComumProps> = (props) => {
     }
 
     return (
-        <div id="schedule-grid" className="w-full h-[calc(100vh-64px)] relative">
-            <div className="absolute inset-0 overflow-y-auto p-6 flex flex-col items-center scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
+        <div id="schedule-grid" className="w-full relative">
+            <div className="w-full p-6 flex flex-col items-center">
                 <div className="w-full max-w-[1400px]">
                     {(grades && grades.length > 1) && (
                         <div className={`flex justify-center items-center gap-1 mb-6 ${isPrinting ? 'invisible' : ''}`}>
