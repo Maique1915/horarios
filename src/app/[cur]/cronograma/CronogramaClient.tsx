@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
-import MapaMentalVisualizacao from '../../../components/prediction/MapaMentalVisualizacao';
+import MapaMentalVisualizacaoSource from '../../../components/prediction/MapaMentalVisualizacao';
+const MapaMentalVisualizacao = MapaMentalVisualizacaoSource as any;
 import LoadingSpinner from '../../../components/shared/LoadingSpinner';
 import { loadDbData } from '../../../services/disciplinaService';
 import { Subject } from '../../../types/Subject';
@@ -213,13 +214,6 @@ const CronogramaView = ({ ctrl }: { ctrl: ReturnType<typeof useCronogramaControl
                 selectedNodeId={ctrl.selectedNodeId}
                 onNodeClick={ctrl.handleNodeClick}
                 graphBounds={ctrl.mindMapData.graphBounds}
-                draggedSubject={null}
-                hoveredSemesterIndex={null}
-                dragPosition={null}
-                isHoverCollision={false}
-                onDragStart={() => {}}
-                onDragMove={() => {}}
-                onDragEnd={() => {}}
             />
         </div>
     );

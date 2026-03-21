@@ -158,13 +158,6 @@ const PredictionMap = ({ semesterGrids, onClose }) => {
                     selectedNodeId={selectedNodeId}
                     onNodeClick={handleNodeClick}
                     graphBounds={mindMapData.graphBounds}
-                    draggedSubject={null}
-                    hoveredSemesterIndex={null}
-                    dragPosition={null}
-                    isHoverCollision={false}
-                    onDragStart={() => {}}
-                    onDragMove={() => {}}
-                    onDragEnd={() => {}}
                 />
 
                 {/* Legend / Info Overlay */}
