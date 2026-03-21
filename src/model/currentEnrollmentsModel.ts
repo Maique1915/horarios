@@ -27,6 +27,9 @@ export const fetchCurrentEnrollments = async (userId: number) => {
                 name,
                 acronym,
                 semester,
+                credits,
+                optional,
+                active,
                 course_id,
                 courses (code, name)
             )
