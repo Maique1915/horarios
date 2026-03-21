@@ -668,22 +668,42 @@ export const usePredictionController = () => {
             if (originalSemIndex >= 0 && originalSemIndex !== hoveredSemesterIndex) {
                  console.log('✅ Movendo matéria!');
                  
-                 // Sempre trabalhar com fixedSemesters
-                 const newFixed = fixedSemesters.map((sem, idx) => {
-                     if (idx === originalSemIndex && isFromFixed) {
-                         // Remove do semestre original em fixed
-                         return sem.filter(s => s._re !== draggedSubject._re && s._id !== draggedSubject._id);
-                     }
-                     return sem;
-                 });
+                 // 1. Determinar o alcance da materialização
+                 // Pegar todos os semestres atuais (incluindo os previstos) do simulationResult
+                 const currentSemesters = simulationResult?.semesters || [];
+                 const maxIdx = Math.max(originalSemIndex, hoveredSemesterIndex);
                  
-                 // Adiciona ao semestre destino
-                 while (newFixed.length <= hoveredSemesterIndex!) {
-                     newFixed.push([]);
+                 console.log(`🔍 Materializando até o índice: ${maxIdx}`);
+
+                 // 2. Criar nova lista de fixos baseada na situação atual até o índice afetado
+                 // Isso garante que as outras matérias não herdem o "vácuo" e sejam empurradas pelo minimax
+                 let newFixed: Subject[][] = [];
+                 for (let i = 0; i <= maxIdx; i++) {
+                     const existingSem = currentSemesters[i];
+                     newFixed.push(existingSem ? [...existingSem] : []);
                  }
-                 newFixed[hoveredSemesterIndex!] = [...newFixed[hoveredSemesterIndex!], draggedSubject];
                  
-                 console.log('📊 fixedSemesters depois:', newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
+                 // 3. Remover a matéria do seu semestre original (agora em newFixed)
+                 newFixed[originalSemIndex] = newFixed[originalSemIndex].filter(s => 
+                     s._re !== draggedSubject._re && s._id !== draggedSubject._id
+                 );
+                 
+                 // 4. Adicionar a matéria no semestre destino (agora em newFixed)
+                 newFixed[hoveredSemesterIndex] = [...newFixed[hoveredSemesterIndex], draggedSubject];
+                 
+                 console.log('📊 fixedSemesters depois (antes minimax):', newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
+                 
+                 // 5. APLICAR MINIMAX: Remover períodos vazios finais apenas
+                 let lastNonEmptyIndex = -1;
+                 for (let i = newFixed.length - 1; i >= 0; i--) {
+                     if (newFixed[i].length > 0) {
+                         lastNonEmptyIndex = i;
+                         break;
+                     }
+                 }
+                 newFixed = newFixed.slice(0, lastNonEmptyIndex + 1);
+                 
+                 console.log('📊 fixedSemesters depois (após minimax):', newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
                  
                  setFixedSemesters(newFixed);
                  pushToHistory(newFixed, blacklistedIds);
@@ -729,8 +749,33 @@ export const usePredictionController = () => {
 
     const handleRemoveSubjectFromSemester = (subjectId: string | number, semesterIndex: number | null) => {
         if (semesterIndex === null || semesterIndex >= fixedSemesters.length) return;
-        const newFixed = [...fixedSemesters];
-        newFixed[semesterIndex] = newFixed[semesterIndex].filter(s => s._id !== subjectId);
+        
+        console.log(`🗑️ Removendo matéria com ID/RE: ${subjectId} do semestre ${semesterIndex}`);
+        console.log(`📊 Semestre antes:`, fixedSemesters[semesterIndex].map(s => ({ _id: s._id, _re: s._re, _di: s._di })));
+        
+        let newFixed = [...fixedSemesters];
+        const beforeLength = newFixed[semesterIndex].length;
+        newFixed[semesterIndex] = newFixed[semesterIndex].filter(s => s._id !== subjectId && s._re !== subjectId);
+        const afterLength = newFixed[semesterIndex].length;
+        
+        console.log(`📊 Semestre depois:`, newFixed[semesterIndex].map(s => ({ _id: s._id, _re: s._re, _di: s._di })));
+        console.log(`📊 Removidas ${beforeLength - afterLength} matérias`);
+        
+        // ✨ APLICAR MINIMAX: Remover períodos vazios finais apenas
+        // Recalcular o último índice com matérias DEPOIS de fazer o filtro
+        let lastNonEmptyIndex = -1;
+        for (let i = newFixed.length - 1; i >= 0; i--) {
+            if (newFixed[i].length > 0) {
+                lastNonEmptyIndex = i;
+                break;
+            }
+        }
+        
+        console.log(`🎯 Último período com matérias: ${lastNonEmptyIndex}`);
+        newFixed = newFixed.slice(0, lastNonEmptyIndex + 1);
+        
+        console.log(`📊 fixedSemesters final:`, newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
+        
         setFixedSemesters(newFixed);
         pushToHistory(newFixed, blacklistedIds);
     };
