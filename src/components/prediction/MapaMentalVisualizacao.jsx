@@ -4,8 +4,8 @@ import MapaMentalLink from './MapaMentalLink';
 
 const MapaMentalVisualizacao = ({ 
   nodes, links, selectedNodeId, onNodeClick, graphBounds, svgRef,
-  draggedSubject, hoveredSemesterIndex, dragPosition, isHoverCollision,
-  onDragStart, onDragMove, onDragEnd
+  draggedSubject = null, hoveredSemesterIndex = null, dragPosition = null, isHoverCollision = false,
+  onDragStart = () => {}, onDragMove = () => {}, onDragEnd = () => {}
 }) => {
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, width: 800, height: 600 });
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
