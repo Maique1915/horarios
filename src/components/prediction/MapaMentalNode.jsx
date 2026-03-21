@@ -32,12 +32,7 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
     }
   };
 
-  const handleClick = (e) => {
-    // Click só dispara se não houve movimento significativo
-    // O pai (MapaMentalVisualizacao) vai decidir se é drag ou click
-    e.stopPropagation();
-    onNodeClick(node.id);
-  };
+
 
   const getStatusStyles = () => {
     if (isSelected) {
@@ -73,7 +68,6 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
             ${isHovered ? 'scale-105 shadow-lg' : ''}
             ${getStatusStyles()}
           `}
-          onClick={handleClick}
           onMouseDown={handleMouseDown}
         >
           {/* Period Indicator strip on left */}

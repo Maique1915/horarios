@@ -5,6 +5,8 @@ import {
     loadCompletedSubjects,
     loadDbData,
     loadCurrentEnrollments,
+    getSubjectsDataMap,
+    getSubjectsDataMapByAcronym,
     Enrollment
 } from '../../../services/disciplinaService';
 import { getCurrentPeriod } from '@/utils/dateUtils';
@@ -44,25 +46,93 @@ export const TITLE_HEIGHT = 40;
 
 // --- Helper Functions ---
 export const checkCollision = (subA: Subject, subB: Subject) => {
+    // 🆕 Tentar obter dados completos do mapa global se não tiverem no objeto
+    const subjectsMapById = getSubjectsDataMap();
+    const subjectsMapByAcronym = getSubjectsDataMapByAcronym();
+    
+    let fullSubA = subA;
+    let fullSubB = subB;
+    
+    // Se o objeto não tem horários, tentar buscar do mapa
+    if (!subA._classSchedules || subA._classSchedules.length === 0) {
+        const mapEntry = subjectsMapById.get(subA._id as number) || subjectsMapByAcronym.get(subA._re as string);
+        if (mapEntry && mapEntry._classSchedules && mapEntry._classSchedules.length > 0) {
+            console.log(`🔄 Usando dados completos do mapa para ${subA._di}`);
+            fullSubA = mapEntry;
+        }
+    }
+    
+    if (!subB._classSchedules || subB._classSchedules.length === 0) {
+        const mapEntry = subjectsMapById.get(subB._id as number) || subjectsMapByAcronym.get(subB._re as string);
+        if (mapEntry && mapEntry._classSchedules && mapEntry._classSchedules.length > 0) {
+            console.log(`🔄 Usando dados completos do mapa para ${subB._di}`);
+            fullSubB = mapEntry;
+        }
+    }
+    
+    // Se QUALQUER matéria não tem horários, permitir a adição
+    if (!fullSubA._classSchedules || fullSubA._classSchedules.length === 0) {
+        console.warn(`⚠️  ${fullSubA._di} (${fullSubA._re}) sem horários carregados - ignorando validação de colisão`);
+        return false; // Permite
+    }
+    if (!fullSubB._classSchedules || fullSubB._classSchedules.length === 0) {
+        console.warn(`⚠️  ${fullSubB._di} (${fullSubB._re}) sem horários carregados - ignorando validação de colisão`);
+        return false; // Permite
+    }
+
     const getSlots = (s: Subject) => {
         const slots = new Set<string>();
         if (s._classSchedules) {
             s._classSchedules.forEach((sched: any) => {
-                if (sched.ho) {
-                    sched.ho.forEach(([d, t]: [string, string]) => slots.add(`${d}:${t}`));
+                if (sched.ho && Array.isArray(sched.ho)) {
+                    sched.ho.forEach(([d, t]: [string, string]) => {
+                        if (d !== undefined && t !== undefined) {
+                            slots.add(`${d}:${t}`);
+                        }
+                    });
                 }
             });
         }
         return slots;
     };
 
-    const slotsA = getSlots(subA);
-    const slotsB = getSlots(subB);
+    const slotsA = getSlots(fullSubA);
+    const slotsB = getSlots(fullSubB);
 
-    for (let sa of slotsA) {
-        if (slotsB.has(sa)) return true; // Collision
+    // 🔍 DEBUG: Log detalhado dos slots COM DADOS BRUTOS
+    // console.group(`🔍 VERIFICANDO COLISÃO: ${fullSubA._di} vs ${fullSubB._di}`);
+    // console.log(`📋 ${fullSubA._di}:`);
+    // console.log(`   _classSchedules:`, fullSubA._classSchedules);
+    // console.log(`   slots extraídos (${slotsA.size}):`, Array.from(slotsA).join(', '));
+    // console.log(`📋 ${fullSubB._di}:`);
+    // console.log(`   _classSchedules:`, fullSubB._classSchedules);
+    // console.log(`   slots extraídos (${slotsB.size}):`, Array.from(slotsB).join(', '));
+
+    // Se nenhum tem slots válidos, sem colisão
+    if (slotsA.size === 0 || slotsB.size === 0) {
+        // console.warn(`⚠️  ${fullSubA._di} ou ${fullSubB._di} não têm slots de horário válidos`);
+        // console.groupEnd();
+        return false;
     }
-    return false;
+
+    // Verificar colisão
+    let hasCollision = false;
+    let collidingSlot = '';
+    for (let sa of slotsA) {
+        if (slotsB.has(sa)) {
+            // console.error(`🔴 COLISÃO NO SLOT: ${sa}`);
+            hasCollision = true;
+            collidingSlot = sa;
+            break;
+        }
+    }
+    
+    if (!hasCollision) {
+        // console.log(`✅ SEM COLISÃO`);
+    }
+    
+    // console.groupEnd();
+    return hasCollision;
 };
 
 // --- Controller ---
@@ -224,6 +294,13 @@ export const usePredictionController = () => {
         if (!draggedSubject || hoveredSemesterIndex === null) return false;
 
         const allSemesters = simulationResult?.semesters || [];
+        
+        // Validar se hoveredSemesterIndex está dentro dos limites
+        if (hoveredSemesterIndex < 0 || hoveredSemesterIndex >= allSemesters.length) {
+            console.warn(`⚠️  hoveredSemesterIndex ${hoveredSemesterIndex} fora dos limites (${allSemesters.length} semestres)`);
+            return true; // Bloquear se índice inválido
+        }
+        
         const targetSemester = allSemesters[hoveredSemesterIndex] || [];
         
         // 1. Check Time Collision with ALL subjects in target semester
@@ -516,20 +593,31 @@ export const usePredictionController = () => {
 
     // Função para detalhar o motivo específico da colisão
     const getDetailedCollisionReason = (subject: Subject, semesterIndex: number): string | null => {
-        console.log(`🔎 Analisando motivo da colisão para ${subject._di} no semestre ${semesterIndex}`);
+        console.log(`🔎 Analisando motivo da colisão para ${subject._di} (${subject._re}) no semestre ${semesterIndex}`);
         
-        // 1. VERIFICAR COLISÃO DE HORÁRIO
-        // Precisamos saber que semestres teriam matérias neste índice
-        // fixedSemesters[semesterIndex] ou simulationResult.semesters[semesterIndex - fixedSemesters.length]
-        let targetSemester: Subject[] = [];
-        if (semesterIndex < fixedSemesters.length) {
-            targetSemester = fixedSemesters[semesterIndex];
-        } else {
-            const predIndex = semesterIndex - fixedSemesters.length;
-            targetSemester = (simulationResult?.semesters || [])[predIndex] || [];
+        // Validação inicial: verificar se subject tem horários carregados
+        if (!subject._classSchedules || subject._classSchedules.length === 0) {
+            console.warn(`⚠️  ${subject._di} não tem horários (_classSchedules vazio/indefinido)`);
+            console.log(`  Dados do subject:`, { _id: subject._id, _re: subject._re, _classSchedules: subject._classSchedules });
         }
         
+        // 1. VERIFICAR COLISÃO DE HORÁRIO
+        // ✅ USAR A MESMA LÓGICA DE isHoverCollision PARA CONSISTÊNCIA
+        const allSemesters = simulationResult?.semesters || [];
+        
+        // Validação de limites
+        if (semesterIndex < 0 || semesterIndex >= allSemesters.length) {
+            console.warn(`⚠️  semesterIndex ${semesterIndex} fora dos limites (${allSemesters.length} semestres)`);
+            return null;
+        }
+        
+        const targetSemester = allSemesters[semesterIndex] || [];
+        console.log(`  Analisando colisão com ${targetSemester.length} matérias no semestre ${semesterIndex}`);
+        
         for (const otherSubject of targetSemester.filter(s => s._re !== subject._re)) {
+            if (!otherSubject._classSchedules || otherSubject._classSchedules.length === 0) {
+                console.warn(`⚠️  ${otherSubject._di} (no semestre alvo) não tem horários definidos`);
+            }
             if (checkCollision(subject, otherSubject)) {
                 const reason = `⏰ Colisão de horário: ${subject._di} choca com ${otherSubject._di}`;
                 console.log(`  → ${reason}`);
@@ -555,15 +643,9 @@ export const usePredictionController = () => {
             ...completedSubjects
         ];
         
-        // Adicionar semestres fixos até o semestre destino
-        for (let i = 0; i < semesterIndex && i < fixedSemesters.length; i++) {
-            semesterCompleted = [...semesterCompleted, ...fixedSemesters[i]];
-        }
-        
-        // Adicionar semestres previstos até o semestre destino
-        const allSemesters = simulationResult?.semesters || [];
-        for (let i = fixedSemesters.length; i < semesterIndex && i < allSemesters.length; i++) {
-            semesterCompleted = [...semesterCompleted, ...allSemesters[i]];
+        // Adicionar todos os semestres até o semestre destino (usando allSemesters para consistência)
+        for (let i = 0; i < semesterIndex; i++) {
+            semesterCompleted = [...semesterCompleted, ...(allSemesters[i] || [])];
         }
         
         const prList = Array.isArray(subject._pr) ? subject._pr : (subject._pr ? [subject._pr] : []);
@@ -612,9 +694,34 @@ export const usePredictionController = () => {
             return;
         }
 
+        // ✅ VALIDAÇÃO REDUNDANTE: Recalcular colisão no momento do drop
+        // (isHoverCollision pode estar desatualizado)
+        const allSemesters = simulationResult?.semesters || [];
+        if (hoveredSemesterIndex < 0 || hoveredSemesterIndex >= allSemesters.length) {
+            console.log(`🔴 BLOQUEADO: hoveredSemesterIndex ${hoveredSemesterIndex} fora dos limites`);
+            setInvalidDropReason(`❌ Período inválido (fora dos limites)`);
+            setDraggedSubject(null);
+            setHoveredSemesterIndex(null);
+            setDragPosition(null);
+            return;
+        }
+        
+        const targetSemester = allSemesters[hoveredSemesterIndex] || [];
+        for (const otherSubject of targetSemester.filter(s => s._re !== draggedSubject._re)) {
+            if (checkCollision(draggedSubject, otherSubject)) {
+                const reason = `⏰ Colisão de horário: ${draggedSubject._di} choca com ${otherSubject._di}`;
+                console.log(`🔴 BLOQUEADO (redundante):`, reason);
+                setInvalidDropReason(reason);
+                setDraggedSubject(null);
+                setHoveredSemesterIndex(null);
+                setDragPosition(null);
+                return;
+            }
+        }
+
         // 1. PRIMEIRO: Verificar colisão de horário (tem PRIORIDADE)
         if (isHoverCollision) {
-            console.log('🔴 BLOQUEADO: Colisão de horário detectada');
+            console.log('🔴 BLOQUEADO: Colisão de horário detectada (isHoverCollision)');
             
             // Usar função detalhada para encontrar o motivo específico
             const reason = getDetailedCollisionReason(draggedSubject, hoveredSemesterIndex);
@@ -668,32 +775,44 @@ export const usePredictionController = () => {
             if (originalSemIndex >= 0 && originalSemIndex !== hoveredSemesterIndex) {
                  console.log('✅ Movendo matéria!');
                  
-                 // 1. Determinar o alcance da materialização
-                 // Pegar todos os semestres atuais (incluindo os previstos) do simulationResult
-                 const currentSemesters = simulationResult?.semesters || [];
-                 const maxIdx = Math.max(originalSemIndex, hoveredSemesterIndex);
+                 // 🔧 FIX: Se matéria vem de simulationResult, sincronizar fixedSemesters PRIMEIRO
+                 let workingFixed = [...fixedSemesters];
                  
-                 console.log(`🔍 Materializando até o índice: ${maxIdx}`);
-
-                 // 2. Criar nova lista de fixos baseada na situação atual até o índice afetado
-                 // Isso garante que as outras matérias não herdem o "vácuo" e sejam empurradas pelo minimax
-                 let newFixed: Subject[][] = [];
-                 for (let i = 0; i <= maxIdx; i++) {
-                     const existingSem = currentSemesters[i];
-                     newFixed.push(existingSem ? [...existingSem] : []);
+                 if (!isFromFixed && simulationResult?.semesters) {
+                     console.log('🔄 SINCRONIZAR: Copiando todos os semestres de simulationResult para fixedSemesters...');
+                     console.log(`   simulationResult tem ${simulationResult.semesters.length} semestres`);
+                     console.log(`   fixedSemesters tem ${workingFixed.length} semestres`);
+                     
+                     // Copiar TODOS os semestres de simulationResult para fixedSemesters
+                     for (let i = workingFixed.length; i < simulationResult.semesters.length; i++) {
+                         console.log(`   Copiando semestre ${i}: [${simulationResult.semesters[i].map(s => s._re).join(', ')}]`);
+                         workingFixed.push([...simulationResult.semesters[i]]);
+                     }
+                     
+                     console.log('📊 Após sincronização:', workingFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
+                     isFromFixed = true; // Agora a matéria ESTÁ em workingFixed
                  }
                  
-                 // 3. Remover a matéria do seu semestre original (agora em newFixed)
-                 newFixed[originalSemIndex] = newFixed[originalSemIndex].filter(s => 
-                     s._re !== draggedSubject._re && s._id !== draggedSubject._id
-                 );
+                 // Sempre trabalhar com workingFixed (sincronizado)
+                 let newFixed = workingFixed.map((sem, idx) => {
+                     if (idx === originalSemIndex && isFromFixed) {
+                         // Remove do semestre original (agora isFromFixed é sempre true após sincronização)
+                         console.log(`   Removendo de semestre ${idx}: ${draggedSubject._re}`);
+                         return sem.filter(s => s._re !== draggedSubject._re && s._id !== draggedSubject._id);
+                     }
+                     return sem;
+                 });
                  
-                 // 4. Adicionar a matéria no semestre destino (agora em newFixed)
-                 newFixed[hoveredSemesterIndex] = [...newFixed[hoveredSemesterIndex], draggedSubject];
+                 // Adiciona ao semestre destino
+                 while (newFixed.length <= hoveredSemesterIndex!) {
+                     newFixed.push([]);
+                 }
+                 newFixed[hoveredSemesterIndex!] = [...newFixed[hoveredSemesterIndex!], draggedSubject];
                  
                  console.log('📊 fixedSemesters depois (antes minimax):', newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
                  
-                 // 5. APLICAR MINIMAX: Remover períodos vazios finais apenas
+                 // ✨ APLICAR MINIMAX: Remover períodos vazios finais apenas
+                 // Remover apenas períodos vazios no final (após o último período com matérias)
                  let lastNonEmptyIndex = -1;
                  for (let i = newFixed.length - 1; i >= 0; i--) {
                      if (newFixed[i].length > 0) {
@@ -738,13 +857,52 @@ export const usePredictionController = () => {
 
     const handleAddSubjectToSemester = (subject: Subject, semesterIndex: number | null) => {
         if (semesterIndex === null) return;
-        const newFixed = [...fixedSemesters];
+        let newFixed = [...fixedSemesters];
         while (newFixed.length <= semesterIndex) newFixed.push([]);
-        if (!newFixed[semesterIndex].find(s => s._id === subject._id)) {
-            newFixed[semesterIndex] = [...newFixed[semesterIndex], subject];
-            setFixedSemesters(newFixed);
-            pushToHistory(newFixed, blacklistedIds);
+        
+        console.log(`\n📌 ADICIONANDO: ${subject._di} (${subject._re}) ao semestre ${semesterIndex}`);
+        console.log(`   _classSchedules:`, subject._classSchedules);
+        
+        // ✅ VALIDAÇÃO: Verificar se já existe NO MESMO semestre
+        if (newFixed[semesterIndex].find(s => s._id === subject._id)) {
+            console.log(`⚠️  ${subject._di} já está neste semestre`);
+            return;
         }
+        
+        // ✅ VALIDAÇÃO: Verificar colisão de horário
+        const targetSemester = newFixed[semesterIndex];
+        console.log(`   Comparando com ${targetSemester.length} matérias neste semestre:`);
+        targetSemester.forEach(s => console.log(`     - ${s._di} (${s._re}): ${s._classSchedules?.length || 0} aulas`));
+        
+        for (const existing of targetSemester) {
+            console.log(`   Checando colisão com ${existing._di}...`);
+            if (checkCollision(subject, existing)) {
+                const reason = `⏰ Colisão de horário: ${subject._di} choca com ${existing._di}`;
+                console.log(`🔴 BLOQUEADO:`, reason);
+                setInvalidDropReason(reason);
+                return;
+            }
+        }
+        
+        // ✅ VALIDAÇÃO: Verificar pré-requisitos
+        const reason = getDetailedCollisionReason(subject, semesterIndex);
+        if (reason) {
+            console.log(`❌ BLOQUEADO:`, reason);
+            setInvalidDropReason(reason);
+            return;
+        }
+        
+        // ✅ Sem restrições - ADICIONAR (não remove do período anterior)
+        console.log(`✅ Adicionando ${subject._di} ao semestre ${semesterIndex}`);
+        newFixed[semesterIndex] = [...newFixed[semesterIndex], subject];
+        
+        console.log('📊 Semestres após operação:', newFixed.map((sem, idx) => 
+            `${idx}: [${sem.map(s => s._re).join(', ')}]`
+        ).join(' | '));
+        
+        setFixedSemesters(newFixed);
+        pushToHistory(newFixed, blacklistedIds);
+        setInvalidDropReason(null);
     };
 
     const handleRemoveSubjectFromSemester = (subjectId: string | number, semesterIndex: number | null) => {

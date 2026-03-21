@@ -52,7 +52,13 @@ let cachedData: Record<string, Subject[]> = {};
 let loadingPromises: Record<string, Promise<Subject[]>> = {};
 let lastFetchTime: number | null = null;
 let globalCoursesRegistryPromise: Promise<CourseRegistryItem[]> | null = null;
+let subjectsDataMap: Map<number, Subject> = new Map(); // 🆕 Mapa de todas as disciplinas por ID
+let subjectsDataMapByAcronym: Map<string, Subject> = new Map(); // 🆕 Mapa de todas as disciplinas por sigla
 const CACHE_DURATION = 0; // Disable cache for debugging
+
+// 🆕 Exportar os mapas para o controller
+export const getSubjectsDataMap = (): Map<number, Subject> => subjectsDataMap;
+export const getSubjectsDataMapByAcronym = (): Map<string, Subject> => subjectsDataMapByAcronym;
 
 // --- Helpers ---
 
@@ -154,6 +160,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
         try {
             let subjectsData: DbSubject[] = [];
             let courseData: DbCourse | null = null;
+            let equivalentSubjects: DbSubject[] = [];
 
             if (courseCode) {
                 console.time('fetch_course_id');
@@ -163,23 +170,71 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     console.warn(`Course code '${courseCode}' not found.`);
                     return [];
                 }
+                
+                console.log(`🎓 Carregando disciplinas do curso: ${courseCode}`);
             }
 
             try {
+                // 1️⃣ PRIMEIRO: Carregar disciplinas do curso do usuário
                 subjectsData = await subjectsModel.fetchSubjects(courseData?.id);
+                console.log(`✅ Carregadas ${subjectsData.length} disciplinas do curso`);
             } catch (err: any) {
                 console.warn("Primary subject fetch failed", err.message);
                 throw err;
             }
 
+            // 2️⃣ SEGUNDO: Se tem curso, buscar disciplinas com equivalências
+            let allSubjectIds = subjectsData.map(s => s.id);
+            if (courseCode && courseData) {
+                try {
+                    console.log(`🔗 Buscando disciplinas com equivalências...`);
+                    const equivalences = await requirementsModel.fetchRequirements(allSubjectIds);
+                    
+                    // Pegar os IDs das disciplinas que têm equivalências
+                    const equivalentIds = new Set<number>();
+                    equivalences.forEach(eq => {
+                        if (eq.requires_id && !allSubjectIds.includes(eq.requires_id)) {
+                            equivalentIds.add(eq.requires_id);
+                        }
+                    });
+                    
+                    if (equivalentIds.size > 0) {
+                        equivalentSubjects = await subjectsModel.fetchSubjectsByIds(Array.from(equivalentIds));
+                        console.log(`✅ Carregadas ${equivalentSubjects.length} disciplinas com equivalências`);
+                        subjectsData = [...subjectsData, ...equivalentSubjects];
+                        allSubjectIds = subjectsData.map(s => s.id);
+                    }
+                } catch (err: any) {
+                    console.warn("Equivalence fetch failed", err.message);
+                    // Continua sem equivalências
+                }
+            }
+
             const subjectIds = subjectsData.map(s => s.id);
 
             console.time('fetch_dependencies');
+            console.log(`🔍 Buscando horários para ${subjectIds.length} disciplinas:`, subjectIds.slice(0, 5), '...');
+            
             const [allRequirements, classesData] = await Promise.all([
                 requirementsModel.fetchRequirements(subjectIds) as Promise<DbRequirement[]>,
                 classesModel.fetchClassesBySubjectIds(subjectIds) as Promise<DbClass[]>
             ]);
             console.timeEnd('fetch_dependencies');
+            
+            // 🔍 DEBUG: Verificar se os horários foram carregados
+            console.log(`📚 Carregado ${subjectsData.length} disciplinas`);
+            console.log(`📅 Carregado ${classesData.length} aulas/horários`);
+            
+            // Mostrar amostra dos dados de classes
+            if (classesData.length > 0) {
+                console.log(`   Primeira classe:`, classesData[0]);
+                console.log(`   Sample de subject_ids em classes:`, [...new Set(classesData.map(c => c.subject_id))].slice(0, 5));
+            } else {
+                console.warn(`⚠️  AVISO: classesData está VAZIO!`);
+            }
+            
+            // Mostrar amostra dos ids de subjects
+            console.log(`   Sample de subject ids carregados:`, subjectsData.slice(0, 3).map(s => `${s.id}(${s.name})`));
 
             // Process Requirements
             const requirementsMap = new Map<number, DbRequirement[]>();
@@ -190,8 +245,30 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
 
             // Process Classes
             const schedulesBySubjectId = new Map<number, ClassSchedule[]>();
-            classesData.forEach(schedule => {
+            let processedCount = 0;
+            let skippedCount = 0;
+            
+            console.log(`🔄 Processando ${classesData.length} registros de classes...`);
+            
+            classesData.forEach((schedule, idx) => {
                 const { subject_id, class: className, day_id, time_slot_id } = schedule;
+                
+                // Log dos primeiros 5 registros
+                if (idx < 5) {
+                    console.log(`   [${idx}] Subject: ${subject_id}, Class: ${className}, Day: ${day_id}, Slot: ${time_slot_id}`, {
+                        temDays: !!(schedule as any).days,
+                        temSlots: !!(schedule as any).time_slots,
+                        keys: Object.keys(schedule)
+                    });
+                }
+                
+                // Verificar dados
+                if (!subject_id || !className || day_id === undefined || time_slot_id === undefined) {
+                    console.warn(`⚠️  [${idx}] Registro incompleto:`, { subject_id, className, day_id, time_slot_id });
+                    skippedCount++;
+                    return;
+                }
+                
                 if (!schedulesBySubjectId.has(subject_id)) schedulesBySubjectId.set(subject_id, []);
                 let subjectSchedules = schedulesBySubjectId.get(subject_id)!;
                 let classSchedule = subjectSchedules.find(cs => cs.class_name === className);
@@ -199,7 +276,36 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     classSchedule = { class_name: className, ho: [], da: [], rt: [] };
                     subjectSchedules.push(classSchedule);
                 }
-                classSchedule.ho.push([day_id, time_slot_id]);
+                
+                // Extrair nomes dos dias e horários se disponíveis via JOIN
+                let dayIdentifier: any = day_id;
+                let slotIdentifier: any = time_slot_id;
+                
+                // Se a relação dias foi carregada, usar name
+                if ((schedule as any).days) {
+                    const dayObj = Array.isArray((schedule as any).days) 
+                        ? (schedule as any).days[0] 
+                        : (schedule as any).days;
+                    
+                    if (dayObj && typeof dayObj === 'object') {
+                        dayIdentifier = dayObj.name || dayObj.id || day_id;
+                    }
+                }
+                
+                // Se a relação time_slots foi carregada, usar start_time:end_time
+                if ((schedule as any).times_slots) {
+                    const slotObj = Array.isArray((schedule as any).times_slots) 
+                        ? (schedule as any).times_slots[0] 
+                        : (schedule as any).times_slots;
+                    
+                    if (slotObj && typeof slotObj === 'object') {
+                        slotIdentifier = slotObj.start_time && slotObj.end_time
+                            ? `${slotObj.start_time}:${slotObj.end_time}` 
+                            : slotObj.id || time_slot_id;
+                    }
+                }
+                
+                classSchedule.ho.push([dayIdentifier, slotIdentifier]);
                 if ((schedule as any).start_real_time && (schedule as any).end_real_time) {
                     classSchedule.rt.push({
                         start: (schedule as any).start_real_time,
@@ -208,22 +314,97 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                 } else {
                     classSchedule.rt.push(null);
                 }
+                
+                processedCount++;
             });
+            
+            console.log(`✅ Processados ${processedCount}/${classesData.length} registros de classes (skipped: ${skippedCount})`);
+            console.log(`📊 Map schedulesBySubjectId tem ${schedulesBySubjectId.size} disciplinas com horários`);
+            
+            // Mostrar amostras
+            if (schedulesBySubjectId.size > 0) {
+                const sample = Array.from(schedulesBySubjectId.entries()).slice(0, 3);
+                sample.forEach(([subId, schedules]) => {
+                    console.log(`   Subject ${subId}: ${schedules.length} classes, total slots: ${schedules.reduce((sum, s) => sum + s.ho.length, 0)}`);
+                    if (schedules[0]) {
+                        console.log(`      Primeira class: ${schedules[0].class_name}, slots: ${schedules[0].ho.slice(0, 2)}`);
+                    }
+                });
+            }
+            
+            // 🔍 DEBUG: Verificar quantas disciplinas têm horários
+            let subjectsWithSchedules = 0;
+            let subjectsWithoutSchedules: {id: number, name: string, course_id?: number}[] = [];
+            
+            schedulesBySubjectId.forEach((schedules, subjectId) => {
+                subjectsWithSchedules++;
+            });
+            
+            subjectsData.forEach(subject => {
+                if (!schedulesBySubjectId.has(subject.id)) {
+                    subjectsWithoutSchedules.push({
+                        id: subject.id, 
+                        name: subject.name, 
+                        course_id: (subject as any).course_id
+                    });
+                }
+            });
+            
+            console.log(`🕐 ${subjectsWithSchedules} disciplinas têm horários mapeados`);
+            if (subjectsWithoutSchedules.length > 0) {
+                console.log(`ℹ️ ${subjectsWithoutSchedules.length} disciplinas sem horários (normal - sem classe associada no banco de dados)`);
+            }
+            if (subjectsWithSchedules === 0) {
+                console.warn(`⚠️  AVISO: Nenhuma disciplina tem horários! Verifique o mapeamento de classes.`);
+            }
 
             // Map Data
             const mappedData: Subject[] = subjectsData.map(item => processSubjectData(item, requirementsMap, schedulesBySubjectId));
 
+            // 🔍 DEBUG: Verificar quantas disciplinas ficaram com horários após mapeamento
+            let subjectsWithSchedulesAfterMapping = 0;
+            let subjectsWithoutSchedulesAfterMapping = 0;
+            mappedData.forEach(subject => {
+                if (subject._classSchedules && subject._classSchedules.length > 0) {
+                    subjectsWithSchedulesAfterMapping++;
+                } else {
+                    subjectsWithoutSchedulesAfterMapping++;
+                }
+            });
+            
+            console.log(`📊 Resultado final: ${subjectsWithSchedulesAfterMapping} disciplinas COM horários, ${subjectsWithoutSchedulesAfterMapping} SEM horários`);
+            
+            // 🔥 FILTRO: Remover disciplinas sem horários (sem classes associadas)
+            // Uma disciplina só é válida para predição se tiver pelo menos uma classe/horário
+            const validMappedData = mappedData.filter(subject => 
+                subject._classSchedules && subject._classSchedules.length > 0
+            );
+            
+            console.log(`✅ Após filtro: ${validMappedData.length} disciplinas válidas (removidas ${mappedData.length - validMappedData.length} sem horários)`);
+
             if (!courseCode) {
                 cachedData = {};
-                mappedData.forEach(item => {
+                validMappedData.forEach(item => {
                     const cu = item._cu as string;
                     if (!cachedData[cu]) cachedData[cu] = [];
                     cachedData[cu].push(item);
                 });
+                
+                // 🆕 Popular os mapas globais para acesso rápido (apenas disciplinas válidas)
+                subjectsDataMap.clear();
+                subjectsDataMapByAcronym.clear();
+                validMappedData.forEach(subject => {
+                    subjectsDataMap.set(subject._id as number, subject);
+                    if (subject._re) {
+                        subjectsDataMapByAcronym.set(subject._re, subject);
+                    }
+                });
+                
+                console.log(`📦 Mapas globais atualizados: ${subjectsDataMap.size} disciplinas por ID, ${subjectsDataMapByAcronym.size} por sigla`);
             }
 
             lastFetchTime = now;
-            return mappedData;
+            return validMappedData;
         } catch (error) {
             console.error('Erro ao carregar dados do Supabase:', JSON.stringify(error, null, 2), error);
             throw error;

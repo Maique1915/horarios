@@ -116,7 +116,7 @@ const MapaMentalVisualizacao = ({
     
     // Se havia drag pendente e nenhum drag iniciou, foi apenas um clique
     if (pendingDrag && !draggedSubject) {
-      onNodeClick(pendingDrag.node);
+      onNodeClick(pendingDrag.node.id);
     }
     
     if (draggedSubject) {
