@@ -240,10 +240,6 @@ const Comum: React.FC<ComumProps> = (props) => {
     }, [state.materias, props.tela, props.separa]);
 
     const { grades, coresGrade } = React.useMemo(() => {
-        if (state.materias.length > 0) {
-            console.log("Comum: Starting grade creation with", state.materias.length, "disciplines");
-        }
-
         const gradesOut: string[][][] = [];
         const coresGradeOut: string[][][] = [];
 
@@ -262,15 +258,10 @@ const Comum: React.FC<ComumProps> = (props) => {
                         const numDia = dbDays.findIndex(d => d.id === dayId);
                         const numHorario = dbTimeSlots.findIndex(s => s.id === slotId);
 
-                        // Cast _da to string array safely if it exists
-                        const daArray = (Array.isArray(disciplina._da) ? disciplina._da : []) as number[];
-
                         const rtArray = disciplina._rt;
                         const realTime = rtArray && rtArray[i] ? rtArray[i] : null;
 
-                        let nomeMateria = (daArray && daArray[i])
-                            ? `${disciplina._di}\n${daArray[i]}`
-                            : disciplina._di;
+                        let nomeMateria = disciplina._di;
 
                         if (realTime) {
                             nomeMateria += `\n{{RT:${realTime.start.slice(0, 5)} - ${realTime.end.slice(0, 5)}}}`;

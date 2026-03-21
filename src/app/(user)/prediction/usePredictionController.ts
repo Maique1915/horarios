@@ -57,7 +57,7 @@ export const checkCollision = (subA: Subject, subB: Subject) => {
     if (!subA._classSchedules || subA._classSchedules.length === 0) {
         const mapEntry = subjectsMapById.get(subA._id as number) || subjectsMapByAcronym.get(subA._re as string);
         if (mapEntry && mapEntry._classSchedules && mapEntry._classSchedules.length > 0) {
-            console.log(`🔄 Usando dados completos do mapa para ${subA._di}`);
+            // console.log(`🔄 Usando dados completos do mapa para ${subA._di}`);
             fullSubA = mapEntry;
         }
     }
@@ -65,18 +65,18 @@ export const checkCollision = (subA: Subject, subB: Subject) => {
     if (!subB._classSchedules || subB._classSchedules.length === 0) {
         const mapEntry = subjectsMapById.get(subB._id as number) || subjectsMapByAcronym.get(subB._re as string);
         if (mapEntry && mapEntry._classSchedules && mapEntry._classSchedules.length > 0) {
-            console.log(`🔄 Usando dados completos do mapa para ${subB._di}`);
+            // console.log(`🔄 Usando dados completos do mapa para ${subB._di}`);
             fullSubB = mapEntry;
         }
     }
     
     // Se QUALQUER matéria não tem horários, permitir a adição
     if (!fullSubA._classSchedules || fullSubA._classSchedules.length === 0) {
-        console.warn(`⚠️  ${fullSubA._di} (${fullSubA._re}) sem horários carregados - ignorando validação de colisão`);
+        // console.warn(`⚠️  ${fullSubA._di} (${fullSubA._re}) sem horários carregados - ignorando validação de colisão`);
         return false; // Permite
     }
     if (!fullSubB._classSchedules || fullSubB._classSchedules.length === 0) {
-        console.warn(`⚠️  ${fullSubB._di} (${fullSubB._re}) sem horários carregados - ignorando validação de colisão`);
+        // console.warn(`⚠️  ${fullSubB._di} (${fullSubB._re}) sem horários carregados - ignorando validação de colisão`);
         return false; // Permite
     }
 
@@ -195,10 +195,16 @@ export const usePredictionController = () => {
                     loadCurrentEnrollments(user.id)
                 ]);
 
+                // 🔥 FILTRO: Considerar apenas disciplinas com horários para predição
+                // Uma disciplina é válida para predição somente se tiver classes associadas
+                const validSubjects = dbSubjects.filter(subject => 
+                    subject._classSchedules && subject._classSchedules.length > 0
+                );
+
                 const periodoAtual = getCurrentPeriod();
                 const filteredEnrollments = (dbEnrollments as Enrollment[]).filter(e => e.period === periodoAtual);
 
-                setAllSubjects(dbSubjects);
+                setAllSubjects(validSubjects);
                 setCompletedSubjects(dbCompleted);
                 setCurrentEnrollments(filteredEnrollments);
             } catch (error) {
@@ -673,7 +679,7 @@ export const usePredictionController = () => {
 
     const handleDragMove = (pos: { x: number, y: number }, semesterIndex: number | null) => {
         if (!draggedSubject) return;
-        console.log('🟢 handleDragMove:', { semesterIndex, collision: isHoverCollision });
+        // console.log('🟢 handleDragMove:', { semesterIndex, collision: isHoverCollision });
         setDragPosition(pos);
         setHoveredSemesterIndex(semesterIndex);
     };

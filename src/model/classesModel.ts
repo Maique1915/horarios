@@ -64,11 +64,11 @@ export const fetchClassesBySubjectIds = async (subjectIds: number[]) => {
             return (fallbackData || []) as unknown as DbClass[];
         }
 
-        console.log(`✅ Retornado ${data?.length || 0} registros de classes (COM JOINs)`);
-        if (data && data.length > 0) {
-            console.log(`   Amostra com JOINs:`, data.slice(0, 2));
-            console.log(`   Subject IDs encontrados:`, [...new Set(data.map((c: any) => c.subject_id))].slice(0, 5));
-        }
+        // console.log(`✅ Retornado ${data?.length || 0} registros de classes (COM JOINs)`);
+        // if (data && data.length > 0) {
+        //     console.log(`   Amostra com JOINs:`, data.slice(0, 2));
+        //     console.log(`   Subject IDs encontrados:`, [...new Set(data.map((c: any) => c.subject_id))].slice(0, 5));
+        // }
         
         return (data || []) as unknown as DbClass[];
     } catch (err) {

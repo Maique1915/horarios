@@ -248,19 +248,19 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
             let processedCount = 0;
             let skippedCount = 0;
             
-            console.log(`🔄 Processando ${classesData.length} registros de classes...`);
+            // console.log(`🔄 Processando ${classesData.length} registros de classes...`);
             
             classesData.forEach((schedule, idx) => {
                 const { subject_id, class: className, day_id, time_slot_id } = schedule;
                 
-                // Log dos primeiros 5 registros
-                if (idx < 5) {
-                    console.log(`   [${idx}] Subject: ${subject_id}, Class: ${className}, Day: ${day_id}, Slot: ${time_slot_id}`, {
-                        temDays: !!(schedule as any).days,
-                        temSlots: !!(schedule as any).time_slots,
-                        keys: Object.keys(schedule)
-                    });
-                }
+                // Log dos primeiros 5 registros - comentado
+                // if (idx < 5) {
+                //     console.log(`   [${idx}] Subject: ${subject_id}, Class: ${className}, Day: ${day_id}, Slot: ${time_slot_id}`, {
+                //         temDays: !!(schedule as any).days,
+                //         temSlots: !!(schedule as any).time_slots,
+                //         keys: Object.keys(schedule)
+                //     });
+                // }
                 
                 // Verificar dados
                 if (!subject_id || !className || day_id === undefined || time_slot_id === undefined) {
@@ -277,35 +277,34 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     subjectSchedules.push(classSchedule);
                 }
                 
-                // Extrair nomes dos dias e horários se disponíveis via JOIN
+                // Extrair IDs numéricos para grid lookup (não usar nomes de dia/slot)
                 let dayIdentifier: any = day_id;
                 let slotIdentifier: any = time_slot_id;
                 
-                // Se a relação dias foi carregada, usar name
+                // Se a relação dias foi carregada, usar numeric day ID (não name!)
                 if ((schedule as any).days) {
                     const dayObj = Array.isArray((schedule as any).days) 
                         ? (schedule as any).days[0] 
                         : (schedule as any).days;
                     
-                    if (dayObj && typeof dayObj === 'object') {
-                        dayIdentifier = dayObj.name || dayObj.id || day_id;
+                    if (dayObj && typeof dayObj === 'object' && dayObj.id) {
+                        dayIdentifier = dayObj.id;
                     }
                 }
                 
-                // Se a relação time_slots foi carregada, usar start_time:end_time
+                // Se a relação time_slots foi carregada, usar numeric slot ID (não time string!)
                 if ((schedule as any).times_slots) {
                     const slotObj = Array.isArray((schedule as any).times_slots) 
                         ? (schedule as any).times_slots[0] 
                         : (schedule as any).times_slots;
                     
-                    if (slotObj && typeof slotObj === 'object') {
-                        slotIdentifier = slotObj.start_time && slotObj.end_time
-                            ? `${slotObj.start_time}:${slotObj.end_time}` 
-                            : slotObj.id || time_slot_id;
+                    if (slotObj && typeof slotObj === 'object' && slotObj.id) {
+                        slotIdentifier = slotObj.id;
                     }
                 }
                 
                 classSchedule.ho.push([dayIdentifier, slotIdentifier]);
+                classSchedule.da.push(day_id);
                 if ((schedule as any).start_real_time && (schedule as any).end_real_time) {
                     classSchedule.rt.push({
                         start: (schedule as any).start_real_time,
@@ -318,19 +317,19 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                 processedCount++;
             });
             
-            console.log(`✅ Processados ${processedCount}/${classesData.length} registros de classes (skipped: ${skippedCount})`);
-            console.log(`📊 Map schedulesBySubjectId tem ${schedulesBySubjectId.size} disciplinas com horários`);
+            // console.log(`✅ Processados ${processedCount}/${classesData.length} registros de classes (skipped: ${skippedCount})`);
+            // console.log(`📊 Map schedulesBySubjectId tem ${schedulesBySubjectId.size} disciplinas com horários`);
             
-            // Mostrar amostras
-            if (schedulesBySubjectId.size > 0) {
-                const sample = Array.from(schedulesBySubjectId.entries()).slice(0, 3);
-                sample.forEach(([subId, schedules]) => {
-                    console.log(`   Subject ${subId}: ${schedules.length} classes, total slots: ${schedules.reduce((sum, s) => sum + s.ho.length, 0)}`);
-                    if (schedules[0]) {
-                        console.log(`      Primeira class: ${schedules[0].class_name}, slots: ${schedules[0].ho.slice(0, 2)}`);
-                    }
-                });
-            }
+            // Mostrar amostras - comentado
+            // if (schedulesBySubjectId.size > 0) {
+            //     const sample = Array.from(schedulesBySubjectId.entries()).slice(0, 3);
+            //     sample.forEach(([subId, schedules]) => {
+            //         console.log(`   Subject ${subId}: ${schedules.length} classes, total slots: ${schedules.reduce((sum, s) => sum + s.ho.length, 0)}`);
+            //         if (schedules[0]) {
+            //             console.log(`      Primeira class: ${schedules[0].class_name}, slots: ${schedules[0].ho.slice(0, 2)}`);
+            //         }
+            //     });
+            // }
             
             // 🔍 DEBUG: Verificar quantas disciplinas têm horários
             let subjectsWithSchedules = 0;
@@ -373,27 +372,19 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
             });
             
             console.log(`📊 Resultado final: ${subjectsWithSchedulesAfterMapping} disciplinas COM horários, ${subjectsWithoutSchedulesAfterMapping} SEM horários`);
-            
-            // 🔥 FILTRO: Remover disciplinas sem horários (sem classes associadas)
-            // Uma disciplina só é válida para predição se tiver pelo menos uma classe/horário
-            const validMappedData = mappedData.filter(subject => 
-                subject._classSchedules && subject._classSchedules.length > 0
-            );
-            
-            console.log(`✅ Após filtro: ${validMappedData.length} disciplinas válidas (removidas ${mappedData.length - validMappedData.length} sem horários)`);
 
             if (!courseCode) {
                 cachedData = {};
-                validMappedData.forEach(item => {
+                mappedData.forEach(item => {
                     const cu = item._cu as string;
                     if (!cachedData[cu]) cachedData[cu] = [];
                     cachedData[cu].push(item);
                 });
                 
-                // 🆕 Popular os mapas globais para acesso rápido (apenas disciplinas válidas)
+                // 🆕 Popular os mapas globais para acesso rápido
                 subjectsDataMap.clear();
                 subjectsDataMapByAcronym.clear();
-                validMappedData.forEach(subject => {
+                mappedData.forEach(subject => {
                     subjectsDataMap.set(subject._id as number, subject);
                     if (subject._re) {
                         subjectsDataMapByAcronym.set(subject._re, subject);
@@ -404,7 +395,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
             }
 
             lastFetchTime = now;
-            return validMappedData;
+            return mappedData;
         } catch (error) {
             console.error('Erro ao carregar dados do Supabase:', JSON.stringify(error, null, 2), error);
             throw error;
@@ -574,11 +565,20 @@ export const commitChanges = async (changes: any[], courseCode: string): Promise
 export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]> => {
     try {
         const subjects = await loadDbData(courseCode);
+        console.log(`📊 loadClassesForGrid: Recebeu ${subjects.length} disciplinas de loadDbData`);
+        
         const gridData: Subject[] = [];
+        let withSchedulesCount = 0;
+        let withoutSchedulesCount = 0;
+        
         subjects.forEach(subject => {
+            console.log(`   [ANTES FILTRO] ${subject._di}: _ag=${subject._ag}, horários=${subject._classSchedules?.length || 0}`);
+            
             if (subject._classSchedules && subject._classSchedules.length > 0) {
+                withSchedulesCount++;
                 subject._classSchedules.forEach((cls: any) => {
                     let displayName = cls.class_name || subject._di;
+                    console.log(`      ✅ Turma: ${displayName}, horários: ${cls.ho?.length || 0} slots, dias: ${cls.da?.join(',')}}`);
                     gridData.push({
                         _id: subject._id,
                         _cu: subject._cu,
@@ -600,6 +600,8 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                     } as Subject);
                 });
             } else if (subject._ag === true) {
+                withoutSchedulesCount++;
+                console.log(`      ⚠️  Sem turmas definidas (ativa)`);
                 // Incluir matéria ativa mesmo sem turmas para visibilidade no passo 1
                 const { _el, _category } = processCategoryAndOptional(subject);
                 gridData.push({
@@ -623,14 +625,21 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                     original_name: subject._di,
                     course_id: subject.course_id
                 } as Subject);
+            } else {
+                console.log(`      ❌ Não ativa (_ag=${subject._ag})`);
             }
         });
-        // Ensure _se is present and is a number for filtering/sorting
-        return gridData.filter(item =>
+        
+        console.log(`🔍 Grid antes filtro: ${gridData.length} items (${withSchedulesCount} com horários, ${withoutSchedulesCount} sem horários)`);
+        
+        const filtered = gridData.filter(item =>
             item._se !== undefined &&
             Number(item._se) >= 0 &&
             item._ag === true
         ).sort((a, b) => Number(a._se || 0) - Number(b._se || 0));
+        
+        console.log(`✅ Grid após filtro: ${filtered.length} disciplinas (filtradas por _se >= 0 e _ag === true)`);
+        return filtered;
     } catch (error) {
         console.error("Service CRITICAL ERROR in loadClassesForGrid:", error);
         throw error;
@@ -1034,6 +1043,7 @@ export const fetchEquivalentOptionsForSubjects = async (subjectIds: number[], ta
             subjectSchedules.push(classSchedule);
         }
         classSchedule.ho.push([day_id, time_slot_id]);
+        classSchedule.da.push(day_id);
     });
 
     // Final Mapping

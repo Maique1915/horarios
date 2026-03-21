@@ -67,15 +67,15 @@ export default class Grafos {
                 }
 
                 if (!temCreditos) {
-                    if (materia._di?.includes('Metodologia') || materia._re?.includes('MET')) {
-                        console.log(`[Grafos] !Candidate: ${materia._re} (${materia._di}) - Credits needed: ${minCreditos}, User has: ${this.cr}`);
-                    }
+                    // if (materia._di?.includes('Metodologia') || materia._re?.includes('MET')) {
+                    //     console.log(`[Grafos] !Candidate: ${materia._re} (${materia._di}) - Credits needed: ${minCreditos}, User has: ${this.cr}`);
+                    // }
                     return false;
                 }
 
-                if (materia._di?.includes('Metodologia') || materia._re?.includes('MET')) {
-                    console.log(`[Grafos] ✓Candidate: ${materia._re} (${materia._di}) - CR=${this.cr} >= ${minCreditos}, temReq=${temReq}`);
-                }
+                // if (materia._di?.includes('Metodologia') || materia._re?.includes('MET')) {
+                //     console.log(`[Grafos] ✓Candidate: ${materia._re} (${materia._di}) - CR=${this.cr} >= ${minCreditos}, temReq=${temReq}`);
+                // }
 
                 return true;
             }

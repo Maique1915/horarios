@@ -298,7 +298,7 @@ export default class Escolhe {
             // 3. Pick the "best" (most subjects/hours)
             // exc() sorts by length descending, so index 0 is best.
             const bestSchedule = possibleSchedules[0];
-            console.log(`✨ Selected ${bestSchedule.length} subjects for this semester:`, bestSchedule.map(s => s._re).join(', '));
+            // console.log(`✨ Selected ${bestSchedule.length} subjects for this semester:`, bestSchedule.map(s => s._re).join(', '));
 
             // 4. Update state
             // Add these subjects to completed list
@@ -307,7 +307,7 @@ export default class Escolhe {
             semesters++;
         }
 
-        console.log(`\n🎉 Prediction finished: ${semesters} semesters total\n`);
+        // console.log(`\n🎉 Prediction finished: ${semesters} semesters total\n`);
         return { semestersCount: semesters, semesterGrids };
     }
 }
@@ -320,7 +320,7 @@ class EscolheDeterministico extends Escolhe {
 
     reduz() {
         const originalCount = this.genesis.length;
-        console.log(`🔧 Reduz: Starting with ${originalCount} candidates (Seeds: ${this.seedIndices.size})`);
+        // console.log(`🔧 Reduz: Starting with ${originalCount} candidates (Seeds: ${this.seedIndices.size})`);
 
         // Separate subjects: keep mandatory AND seeded ones
         const mandatoryOrSeeded = this.genesis.filter((s, idx) => !s._el || this.seedIndices.has(idx));
@@ -351,7 +351,7 @@ class EscolheDeterministico extends Escolhe {
             this.genesis.push(...optionals);
         }
 
-        console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatoryOrSeeded.length} mandatory/seeded + ${this.genesis.length - mandatoryOrSeeded.length} other optionals)`);
+        // console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatoryOrSeeded.length} mandatory/seeded + ${this.genesis.length - mandatoryOrSeeded.length} other optionals)`);
 
         if (mandatoryOrSeeded.length > MAX_SUBJECTS) {
             console.warn(`⚠️ Warning: ${mandatoryOrSeeded.length} mandatory/seeded subjects exceed the ${MAX_SUBJECTS} limit. All will be kept.`);
