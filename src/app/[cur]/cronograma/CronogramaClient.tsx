@@ -214,6 +214,13 @@ const CronogramaView = ({ ctrl }: { ctrl: ReturnType<typeof useCronogramaControl
                 selectedNodeId={ctrl.selectedNodeId}
                 onNodeClick={ctrl.handleNodeClick}
                 graphBounds={ctrl.mindMapData.graphBounds}
+                draggedSubject={null}
+                hoveredSemesterIndex={null}
+                dragPosition={null}
+                isHoverCollision={false}
+                onDragStart={() => {}}
+                onDragMove={() => {}}
+                onDragEnd={() => {}}
             />
         </div>
     );
