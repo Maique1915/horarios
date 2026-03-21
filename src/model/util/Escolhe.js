@@ -1,10 +1,11 @@
 import Grafos from './Grafos';
 export default class Escolhe {
 
-    constructor(genesis, schedule, weights = new Map(), mainCourseId = null) {
+    constructor(genesis, schedule, weights = new Map(), mainCourseId = null, seedIndices = new Set()) {
         this.weights = weights;
         this.schedule = schedule || [[], []]
         this.mainCourseId = mainCourseId;
+        this.seedIndices = seedIndices;
 
         // Normalize genesis subjects 
         this.genesis = genesis.map(subject => this.normalize(subject))
@@ -91,6 +92,16 @@ export default class Escolhe {
         while (i > 0) {
             const f = i.toString(2).padStart(this.genesis.length, '0').split('')
             i--
+
+            // Seed check: combinations MUST include all subjects in seedIndices
+            let missingSeed = false;
+            for (const sIdx of this.seedIndices) {
+                if (f[sIdx] !== '1') {
+                    missingSeed = true;
+                    break;
+                }
+            }
+            if (missingSeed) continue;
 
             if (this.count(f) >= 9) continue
 
@@ -200,7 +211,7 @@ export default class Escolhe {
      * @param {Object} scheduleMeta - { days: [], slots: [] } Metadata for schedule parsing.
      * @returns {{ semestersCount: number, semesterGrids: Array<Array<Object>> }} Prediction result containing count and grids.
      */
-    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { optionalHours: Infinity, mandatoryHours: Infinity }, mainCourseId = null, equivalencies = []) {
+    static predictCompletion(allSubjects, completedSubjects, scheduleMeta, limits = { optionalHours: Infinity, mandatoryHours: Infinity }, mainCourseId = null, equivalencies = [], fixedFutureSemesters = []) {
         if (!allSubjects || allSubjects.length === 0) return 0;
 
         let currentCompleted = [...completedSubjects]; // Copy to avoid mutating original
@@ -243,6 +254,11 @@ export default class Escolhe {
             const grafos = new Grafos(allSubjects, -1, currentCompleted);
             let candidates = grafos.matriz();
 
+            // 1.05 EXCLUDE subjects that are fixed in ANY future semester
+            // This prevents the algorithm from "stealing" a manually placed subject for an earlier semester
+            const futureSeeds = fixedFutureSemesters.slice(semesters + 1).flat();
+            candidates = candidates.filter(c => !futureSeeds.some(fs => fs._re === c._re));
+
             // 1.1 FILTER CANDIDATES BASED ON LIMITS
             candidates = candidates.filter(subject => {
                 if (!subject._el) {
@@ -263,8 +279,16 @@ export default class Escolhe {
             // Calculate heights for current pool of subjects
             const heights = grafos.calculateHeights();
 
+            // Identify seeds for this semester from fixedFutureSemesters
+            const seedIndices = new Set();
+            const currentFixed = fixedFutureSemesters[semesters] || [];
+            currentFixed.forEach(fixedSub => {
+                const idx = candidates.findIndex(c => c._re === fixedSub._re);
+                if (idx !== -1) seedIndices.add(idx);
+            });
+
             // Use Deterministic chooser to avoid random results in prediction
-            const escolhe = new EscolheDeterministico(candidates, scheduleMeta, heights, mainCourseId);
+            const escolhe = new EscolheDeterministico(candidates, scheduleMeta, heights, mainCourseId, seedIndices);
             const possibleSchedules = escolhe.exc();
 
             if (possibleSchedules.length === 0) {
@@ -290,21 +314,24 @@ export default class Escolhe {
 
 // Subclass to enforce deterministic reduction for prediction accuracy
 class EscolheDeterministico extends Escolhe {
+    constructor(genesis, schedule, weights, mainCourseId, seedIndices) {
+        super(genesis, schedule, weights, mainCourseId, seedIndices);
+    }
+
     reduz() {
         const originalCount = this.genesis.length;
-        console.log(`🔧 Reduz: Starting with ${originalCount} candidates`);
+        console.log(`🔧 Reduz: Starting with ${originalCount} candidates (Seeds: ${this.seedIndices.size})`);
 
-        // Separate mandatory and optional subjects
-        // _el=false means MANDATORY, _el=true means OPTIONAL
-        const mandatory = this.genesis.filter(s => !s._el);
-        const optionals = this.genesis.filter(s => s._el);
+        // Separate subjects: keep mandatory AND seeded ones
+        const mandatoryOrSeeded = this.genesis.filter((s, idx) => !s._el || this.seedIndices.has(idx));
+        const optionals = this.genesis.filter((s, idx) => s._el && !this.seedIndices.has(idx));
 
-        // Keep all mandatory subjects - they should ALWAYS be considered
-        this.genesis = [...mandatory];
+        // Keep all mandatory/seeded subjects
+        this.genesis = [...mandatoryOrSeeded];
 
         // Add optionals up to the limit
         const MAX_SUBJECTS = 20;
-        const remainingSlots = Math.max(0, MAX_SUBJECTS - mandatory.length);
+        const remainingSlots = Math.max(0, MAX_SUBJECTS - mandatoryOrSeeded.length);
 
         if (optionals.length > remainingSlots) {
             // Need to reduce optionals
@@ -324,10 +351,10 @@ class EscolheDeterministico extends Escolhe {
             this.genesis.push(...optionals);
         }
 
-        console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatory.length} mandatory + ${this.genesis.length - mandatory.length} optionals)`);
+        console.log(`🔧 Reduz: Final count: ${this.genesis.length} (${mandatoryOrSeeded.length} mandatory/seeded + ${this.genesis.length - mandatoryOrSeeded.length} other optionals)`);
 
-        if (mandatory.length > MAX_SUBJECTS) {
-            console.warn(`⚠️ Warning: ${mandatory.length} mandatory subjects exceed the ${MAX_SUBJECTS} limit. All will be kept.`);
+        if (mandatoryOrSeeded.length > MAX_SUBJECTS) {
+            console.warn(`⚠️ Warning: ${mandatoryOrSeeded.length} mandatory/seeded subjects exceed the ${MAX_SUBJECTS} limit. All will be kept.`);
         }
     }
 }
