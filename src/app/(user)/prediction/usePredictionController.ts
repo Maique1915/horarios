@@ -46,30 +46,13 @@ export const TITLE_HEIGHT = 40;
 export const checkCollision = (subA: Subject, subB: Subject) => {
     const getSlots = (s: Subject) => {
         const slots = new Set<string>();
-        
-        const processHo = (ho: any) => {
-            if (!ho || !Array.isArray(ho)) return;
-            ho.forEach((item: any) => {
-                if (Array.isArray(item) && item.length === 2) {
-                    slots.add(`${item[0]}:${item[1]}`);
-                } else if (typeof item === 'object' && item !== null) {
-                    // Try day/time variants
-                    const d = item.day ?? item.d ?? item.day_id;
-                    const t = item.time ?? item.t ?? item.time_slot_id;
-                    if (d !== undefined && t !== undefined) slots.add(`${d}:${t}`);
+        if (s._classSchedules) {
+            s._classSchedules.forEach((sched: any) => {
+                if (sched.ho) {
+                    sched.ho.forEach(([d, t]: [string, string]) => slots.add(`${d}:${t}`));
                 }
             });
-        };
-
-        if (s._classSchedules && s._classSchedules.length > 0) {
-            s._classSchedules.forEach((sched: any) => {
-                processHo(sched.ho || sched._ho || (sched.schedule_data?.ho) || (Array.isArray(sched.schedule_data) ? sched.schedule_data[0]?.ho : null));
-            });
         }
-        
-        processHo(s._ho);
-        if (s.schedule_data) processHo(s.schedule_data.ho || s.schedule_data);
-
         return slots;
     };
 
@@ -104,7 +87,7 @@ export const usePredictionController = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     // --- Drag and Drop State ---
-    const [draggedSubject, setDraggedSubject] = useState<Subject | null>(null);
+    const [draggedSubject, setDraggedSubject] = useState<Subject | null | undefined>(null);
     const [hoveredSemesterIndex, setHoveredSemesterIndex] = useState<number | null>(null);
     const [dragPosition, setDragPosition] = useState<{ x: number, y: number } | null>(null);
     const [invalidDropReason, setInvalidDropReason] = useState<string | null>(null);
@@ -212,12 +195,10 @@ export const usePredictionController = () => {
         let simulatedCompleted = [...completedSubjects];
         const finalGrid: Subject[][] = [];
 
-        // 1. Add ONLY the "Actual" semester (2026.1) as fixed base
-        // Subsequent fixed semesters will be handled as Seeds in predictCompletion
-        if (fixedSemesters.length > 0) {
-            finalGrid.push(fixedSemesters[0]);
-            simulatedCompleted = [...simulatedCompleted, ...fixedSemesters[0]];
-        }
+        fixedSemesters.forEach(semesterSubjects => {
+            finalGrid.push(semesterSubjects);
+            simulatedCompleted = [...simulatedCompleted, ...semesterSubjects];
+        });
 
         const limits = {
             optionalHours: 360,
@@ -228,20 +209,12 @@ export const usePredictionController = () => {
             availableSubjects,
             simulatedCompleted,
             scheduleMeta,
-            limits,
-            undefined, // mainCourseId 
-            [],        // equivalencies
-            fixedSemesters.slice(1) // Future seeds starting from index 1 (2026.2)
+            limits
         );
 
-        // Append the simulated/seeded future grids
-        (prediction.semesterGrids as Subject[][]).forEach((grid: Subject[]) => {
-            finalGrid.push(grid);
-        });
-
         return {
-            semesters: finalGrid,
-            totalCount: finalGrid.length
+            semesters: [...fixedSemesters, ...prediction.semesterGrids] as Subject[][],
+            totalCount: fixedSemesters.length + prediction.semestersCount
         };
 
     }, [allSubjects, completedSubjects, currentEnrollments, scheduleMeta, blacklistedIds, fixedSemesters, loading]);

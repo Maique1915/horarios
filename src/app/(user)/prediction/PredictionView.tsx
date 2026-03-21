@@ -195,13 +195,13 @@ const CanvasView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController>
                         }
                     }}
                     // DnD Props
-                    draggedSubject={ctrl.draggedSubject}
-                    hoveredSemesterIndex={ctrl.hoveredSemesterIndex}
-                    dragPosition={ctrl.dragPosition}
-                    isHoverCollision={ctrl.isHoverCollision}
-                    onDragStart={ctrl.handleDragStart}
-                    onDragMove={ctrl.handleDragMove}
-                    onDragEnd={ctrl.handleDragEnd}
+                    draggedSubject={ctrl.draggedSubject as any}
+                    hoveredSemesterIndex={ctrl.hoveredSemesterIndex as any}
+                    dragPosition={ctrl.dragPosition as any}
+                    isHoverCollision={ctrl.isHoverCollision as any}
+                    onDragStart={ctrl.handleDragStart as any}
+                    onDragMove={ctrl.handleDragMove as any}
+                    onDragEnd={ctrl.handleDragEnd as any}
                 />
             )}
         </div>

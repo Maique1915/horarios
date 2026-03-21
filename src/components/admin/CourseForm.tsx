@@ -41,7 +41,7 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
             needs_complementary_activities: false,
             credit_categories: [],
         }
-    });
+    } as any);
 
     const { fields, append, remove } = useFieldArray({
         control,
