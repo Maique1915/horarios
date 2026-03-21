@@ -185,6 +185,13 @@ const MapaMental = ({ subjectStatus, onVoltar }) => {
         selectedNodeId={selectedNodeId}
         onNodeClick={handleNodeClick}
         graphBounds={mindMapData.graphBounds}
+        draggedSubject={null}
+        hoveredSemesterIndex={null}
+        dragPosition={null}
+        isHoverCollision={false}
+        onDragStart={() => {}}
+        onDragMove={() => {}}
+        onDragEnd={() => {}}
       />
     </div>
   );
