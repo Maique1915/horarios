@@ -18,6 +18,8 @@ const formSchema = z.object({
         name: z.string().min(1, "O nome da categoria é obrigatório"),
         required_hours: z.coerce.number().min(0, "As horas devem ser um número positivo"),
     })).default([]),
+    period_start: z.string().nullable().optional(),
+    period_end: z.string().nullable().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -40,6 +42,8 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
             university_id: null,
             needs_complementary_activities: false,
             credit_categories: [],
+            period_start: null,
+            period_end: null,
         }
     } as any);
 
@@ -71,6 +75,8 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
                 // @ts-ignore
                 needs_complementary_activities: !!initialData.needs_complementary_activities,
                 credit_categories: Array.isArray(initialData.credit_categories) ? initialData.credit_categories : [],
+                period_start: (initialData as any).period_start || null,
+                period_end: (initialData as any).period_end || null,
             });
         } else {
             reset({
@@ -80,6 +86,8 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
                 university_id: null,
                 needs_complementary_activities: false,
                 credit_categories: [],
+                period_start: null,
+                period_end: null,
             });
         }
     }, [initialData, reset]);
@@ -281,6 +289,39 @@ export default function CourseForm({ initialData, onSave, onCancel }: CourseForm
                             )}
                         </div>
                     ))}
+                </div>
+            </div>
+
+            {/* Período Letivo */}
+            <div className="space-y-3 p-4 bg-amber-50/60 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <div className="flex items-center gap-2 mb-1">
+                    <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-lg">calendar_month</span>
+                    <span className="text-sm font-semibold text-amber-900 dark:text-amber-200">Período Letivo Ativo</span>
+                </div>
+                <p className="text-xs text-amber-700 dark:text-amber-400 -mt-1">
+                    Define o intervalo do semestre atual. Quando o período encerrar, alunos verão a tela de revisão de resultados.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Início do Período
+                        </label>
+                        <input
+                            type="date"
+                            {...register('period_start')}
+                            className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary p-2.5 outline-none transition-all text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Fim do Período
+                        </label>
+                        <input
+                            type="date"
+                            {...register('period_end')}
+                            className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary p-2.5 outline-none transition-all text-sm"
+                        />
+                    </div>
                 </div>
             </div>
 

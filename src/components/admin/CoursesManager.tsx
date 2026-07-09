@@ -15,6 +15,8 @@ export interface Course {
     needs_complementary_activities?: boolean;
     credit_categories?: any[];
     universities?: { name: string };
+    period_start?: string | null;
+    period_end?: string | null;
 }
 
 export default function CoursesManager() {
@@ -59,16 +61,19 @@ export default function CoursesManager() {
                 shift: formData.shift ?? null
             };
 
+            const extraFields = {
+                university_id: (formData as any).university_id,
+                needs_complementary_activities: (formData as any).needs_complementary_activities,
+                credit_categories: (formData as any).credit_categories,
+                period_start: (formData as any).period_start || null,
+                period_end: (formData as any).period_end || null,
+            };
+
             if (editingCourse) {
                 // Update
                 const { error } = await supabase
                     .from('courses')
-                    .update({
-                        ...courseData,
-                        university_id: (formData as any).university_id,
-                        needs_complementary_activities: (formData as any).needs_complementary_activities,
-                        credit_categories: (formData as any).credit_categories,
-                    })
+                    .update({ ...courseData, ...extraFields })
                     .eq('id', editingCourse.id);
 
                 if (error) throw error;
@@ -76,12 +81,7 @@ export default function CoursesManager() {
                 // Create
                 const { error } = await supabase
                     .from('courses')
-                    .insert([{
-                        ...courseData,
-                        university_id: (formData as any).university_id,
-                        needs_complementary_activities: (formData as any).needs_complementary_activities,
-                        credit_categories: (formData as any).credit_categories,
-                    }]);
+                    .insert([{ ...courseData, ...extraFields }]);
 
                 if (error) throw error;
             }

@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { ScheduleEditorView } from '../profile/ScheduleEditorView';
-import { loadCurrentEnrollments, saveCurrentEnrollments } from '../../../services/disciplinaService';
+import { loadCurrentEnrollments, saveCurrentEnrollments, fetchCourseConfig, loadCompletedSubjects } from '../../../services/disciplinaService';
 import { getCurrentPeriod } from '@/utils/dateUtils';
 
 export default function GradePage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [currentEnrollments, setCurrentEnrollments] = React.useState<any[]>([]);
+    const [activePeriod, setActivePeriod] = React.useState<string>('');
+    const [completedSubjectIds, setCompletedSubjectIds] = React.useState<Set<number>>(new Set());
     const [loading, setLoading] = React.useState(true);
 
     const handleClose = () => {
@@ -32,11 +34,40 @@ export default function GradePage() {
         if (!user) return;
         try {
             setLoading(true);
+
+            // Buscar configuração do curso para obter as datas do período
+            const courseCode = user.courses?.code;
+            let periodStart: string | null = null;
+            let periodEnd: string | null = null;
+
+            if (courseCode) {
+                try {
+                    const config = await fetchCourseConfig(courseCode);
+                    periodStart = config?.period_start ?? null;
+                    periodEnd = config?.period_end ?? null;
+                } catch (e) {
+                    console.warn('Grade: could not load course config, falling back to computed period', e);
+                }
+            }
+
             const data = await loadCurrentEnrollments(user.id);
-            const periodoAtual = getCurrentPeriod();
-            // Filtrar apenas o que é do período atual
-            const filteredData = data.filter((e: any) => e.period === periodoAtual);
-            setCurrentEnrollments(filteredData);
+
+            // Buscar disciplinas concluídas para bloquear no modal de adição
+            const completed = await loadCompletedSubjects(user.id);
+            setCompletedSubjectIds(new Set(completed.map((s: any) => Number(s._id || s.subject_id))));
+
+            if (periodStart && periodEnd) {
+                // Datas configuradas no banco → fonte de verdade, exibir tudo
+                setCurrentEnrollments(data);
+                // Período ativo = o que está nas matrículas existentes (ou o calculado como fallback)
+                const existingPeriod = (data[0] as any)?.period ?? getCurrentPeriod();
+                setActivePeriod(existingPeriod);
+            } else {
+                // Fallback legacy: filtrar pelo período calculado pelo sistema
+                const periodoAtual = getCurrentPeriod();
+                setCurrentEnrollments(data.filter((e: any) => e.period === periodoAtual));
+                setActivePeriod(periodoAtual);
+            }
         } catch (error) {
             console.error('Error loading enrollments:', error);
         } finally {
@@ -48,10 +79,9 @@ export default function GradePage() {
     const handleSave = async (enrollments: any[]) => {
         if (!user) return;
         try {
-            const periodoAtual = getCurrentPeriod();
-            // Precisamos garantir que as disciplinas tenham o formato que o saveCurrentEnrollments espera
-            // (especialmente _id e horários)
-            await saveCurrentEnrollments(user.id, enrollments, periodoAtual, user.course_id);
+            // Usar o período já determinado (do banco ou calculado)
+            const periodo = activePeriod || getCurrentPeriod();
+            await saveCurrentEnrollments(user.id, enrollments, periodo, user.course_id);
             await queryClient.invalidateQueries({ queryKey: ['currentEnrollments', user.id] });
         } catch (error) {
             console.error('Error saving grade:', error);
@@ -75,6 +105,7 @@ export default function GradePage() {
         <ScheduleEditorView
             currentEnrollments={currentEnrollments}
             userCourseCode={user.courses?.code || 'engcomp'}
+            completedSubjectIds={completedSubjectIds}
             onClose={handleClose}
             onSave={handleSave}
         />

@@ -17,7 +17,11 @@ export interface DbCourse {
     subjects: DbSubject[];
     university?: {
         name: string;
-    }
+    };
+    /** Data de início do período letivo ativo (ex: '2026-03-01') */
+    period_start?: string | null;
+    /** Data de fim do período letivo ativo (ex: '2026-07-31') */
+    period_end?: string | null;
 }
 
 export const fetchAllCourses = async () => {
@@ -27,13 +31,28 @@ export const fetchAllCourses = async () => {
 };
 
 export const fetchCourseByCode = async (courseCode: string) => {
+    // Try with period date columns first (requires migration to have been run)
     const { data, error } = await supabase
+        .from('courses')
+        .select('id, code, name, university_id, needs_complementary_activities, credit_categories, period_start, period_end, workloads:course_workloads(*)')
+        .eq('code', courseCode)
+        .limit(1);
+
+    if (!error) {
+        return data && data.length > 0 ? (data[0] as DbCourse) : null;
+    }
+
+    // Fallback: period columns might not exist yet (migration pending)
+    // Try without them so the rest of the app keeps working
+    console.warn('fetchCourseByCode: period columns unavailable, falling back (run add_period_dates_to_courses.sql)', error);
+    const { data: fallbackData, error: fallbackError } = await supabase
         .from('courses')
         .select('id, code, name, university_id, needs_complementary_activities, credit_categories, workloads:course_workloads(*)')
         .eq('code', courseCode)
         .limit(1);
-    if (error) throw error;
-    return data && data.length > 0 ? (data[0] as DbCourse) : null;
+
+    if (fallbackError) throw fallbackError;
+    return fallbackData && fallbackData.length > 0 ? (fallbackData[0] as DbCourse) : null;
 };
 
 export const fetchCourseStats = async () => {

@@ -7,6 +7,7 @@ import { CompletedSubjectsSection } from './CompletedSubjectsSection';
 import { CurrentEnrollmentsSection } from './CurrentEnrollmentsSection';
 import { EquivalenciesSection } from './EquivalenciesSection';
 import { WorkloadSection } from './WorkloadSection';
+import { PeriodReviewSection } from './PeriodReviewSection';
 import { Subject } from '@/types/Subject';
 
 // --- View Components ---
@@ -195,15 +196,22 @@ export default function ProfileView({ ctrl }: { ctrl: ReturnType<typeof useProfi
                 <WorkloadSection categories={ctrl.categoryStats} />
             </div>
 
+            {/* Seção de Revisão de Período — aparece entre semestres */}
+            {ctrl.isReviewMode && (
+                <PeriodReviewSection ctrl={ctrl} />
+            )}
+
             {/* TWO COLUMNS: Enrollments & Completed */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-                {/* Current Enrollments Section - 7/12 width */}
-                <div className="lg:col-span-7">
-                    <CurrentEnrollmentsSection ctrl={ctrl} />
-                </div>
+                {/* Current Enrollments Section — oculta durante revisão de período */}
+                {!ctrl.isReviewMode && (
+                    <div className="lg:col-span-7">
+                        <CurrentEnrollmentsSection ctrl={ctrl} />
+                    </div>
+                )}
 
-                {/* Completed Subjects Section - 5/12 width */}
-                <div className="lg:col-span-5">
+                {/* Completed Subjects Section */}
+                <div className={ctrl.isReviewMode ? 'lg:col-span-12' : 'lg:col-span-5'}>
                     <CompletedSubjectsSection ctrl={ctrl} />
                 </div>
             </div>

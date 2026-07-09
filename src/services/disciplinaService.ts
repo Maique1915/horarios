@@ -692,6 +692,29 @@ export const loadCurrentEnrollments = async (userId: number): Promise<Enrollment
     });
 };
 
+/**
+ * Finaliza a revisão de um semestre: move disciplinas aprovadas para completed_subjects
+ * e remove TODAS as matrículas daquele semestre de current_enrollments.
+ *
+ * @param userId - ID do usuário
+ * @param approvedSubjectIds - IDs das disciplinas que o usuário foi aprovado
+ * @param semester - String do período acadêmico (ex: "2026.1")
+ */
+export const graduateEnrollments = async (
+    userId: number,
+    approvedSubjectIds: (number | string)[],
+    semester: string
+): Promise<void> => {
+    // 1. Adicionar disciplinas aprovadas a completed_subjects
+    if (approvedSubjectIds.length > 0) {
+        const rows = approvedSubjectIds.map(id => ({ user_id: userId, subject_id: id }));
+        await completedSubjectsModel.upsertCompletedSubjects(rows);
+    }
+
+    // 2. Remover TODAS as matrículas daquele semestre (aprovadas + reprovadas)
+    await currentEnrollmentsModel.deleteCurrentEnrollments(userId, semester);
+};
+
 export const getCourseTotalSubjects = async (courseCode: string): Promise<number> => {
     if (!courseCode) return 0;
     const courseData = await coursesModel.fetchCourseByCode(courseCode);

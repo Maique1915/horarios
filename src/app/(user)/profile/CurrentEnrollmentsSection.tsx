@@ -13,20 +13,32 @@ export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionPro
 
     return (
         <div className="bg-surface-light dark:bg-surface-dark lg:col-span-3 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden h-fit">
-            <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
+            <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-white/5 flex justify-between items-center gap-3">
                 <h2 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">calendar_today</span>
                     Grade Atual (Em Curso)
                 </h2>
-                {ctrl.currentEnrollments.length > 0 && (
-                    <button
-                        onClick={() => router.push(ROUTES.GRADE)}
-                        className="text-xs font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider flex items-center gap-1"
-                    >
-                        <span className="material-symbols-outlined text-sm">grid_view</span>
-                        Visualizar Grade
-                    </button>
-                )}
+                <div className="flex items-center gap-3">
+                    {ctrl.currentEnrollments.length > 0 && !ctrl.isReviewMode && (
+                        <button
+                            onClick={() => ctrl.setIsManualReview(true)}
+                            className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors uppercase tracking-wider flex items-center gap-1"
+                            title="Marcar quais disciplinas você foi aprovado neste semestre"
+                        >
+                            <span className="material-symbols-outlined text-sm">pending_actions</span>
+                            Revisar Semestre
+                        </button>
+                    )}
+                    {ctrl.currentEnrollments.length > 0 && (
+                        <button
+                            onClick={() => router.push(ROUTES.GRADE)}
+                            className="text-xs font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider flex items-center gap-1"
+                        >
+                            <span className="material-symbols-outlined text-sm">grid_view</span>
+                            Visualizar Grade
+                        </button>
+                    )}
+                </div>
             </div>
             <div className="p-6">
                 {ctrl.currentEnrollments.length === 0 ? (

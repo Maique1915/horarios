@@ -8,6 +8,7 @@ import { loadDbData, fetchEquivalentOptionsForSubjects } from '../../../services
 interface ScheduleEditorViewProps {
     currentEnrollments: Subject[];
     userCourseCode: string;
+    completedSubjectIds?: Set<number>;
     onClose: () => void;
     onSave?: (enrollments: Subject[]) => void;
 }
@@ -24,7 +25,7 @@ interface SubjectOption {
     subject: Subject;
 }
 
-export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose, onSave }: ScheduleEditorViewProps) => {
+export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, completedSubjectIds = new Set(), onClose, onSave }: ScheduleEditorViewProps) => {
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
@@ -460,6 +461,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                             ) : (
                                                 filteredSubjects.map((subject: Subject) => {
                                                     const isSelected = selectedSubjects.some((s: Subject) => s._id === subject._id);
+                                                    const isCompleted = completedSubjectIds.has(subject._id as number);
                                                     const equivalents = subjectEquivalents.get(subject._id as number) || [];
                                                     const hasEquivalents = equivalents.length > 0;
                                                     const isExpanded = expandedSubjectId === subject._id;
@@ -501,6 +503,14 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                                                                 </span>
                                                                             </>
                                                                         )}
+                                                                        {isCompleted && (
+                                                                            <>
+                                                                                <div className="h-1 w-1 rounded-full bg-slate-300"></div>
+                                                                                <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/30 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider border border-emerald-200 dark:border-emerald-800/50">
+                                                                                    Concluída
+                                                                                </span>
+                                                                            </>
+                                                                        )}
                                                                     </div>
                                                                 </div>
 
@@ -516,16 +526,22 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, onClose
                                                                         </button>
                                                                     )}
                                                                     <button
-                                                                        onClick={() => isSelected ? handleRemoveSubject(subject._id as number) : handleAddSubject(subject)}
+                                                                        onClick={() => {
+                                                                            if (isCompleted) return;
+                                                                            isSelected ? handleRemoveSubject(subject._id as number) : handleAddSubject(subject);
+                                                                        }}
+                                                                        disabled={isCompleted && !isSelected}
                                                                         className={`p-2.5 rounded-xl transition-all flex-shrink-0
                                                                             ${isSelected
                                                                                 ? 'text-red-500 bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20'
-                                                                                : 'text-primary bg-primary/5 hover:bg-primary/15'
+                                                                                : isCompleted
+                                                                                    ? 'text-slate-400 bg-slate-100 dark:bg-slate-800 cursor-not-allowed opacity-60'
+                                                                                    : 'text-primary bg-primary/5 hover:bg-primary/15'
                                                                             }`}
-                                                                        title={isSelected ? "Remover" : "Adicionar"}
+                                                                        title={isSelected ? "Remover" : isCompleted ? "Já concluída" : "Adicionar"}
                                                                     >
                                                                         <span className="material-symbols-outlined text-2xl">
-                                                                            {isSelected ? 'do_not_disturb_on' : 'add_circle'}
+                                                                            {isSelected ? 'do_not_disturb_on' : isCompleted ? 'check_circle' : 'add_circle'}
                                                                         </span>
                                                                     </button>
                                                                 </div>

@@ -18,6 +18,7 @@ import {
     getEquivalencies,
     loadEffectiveCompletedSubjects,
     fetchCourseConfig,
+    graduateEnrollments,
     DbEquivalency,
     Enrollment,
     CompletedSubject
@@ -26,7 +27,7 @@ import { getDays, getTimeSlots } from '../../../services/scheduleService';
 import { getUserTotalHours } from '../../../services/complementaryService';
 import { getComments, addComment } from '../../../services/commentService';
 import ROUTES from '../../../routes';
-import { getCurrentPeriod } from '@/utils/dateUtils';
+import { getCurrentPeriod, isInReviewWindow } from '@/utils/dateUtils';
 // @ts-ignore
 import Escolhe from '../../../model/util/Escolhe';
 
@@ -75,6 +76,11 @@ export const useProfileController = () => {
 
     // Views
     const [showScheduleView, setShowScheduleView] = useState(false);
+
+    // Graduation Review
+    const [graduatingSubjects, setGraduatingSubjects] = useState(false);
+    const [approvedReviewIds, setApprovedReviewIds] = useState<Set<string>>(new Set());
+    const [isManualReview, setIsManualReview] = useState(false);
 
     // Manage Subjects (Edit Mode)
     const [isEditingSubjects, setIsEditingSubjects] = useState(false);
@@ -157,11 +163,39 @@ export const useProfileController = () => {
 
     const currentEnrollments = useMemo(() => {
         const raw = currentEnrollmentsRaw || [];
-        const periodoAtual = getCurrentPeriod();
 
-        // No perfil, mostramos apenas o que está em curso no período ATUAL
+        const pStart = courseConfig?.period_start;
+        const pEnd = courseConfig?.period_end;
+
+        if (pStart && pEnd) {
+            // Quando as datas vêm do banco, elas são a fonte de verdade.
+            // Não filtramos pela string calculada do período (getCurrentPeriod),
+            // pois a matrícula pode ter sido feita com "2026.1" mas estamos em julho.
+            // Exibimos TUDO que está em current_enrollments.
+            return raw;
+        }
+
+        // Fallback legacy: filtra pelo período calculado pela data do sistema
+        const periodoAtual = getCurrentPeriod();
         return raw.filter(e => e.period === periodoAtual);
-    }, [currentEnrollmentsRaw]);
+    }, [currentEnrollmentsRaw, courseConfig]);
+
+    // Modo de revisão de semestre:
+    // — automático: período encerrado + dentro da janela de revisão
+    // — manual: usuário clicou em "Revisar Semestre" no card de Grade Atual
+    const isReviewMode = useMemo(() => {
+        const pStart = courseConfig?.period_start;
+        const pEnd = courseConfig?.period_end;
+        const autoReview = isInReviewWindow(pStart, pEnd) && currentEnrollments.length > 0;
+        const manualReview = isManualReview && currentEnrollments.length > 0;
+        return autoReview || manualReview;
+    }, [courseConfig, currentEnrollments, isManualReview]);
+
+    // Disciplinas em revisão
+    const reviewEnrollments = useMemo(() => {
+        if (!isReviewMode) return [];
+        return currentEnrollments;
+    }, [isReviewMode, currentEnrollments]);
 
     const { data: complementaryHours = 0, isLoading: loadingHours } = useQuery<number>({
         queryKey: ['userTotalHours', user?.id, user?.course_id],
@@ -361,6 +395,43 @@ export const useProfileController = () => {
         }
     };
 
+    const handleGraduateEnrollments = async () => {
+        if (!user) return;
+        const semester = reviewEnrollments[0]?.period;
+        if (!semester) return;
+
+        const confirmed = window.confirm(
+            `Confirmar resultados do semestre ${semester}?\n\n` +
+            `Aprovadas: ${approvedReviewIds.size} disciplina(s)\n` +
+            `Reprovadas/Não cursadas: ${reviewEnrollments.length - approvedReviewIds.size} disciplina(s)\n\n` +
+            `Esta ação moverá as aprovadas para "Concluídas" e limpará a grade atual.`
+        );
+        if (!confirmed) return;
+
+        try {
+            setGraduatingSubjects(true);
+            const approvedIds = Array.from(approvedReviewIds);
+            await graduateEnrollments(user.id, approvedIds, semester);
+            await queryClient.invalidateQueries({ queryKey: ['completedSubjects', user.id] });
+            await queryClient.invalidateQueries({ queryKey: ['currentEnrollments', user.id] });
+            setApprovedReviewIds(new Set());
+            setIsManualReview(false);
+            alert('Resultados do semestre confirmados com sucesso!');
+        } catch (error) {
+            console.error('Erro ao confirmar resultados:', error);
+            alert('Erro ao confirmar resultados. Tente novamente.');
+        } finally {
+            setGraduatingSubjects(false);
+        }
+    };
+
+    const handleToggleApprovedReview = (subjectId: string) => {
+        const next = new Set(approvedReviewIds);
+        if (next.has(subjectId)) next.delete(subjectId);
+        else next.add(subjectId);
+        setApprovedReviewIds(next);
+    };
+
     const handlePostComment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newComment.trim() || !user) return;
@@ -545,6 +616,12 @@ export const useProfileController = () => {
         effectiveCompletedIds,
         complementaryHours,
         courseConfig,
+        // Review Mode
+        isReviewMode,
+        isManualReview, setIsManualReview,
+        reviewEnrollments,
+        approvedReviewIds,
+        graduatingSubjects,
         // Stats
         progressPercentage, estimatedDate,
         categoryStats,
@@ -560,6 +637,8 @@ export const useProfileController = () => {
         handleToggleSubject, handleTogglePeriod,
         handleSaveSubjects,
         handlePostComment,
+        handleGraduateEnrollments,
+        handleToggleApprovedReview,
         getFormattedSchedule
     };
 };
