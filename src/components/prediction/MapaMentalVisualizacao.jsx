@@ -57,6 +57,25 @@ const MapaMentalVisualizacao = ({
   const [pendingDrag, setPendingDrag] = useState(null); // {node, startPos}
   const dragThreshold = 5;
 
+  // Touch Zoom State
+  const [initialPinchDist, setInitialPinchDist] = useState(null);
+  const [initialViewBox, setInitialViewBox] = useState(null);
+
+  const getDistance = (touches) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getCenter = (touches) => {
+    if (touches.length < 2) return { clientX: touches[0].clientX, clientY: touches[0].clientY };
+    return {
+      clientX: (touches[0].clientX + touches[1].clientX) / 2,
+      clientY: (touches[0].clientY + touches[1].clientY) / 2
+    };
+  };
+
   const handleMouseDown = (e) => {
     if (e.target === svgRef.current || e.target.closest('rect[fill="url(#dot-pattern)"]')) {
       setIsPanning(true);
@@ -131,26 +150,137 @@ const MapaMentalVisualizacao = ({
     if (!svgRef.current || !graphBounds) return;
     const scaleFactor = 1.1;
     const { clientX, clientY } = e;
+    
+    // Zoom in (deltaY < 0), Zoom out (deltaY > 0)
+    applyZoom(clientX, clientY, e.deltaY > 0 ? 1/scaleFactor : scaleFactor);
+  };
+
+  const applyZoom = (clientX, clientY, scaleFactor, baseViewBox = viewBox) => {
+    if (!svgRef.current || !graphBounds) return;
+    
     const svgPoint = svgRef.current.createSVGPoint();
     svgPoint.x = clientX;
     svgPoint.y = clientY;
     const ctm = svgRef.current.getScreenCTM()?.inverse();
     if (!ctm) return;
     const { x: pointerX, y: pointerY } = svgPoint.matrixTransform(ctm);
-    let newWidth = e.deltaY > 0 ? viewBox.width * scaleFactor : viewBox.width / scaleFactor;
-    let newHeight = e.deltaY > 0 ? viewBox.height * scaleFactor : viewBox.height / scaleFactor;
+    
+    // Invert the meaning of scaleFactor to match SVG viewbox behavior (larger viewbox = smaller elements)
+    let newWidth = baseViewBox.width / scaleFactor;
+    let newHeight = baseViewBox.height / scaleFactor;
+    
     const graphWidth = graphBounds.maxX - graphBounds.minX;
     const graphHeight = graphBounds.maxY - graphBounds.minY;
-    if (newWidth > graphWidth) newWidth = graphWidth;
-    if (newHeight > graphHeight) newHeight = graphHeight;
+    
+    // Limite máximo de zoom out (não mais longe que o mapa real)
+    if (newWidth > graphWidth * 1.5) newWidth = graphWidth * 1.5;
+    if (newHeight > graphHeight * 1.5) newHeight = graphHeight * 1.5;
+    
+    // Limite máximo de zoom in
     const MIN_ZOOM_WIDTH = 360;
     if (newWidth < MIN_ZOOM_WIDTH) newWidth = MIN_ZOOM_WIDTH;
-    if (newHeight < MIN_ZOOM_WIDTH * (viewBox.height / viewBox.width)) newHeight = MIN_ZOOM_WIDTH * (viewBox.height / viewBox.width);
-    let newX = pointerX - (pointerX - viewBox.x) * (newWidth / viewBox.width);
-    let newY = pointerY - (pointerY - viewBox.y) * (newHeight / viewBox.height);
-    newX = Math.max(graphBounds.minX, Math.min(newX, graphBounds.maxX - newWidth));
-    newY = Math.max(graphBounds.minY, Math.min(newY, graphBounds.maxY - newHeight));
+    if (newHeight < MIN_ZOOM_WIDTH * (baseViewBox.height / baseViewBox.width)) newHeight = MIN_ZOOM_WIDTH * (baseViewBox.height / baseViewBox.width);
+    
+    let newX = pointerX - (pointerX - baseViewBox.x) * (newWidth / baseViewBox.width);
+    let newY = pointerY - (pointerY - baseViewBox.y) * (newHeight / baseViewBox.height);
+    
+    // newX = Math.max(graphBounds.minX - 500, Math.min(newX, graphBounds.maxX + 500 - newWidth));
+    // newY = Math.max(graphBounds.minY - 500, Math.min(newY, graphBounds.maxY + 500 - newHeight));
+    
     setViewBox({ x: newX, y: newY, width: newWidth, height: newHeight });
+  };
+
+  // --- TOUCH HANDLERS ---
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      // Começou um pinch
+      setInitialPinchDist(getDistance(e.touches));
+      setInitialViewBox({ ...viewBox });
+      setIsPanning(false);
+    } else if (e.touches.length === 1) {
+      // Começou um pan ou um possível drag (se originado de um Node, o Node avisa no onDragStart)
+      // Aqui, se não for originário de um node, é pan do background
+      if (e.target === svgRef.current || e.target.closest('rect[fill="url(#dot-pattern)"]')) {
+        setIsPanning(true);
+        setPanStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && initialPinchDist && initialViewBox) {
+      // Zoom
+      e.preventDefault(); // Previne scroll da página
+      const currentDist = getDistance(e.touches);
+      const scaleFactor = currentDist / initialPinchDist; // scale > 1 means zoom in
+      const center = getCenter(e.touches);
+      
+      applyZoom(center.clientX, center.clientY, scaleFactor, initialViewBox);
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      
+      if (pendingDrag && !draggedSubject) {
+        const dx = Math.abs(touch.clientX - pendingDrag.startPos.x);
+        const dy = Math.abs(touch.clientY - pendingDrag.startPos.y);
+        
+        if (Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+          e.preventDefault(); // Evita scroll do body durante drag de matéria
+          const point = getSVGPoint(touch.clientX, touch.clientY);
+          onDragStart(pendingDrag.node, point);
+          setPendingDrag(null);
+        }
+        return;
+      }
+
+      if (isPanning) {
+        e.preventDefault(); // Previne scroll da página
+        const scaleX = viewBox.width / (svgRef.current?.clientWidth || viewBox.width);
+        const scaleY = viewBox.height / (svgRef.current?.clientHeight || viewBox.height);
+        const dx = (touch.clientX - panStart.x) * scaleX;
+        const dy = (touch.clientY - panStart.y) * scaleY;
+        
+        setViewBox(v => {
+          let newX = v.x - dx;
+          let newY = v.y - dy;
+          return { ...v, x: newX, y: newY };
+        });
+        setPanStart({ x: touch.clientX, y: touch.clientY });
+        return;
+      }
+      
+      if (draggedSubject) {
+        e.preventDefault();
+        const point = getSVGPoint(touch.clientX, touch.clientY);
+        const semesterIndex = Math.max(0, Math.floor(point.x / COLUMN_WIDTH));
+        onDragMove(point, semesterIndex);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.touches.length < 2) {
+      setInitialPinchDist(null);
+      setInitialViewBox(null);
+    }
+    
+    if (e.touches.length === 0) {
+      if (isPanning) {
+        setIsPanning(false);
+      }
+      
+      if (pendingDrag && !draggedSubject) {
+        onNodeClick(pendingDrag.node.id);
+      }
+      
+      if (draggedSubject) {
+        onDragEnd();
+      }
+      
+      setPendingDrag(null);
+    }
   };
 
   if (!nodes || nodes.length === 0) return null;
@@ -176,6 +306,10 @@ const MapaMentalVisualizacao = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     >
       <defs>
         <pattern id="dot-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">

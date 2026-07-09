@@ -32,6 +32,15 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
     }
   };
 
+  const handleTouchStart = (e) => {
+    e.stopPropagation();
+    // Do not prevent default here, as it might block scroll if they just want to scroll the page.
+    // However, touch-action: none on the parent SVG usually handles it.
+    if (e.touches.length > 0 && onDragStart) {
+      onDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+
 
 
   const getStatusStyles = () => {
@@ -69,6 +78,7 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
             ${getStatusStyles()}
           `}
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           {/* Period Indicator strip on left */}
           <div

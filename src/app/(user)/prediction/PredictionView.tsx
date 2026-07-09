@@ -17,9 +17,17 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
         [ctrl.allSubjects]);
 
     return (
-        <div className={`flex flex-col border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark transition-all duration-300 ${ctrl.isSidebarOpen ? 'w-80' : 'w-0 overflow-hidden'}`}>
-            <div className="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center">
-                <h2 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">Controles</h2>
+        <>
+            {/* Mobile Backdrop */}
+            {ctrl.isSidebarOpen && (
+                <div 
+                    className="md:hidden absolute inset-0 bg-black/40 z-30 transition-opacity"
+                    onClick={() => ctrl.setIsSidebarOpen(false)}
+                />
+            )}
+            <div className={`flex flex-col border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark transition-all duration-300 max-md:absolute max-md:z-40 max-md:h-full max-md:shadow-2xl ${ctrl.isSidebarOpen ? 'w-80 max-md:w-[85%] max-w-sm' : 'w-0 overflow-hidden'}`}>
+                <div className="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-surface-light dark:bg-surface-dark relative z-10">
+                    <h2 className="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">Controles</h2>
                 <button onClick={() => ctrl.setIsSidebarOpen(false)} className="md:hidden">
                     <span className="material-symbols-outlined">close</span>
                 </button>
@@ -132,6 +140,7 @@ const SidebarView = ({ ctrl }: { ctrl: ReturnType<typeof usePredictionController
                 )}
             </div>
         </div>
+        </>
     );
 };
 
@@ -228,7 +237,7 @@ export default function PredictionView({ ctrl }: { ctrl: ReturnType<typeof usePr
                     </button>
                 </div>
             )}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden relative">
                 <SidebarView ctrl={ctrl} />
                 <CanvasView ctrl={ctrl} />
             </div>
