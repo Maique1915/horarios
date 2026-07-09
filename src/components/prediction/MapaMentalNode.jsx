@@ -34,8 +34,12 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
 
   const handleTouchStart = (e) => {
     e.stopPropagation();
-    // Do not prevent default here, as it might block scroll if they just want to scroll the page.
-    // However, touch-action: none on the parent SVG usually handles it.
+    // Previne eventos de mouse simulados que causariam duplo-clique no mobile
+    // (o touchEnd -> nodeClick somado ao mouseUp -> nodeClick anulava o toggle)
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+    
     if (e.touches.length > 0 && onDragStart) {
       onDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     }
