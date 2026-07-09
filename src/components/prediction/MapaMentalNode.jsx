@@ -36,7 +36,7 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
 
   const getStatusStyles = () => {
     if (isSelected) {
-      return "ring-2 ring-primary bg-primary/10 border-primary shadow-xl scale-105 z-10";
+      return "ring-2 ring-primary bg-primary/10 border-primary shadow-xl z-10";
     }
 
     switch (node.status) {
@@ -65,7 +65,7 @@ const SubjectNode = ({ node, onNodeClick, selectedNodeId, onDragStart }) => {
           className={`
             relative w-full h-full px-4 py-2 flex flex-col items-center justify-center text-center
             rounded-xl border transition-all duration-200 select-none cursor-move
-            ${isHovered ? 'scale-105 shadow-lg' : ''}
+            ${isHovered ? 'shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.5)] ring-1 ring-primary/40 border-primary/40 -translate-y-0.5' : ''}
             ${getStatusStyles()}
           `}
           onMouseDown={handleMouseDown}

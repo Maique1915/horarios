@@ -705,10 +705,15 @@ export const graduateEnrollments = async (
     approvedSubjectIds: (number | string)[],
     semester: string
 ): Promise<void> => {
-    // 1. Adicionar disciplinas aprovadas a completed_subjects
+    // 1. Adicionar disciplinas aprovadas a completed_subjects (evitando duplicatas)
     if (approvedSubjectIds.length > 0) {
-        const rows = approvedSubjectIds.map(id => ({ user_id: userId, subject_id: id }));
-        await completedSubjectsModel.upsertCompletedSubjects(rows);
+        const existingSet = await loadEffectiveCompletedSubjects(userId);
+        const newIds = approvedSubjectIds.filter(id => !existingSet.has(Number(id)));
+        
+        if (newIds.length > 0) {
+            const rows = newIds.map(id => ({ user_id: userId, subject_id: id }));
+            await completedSubjectsModel.upsertCompletedSubjects(rows);
+        }
     }
 
     // 2. Remover TODAS as matrículas daquele semestre (aprovadas + reprovadas)
@@ -724,7 +729,10 @@ export const getCourseTotalSubjects = async (courseCode: string): Promise<number
 
 export const toggleCompletedSubject = async (userId: number, subjectId: number | string, isCompleted: boolean): Promise<void> => {
     if (isCompleted) {
-        await completedSubjectsModel.upsertCompletedSubjects([{ user_id: userId, subject_id: subjectId }]);
+        const existingSet = await loadEffectiveCompletedSubjects(userId);
+        if (!existingSet.has(Number(subjectId))) {
+            await completedSubjectsModel.upsertCompletedSubjects([{ user_id: userId, subject_id: subjectId }]);
+        }
     } else {
         await completedSubjectsModel.deleteCompletedSubject(userId, subjectId);
     }
@@ -735,8 +743,12 @@ export const toggleMultipleSubjects = async (userId: number, subjectIds: (number
     if (!subjectIds || subjectIds.length === 0) return;
 
     if (isCompleted) {
-        const rows = subjectIds.map(id => ({ user_id: userId, subject_id: id }));
-        await completedSubjectsModel.upsertCompletedSubjects(rows);
+        const existingSet = await loadEffectiveCompletedSubjects(userId);
+        const newIds = subjectIds.filter(id => !existingSet.has(Number(id)));
+        if (newIds.length > 0) {
+            const rows = newIds.map(id => ({ user_id: userId, subject_id: id }));
+            await completedSubjectsModel.upsertCompletedSubjects(rows);
+        }
     } else {
         await completedSubjectsModel.deleteCompletedSubjects(userId, subjectIds);
     }
@@ -848,13 +860,20 @@ export const getCourseStats = async (): Promise<any[]> => {
 export const saveCompletedSubjects = async (userId: number, subjectIds: (number | string)[]): Promise<void> => {
     if (!subjectIds || subjectIds.length === 0) return;
 
-    const rows = subjectIds.map((id) => ({
-        user_id: userId,
-        subject_id: id
-    }));
+    const existingSet = await loadEffectiveCompletedSubjects(userId);
+    const newIds = subjectIds.filter(id => !existingSet.has(Number(id)));
 
-    await completedSubjectsModel.upsertCompletedSubjects(rows);
-    console.log(`Saved ${rows.length} completed subjects.`);
+    if (newIds.length > 0) {
+        const rows = newIds.map((id) => ({
+            user_id: userId,
+            subject_id: id
+        }));
+
+        await completedSubjectsModel.upsertCompletedSubjects(rows);
+        console.log(`Saved ${rows.length} new completed subjects (filtered ${subjectIds.length - newIds.length} duplicates).`);
+    } else {
+        console.log(`All ${subjectIds.length} subjects were already completed. No database insert needed.`);
+    }
 };
 
 export const getCourseSchedule = async (courseCode: string): Promise<[any[], any[]]> => {

@@ -7,7 +7,8 @@ import {
     loadCurrentEnrollments,
     getSubjectsDataMap,
     getSubjectsDataMapByAcronym,
-    Enrollment
+    Enrollment,
+    fetchCourseConfig
 } from '../../../services/disciplinaService';
 import { getCurrentPeriod } from '@/utils/dateUtils';
 import { getDays, getTimeSlots } from '../../../services/scheduleService';
@@ -142,9 +143,10 @@ export const usePredictionController = () => {
 
     // Data State
     const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
-    const [completedSubjects, setCompletedSubjects] = useState<Subject[]>([]);
-    const [currentEnrollments, setCurrentEnrollments] = useState<Subject[]>([]);
-    const [scheduleMeta, setScheduleMeta] = useState<ScheduleMeta>({ days: [], slots: [] });
+    const [completedSubjects, setCompletedSubjects] = useState<any[]>([]);
+    const [currentEnrollments, setCurrentEnrollments] = useState<any[]>([]);
+    const [activePeriod, setActivePeriod] = useState<string>('');
+    const [scheduleMeta, setScheduleMeta] = useState<{ days: any[], slots: any[] }>({ days: [], slots: [] });
     const [loading, setLoading] = useState(true);
 
     // User Interaction State
@@ -201,12 +203,42 @@ export const usePredictionController = () => {
                     subject._classSchedules && subject._classSchedules.length > 0
                 );
 
-                const periodoAtual = getCurrentPeriod();
-                const filteredEnrollments = (dbEnrollments as Enrollment[]).filter(e => e.period === periodoAtual);
+                // Fetch course config for period dates
+                let periodStart = null;
+                let periodEnd = null;
+                try {
+                    if (courseCode) {
+                        const config = await fetchCourseConfig(courseCode);
+                        if (config) {
+                            periodStart = config.period_start;
+                            periodEnd = config.period_end;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Prediction: could not load course config");
+                }
+
+                let finalEnrollments = [];
+                let currentActivePeriod = getCurrentPeriod();
+
+                if (periodStart && periodEnd) {
+                    // Se temos datas no banco, exibir todas as matriculas que estão em andamento
+                    finalEnrollments = dbEnrollments as Enrollment[];
+                    if (finalEnrollments.length > 0 && finalEnrollments[0].period) {
+                        currentActivePeriod = finalEnrollments[0].period;
+                    } else if (periodStart) {
+                        // Se não há matrículas (ex: o usuário acabou de revisar o semestre)
+                        // determinamos o período base real a partir da data de início configurada no banco
+                        currentActivePeriod = getCurrentPeriod(new Date(periodStart));
+                    }
+                } else {
+                    finalEnrollments = (dbEnrollments as Enrollment[]).filter(e => e.period === currentActivePeriod);
+                }
 
                 setAllSubjects(validSubjects);
                 setCompletedSubjects(dbCompleted);
-                setCurrentEnrollments(filteredEnrollments);
+                setCurrentEnrollments(finalEnrollments);
+                setActivePeriod(currentActivePeriod);
             } catch (error) {
                 console.error("Failed to load prediction data", error);
             } finally {
@@ -377,7 +409,7 @@ export const usePredictionController = () => {
         const links: any[] = [];
         const nodeMap = new Map();
         
-        const periodoAtual = getCurrentPeriod();
+        const periodoAtual = activePeriod || getCurrentPeriod();
         const [currentYearStr, currentSemStr] = periodoAtual.split('.');
         const baseYear = parseInt(currentYearStr);
         const baseSemester = parseInt(currentSemStr);
@@ -813,7 +845,11 @@ export const usePredictionController = () => {
                  while (newFixed.length <= hoveredSemesterIndex!) {
                      newFixed.push([]);
                  }
-                 newFixed[hoveredSemesterIndex!] = [...newFixed[hoveredSemesterIndex!], draggedSubject];
+                 
+                 const targetRowIndex = dragPosition ? Math.max(0, Math.round(dragPosition.y / ROW_HEIGHT)) : newFixed[hoveredSemesterIndex!].length;
+                 const targetList = [...newFixed[hoveredSemesterIndex!]];
+                 targetList.splice(targetRowIndex, 0, draggedSubject);
+                 newFixed[hoveredSemesterIndex!] = targetList;
                  
                  console.log('📊 fixedSemesters depois (antes minimax):', newFixed.map((sem, idx) => `${idx}: [${sem.map(s => s._re).join(', ')}]`));
                  
@@ -833,8 +869,32 @@ export const usePredictionController = () => {
                  setFixedSemesters(newFixed);
                  pushToHistory(newFixed, blacklistedIds);
                  setInvalidDropReason(null);
+                 setInvalidDropReason(null);
             } else if (originalSemIndex === hoveredSemesterIndex) {
-                 console.log('⚠️ Mesmo semestre, ignorando');
+                 console.log('🔄 Reorganizando no mesmo semestre');
+                 
+                 let workingFixed = [...fixedSemesters];
+                 
+                 if (!isFromFixed && simulationResult?.semesters) {
+                     for (let i = workingFixed.length; i < simulationResult.semesters.length; i++) {
+                         workingFixed.push([...simulationResult.semesters[i]]);
+                     }
+                     isFromFixed = true;
+                 }
+                 
+                 let newFixed = workingFixed.map((sem, idx) => {
+                     if (idx === originalSemIndex) {
+                         const filteredSem = sem.filter(s => s._re !== draggedSubject._re && s._id !== draggedSubject._id);
+                         const targetRowIndex = dragPosition ? Math.max(0, Math.round(dragPosition.y / ROW_HEIGHT)) : filteredSem.length;
+                         const targetList = [...filteredSem];
+                         targetList.splice(targetRowIndex, 0, draggedSubject);
+                         return targetList;
+                     }
+                     return sem;
+                 });
+                 
+                 setFixedSemesters(newFixed);
+                 pushToHistory(newFixed, blacklistedIds);
                  setInvalidDropReason(null);
             } else {
                  console.log('⚠️ Matéria não encontrada em nenhum semestre');
