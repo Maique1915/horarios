@@ -182,8 +182,27 @@ export default class Escolhe {
         return false
     }
 
+    // Verifica se a matéria 'a' é pré-requisito de 'b' ou vice-versa
+    temDependencia(a, b) {
+        const prListA = Array.isArray(a._pr) ? a._pr : (a._pr ? [a._pr] : []);
+        const prListB = Array.isArray(b._pr) ? b._pr : (b._pr ? [b._pr] : []);
+        
+        // Verifica se a é pré-requisito de b
+        if (a._re && prListB.some(pr => String(pr) === a._re)) return true;
+        
+        // Verifica se b é pré-requisito de a
+        if (b._re && prListA.some(pr => String(pr) === b._re)) return true;
+        
+        return false;
+    }
+
     // Returns true if NO collision (safe)
     semColisao(a, b) {
+        // 🆕 Se uma depende da outra, NÃO podem ficar no mesmo período
+        if (this.temDependencia(a, b)) {
+            return false; // Colisão de dependência
+        }
+
         // Se alguma das matérias for de outro curso, não verificar choque de horário (conforme pedido do usuário)
         // Isso permite que matérias "extras" convivam na mesma grade mesmo que os horários coincidam no papel.
         const isFromOtherCourse = (s) => s.course_id && this.mainCourseId && s.course_id !== this.mainCourseId;

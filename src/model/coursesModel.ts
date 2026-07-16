@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { DbSubject } from './subjectsModel';
+import { Course } from '../domain/entities/Course';
 
 export interface DbCourse {
     id: number;
@@ -85,12 +86,34 @@ export const fetchCourseStats = async () => {
 };
 
 export const insertCourse = async (courseData: Partial<DbCourse>) => {
+    // DDD: Criação da entidade valida as regras de negócio antes de ir pro banco
+    const courseEntity = new Course({
+        id: 0,
+        code: courseData.code || '',
+        name: courseData.name || '',
+        shift: courseData.shift || null,
+        modalities: courseData.modalities || null,
+        periods: courseData.periods || null,
+        campus: courseData.campus || null,
+        activies: courseData.activies,
+        universityId: courseData.university_id,
+        needsComplementaryActivities: courseData.needs_complementary_activities,
+        periodStart: courseData.period_start,
+        periodEnd: courseData.period_end
+    });
+
     const { data, error } = await supabase.from('courses').insert(courseData).select().single();
     if (error) throw error;
     return data as DbCourse;
 };
 
 export const updateCourse = async (id: number, courseData: Partial<DbCourse>) => {
+    // DDD: Para validar a atualização, tentamos criar uma Entidade se tivermos os dados chave, 
+    // ou validamos individualmente os campos que estão sendo atualizados se possível.
+    if (courseData.name !== undefined && courseData.name.trim().length < 3) {
+        throw new Error('COURSE_VALIDATION_ERROR: O nome do curso deve ter pelo menos 3 caracteres.');
+    }
+    
     const { data, error } = await supabase.from('courses').update(courseData).eq('id', id).select().single();
     if (error) throw error;
     return data as DbCourse;

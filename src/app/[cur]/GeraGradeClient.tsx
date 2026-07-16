@@ -12,7 +12,7 @@ import Escolhe from '../../model/util/Escolhe';
 import MapaMental from '../../components/prediction/MapaMental';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 import { useAuth } from '../../contexts/AuthContext';
-import { loadCompletedSubjects, toggleMultipleSubjects, loadClassesForGrid, getCourseSchedule, getCourseDimension, loadEffectiveCompletedSubjects, fetchEquivalentOptionsForSubjects } from '../../services/disciplinaService';
+import { loadCompletedSubjects, toggleMultipleSubjects, loadClassesForGrid, getCourseSchedule, getCourseDimension, loadEffectiveCompletedSubjects, fetchEquivalentOptionsForSubjects, clearCache } from '../../services/disciplinaService';
 import { Subject } from '../../types/Subject';
 import { EquivalencyManager } from '../../components/grade/EquivalencyManager';
 
@@ -55,7 +55,8 @@ const useGeraGradeController = () => {
     const { data: arr = [], isLoading: loadingArr } = useQuery<Subject[]>({
         queryKey: ['ativas', cur],
         queryFn: () => loadClassesForGrid(cur),
-        staleTime: 1000 * 60 * 60 * 24,
+        staleTime: 1000 * 60, // 1 minuto — reduzido para debug (era 24h)
+        refetchOnMount: 'always', // garante dados frescos ao montar
         enabled: !!cur,
     });
 
@@ -88,6 +89,13 @@ const useGeraGradeController = () => {
     });
 
     const loading = loadingArr || (loadingSchedule && !courseSchedule.length) || (loadingDimension && !courseDimension[0]);
+
+    // Limpar cache do serviço ao montar para garantir dados frescos do banco
+    useEffect(() => {
+        clearCache();
+        queryClient.invalidateQueries({ queryKey: ['ativas', cur] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Effects
     useEffect(() => {
@@ -362,6 +370,7 @@ const useGeraGradeController = () => {
     function remove(m: Subject[]) {
         const aux = [];
         const e = new Set();
+        console.group('🔍 remove() — processando', m.length, 'disciplinas');
         for (const i of m) {
             // Trim acronym to handle whitespace issues
             const key = i._re ? i._re.trim() : i._re;
@@ -371,17 +380,26 @@ const useGeraGradeController = () => {
 
                 // Clone to avoid side effects
                 const newItem = { ...i };
+                const diOriginal = newItem._di;
 
-                if (newItem._di.includes(" - A") || newItem._di.includes(" - B")) {
+                // Step 1: strip class-suffix like " - A" or " - B" from the display name
+                if (newItem._di.endsWith(" - A") || newItem._di.endsWith(" - B")) {
                     newItem._di = newItem._di.substring(0, newItem._di.length - 4);
-                } else if (newItem._el && !newItem._di.includes(" - OPT")) {
+                }
+                // Step 2: independently mark optional subjects (these two are not mutually exclusive)
+                if (newItem._el && !newItem._di.includes(" - OPT")) {
                     newItem._di += " - OPT";
                 }
+                console.log(
+                    `  [${key}] _el=${newItem._el} _se=${newItem._se}  "${diOriginal}" → "${newItem._di}"`,
+                    newItem._el && !newItem._di.includes(' - OPT') ? '⚠️ DEVERIA TER OPT!' : (newItem._el ? '🟣' : '⬜')
+                );
                 aux.push(newItem);
             } else {
-                console.warn("GeraGradeClient: Duplicate acronym detected and filtered:", key, i._di);
+                console.warn("  ❌ DUPLICATA IGNORADA:", key, `"${i._di}"`);
             }
         }
+        console.groupEnd();
         return aux;
     }
 

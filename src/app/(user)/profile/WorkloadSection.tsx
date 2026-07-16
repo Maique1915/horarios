@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Subject } from '@/types/Subject';
+import { HOURS_PER_CREDIT } from '@/lib/constants';
 
 interface CategoryProgressProps {
     title: string;
@@ -16,7 +17,7 @@ interface CategoryProgressProps {
 
 const CategoryProgress = ({ title, subjects, reqHours, reqCredits, color, bgColor, icon, customTotalHours, onClick, onViewSubjects }: CategoryProgressProps) => {
     const totalCredits = subjects.reduce((sum: number, s: any) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-    const totalHours = customTotalHours !== undefined ? customTotalHours : totalCredits * 18;
+    const totalHours = customTotalHours !== undefined ? customTotalHours : totalCredits * HOURS_PER_CREDIT;
     const hoursPct = reqHours > 0 ? Math.min(100, Math.round((totalHours / reqHours) * 100)) : 0;
     const creditsPct = reqCredits > 0 ? Math.min(100, Math.round((totalCredits / reqCredits) * 100)) : 0;
 
@@ -181,7 +182,7 @@ export const WorkloadSection = ({ categories }: { categories: any[] }) => {
                                                     <div className="text-right">
                                                         <p className="text-[10px] text-text-light-secondary dark:text-text-dark-secondary font-medium uppercase tracking-tighter">Horas</p>
                                                         <p className="text-xs font-bold text-text-light-primary dark:text-text-dark-primary">
-                                                            {(Number(s._ap || 0) + Number(s._at || 0)) * 18}h
+                                                            {(Number(s._ap || 0) + Number(s._at || 0)) * HOURS_PER_CREDIT}h
                                                         </p>
                                                     </div>
                                                     <div className="text-right w-12">

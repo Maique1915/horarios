@@ -595,6 +595,26 @@ export const usePredictionController = () => {
         setDragPosition(initialPos);
     };
 
+    // Função para verificar se alguma matéria no semestre DEPENDE da matéria sendo adicionada
+    const hasSubjectAsPrerequisiteInTarget = (subject: Subject, semesterIndex: number): boolean => {
+        const allSemesters = simulationResult?.semesters || [];
+        if (semesterIndex < 0 || semesterIndex >= allSemesters.length) return false;
+        
+        const targetSemester = allSemesters[semesterIndex] || [];
+        const subjectAcronym = subject._re;
+        if (!subjectAcronym) return false;
+        
+        for (const existing of targetSemester) {
+            const prList = Array.isArray(existing._pr) ? existing._pr : (existing._pr ? [existing._pr] : []);
+            for (const pr of prList) {
+                if (String(pr) === subjectAcronym) {
+                    return true; // Essa matéria no semestre DEPENDE da que está sendo adicionada
+                }
+            }
+        }
+        return false;
+    };
+
     // Função auxiliar para calcular créditos até um semestre específico
     // semesterIndex: 0 = 2026.1, 1 = 2026.2, etc.
     // IMPORTANTE: fixedSemesters[0] = 2026.1 (sempre contém currentEnrollments)
@@ -773,7 +793,28 @@ export const usePredictionController = () => {
             return; // SEMPRE retorna quando há colisão
         }
         
-        // 2. SEGUNDO: Verificar pré-requisitos
+        // 2. SEGUNDO: Verificar se alguma matéria no semestre DEPENDE desta
+        const dependencyAcronym = draggedSubject._re;
+        let hasReverseDependency = false;
+        if (dependencyAcronym) {
+            for (const existingSubject of targetSemester) {
+                if (existingSubject._re === draggedSubject._re) continue;
+                const prList = Array.isArray(existingSubject._pr) ? existingSubject._pr : (existingSubject._pr ? [existingSubject._pr] : []);
+                if (prList.some(pr => String(pr) === dependencyAcronym)) {
+                    const reason = `📚 Dependência no mesmo período: ${draggedSubject._di} é pré-requisito de ${existingSubject._di} que já está neste semestre`;
+                    console.log(`🔴 BLOQUEADO:`, reason);
+                    setInvalidDropReason(reason);
+                    setDraggedSubject(null);
+                    setHoveredSemesterIndex(null);
+                    setDragPosition(null);
+                    hasReverseDependency = true;
+                    break;
+                }
+            }
+        }
+        if (hasReverseDependency) return;
+        
+        // 2. TERCEIRO: Verificar pré-requisitos
         const reason = getDetailedCollisionReason(draggedSubject, hoveredSemesterIndex);
         
         if (reason) {
@@ -954,6 +995,18 @@ export const usePredictionController = () => {
         const reason = getDetailedCollisionReason(subject, semesterIndex);
         if (reason) {
             console.log(`❌ BLOQUEADO:`, reason);
+            setInvalidDropReason(reason);
+            return;
+        }
+        
+        // ✅ VALIDAÇÃO: Verificar se alguma matéria no semestre DEPENDE desta
+        if (hasSubjectAsPrerequisiteInTarget(subject, semesterIndex)) {
+            const existingSubject = targetSemester.find(s => {
+                const prList = Array.isArray(s._pr) ? s._pr : (s._pr ? [s._pr] : []);
+                return prList.some(pr => String(pr) === subject._re);
+            });
+            const reason = `📚 Dependência no mesmo período: ${subject._di} é pré-requisito de ${existingSubject?._di || 'outra matéria'} que já está neste semestre`;
+            console.log(`🔴 BLOQUEADO:`, reason);
             setInvalidDropReason(reason);
             return;
         }

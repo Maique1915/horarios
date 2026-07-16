@@ -1,3 +1,4 @@
+import { HOURS_PER_CREDIT } from '@/lib/constants';
 import { saveClassSchedule as saveClassService } from './classService';
 import { getDays, getTimeSlots } from './scheduleService';
 import { supabase } from '../lib/supabaseClient';
@@ -95,11 +96,18 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
     const _cu = (item as any).courses?.name || (item as any).courses?.code || (item as any).course?.name || (item as any).course?.code;
     if (!_cu) console.warn(`Service: Missing course info for subject ${item.acronym}`, item);
 
-    // Use the credits array
-    // index 0: theory, index 1: practical (mapping matches SQL migration)
-    const credits = item.credits || [];
-    const theoryCreds = credits[0] || 0;
-    const practCreds = credits[1] || 0;
+    // Fallback: Calculate credits from workload if exact division isn't available
+    const totalCredits = (item.workload || 0) / 15; // Assumes 15h per credit
+    let theoryCreds = 0;
+    let practCreds = 0;
+    if ((item as any).has_theory && (item as any).has_practical) {
+        theoryCreds = Math.floor(totalCredits / 2);
+        practCreds = totalCredits - theoryCreds;
+    } else if ((item as any).has_practical) {
+        practCreds = totalCredits;
+    } else {
+        theoryCreds = totalCredits;
+    }
 
     return {
         _id: item.id,
@@ -111,7 +119,7 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
         _at: theoryCreds,
         _el: item.optional, // true = OPTATIVA, false = OBRIGATÓRIA (SEM inversão!)
         _category: item.optional ? 'OPTIONAL' : 'MANDATORY',
-        _workload: (practCreds + theoryCreds) * 18,
+        _workload: (practCreds + theoryCreds) * HOURS_PER_CREDIT,
         _ag: item.active,
         _pr: _pr,
         _pr_creditos_input: creditsReq?.min_credits ?? 0,
@@ -614,7 +622,7 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                     _at: subject._at,
                     _el: _el,
                     _category: _category,
-                    _workload: (Number(subject._ap || 0) + Number(subject._at || 0)) * 18,
+                    _workload: (Number(subject._ap || 0) + Number(subject._at || 0)) * HOURS_PER_CREDIT,
                     _ag: subject._ag,
                     _pr: subject._pr,
                     _pr_creditos_input: subject._pr_creditos_input,

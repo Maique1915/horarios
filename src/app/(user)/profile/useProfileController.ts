@@ -27,6 +27,7 @@ import { getDays, getTimeSlots } from '../../../services/scheduleService';
 import { getUserTotalHours } from '../../../services/complementaryService';
 import { getComments, addComment } from '../../../services/commentService';
 import ROUTES from '../../../routes';
+import { HOURS_PER_CREDIT } from '@/lib/constants';
 import { getCurrentPeriod, isInReviewWindow } from '@/utils/dateUtils';
 // @ts-ignore
 import Escolhe from '../../../model/util/Escolhe';
@@ -571,7 +572,7 @@ export const useProfileController = () => {
 
             if (type !== 'atividades complementares') {
                 currentCredits = subjects.reduce((sum: number, s: any) => sum + (Number(s._ap || 0) + Number(s._at || 0)), 0);
-                currentHours = Math.min(w.min_hours, currentCredits * 18);
+                currentHours = Math.min(w.min_hours, currentCredits * HOURS_PER_CREDIT);
             }
 
             totalEff += currentHours;

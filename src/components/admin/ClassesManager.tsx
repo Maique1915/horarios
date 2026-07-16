@@ -29,6 +29,7 @@ interface Subject {
     acronym: string;
     course_id: number;
     semester: number;
+    optional: boolean;
 }
 
 interface Course {
@@ -77,7 +78,7 @@ export default function ClassesManager() {
     };
 
     const fetchSubjects = async () => {
-        const { data } = await supabase.from('subjects').select('id, name, acronym, course_id, semester').order('name');
+        const { data } = await supabase.from('subjects').select('id, name, acronym, course_id, semester, optional').order('name');
         if (data) setSubjects(data);
     };
 
@@ -269,7 +270,7 @@ export default function ClassesManager() {
         if (filterSubjectId && cls.subjectId !== filterSubjectId) return false;
 
         // Semester Filter
-        if (filterSemester && subject?.semester !== filterSemester) return false;
+        if (filterSemester !== null && subject?.semester !== filterSemester) return false;
 
         return true;
     });
@@ -318,9 +319,9 @@ export default function ClassesManager() {
                             </label>
                             <select
                                 className="w-full p-2.5 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
-                                value={newClassSemesterFilter || ''}
+                                value={newClassSemesterFilter !== null ? newClassSemesterFilter : ''}
                                 onChange={e => {
-                                    setNewClassSemesterFilter(e.target.value ? Number(e.target.value) : null);
+                                    setNewClassSemesterFilter(e.target.value !== '' ? Number(e.target.value) : null);
                                     setNewClassSubjectId(null); // Reset subject when period changes
                                 }}
                             >
@@ -346,9 +347,9 @@ export default function ClassesManager() {
                             >
                                 <option value="">Selecione...</option>
                                 {availableSubjects
-                                    .filter(s => newClassSemesterFilter ? s.semester === newClassSemesterFilter : true)
+                                    .filter(s => newClassSemesterFilter !== null ? s.semester === newClassSemesterFilter : true)
                                     .map(s => (
-                                        <option key={s.id} value={s.id}>{s.acronym} - {s.name}</option>
+                                        <option key={s.id} value={s.id}>{s.acronym} - {s.name} {s.optional ? '(Optativa)' : '(Obrigatória)'}</option>
                                     ))}
                             </select>
                         </div>
@@ -500,8 +501,8 @@ export default function ClassesManager() {
                                                 value: sem,
                                                 label: `${sem}º Período`
                                             }))}
-                                            value={filterSemester ? { value: filterSemester, label: `${filterSemester}º Período` } : null}
-                                            onChange={(opt: any) => setFilterSemester(opt?.value || null)}
+                                            value={filterSemester !== null ? { value: filterSemester, label: `${filterSemester}º Período` } : null}
+                                            onChange={(opt: any) => setFilterSemester(opt !== null ? opt.value : null)}
                                             isClearable
                                             classNamePrefix="select"
                                             classNames={{
@@ -529,11 +530,11 @@ export default function ClassesManager() {
                                             placeholder="Disciplina"
                                             options={availableSubjects.map(s => ({
                                                 value: s.id,
-                                                label: `${s.acronym} - ${s.name}`
+                                                label: `${s.acronym} - ${s.name} ${s.optional ? '(Optativa)' : '(Obrigatória)'}`
                                             }))}
-                                            value={filterSubjectId ? availableSubjects.find(s => s.id === filterSubjectId) ? {
+                                            value={filterSubjectId !== null ? availableSubjects.find(s => s.id === filterSubjectId) ? {
                                                 value: filterSubjectId,
-                                                label: `${availableSubjects.find(s => s.id === filterSubjectId)!.acronym} - ${availableSubjects.find(s => s.id === filterSubjectId)!.name}`
+                                                label: `${availableSubjects.find(s => s.id === filterSubjectId)!.acronym} - ${availableSubjects.find(s => s.id === filterSubjectId)!.name} ${availableSubjects.find(s => s.id === filterSubjectId)!.optional ? '(Optativa)' : '(Obrigatória)'}`
                                             } : null : null}
                                             onChange={(opt: any) => setFilterSubjectId(opt?.value || null)}
                                             isClearable
