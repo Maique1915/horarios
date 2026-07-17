@@ -11,15 +11,7 @@ export interface DbCompletedSubject {
 
 export const fetchCompletedSubjects = async (userId: number) => {
     const { data, error } = await supabase
-        .from('completed_subjects')
-        .select(`
-            completed_at,
-            subjects (
-                *,
-                courses (code, name)
-            )
-        `)
-        .eq('user_id', userId);
+        .rpc('get_user_completed_subjects', { p_user_id: userId });
 
     if (error) throw error;
     return data;

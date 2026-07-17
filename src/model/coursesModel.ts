@@ -32,28 +32,35 @@ export const fetchAllCourses = async () => {
 };
 
 export const fetchCourseByCode = async (courseCode: string) => {
-    // Try with period date columns first (requires migration to have been run)
     const { data, error } = await supabase
         .from('courses')
-        .select('id, code, name, university_id, needs_complementary_activities, credit_categories, period_start, period_end, workloads:course_workloads(*)')
+        .select('id, code, name, university_id, needs_complementary_activities, workloads:course_workloads(*)')
         .eq('code', courseCode)
         .limit(1);
 
-    if (!error) {
-        return data && data.length > 0 ? (data[0] as DbCourse) : null;
+    if (error) throw error;
+    if (!data || data.length === 0) return null;
+    
+    const course = data[0] as DbCourse;
+    
+    // Buscar o período atual para a universidade
+    if (course.university_id) {
+        const { data: periodsData } = await supabase
+            .from('periods')
+            .select('*')
+            .eq('university_id', course.university_id)
+            .order('start_date', { ascending: false }); // Pega o mais recente caso não haja um ativo
+            
+        if (periodsData && periodsData.length > 0) {
+            const today = new Date().toISOString().split('T')[0];
+            const activePeriod = periodsData.find(p => p.start_date <= today && p.end_date >= today) || periodsData[0];
+            course.period_start = activePeriod.start_date;
+            course.period_end = activePeriod.end_date;
+            (course as any).current_period_code = activePeriod.code;
+        }
     }
-
-    // Fallback: period columns might not exist yet (migration pending)
-    // Try without them so the rest of the app keeps working
-    console.warn('fetchCourseByCode: period columns unavailable, falling back (run add_period_dates_to_courses.sql)', error);
-    const { data: fallbackData, error: fallbackError } = await supabase
-        .from('courses')
-        .select('id, code, name, university_id, needs_complementary_activities, credit_categories, workloads:course_workloads(*)')
-        .eq('code', courseCode)
-        .limit(1);
-
-    if (fallbackError) throw fallbackError;
-    return fallbackData && fallbackData.length > 0 ? (fallbackData[0] as DbCourse) : null;
+    
+    return course;
 };
 
 export const fetchCourseStats = async () => {
@@ -77,7 +84,7 @@ export const fetchCourseStats = async () => {
                 semester,
                 active,
                 classes (
-                    class
+                    class_code
                 )
             )
         `);

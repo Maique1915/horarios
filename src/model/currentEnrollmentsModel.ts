@@ -4,7 +4,7 @@ export interface DbCurrentEnrollment {
     id: number;
     user_id: number;
     subject_id: number;
-    class_name: string;
+    class_code?: string;
     semester: string;
     course_id: number;
     schedule_data: any; // jsonb
@@ -15,26 +15,7 @@ export interface DbCurrentEnrollment {
 
 export const fetchCurrentEnrollments = async (userId: number) => {
     const { data, error } = await supabase
-        .from('current_enrollments')
-        .select(`
-            class_name,
-            semester,
-            course_id,
-            schedule_data,
-            created_at,
-            subjects (
-                id,
-                name,
-                acronym,
-                semester,
-                credits,
-                optional,
-                active,
-                course_id,
-                courses (code, name)
-            )
-        `)
-        .eq('user_id', userId);
+        .rpc('get_user_current_enrollments', { p_user_id: userId });
 
     if (error) throw error;
     return data;

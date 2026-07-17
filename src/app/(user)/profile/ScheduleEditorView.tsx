@@ -63,6 +63,8 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
     const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [completionFilter, setCompletionFilter] = useState<'all' | 'done' | 'not_done'>('all');
+    const [classFilter, setClassFilter] = useState<'all' | 'with_classes' | 'without_classes'>('all');
 
     // Carregar cursos disponíveis e pré-selecionar o curso do usuário
     useEffect(() => {
@@ -164,13 +166,11 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
 
         const newSelected = [...selectedSubjects, updatedSubject];
         setSelectedSubjects(newSelected);
-        if (onSave) onSave(newSelected);
     };
 
     const handleRemoveSubject = (subjectId: number) => {
         const newSelected = selectedSubjects.filter((s: Subject) => s._id !== subjectId);
         setSelectedSubjects(newSelected);
-        if (onSave) onSave(newSelected);
     };
 
     // Preparar disciplinas para exibição na grade
@@ -185,17 +185,34 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
         const gridData: any[] = [];
 
         subjects.forEach((subject: Subject) => {
-            if (subject._classSchedules && subject._classSchedules.length > 0) {
-                // Para cada turma, criar uma entrada separada
-                subject._classSchedules.forEach((classSchedule: any) => {
-                    gridData.push({
-                        ...subject,
-                        _di: subject._di, // Nome da disciplina
-                        class_name: classSchedule.class_name,
-                        _ho: classSchedule.ho,
-                        _rt: classSchedule.rt || [],
-                        _da: classSchedule.da || []
-                    });
+            if (subject.class_name && (subject._ho || subject.schedule_data)) {
+                // A disciplina já tem uma turma selecionada (o handleAddSubject define isso)
+                gridData.push({
+                    ...subject,
+                    _di: subject._di,
+                    _ho: subject.schedule_data?.ho || subject._ho || [],
+                    _rt: subject.schedule_data?.rt || subject._rt || [],
+                    _da: subject.schedule_data?.da || subject._da || []
+                });
+            } else if (subject._classSchedules && subject._classSchedules.length > 0) {
+                // Fallback: usar apenas a primeira turma, NUNCA todas de uma vez para não duplicar visualmente
+                const firstClass = subject._classSchedules[0];
+                gridData.push({
+                    ...subject,
+                    _di: subject._di,
+                    class_name: firstClass.class_name,
+                    _ho: firstClass.ho || [],
+                    _rt: firstClass.rt || [],
+                    _da: firstClass.da || []
+                });
+            } else {
+                // Sem turma cadastrada
+                gridData.push({
+                    ...subject,
+                    _di: subject._di,
+                    _ho: [],
+                    _rt: [],
+                    _da: []
                 });
             }
         });
@@ -213,6 +230,16 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
     const filteredSubjects = availableSubjects.filter((subject: Subject) => {
         // Filtro de Semestre
         if (selectedSemester !== null && subject._se !== selectedSemester) return false;
+
+        // Filtro de Status
+        const isCompleted = completedSubjectIds.has(subject._id as number);
+        if (completionFilter === 'done' && !isCompleted) return false;
+        if (completionFilter === 'not_done' && isCompleted) return false;
+
+        // Filtro de Turmas
+        const hasClasses = subject._classSchedules && subject._classSchedules.length > 0;
+        if (classFilter === 'with_classes' && !hasClasses) return false;
+        if (classFilter === 'without_classes' && hasClasses) return false;
 
         // Filtro de Busca
         if (!searchQuery) return true;
@@ -251,6 +278,16 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
                         >
                             <span className="material-symbols-outlined text-lg">add_circle</span>
                             Adicionar Matéria
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (onSave) onSave(selectedSubjects);
+                                alert('Grade salva com sucesso!');
+                            }}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-colors font-medium"
+                        >
+                            <span className="material-symbols-outlined text-lg">save</span>
+                            Salvar Alterações
                         </button>
                         <button
                             onClick={onClose}
@@ -338,7 +375,7 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
                         <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                             <div className="space-y-6">
                                 {/* Filters Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                                     {/* Course Selection */}
                                     <div className="md:col-span-1">
                                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">
@@ -397,6 +434,64 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
                                             }}
                                         />
                                     </div>
+
+                                    {/* Completion Filter */}
+                                    <div className="md:col-span-1">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">
+                                            STATUS
+                                        </label>
+                                        <Select
+                                            placeholder="Status"
+                                            value={
+                                                completionFilter === 'all' ? { value: 'all', label: 'Todas' } :
+                                                completionFilter === 'done' ? { value: 'done', label: 'Já feitas' } :
+                                                { value: 'not_done', label: 'Não feitas' }
+                                            }
+                                            options={[
+                                                { value: 'all', label: 'Todas' },
+                                                { value: 'done', label: 'Já feitas' },
+                                                { value: 'not_done', label: 'Não feitas' }
+                                            ]}
+                                            onChange={(opt: any) => setCompletionFilter(opt?.value || 'all')}
+                                            isClearable={false}
+                                            classNamePrefix="select"
+                                            classNames={{
+                                                control: () => '!border-slate-200 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-xl !text-sm !min-h-[44px] !shadow-sm',
+                                                menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-xl !mt-2 !shadow-xl !overflow-hidden !z-50',
+                                                option: ({ isFocused }: any) => `!text-sm !p-3 ${isFocused ? '!bg-slate-100 dark:!bg-slate-700' : ''} !text-slate-800 dark:!text-slate-200 cursor-pointer`,
+                                                singleValue: () => '!text-slate-800 dark:!text-slate-200',
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Class Availability Filter */}
+                                    <div className="md:col-span-1">
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">
+                                            TURMAS
+                                        </label>
+                                        <Select
+                                            placeholder="Turmas"
+                                            value={
+                                                classFilter === 'all' ? { value: 'all', label: 'Todas' } :
+                                                classFilter === 'with_classes' ? { value: 'with_classes', label: 'Com turma' } :
+                                                { value: 'without_classes', label: 'Sem turma' }
+                                            }
+                                            options={[
+                                                { value: 'all', label: 'Todas' },
+                                                { value: 'with_classes', label: 'Com turma' },
+                                                { value: 'without_classes', label: 'Sem turma' }
+                                            ]}
+                                            onChange={(opt: any) => setClassFilter(opt?.value || 'all')}
+                                            isClearable={false}
+                                            classNamePrefix="select"
+                                            classNames={{
+                                                control: () => '!border-slate-200 dark:!border-slate-700 !bg-white dark:!bg-slate-900 !rounded-xl !text-sm !min-h-[44px] !shadow-sm',
+                                                menu: () => '!bg-white dark:!bg-slate-800 !border !border-slate-200 dark:!border-slate-700 !rounded-xl !mt-2 !shadow-xl !overflow-hidden !z-50',
+                                                option: ({ isFocused }: any) => `!text-sm !p-3 ${isFocused ? '!bg-slate-100 dark:!bg-slate-700' : ''} !text-slate-800 dark:!text-slate-200 cursor-pointer`,
+                                                singleValue: () => '!text-slate-800 dark:!text-slate-200',
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Search Input */}
@@ -432,6 +527,8 @@ export const ScheduleEditorView = ({ currentEnrollments, userCourseCode, complet
                                                 onClick={() => {
                                                     setSearchQuery('');
                                                     setSelectedSemester(null);
+                                                    setCompletionFilter('all');
+                                                    setClassFilter('all');
                                                 }}
                                                 className="text-xs text-primary hover:underline font-bold"
                                             >

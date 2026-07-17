@@ -10,9 +10,9 @@ import ClassesTable, { ClassTableData } from './ClassesTable';
 interface ClassRow {
     id?: number;
     subject_id: number;
+    class_code: string;
     day_id: number;
     time_slot_id: number;
-    class: string;
     start_real_time?: string;
     end_real_time?: string;
 }
@@ -90,10 +90,10 @@ export default function ClassesManager() {
             // Group by 'class' name AND 'subject_id' to differentiate between courses
             const grouped: Record<string, GroupedClass> = {};
             (data as ClassRow[]).forEach(row => {
-                const key = `${row.class}|${row.subject_id}`;
+                const key = `${row.class_code}|${row.subject_id}`;
                 if (!grouped[key]) {
                     grouped[key] = {
-                        className: row.class,
+                        className: row.class_code,
                         subjectId: row.subject_id,
                         rows: []
                     };
@@ -127,7 +127,7 @@ export default function ClassesManager() {
                 const { error: deleteError } = await supabase
                     .from('classes')
                     .delete()
-                    .eq('class', editingClass.className);
+                    .eq('class_code', editingClass.className);
                 if (deleteError) throw deleteError;
             } else {
                 // Creation Mode: Check for name collision ONLY in the current course
@@ -170,7 +170,7 @@ export default function ClassesManager() {
                 const { error: deleteError } = await supabase
                     .from('classes')
                     .delete()
-                    .eq('class', className);
+                    .eq('class_code', className);
                 if (deleteError) throw deleteError;
             }
 
@@ -180,7 +180,7 @@ export default function ClassesManager() {
                 const customTimes = data.da[index];
 
                 return {
-                    class: className,
+                    class_code: className,
                     subject_id: subjectId,
                     day_id: dayId,
                     time_slot_id: timeSlotId,
@@ -221,7 +221,7 @@ export default function ClassesManager() {
         if (!confirm(`Tem certeza que deseja excluir a turma "${className}"?`)) return;
 
         try {
-            const { error } = await supabase.from('classes').delete().eq('class', className);
+            const { error } = await supabase.from('classes').delete().eq('class_code', className);
             if (error) throw error;
             fetchClasses();
             if (editingClass?.className === className) {

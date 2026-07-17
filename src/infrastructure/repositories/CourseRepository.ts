@@ -60,9 +60,7 @@ export class CourseRepository {
             campus: course.campus,
             activies: course.activies,
             university_id: course.universityId,
-            needs_complementary_activities: course.needsComplementaryActivities,
-            period_start: course.periodStart,
-            period_end: course.periodEnd
+            needs_complementary_activities: course.needsComplementaryActivities
         }).select().single();
 
         if (error) throw error;
@@ -95,8 +93,6 @@ export class CourseRepository {
         if (updates.activies !== undefined) dbPayload.activies = updates.activies;
         if (updates.universityId !== undefined) dbPayload.university_id = updates.universityId;
         if (updates.needsComplementaryActivities !== undefined) dbPayload.needs_complementary_activities = updates.needsComplementaryActivities;
-        if (updates.periodStart !== undefined) dbPayload.period_start = updates.periodStart;
-        if (updates.periodEnd !== undefined) dbPayload.period_end = updates.periodEnd;
 
         const { data, error } = await supabase.from('courses').update(dbPayload).eq('id', id).select().single();
         if (error) throw error;

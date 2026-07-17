@@ -15,11 +15,12 @@ export interface DbSubject {
     workload?: number;
     course?: DbCourse;
     classes?: DbClass[];
+    credits?: { amount: number; category?: any }[];
+    total_credits?: number;
 }
 
 export const fetchSubjects = async (courseId?: number) => {
-    let q = supabase.from('subjects').select('id, semester, name, acronym, category, optional, active, course_id, courses (code, name)');
-    if (courseId) q = q.eq('course_id', courseId);
+    let q = supabase.rpc('get_subjects_with_credits', { p_course_id: courseId || null });
 
     const { data, error } = await q;
     if (error) throw error;
@@ -29,7 +30,7 @@ export const fetchSubjects = async (courseId?: number) => {
 export const fetchSubjectsByIds = async (ids: number[]) => {
     const { data, error } = await supabase
         .from('subjects')
-        .select('id, semester, name, acronym, category, optional, active, course_id, courses (code, name)')
+        .select('id, semester, name, acronym, category_id, optional, active, workload, course_id, courses (code, name), credits:subject_credits(amount, category:course_credit_categories(name))')
         .in('id', ids);
     if (error) throw error;
     return data as DbSubject[];

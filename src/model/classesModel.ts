@@ -13,7 +13,7 @@ export interface DbTimeSlot {
 
 export interface DbClass {
     subject_id: number;
-    class: string;
+    class_code: string;
     day_id: number;
     time_slot_id: number;
     start_real_time?: string;
@@ -32,13 +32,14 @@ export const fetchClassesBySubjectIds = async (subjectIds: number[]) => {
             .from('classes')
             .select(`
                 subject_id, 
-                class, 
+                class_code, 
                 day_id, 
                 time_slot_id, 
                 start_real_time, 
                 end_real_time,
                 days(id, name),
-                time_slots(id, start_time, end_time)
+                time_slots(id, start_time, end_time),
+                subjects(name)
             `)
             .in('subject_id', subjectIds);
 
@@ -47,7 +48,7 @@ export const fetchClassesBySubjectIds = async (subjectIds: number[]) => {
             // Fallback: buscar sem JOINs
             const { data: fallbackData, error: fallbackError } = await supabase
                 .from('classes')
-                .select('subject_id, class, day_id, time_slot_id, start_real_time, end_real_time')
+                .select('subject_id, class_code, day_id, time_slot_id, start_real_time, end_real_time, subjects(name)')
                 .in('subject_id', subjectIds);
 
             if (fallbackError) {
@@ -70,7 +71,23 @@ export const fetchClassesBySubjectIds = async (subjectIds: number[]) => {
         //     console.log(`   Subject IDs encontrados:`, [...new Set(data.map((c: any) => c.subject_id))].slice(0, 5));
         // }
         
-        return (data || []) as unknown as DbClass[];
+        
+        // Reconstruir class_code com o nome da disciplina
+        const mappedData = data?.map((c: any) => {
+            const subjectName = c.subjects?.name || '';
+            let finalClassName = c.class_code;
+            if (!c.class_code) {
+                finalClassName = subjectName;
+            } else {
+                finalClassName = c.class_code.trim().startsWith('-') ? `${subjectName} ${c.class_code.trim()}` : `${subjectName}-${c.class_code.trim()}`;
+            }
+            return {
+                ...c,
+                class_code: finalClassName
+            };
+        }) || [];
+        
+        return mappedData as unknown as DbClass[];
     } catch (err) {
         console.error(`❌ Erro ao buscar classes:`, err);
         throw err;
@@ -107,7 +124,7 @@ export const deleteClass = async (id: number) => {
 };
 
 export const deleteClassScheduleBySubjectAndName = async (subjectId: number | string, className: string) => {
-    const { error } = await supabase.from('classes').delete().match({ subject_id: subjectId, class: className });
+    const { error } = await supabase.from('classes').delete().match({ subject_id: subjectId, class_code: className });
     if (error) throw error;
 };
 
@@ -118,13 +135,16 @@ export const fetchFullClassesBySubjectId = async (subjectId: number | string) =>
             .from('classes')
             .select(`
                 subject_id, 
-                class, 
+                class_code, 
                 day_id, 
                 time_slot_id, 
                 start_real_time, 
                 end_real_time,
+                professor,
+                sala,
                 days(id, name),
-                time_slots(id, start_time, end_time)
+                time_slots(id, start_time, end_time),
+                subjects(name)
             `)
             .eq('subject_id', subjectId);
 
@@ -133,14 +153,29 @@ export const fetchFullClassesBySubjectId = async (subjectId: number | string) =>
             // Fallback: buscar sem JOINs
             const { data: fallbackData, error: fallbackError } = await supabase
                 .from('classes')
-                .select('subject_id, class, day_id, time_slot_id, start_real_time, end_real_time')
+                .select('subject_id, class_code, day_id, time_slot_id, start_real_time, end_real_time, professor, sala, subjects(name)')
                 .eq('subject_id', subjectId);
 
             if (fallbackError) throw fallbackError;
             return (fallbackData || []) as unknown as DbClass[];
         }
 
-        return (data || []) as unknown as DbClass[];
+        // Reconstruir class_code com o nome da disciplina
+        const mappedData = data?.map((c: any) => {
+            const subjectName = c.subjects?.name || '';
+            let finalClassName = c.class_code;
+            if (!c.class_code) {
+                finalClassName = subjectName;
+            } else {
+                finalClassName = c.class_code.trim().startsWith('-') ? `${subjectName} ${c.class_code.trim()}` : `${subjectName}-${c.class_code.trim()}`;
+            }
+            return {
+                ...c,
+                class_code: finalClassName
+            };
+        }) || [];
+        
+        return mappedData as unknown as DbClass[];
     } catch (err) {
         console.error(`❌ Erro ao buscar classes para subject ${subjectId}:`, err);
         throw err;

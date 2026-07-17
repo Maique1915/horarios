@@ -29,22 +29,27 @@ export const CurrentEnrollmentsSection = ({ ctrl }: CurrentEnrollmentsSectionPro
                             Revisar Semestre
                         </button>
                     )}
-                    {ctrl.currentEnrollments.length > 0 && (
-                        <button
-                            onClick={() => router.push(ROUTES.GRADE)}
-                            className="text-xs font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider flex items-center gap-1"
-                        >
-                            <span className="material-symbols-outlined text-sm">grid_view</span>
-                            Visualizar Grade
-                        </button>
-                    )}
+                    <button
+                        onClick={() => router.push(ROUTES.GRADE)}
+                        className="text-xs font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-wider flex items-center gap-1"
+                    >
+                        <span className="material-symbols-outlined text-sm">edit</span>
+                        Editar Grade
+                    </button>
                 </div>
             </div>
             <div className="p-6">
                 {ctrl.currentEnrollments.length === 0 ? (
-                    <div className="text-center py-8">
+                    <div className="text-center py-8 flex flex-col items-center">
                         <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">event_busy</span>
-                        <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm">Nenhuma disciplina em curso no momento.</p>
+                        <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm mb-4">Nenhuma disciplina em curso no momento.</p>
+                        <button
+                            onClick={() => router.push(ROUTES.GRADE)}
+                            className="px-6 py-2.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-sm">add_circle</span>
+                            Adicionar Matérias
+                        </button>
                     </div>
                 ) : (
                     <ul className="space-y-3">

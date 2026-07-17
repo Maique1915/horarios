@@ -14,8 +14,7 @@ export interface DbSubject {
     semester: number;
     name: string;
     acronym: string;
-    has_practical: number;
-    has_theory: number;
+
     category?: string;
     elective: boolean;
     active: boolean;
@@ -34,7 +33,7 @@ export interface DbRequirement {
 
 export interface DbClass {
     subject_id: number;
-    class: string;
+    class_code: string;
     day_id: number;
     time_slot_id: number;
 }
@@ -55,7 +54,7 @@ export const fetchCourseByCode = async (courseCode: string) => {
 };
 
 export const fetchSubjects = async (courseId?: number) => {
-    let q = supabase.from('subjects').select('id, semester, name, acronym, has_practical, has_theory, category, elective, active, course_id, courses (code)');
+    let q = supabase.from('subjects').select('id, semester, name, acronym, workload, category_id, elective, active, course_id, courses (code), credits:subject_credits(amount, category:course_credit_categories(name))');
     if (courseId) q = q.eq('course_id', courseId);
 
     const { data, error } = await q;
@@ -76,7 +75,7 @@ export const fetchRequirements = async (subjectIds: number[]) => {
 export const fetchClassesBySubjectIds = async (subjectIds: number[]) => {
     const { data, error } = await supabase
         .from('classes')
-        .select('subject_id, class, day_id, time_slot_id')
+        .select('subject_id, class_code, day_id, time_slot_id')
         .in('subject_id', subjectIds);
 
     if (error) throw error;

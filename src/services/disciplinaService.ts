@@ -1,4 +1,4 @@
-import { HOURS_PER_CREDIT } from '@/lib/constants';
+
 import { saveClassSchedule as saveClassService } from './classService';
 import { getDays, getTimeSlots } from './scheduleService';
 import { supabase } from '../lib/supabaseClient';
@@ -92,21 +92,39 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
     const _pr = [...new Set(_prRaw)];
     const creditsReq = subjectRequirements.find((r) => r.type === 'CREDITS');
 
-    // Supabase might return 'courses' (plural) depending on relationship name
-    const _cu = (item as any).courses?.name || (item as any).courses?.code || (item as any).course?.name || (item as any).course?.code;
+    // Supabase might return 'courses' (plural) depending on relationship name, or flat for RPC
+    const _cu = (item as any).course_name || (item as any).course_code || (item as any).courses?.name || (item as any).courses?.code || (item as any).course?.name || (item as any).course?.code;
     if (!_cu) console.warn(`Service: Missing course info for subject ${item.acronym}`, item);
 
-    // Fallback: Calculate credits from workload if exact division isn't available
-    const totalCredits = (item.workload || 0) / 15; // Assumes 15h per credit
+    // O workload agora atua como multiplicador
+    const multiplier = (item.workload && item.workload > 0 && item.workload <= 30) ? item.workload : 0;
     let theoryCreds = 0;
     let practCreds = 0;
-    if ((item as any).has_theory && (item as any).has_practical) {
-        theoryCreds = Math.floor(totalCredits / 2);
-        practCreds = totalCredits - theoryCreds;
-    } else if ((item as any).has_practical) {
-        practCreds = totalCredits;
+
+    if (item.total_credits !== undefined) {
+        theoryCreds = item.total_credits || 0;
+        practCreds = 0;
+    } else if (item.credits && Array.isArray(item.credits) && item.credits.length > 0) {
+        item.credits.forEach((c: any) => {
+            const catName = c.category?.name?.toLowerCase() || '';
+            if (catName.includes('prática') || catName.includes('pratica') || catName.includes('prat')) {
+                practCreds += c.amount || 0;
+            } else {
+                theoryCreds += c.amount || 0;
+            }
+        });
     } else {
-        theoryCreds = totalCredits;
+        // Fallback antigo caso não haja relação subject_credits
+        // Se workload > 30, significa que ainda está no formato antigo (carga horária total)
+        const totalCredits = (item.workload && item.workload > 30) ? Math.floor(item.workload / 18) : 0;
+        if ((item as any).has_theory && (item as any).has_practical) {
+            theoryCreds = Math.floor(totalCredits / 2);
+            practCreds = totalCredits - theoryCreds;
+        } else if ((item as any).has_practical) {
+            practCreds = totalCredits;
+        } else {
+            theoryCreds = totalCredits;
+        }
     }
 
     return {
@@ -119,7 +137,7 @@ const processSubjectData = (item: DbSubject, requirementsMap: Map<number, DbRequ
         _at: theoryCreds,
         _el: item.optional, // true = OPTATIVA, false = OBRIGATÓRIA (SEM inversão!)
         _category: item.optional ? 'OPTIONAL' : 'MANDATORY',
-        _workload: (practCreds + theoryCreds) * HOURS_PER_CREDIT,
+        _workload: (practCreds + theoryCreds) * multiplier,
         _ag: item.active,
         _pr: _pr,
         _pr_creditos_input: creditsReq?.min_credits ?? 0,
@@ -178,7 +196,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     console.warn(`Course code '${courseCode}' not found.`);
                     return [];
                 }
-                
+
                 console.log(`🎓 Carregando disciplinas do curso: ${courseCode}`);
             }
 
@@ -197,7 +215,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                 try {
                     console.log(`🔗 Buscando disciplinas com equivalências...`);
                     const equivalences = await requirementsModel.fetchRequirements(allSubjectIds);
-                    
+
                     // Pegar os IDs das disciplinas que têm equivalências
                     const equivalentIds = new Set<number>();
                     equivalences.forEach(eq => {
@@ -205,7 +223,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                             equivalentIds.add(eq.requires_id);
                         }
                     });
-                    
+
                     if (equivalentIds.size > 0) {
                         equivalentSubjects = await subjectsModel.fetchSubjectsByIds(Array.from(equivalentIds));
                         console.log(`✅ Carregadas ${equivalentSubjects.length} disciplinas com equivalências`);
@@ -222,17 +240,17 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
 
             console.time('fetch_dependencies');
             console.log(`🔍 Buscando horários para ${subjectIds.length} disciplinas:`, subjectIds.slice(0, 5), '...');
-            
+
             const [allRequirements, classesData] = await Promise.all([
                 requirementsModel.fetchRequirements(subjectIds) as Promise<DbRequirement[]>,
                 classesModel.fetchClassesBySubjectIds(subjectIds) as Promise<DbClass[]>
             ]);
             console.timeEnd('fetch_dependencies');
-            
+
             // 🔍 DEBUG: Verificar se os horários foram carregados
             console.log(`📚 Carregado ${subjectsData.length} disciplinas`);
             console.log(`📅 Carregado ${classesData.length} aulas/horários`);
-            
+
             // Mostrar amostra dos dados de classes
             if (classesData.length > 0) {
                 console.log(`   Primeira classe:`, classesData[0]);
@@ -240,7 +258,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
             } else {
                 console.warn(`⚠️  AVISO: classesData está VAZIO!`);
             }
-            
+
             // Mostrar amostra dos ids de subjects
             console.log(`   Sample de subject ids carregados:`, subjectsData.slice(0, 3).map(s => `${s.id}(${s.name})`));
 
@@ -255,12 +273,15 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
             const schedulesBySubjectId = new Map<number, ClassSchedule[]>();
             let processedCount = 0;
             let skippedCount = 0;
-            
+
             // console.log(`🔄 Processando ${classesData.length} registros de classes...`);
-            
+
             classesData.forEach((schedule, idx) => {
-                const { subject_id, class: className, day_id, time_slot_id } = schedule;
-                
+                const { subject_id, class_code, day_id, time_slot_id } = schedule;
+
+                // classesData já traz o class_code montado corretamente pelo classesModel
+                let className = class_code;
+
                 // Log dos primeiros 5 registros - comentado
                 // if (idx < 5) {
                 //     console.log(`   [${idx}] Subject: ${subject_id}, Class: ${className}, Day: ${day_id}, Slot: ${time_slot_id}`, {
@@ -269,14 +290,14 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                 //         keys: Object.keys(schedule)
                 //     });
                 // }
-                
+
                 // Verificar dados
                 if (!subject_id || !className || day_id === undefined || time_slot_id === undefined) {
                     console.warn(`⚠️  [${idx}] Registro incompleto:`, { subject_id, className, day_id, time_slot_id });
                     skippedCount++;
                     return;
                 }
-                
+
                 if (!schedulesBySubjectId.has(subject_id)) schedulesBySubjectId.set(subject_id, []);
                 let subjectSchedules = schedulesBySubjectId.get(subject_id)!;
                 let classSchedule = subjectSchedules.find(cs => cs.class_name === className);
@@ -284,33 +305,33 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     classSchedule = { class_name: className, ho: [], da: [], rt: [] };
                     subjectSchedules.push(classSchedule);
                 }
-                
+
                 // Extrair IDs numéricos para grid lookup (não usar nomes de dia/slot)
                 let dayIdentifier: any = day_id;
                 let slotIdentifier: any = time_slot_id;
-                
+
                 // Se a relação dias foi carregada, usar numeric day ID (não name!)
                 if ((schedule as any).days) {
-                    const dayObj = Array.isArray((schedule as any).days) 
-                        ? (schedule as any).days[0] 
+                    const dayObj = Array.isArray((schedule as any).days)
+                        ? (schedule as any).days[0]
                         : (schedule as any).days;
-                    
+
                     if (dayObj && typeof dayObj === 'object' && dayObj.id) {
                         dayIdentifier = dayObj.id;
                     }
                 }
-                
+
                 // Se a relação time_slots foi carregada, usar numeric slot ID (não time string!)
                 if ((schedule as any).times_slots) {
-                    const slotObj = Array.isArray((schedule as any).times_slots) 
-                        ? (schedule as any).times_slots[0] 
+                    const slotObj = Array.isArray((schedule as any).times_slots)
+                        ? (schedule as any).times_slots[0]
                         : (schedule as any).times_slots;
-                    
+
                     if (slotObj && typeof slotObj === 'object' && slotObj.id) {
                         slotIdentifier = slotObj.id;
                     }
                 }
-                
+
                 classSchedule.ho.push([dayIdentifier, slotIdentifier]);
                 classSchedule.da.push(day_id);
                 if ((schedule as any).start_real_time && (schedule as any).end_real_time) {
@@ -321,13 +342,13 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                 } else {
                     classSchedule.rt.push(null);
                 }
-                
+
                 processedCount++;
             });
-            
+
             // console.log(`✅ Processados ${processedCount}/${classesData.length} registros de classes (skipped: ${skippedCount})`);
             // console.log(`📊 Map schedulesBySubjectId tem ${schedulesBySubjectId.size} disciplinas com horários`);
-            
+
             // Mostrar amostras - comentado
             // if (schedulesBySubjectId.size > 0) {
             //     const sample = Array.from(schedulesBySubjectId.entries()).slice(0, 3);
@@ -338,25 +359,25 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
             //         }
             //     });
             // }
-            
+
             // 🔍 DEBUG: Verificar quantas disciplinas têm horários
             let subjectsWithSchedules = 0;
-            let subjectsWithoutSchedules: {id: number, name: string, course_id?: number}[] = [];
-            
+            let subjectsWithoutSchedules: { id: number, name: string, course_id?: number }[] = [];
+
             schedulesBySubjectId.forEach((schedules, subjectId) => {
                 subjectsWithSchedules++;
             });
-            
+
             subjectsData.forEach(subject => {
                 if (!schedulesBySubjectId.has(subject.id)) {
                     subjectsWithoutSchedules.push({
-                        id: subject.id, 
-                        name: subject.name, 
+                        id: subject.id,
+                        name: subject.name,
                         course_id: (subject as any).course_id
                     });
                 }
             });
-            
+
             console.log(`🕐 ${subjectsWithSchedules} disciplinas têm horários mapeados`);
             if (subjectsWithoutSchedules.length > 0) {
                 console.log(`ℹ️ ${subjectsWithoutSchedules.length} disciplinas sem horários (normal - sem classe associada no banco de dados)`);
@@ -378,7 +399,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     subjectsWithoutSchedulesAfterMapping++;
                 }
             });
-            
+
             console.log(`📊 Resultado final: ${subjectsWithSchedulesAfterMapping} disciplinas COM horários, ${subjectsWithoutSchedulesAfterMapping} SEM horários`);
 
             if (!courseCode) {
@@ -388,7 +409,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                     if (!cachedData[cu]) cachedData[cu] = [];
                     cachedData[cu].push(item);
                 });
-                
+
                 // 🆕 Popular os mapas globais para acesso rápido
                 subjectsDataMap.clear();
                 subjectsDataMapByAcronym.clear();
@@ -398,7 +419,7 @@ export const loadDbData = async (courseCode: string | null = null): Promise<Subj
                         subjectsDataMapByAcronym.set(subject._re, subject);
                     }
                 });
-                
+
                 console.log(`📦 Mapas globais atualizados: ${subjectsDataMap.size} disciplinas por ID, ${subjectsDataMapByAcronym.size} por sigla`);
             }
 
@@ -574,14 +595,14 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
     try {
         const subjects = await loadDbData(courseCode);
         console.log(`📊 loadClassesForGrid: Recebeu ${subjects.length} disciplinas de loadDbData`);
-        
+
         const gridData: Subject[] = [];
         let withSchedulesCount = 0;
         let withoutSchedulesCount = 0;
-        
+
         subjects.forEach(subject => {
             console.log(`   [ANTES FILTRO] ${subject._di}: _ag=${subject._ag}, horários=${subject._classSchedules?.length || 0}`);
-            
+
             if (subject._classSchedules && subject._classSchedules.length > 0) {
                 withSchedulesCount++;
                 subject._classSchedules.forEach((cls: any) => {
@@ -596,6 +617,8 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                         _ap: subject._ap,
                         _at: subject._at,
                         _el: subject._el,
+                        _category: subject._category,
+                        _workload: subject._workload,
                         _ag: subject._ag,
                         _pr: subject._pr,
                         _pr_creditos_input: subject._pr_creditos_input,
@@ -611,7 +634,6 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                 withoutSchedulesCount++;
                 console.log(`      ⚠️  Sem turmas definidas (ativa)`);
                 // Incluir matéria ativa mesmo sem turmas para visibilidade no passo 1
-                const { _el, _category } = processCategoryAndOptional(subject);
                 gridData.push({
                     _id: subject._id,
                     _cu: subject._cu,
@@ -620,9 +642,9 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                     _re: subject._re,
                     _ap: subject._ap,
                     _at: subject._at,
-                    _el: _el,
-                    _category: _category,
-                    _workload: (Number(subject._ap || 0) + Number(subject._at || 0)) * HOURS_PER_CREDIT,
+                    _el: subject._el,
+                    _category: subject._category,
+                    _workload: subject._workload,
                     _ag: subject._ag,
                     _pr: subject._pr,
                     _pr_creditos_input: subject._pr_creditos_input,
@@ -637,15 +659,15 @@ export const loadClassesForGrid = async (courseCode: string): Promise<Subject[]>
                 console.log(`      ❌ Não ativa (_ag=${subject._ag})`);
             }
         });
-        
+
         console.log(`🔍 Grid antes filtro: ${gridData.length} items (${withSchedulesCount} com horários, ${withoutSchedulesCount} sem horários)`);
-        
+
         const filtered = gridData.filter(item =>
             item._se !== undefined &&
             Number(item._se) >= 0 &&
             item._ag === true
         ).sort((a, b) => Number(a._se || 0) - Number(b._se || 0));
-        
+
         console.log(`✅ Grid após filtro: ${filtered.length} disciplinas (filtradas por _se >= 0 e _ag === true)`);
         return filtered;
     } catch (error) {
@@ -663,13 +685,12 @@ export const loadCompletedSubjects = async (userId: number): Promise<CompletedSu
     // Model just fetches. Let's keep catch block here if needed, but model is simpler now.
     try {
         const data = await completedSubjectsModel.fetchCompletedSubjects(userId);
-        return (data as DbCompletedSubject[]).map(item => {
-            if (!item.subjects) return null;
-            const processedSubject = processSubjectData(item.subjects, null, null);
+        return (data as any[]).map(item => {
+            const processedSubject = processSubjectData(item, null, null);
             return {
                 ...processedSubject,
                 completed_at: item.completed_at,
-                course_name: item.subjects.courses?.name
+                course_name: item.course_name
             };
         }).filter(item => item !== null) as CompletedSubject[];
     } catch (error: any) {
@@ -680,21 +701,31 @@ export const loadCompletedSubjects = async (userId: number): Promise<CompletedSu
 
 export const loadCurrentEnrollments = async (userId: number): Promise<Enrollment[]> => {
     const data = await currentEnrollmentsModel.fetchCurrentEnrollments(userId);
-    return (data as DbCurrentEnrollment[]).map(item => {
-        const processedSubject = processSubjectData(item.subjects, null, null);
+    return (data as any[]).map(item => {
+        const processedSubject = processSubjectData(item, null, null);
         const schedule_data = typeof item.schedule_data === 'string' ? JSON.parse(item.schedule_data) : item.schedule_data;
 
-        // Ensure _ho and name are present for frontend consistency
+        let _ho: any[] = [];
+        if (schedule_data?.ho) {
+            _ho = schedule_data.ho;
+        } else if (Array.isArray(schedule_data)) {
+            if (schedule_data.length > 0 && Array.isArray(schedule_data[0])) {
+                _ho = schedule_data; // It's an array of [day, slot]
+            } else if (schedule_data.length > 0 && schedule_data[0]?.ho) {
+                _ho = schedule_data[0].ho;
+            }
+        }
+
         return {
             ...processedSubject,
-            _di: processedSubject._di || item.subjects?.name,
-            name: processedSubject.name || item.subjects?.name,
-            class_name: item.class_name,
-            period: item.semester, // Academic period (e.g. 2026.1)
+            _di: processedSubject._di || item.name,
+            name: processedSubject.name || item.name,
+            class_name: item.class_code ? (item.class_code.trim().startsWith('-') ? `${item.name} ${item.class_code.trim()}` : `${item.name}-${item.class_code.trim()}`) : (item.name || ''),
+            period: item.enrollment_semester,
             schedule_data: schedule_data,
-            _ho: schedule_data?.ho || schedule_data?.[0]?.ho || [], // Populate _ho from schedule_data
+            _ho: _ho,
             created_at: item.created_at,
-            course_name: item.subjects?.courses?.name,
+            course_name: item.course_name,
             course_id: item.course_id
         };
     });
@@ -717,7 +748,7 @@ export const graduateEnrollments = async (
     if (approvedSubjectIds.length > 0) {
         const existingSet = await loadEffectiveCompletedSubjects(userId);
         const newIds = approvedSubjectIds.filter(id => !existingSet.has(Number(id)));
-        
+
         if (newIds.length > 0) {
             const rows = newIds.map(id => ({ user_id: userId, subject_id: id }));
             await completedSubjectsModel.upsertCompletedSubjects(rows);
@@ -763,54 +794,50 @@ export const toggleMultipleSubjects = async (userId: number, subjectIds: (number
 };
 
 export const saveCurrentEnrollments = async (userId: number, enrollments: Subject[], semester: number | string, defaultCourseId?: number): Promise<void> => {
-    // 1. Fetch existing enrollments for this user
-    // Note: We fetch all and filter by semester in code or query by semester.
-    // Given the model, let's fetch all (cheap) and filter.
-    const allEnrollments = await currentEnrollmentsModel.fetchCurrentEnrollments(userId);
-    // Ensure we match semester type (string vs number) logic
-    const existingInSemester = (allEnrollments || []).filter((e: any) => String(e.semester) === String(semester));
-
-    // 2. Identify incoming unique IDs
+    // 1. Identify incoming unique IDs (Deduplicate)
     const uniqueIncoming = Array.from(new Map(enrollments.map(item => [item._id, item])).values());
-    const incomingIds = new Set(uniqueIncoming.map(i => i._id));
 
-    // 3. Identify existing IDs
-    const existingIds = new Set(existingInSemester.map((e: any) => e.subjects?.id || e.subject_id));
+    // 2. Wipe existing enrollments for this semester to clean up any duplicates and allow updates
+    await currentEnrollmentsModel.deleteCurrentEnrollments(userId, semester);
 
-    // 4. Calculate diff
-    const toDelete = Array.from(existingIds).filter(id => !incomingIds.has(id));
-    const toInsert = uniqueIncoming.filter(item => !existingIds.has(item._id));
-
-    // 5. Perform updates
-    if (toDelete.length > 0) {
-        // We need to cast back to (number | string)[]
-        await currentEnrollmentsModel.deleteCurrentEnrollmentsList(userId, semester, toDelete);
-    }
-
-    if (toInsert.length > 0) {
+    // 3. Insert fresh enrollments
+    if (uniqueIncoming.length > 0) {
         // Encontrar se algum item está sem course_id
-        const missingCourseId = toInsert.filter(item => !item.course_id);
+        const missingCourseId = uniqueIncoming.filter(item => !item.course_id);
         if (missingCourseId.length > 0) {
             console.warn(`Atenção: ${missingCourseId.length} disciplinas sem course_id detectadas.`, missingCourseId.map(m => m._re));
         }
 
-        const rows = toInsert.map(item => {
-            // Get schedule from _ho or schedule_data or first available class
+        const rows = uniqueIncoming.map(item => {
             let schedule = item._ho || [];
-            if (schedule.length === 0 && item.schedule_data) {
-                schedule = item.schedule_data.ho || (Array.isArray(item.schedule_data) ? item.schedule_data[0]?.ho : []);
+            if ((!schedule || schedule.length === 0) && item.schedule_data) {
+                schedule = item.schedule_data.ho || (Array.isArray(item.schedule_data) ? item.schedule_data[0]?.ho : []) || [];
             }
-            if (schedule.length === 0 && item._classSchedules?.length > 0) {
-                schedule = item._classSchedules[0].ho;
+            if ((!schedule || schedule.length === 0) && item._classSchedules?.length > 0) {
+                schedule = item._classSchedules[0].ho || [];
+            }
+            
+            schedule = schedule || [];
+
+            let classCode = item.class_name || (item._classSchedules?.[0]?.class_name) || null;
+            if (classCode && item.name) {
+                if (classCode === item.name) {
+                    classCode = null;
+                } else if (classCode.startsWith(`${item.name}-`)) {
+                    classCode = classCode.substring(item.name.length + 1);
+                } else if (classCode.startsWith(`${item.name} -`)) {
+                    classCode = classCode.substring(item.name.length + 2);
+                } else if (classCode.startsWith(`${item.name} `)) {
+                    classCode = classCode.substring(item.name.length + 1);
+                }
             }
 
             return {
                 user_id: userId,
                 subject_id: item._id,
-                class_name: item.class_name || (item._classSchedules?.[0]?.class_name) || null,
+                class_code: classCode,
                 semester: semester,
-                schedule_data: schedule,
-                course_id: item.course_id || defaultCourseId || 3
+                schedule_data: schedule
             };
         });
 
@@ -829,7 +856,7 @@ export const saveCurrentEnrollments = async (userId: number, enrollments: Subjec
         }
     }
 
-    console.log(`Smart Update: Deleted ${toDelete.length}, Inserted ${toInsert.length}`);
+    console.log(`Smart Update: Grade resetada e ${uniqueIncoming.length} disciplinas inseridas.`);
 };
 
 export const getCourseStats = async (): Promise<any[]> => {
@@ -965,7 +992,8 @@ export const loadEffectiveCompletedSubjects = async (userId: number): Promise<Se
             getEquivalencies()
         ]);
 
-        const completedSet = new Set<number>((completedRows as any[]).map(r => r.subjects?.id).filter(id => id !== undefined));
+        // A RPC retorna os dados achatados (flat), com o id do subject direto na raiz
+        const completedSet = new Set<number>((completedRows as any[]).map(r => r.id).filter(id => id !== undefined));
         const effectiveSet = new Set<number>(completedSet);
 
         // Recursive/Iterative expansion until no more subjects are added
@@ -1084,7 +1112,8 @@ export const fetchEquivalentOptionsForSubjects = async (subjectIds: number[], ta
     // Process Classes
     const schedulesMap = new Map<number, ClassSchedule[]>();
     classesData.forEach(schedule => {
-        const { subject_id, class: className, day_id, time_slot_id } = schedule;
+        const { subject_id, class_code, day_id, time_slot_id } = schedule;
+        let className = class_code;
         if (!schedulesMap.has(subject_id)) schedulesMap.set(subject_id, []);
         let subjectSchedules = schedulesMap.get(subject_id)!;
         let classSchedule = subjectSchedules.find(cs => cs.class_name === className);
