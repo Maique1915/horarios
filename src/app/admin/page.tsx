@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabaseClient';
+import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../../components/shared/LoadingSpinner';
 
 export default function AdminPage() {
@@ -32,7 +32,7 @@ export default function AdminPage() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const { data, error } = await supabase.rpc('admin_get_users', {
+            const { data, error } = await adminService.rpcCall('admin_get_users', {
                 requesting_user_id: currentUser?.id,
                 confirmation_password: adminPassword
             });
@@ -57,7 +57,7 @@ export default function AdminPage() {
 
         setProcessingId(user.id);
         try {
-            const { error } = await supabase.rpc('admin_activate_user', {
+            const { error } = await adminService.rpcCall('admin_activate_user', {
                 target_user_id: user.id,
                 requesting_user_id: currentUser?.id,
                 confirmation_password: adminPassword
@@ -195,9 +195,9 @@ export default function AdminPage() {
                                                 {new Date(user.created_at).toLocaleDateString()} <span className="text-xs text-slate-400">({new Date(user.created_at).toLocaleTimeString().slice(0, 5)})</span>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                                                {user.courses ? (
+                                                {user.course_id ? (
                                                     <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-medium">
-                                                        ID: {user.courses}
+                                                        ID: {user.course_id}
                                                     </span>
                                                 ) : '-'}
                                             </td>

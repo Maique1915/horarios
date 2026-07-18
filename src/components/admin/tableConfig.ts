@@ -53,18 +53,14 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'code', label: 'Código', type: 'text', editable: true },
             { key: 'name', label: 'Nome', type: 'text', editable: true },
             { key: 'shift', label: 'Turno', type: 'text', editable: true },
+            { key: 'workload', label: 'Carga Horária', type: 'number', editable: true },
             {
                 key: 'university_id',
-                label: 'Universidade',
-                type: 'select',
+                label: 'ID Universidade',
+                type: 'number',
                 editable: true,
-                options: [
-                    { label: 'CEFET', value: 1 },
-                    { label: 'FAETERJ', value: 2 },
-                ]
             },
             { key: 'needs_complementary_activities', label: 'Atv. Compl.?', type: 'boolean', editable: true },
-            { key: 'credit_categories', label: 'Cat. Créditos (JSON)', type: 'json', editable: true },
         ],
         customActions: [
             {
@@ -94,21 +90,11 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'acronym', label: 'Sigla/Código', type: 'text', editable: true },
             { key: 'name', label: 'Nome', type: 'text', editable: true },
             { key: 'semester', label: 'Semestre', type: 'number', editable: true },
-            { key: 'credits', label: 'Créditos (Array)', type: 'json', editable: true },
             { key: 'workload', label: 'Carga Horária', type: 'number', editable: true },
-            { key: 'optional', label: 'Eletiva/Optativa?', type: 'boolean', editable: true },
+            { key: 'optional', label: 'Optativa?', type: 'boolean', editable: true },
+            { key: 'elective', label: 'Eletiva?', type: 'boolean', editable: true },
             { key: 'active', label: 'Ativo?', type: 'boolean', editable: true },
-            {
-                key: 'category',
-                label: 'Categoria',
-                type: 'select',
-                editable: true,
-                options: [
-                    { label: 'Obrigatória', value: 'MANDATORY' },
-                    { label: 'Optativa', value: 'OPTIONAL' },
-                    { label: 'Complementar', value: 'COMPLEMENTARY' }
-                ]
-            },
+            { key: 'category_id', label: 'ID Categoria', type: 'number', editable: true },
         ]
     },
     classes: {
@@ -116,8 +102,7 @@ export const tableConfigs: Record<string, TableConfig> = {
         displayName: 'Turmas',
         primaryKey: 'id',
         columns: [
-            { key: 'id', label: 'ID', type: 'number', editable: false },
-            { key: 'class', label: 'Turma', type: 'text', editable: true },
+            { key: 'class_code', label: 'Turma (Código)', type: 'text', editable: true },
             { key: 'subject_id', label: 'ID Disciplina', type: 'number', editable: true },
             { key: 'day_id', label: 'ID Dia', type: 'number', editable: true },
             { key: 'time_slot_id', label: 'ID Horário', type: 'number', editable: true },
@@ -130,7 +115,6 @@ export const tableConfigs: Record<string, TableConfig> = {
         columns: [
             { key: 'id', label: 'ID', type: 'number', editable: false },
             { key: 'name', label: 'Nome', type: 'text', editable: true },
-            { key: 'short_name', label: 'Abrev.', type: 'text', editable: true },
         ]
     },
     time_slots: {
@@ -141,6 +125,7 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'id', label: 'ID', type: 'number', editable: false },
             { key: 'start_time', label: 'Início', type: 'text', editable: true },
             { key: 'end_time', label: 'Fim', type: 'text', editable: true },
+            { key: 'course_id', label: 'ID Curso', type: 'number', editable: true },
         ]
     },
     complementary_activities: {
@@ -149,7 +134,7 @@ export const tableConfigs: Record<string, TableConfig> = {
         primaryKey: 'id',
         columns: [
             { key: 'id', label: 'ID', type: 'number', editable: false },
-            { key: 'group', label: 'Grupo', type: 'text', editable: true },
+            { key: 'group_id', label: 'ID Grupo', type: 'text', editable: true },
             { key: 'code', label: 'Código', type: 'text', editable: true },
             { key: 'description', label: 'Descrição', type: 'text', editable: true },
             { key: 'workload_formula', label: 'Fórmula CH', type: 'text', editable: true },
@@ -191,7 +176,6 @@ export const tableConfigs: Record<string, TableConfig> = {
             { key: 'course_id', label: 'ID Curso', type: 'number', editable: true },
             { key: 'target_subject_id', label: 'ID Alvo', type: 'number', editable: true },
             { key: 'source_subject_id', label: 'ID Origem', type: 'number', editable: true },
-            { key: 'equivalence_group_id', label: 'ID Grupo', type: 'text', editable: true },
         ]
     }
 };

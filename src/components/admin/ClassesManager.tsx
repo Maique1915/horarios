@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { supabase } from '../../lib/supabaseClient';
+import { saveClassSchedule, deleteClassSchedule } from '../../services/classService';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import HorarioEditor from './HorarioEditor';
 import { useAuth } from '../../contexts/AuthContext';
@@ -84,16 +85,29 @@ export default function ClassesManager() {
 
     const fetchClasses = async () => {
         try {
-            const { data, error } = await supabase.from('classes').select('*');
+            const { data, error } = await supabase.from('classes').select('*, subjects(name)');
             if (error) throw error;
 
             // Group by 'class' name AND 'subject_id' to differentiate between courses
             const grouped: Record<string, GroupedClass> = {};
-            (data as ClassRow[]).forEach(row => {
-                const key = `${row.class_code}|${row.subject_id}`;
+            (data as any[]).forEach(row => {
+                const suffix = row.class_code ? row.class_code.trim() : '';
+                const subjectName = row.subjects?.name || 'Desconhecida';
+                
+                let className = subjectName;
+                if (suffix && suffix !== subjectName) {
+                    // Avoid duplicating subject name if class_code somehow already contains it
+                    if (suffix.startsWith(subjectName)) {
+                        className = suffix;
+                    } else {
+                        className = `${subjectName} - ${suffix}`;
+                    }
+                }
+
+                const key = `${className}|${row.subject_id}`;
                 if (!grouped[key]) {
                     grouped[key] = {
-                        className: row.class_code,
+                        className: className,
                         subjectId: row.subject_id,
                         rows: []
                     };
@@ -124,11 +138,10 @@ export default function ClassesManager() {
             const oldName = editingClass?.className || className;
 
             if (editingClass) {
-                const { error: deleteError } = await supabase
-                    .from('classes')
-                    .delete()
-                    .eq('class_code', editingClass.className);
-                if (deleteError) throw deleteError;
+                // If the name changed, we should delete the old schedule first to prevent orphans
+                if (editingClass.className !== className) {
+                    await deleteClassSchedule(subjectId, editingClass.className);
+                }
             } else {
                 // Creation Mode: Check for name collision ONLY in the current course
                 const currentCourseSubjects = subjects
@@ -154,47 +167,21 @@ export default function ClassesManager() {
                         }
 
                         suffixChar++;
-                        // Emergency break if too many (A-Z exhausted)
                         if (suffixChar > 90) { // Z
-                            newName = `${className} - ${Date.now()}`; // Fallback timestamp
+                            newName = `${className} - ${Date.now()}`;
                             break;
                         }
                     }
                     className = newName;
                 }
-
-                // Only delete if we are SURE it's safe (e.g. if we just generated a new name that theoretically shouldn't exist, 
-                // or if we are overwriting an exact match which shouldn't happen if we logic above is right).
-                // But for safety, and since 'classes' table doesn't have unique constraint on class name (it seems),
-                // we delete to avoid duplicate rows for the same class name if they somehow exist.
-                const { error: deleteError } = await supabase
-                    .from('classes')
-                    .delete()
-                    .eq('class_code', className);
-                if (deleteError) throw deleteError;
             }
 
-            const newRows = data.ho.map((slot, index) => {
-                const dayId = slot[0];
-                const timeSlotId = slot[1];
-                const customTimes = data.da[index];
-
-                return {
-                    class_code: className,
-                    subject_id: subjectId,
-                    day_id: dayId,
-                    time_slot_id: timeSlotId,
-                    start_real_time: customTimes ? customTimes[0] : null,
-                    end_real_time: customTimes ? customTimes[1] : null
-                };
+            // Save using the service, which handles suffix extraction and insertions
+            await saveClassSchedule(subjectId, {
+                class_name: className,
+                ho: data.ho,
+                da: data.da
             });
-
-            if (newRows.length > 0) {
-                const { error: insertError } = await supabase
-                    .from('classes')
-                    .insert(newRows);
-                if (insertError) throw insertError;
-            }
 
             alert('Turma salva com sucesso!');
             await fetchClasses();
@@ -221,8 +208,12 @@ export default function ClassesManager() {
         if (!confirm(`Tem certeza que deseja excluir a turma "${className}"?`)) return;
 
         try {
-            const { error } = await supabase.from('classes').delete().eq('class_code', className);
-            if (error) throw error;
+            const clsToDelete = classes.find(c => c.className === className);
+            if (clsToDelete) {
+                await deleteClassSchedule(clsToDelete.subjectId, className);
+            } else {
+                throw new Error("Não foi possível encontrar a turma para excluir.");
+            }
             fetchClasses();
             if (editingClass?.className === className) {
                 setEditingClass(null);

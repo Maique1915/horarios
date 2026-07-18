@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -20,7 +20,7 @@ const UserManagementModal = ({ onClose }) => {
         setLoading(true);
         try {
             // Usar RPC seguro para buscar usuários
-            const { data, error } = await supabase.rpc('admin_get_users', {
+            const { data, error } = await adminService.rpcCall('admin_get_users', {
                 requesting_user_id: currentUser.id
             });
 
@@ -45,7 +45,7 @@ const UserManagementModal = ({ onClose }) => {
             expiresAt.setMonth(expiresAt.getMonth() + 6);
 
             // Chamar RPC para ativar usuário
-            const { error } = await supabase.rpc('admin_activate_user', {
+            const { error } = await adminService.rpcCall('admin_activate_user', {
                 target_user_id: user.id,
                 requesting_user_id: currentUser.id
             });
@@ -116,7 +116,7 @@ const UserManagementModal = ({ onClose }) => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                                        {user.courses ? `ID: ${user.courses}` : '-'}
+                                        {user.course_id ? `ID: ${user.course_id}` : '-'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {user.is_paid ? (

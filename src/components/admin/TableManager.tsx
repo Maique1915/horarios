@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { adminService } from '../../services/adminService';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import Pagination from '../shared/Pagination';
 import { TableConfig, ColumnConfig } from './tableConfig';
@@ -55,7 +55,7 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
 
             if (config.rpc?.read) {
                 if (!user) return;
-                const response = await supabase.rpc(config.rpc.read, {
+                const response = await adminService.rpcCall(config.rpc.read, {
                     requesting_user_id: user.id,
                     confirmation_password: adminPassword
                 });
@@ -70,15 +70,10 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
 
                 count = result?.length || 0;
             } else {
-                const { data, error, count: total } = await supabase
-                    .from(config.tableName)
-                    .select('*', { count: 'exact' })
-                    .range((page - 1) * pageSize, page * pageSize - 1)
-                    .order(config.primaryKey, { ascending: true });
-
-                result = data;
-                fetchError = error;
-                count = total || 0;
+                const response = await adminService.fetchTableData(config.tableName, page, pageSize, config.primaryKey);
+                result = response.data;
+                fetchError = response.error;
+                count = response.count || 0;
             }
 
             if (fetchError) throw fetchError;
@@ -96,10 +91,7 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
         if (!confirm('Tem certeza que deseja excluir este registro?')) return;
 
         try {
-            const { error: deleteError } = await supabase
-                .from(config.tableName)
-                .delete()
-                .eq(config.primaryKey, id);
+            const { error: deleteError } = await adminService.deleteRecord(config.tableName, config.primaryKey, id);
 
             if (deleteError) throw deleteError;
 
@@ -167,20 +159,13 @@ const TableManager: React.FC<TableManagerProps> = ({ config }) => {
                     newItem = rest;
                 }
 
-                const { data: inserted, error: insertError } = await supabase
-                    .from(config.tableName)
-                    .insert([newItem])
-                    .select();
+                const { data: inserted, error: insertError } = await adminService.insertRecord(config.tableName, newItem);
 
                 if (insertError) throw insertError;
                 result = inserted;
                 fetchData(); // Refresh to see new item
             } else {
-                const { data: updated, error: updateError } = await supabase
-                    .from(config.tableName)
-                    .update(finalForm)
-                    .eq(config.primaryKey, editingId)
-                    .select();
+                const { data: updated, error: updateError } = await adminService.updateRecord(config.tableName, config.primaryKey, editingId, finalForm);
 
                 if (updateError) throw updateError;
                 // Optimistic update or refresh

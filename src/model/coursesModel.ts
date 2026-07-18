@@ -49,14 +49,37 @@ export const fetchCourseByCode = async (courseCode: string) => {
             .from('periods')
             .select('*')
             .eq('university_id', course.university_id)
-            .order('start_date', { ascending: false }); // Pega o mais recente caso não haja um ativo
+            .order('start_date', { ascending: true }); // Ordena do mais antigo pro mais novo
             
         if (periodsData && periodsData.length > 0) {
             const today = new Date().toISOString().split('T')[0];
-            const activePeriod = periodsData.find(p => p.start_date <= today && p.end_date >= today) || periodsData[0];
-            course.period_start = activePeriod.start_date;
-            course.period_end = activePeriod.end_date;
-            (course as any).current_period_code = activePeriod.code;
+            
+            // Tenta encontrar um período que esteja ocorrendo hoje (Em andamento)
+            const activePeriod = periodsData.find(p => p.start_date <= today && p.end_date >= today);
+            
+            if (activePeriod) {
+                course.period_start = activePeriod.start_date;
+                course.period_end = activePeriod.end_date;
+                (course as any).current_period_code = activePeriod.code;
+                (course as any).current_period_status = 'EM_ANDAMENTO';
+            } else {
+                // Se não há nenhum ocorrendo, estamos em "Férias" (Limbo).
+                // Encontrar o PRÓXIMO período (o primeiro cujo start_date seja > today)
+                const nextPeriod = periodsData.find(p => p.start_date > today);
+                if (nextPeriod) {
+                    course.period_start = nextPeriod.start_date;
+                    course.period_end = nextPeriod.end_date;
+                    (course as any).current_period_code = nextPeriod.code;
+                    (course as any).current_period_status = 'FERIAS';
+                } else {
+                    // Fallback: Pega o último cadastrado se todos já passaram
+                    const lastPeriod = periodsData[periodsData.length - 1];
+                    course.period_start = lastPeriod.start_date;
+                    course.period_end = lastPeriod.end_date;
+                    (course as any).current_period_code = lastPeriod.code;
+                    (course as any).current_period_status = 'EM_ANDAMENTO';
+                }
+            }
         }
     }
     

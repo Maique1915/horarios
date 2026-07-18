@@ -124,8 +124,15 @@ export const deleteClass = async (id: number) => {
 };
 
 export const deleteClassScheduleBySubjectAndName = async (subjectId: number | string, className: string) => {
-    const { error } = await supabase.from('classes').delete().match({ subject_id: subjectId, class_code: className });
-    if (error) throw error;
+    if (className === '') {
+        const { error: error1 } = await supabase.from('classes').delete().match({ subject_id: subjectId, class_code: '' });
+        const { error: error2 } = await supabase.from('classes').delete().match({ subject_id: subjectId }).is('class_code', null);
+        if (error1) throw error1;
+        if (error2) throw error2;
+    } else {
+        const { error } = await supabase.from('classes').delete().match({ subject_id: subjectId, class_code: className });
+        if (error) throw error;
+    }
 };
 
 export const fetchFullClassesBySubjectId = async (subjectId: number | string) => {
@@ -140,8 +147,6 @@ export const fetchFullClassesBySubjectId = async (subjectId: number | string) =>
                 time_slot_id, 
                 start_real_time, 
                 end_real_time,
-                professor,
-                sala,
                 days(id, name),
                 time_slots(id, start_time, end_time),
                 subjects(name)
@@ -153,7 +158,7 @@ export const fetchFullClassesBySubjectId = async (subjectId: number | string) =>
             // Fallback: buscar sem JOINs
             const { data: fallbackData, error: fallbackError } = await supabase
                 .from('classes')
-                .select('subject_id, class_code, day_id, time_slot_id, start_real_time, end_real_time, professor, sala, subjects(name)')
+                .select('subject_id, class_code, day_id, time_slot_id, start_real_time, end_real_time, subjects(name)')
                 .eq('subject_id', subjectId);
 
             if (fallbackError) throw fallbackError;

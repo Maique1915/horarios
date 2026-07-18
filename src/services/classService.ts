@@ -35,11 +35,13 @@ export const saveClassSchedule = async (subjectId: number | string, classSchedul
     const subject = subjects[0];
     if (subject && subject.name) {
         if (className === subject.name) {
-            classCodeToSave = null as any;
-        } else if (className.startsWith(`${subject.name}-`)) {
-            classCodeToSave = className.substring(subject.name.length + 1);
+            classCodeToSave = '';
+        } else if (className.startsWith(`${subject.name} - `)) {
+            classCodeToSave = className.substring(subject.name.length + 3);
         } else if (className.startsWith(`${subject.name} -`)) {
             classCodeToSave = className.substring(subject.name.length + 2);
+        } else if (className.startsWith(`${subject.name}-`)) {
+            classCodeToSave = className.substring(subject.name.length + 1);
         } else if (className.startsWith(`${subject.name} `)) {
             classCodeToSave = className.substring(subject.name.length + 1);
         }
@@ -57,10 +59,8 @@ export const saveClassSchedule = async (subjectId: number | string, classSchedul
                 day_id: dayId,
                 time_slot_id: timeSlotId,
                 start_real_time: customTime ? customTime[0] : undefined,
-                end_real_time: customTime ? customTime[1] : undefined,
-                professor: classSchedule.professor,
-                ['sala']: classSchedule.sala
-            } as any; // Cast to any to allow 'sala' if not in interface yet, or update DbClass
+                end_real_time: customTime ? customTime[1] : undefined
+            } as any; 
         });
         await insertClasses(newClassesRows);
     }
@@ -73,11 +73,13 @@ export const deleteClassSchedule = async (subjectId: number | string, className:
     const subject = subjects[0];
     if (subject && subject.name) {
         if (className === subject.name) {
-            classCodeToDelete = null as any;
-        } else if (className.startsWith(`${subject.name}-`)) {
-            classCodeToDelete = className.substring(subject.name.length + 1);
+            classCodeToDelete = '';
+        } else if (className.startsWith(`${subject.name} - `)) {
+            classCodeToDelete = className.substring(subject.name.length + 3);
         } else if (className.startsWith(`${subject.name} -`)) {
             classCodeToDelete = className.substring(subject.name.length + 2);
+        } else if (className.startsWith(`${subject.name}-`)) {
+            classCodeToDelete = className.substring(subject.name.length + 1);
         } else if (className.startsWith(`${subject.name} `)) {
             classCodeToDelete = className.substring(subject.name.length + 1);
         }

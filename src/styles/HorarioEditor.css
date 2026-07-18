@@ -1,15 +1,16 @@
 /* Global styling for the editor container */
 .horario-editor-container {
     font-family: 'Segoe UI', sans-serif;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 1rem 0;
 }
 
 h3 {
     color: #333;
     margin-bottom: 20px;
+}
+
+.dark h3 {
+    color: #e5e7eb;
 }
 
 /* Schedule Grid Configuration */
@@ -28,11 +29,19 @@ h3 {
     font-size: 0.9rem;
 }
 
+.dark .day-header {
+    color: #9ca3af;
+}
+
 .time-label {
     font-size: 0.8rem;
     color: #0056b3;
     text-align: right;
     padding-right: 15px;
+}
+
+.dark .time-label {
+    color: #60a5fa;
 }
 
 /* Slot Checkboxes Styling */
@@ -55,13 +64,25 @@ h3 {
     transition: background 0.2s;
 }
 
+.dark .slot span {
+    background-color: #374151; /* Dark gray */
+}
+
 /* When selected */
 .slot input:checked+span {
     background-color: #007bff; /* Blue selection */
 }
 
+.dark .slot input:checked+span {
+    background-color: #3b82f6; /* Lighter Blue selection */
+}
+
 .slot span:hover {
     background-color: #e9ecef;
+}
+
+.dark .slot span:hover {
+    background-color: #4b5563;
 }
 
 /* Styles for the custom time editor section */
@@ -71,11 +92,19 @@ h3 {
   border-top: 2px solid #e0e0e0;
 }
 
+.dark .custom-time-editor {
+  border-top: 2px solid #374151;
+}
+
 .custom-time-editor h4 {
   margin-top: 0;
   margin-bottom: 15px;
   font-weight: 600;
   color: #333;
+}
+
+.dark .custom-time-editor h4 {
+  color: #e5e7eb;
 }
 
 .custom-time-row {
@@ -88,10 +117,18 @@ h3 {
   border-radius: 5px;
 }
 
+.dark .custom-time-row {
+  background-color: #1f2937;
+}
+
 .custom-time-row span {
   font-weight: 500;
   color: #555;
   flex-basis: 50%; /* Occupy half space */
+}
+
+.dark .custom-time-row span {
+  color: #d1d5db;
 }
 
 .time-input {
@@ -101,4 +138,12 @@ h3 {
   width: 100px; /* Fixed width for inputs */
   margin-left: 10px;
   text-align: center;
+  background-color: #fff;
+  color: #333;
+}
+
+.dark .time-input {
+  border-color: #4b5563;
+  background-color: #374151;
+  color: #f3f4f6;
 }

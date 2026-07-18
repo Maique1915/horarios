@@ -146,6 +146,7 @@ export const usePredictionController = () => {
     const [completedSubjects, setCompletedSubjects] = useState<any[]>([]);
     const [currentEnrollments, setCurrentEnrollments] = useState<any[]>([]);
     const [activePeriod, setActivePeriod] = useState<string>('');
+    const [activePeriodStatus, setActivePeriodStatus] = useState<string>('EM_ANDAMENTO');
     const [scheduleMeta, setScheduleMeta] = useState<{ days: any[], slots: any[] }>({ days: [], slots: [] });
     const [loading, setLoading] = useState(true);
 
@@ -206,12 +207,16 @@ export const usePredictionController = () => {
                 // Fetch course config for period dates
                 let periodStart = null;
                 let periodEnd = null;
+                let periodCode = null;
+                let periodStatus = 'EM_ANDAMENTO';
                 try {
                     if (courseCode) {
                         const config = await fetchCourseConfig(courseCode);
                         if (config) {
                             periodStart = config.period_start;
                             periodEnd = config.period_end;
+                            periodCode = (config as any).current_period_code;
+                            periodStatus = (config as any).current_period_status || 'EM_ANDAMENTO';
                         }
                     }
                 } catch (e) {
@@ -219,16 +224,16 @@ export const usePredictionController = () => {
                 }
 
                 let finalEnrollments = [];
-                let currentActivePeriod = getCurrentPeriod();
+                let currentActivePeriod = periodCode || getCurrentPeriod();
 
                 if (periodStart && periodEnd) {
                     // Se temos datas no banco, exibir todas as matriculas que estão em andamento
                     finalEnrollments = dbEnrollments as Enrollment[];
                     if (finalEnrollments.length > 0 && finalEnrollments[0].period) {
                         currentActivePeriod = finalEnrollments[0].period;
-                    } else if (periodStart) {
-                        // Se não há matrículas (ex: o usuário acabou de revisar o semestre)
-                        // determinamos o período base real a partir da data de início configurada no banco
+                        periodStatus = 'EM_ANDAMENTO'; // Ele tem coisas pendentes, logo forçamos "Em andamento" para a base
+                    } else if (!periodCode && periodStart) {
+                        // Fallback se o código não veio (legado)
                         currentActivePeriod = getCurrentPeriod(new Date(periodStart));
                     }
                 } else {
@@ -239,6 +244,7 @@ export const usePredictionController = () => {
                 setCompletedSubjects(dbCompleted);
                 setCurrentEnrollments(finalEnrollments);
                 setActivePeriod(currentActivePeriod);
+                setActivePeriodStatus(periodStatus);
             } catch (error) {
                 console.error("Failed to load prediction data", error);
             } finally {
@@ -419,7 +425,7 @@ export const usePredictionController = () => {
             const semesterNum = index + 1;
             const columnX = (semesterNum - 1) * COLUMN_WIDTH;
 
-            const firstIsCurrentPeriod = hasCurrentEnrollments && index === 0;
+            const firstIsCurrentPeriod = index === 0;
 
             let displayYear: number;
             let displaySemester: number;
@@ -428,10 +434,16 @@ export const usePredictionController = () => {
             if (firstIsCurrentPeriod) {
                 displayYear = baseYear;
                 displaySemester = baseSemester;
-                labelSuffix = 'Atual';
+                
+                if (hasCurrentEnrollments) {
+                    labelSuffix = 'Atual';
+                } else if (activePeriodStatus === 'FERIAS') {
+                    labelSuffix = 'Próximo Período';
+                } else {
+                    labelSuffix = 'Atual (Sem matrículas)';
+                }
             } else {
-                const addedSemesters = hasCurrentEnrollments ? index : index + 1;
-                const futureSemesterVal = baseSemester + addedSemesters;
+                const futureSemesterVal = baseSemester + index;
                 const yearOffset = Math.floor((futureSemesterVal - 1) / 2);
                 displayYear = baseYear + yearOffset;
                 displaySemester = ((futureSemesterVal - 1) % 2) + 1;
