@@ -14,7 +14,7 @@ interface ClassScheduleItem {
     class_name: string;
     turma?: string; // Legacy support
     ho: number[][]; // [day_id, time_slot_id][]
-    da?: string[][]; // [start, end][]
+    da?: (string[] | null)[]; // [start, end][]
     professor?: string;
     sala?: string;
 }
