@@ -183,6 +183,7 @@ export default function ClassesManager() {
                 da: data.da
             });
 
+            // Force cache invalidation
             alert('Turma salva com sucesso!');
             await fetchClasses();
 
